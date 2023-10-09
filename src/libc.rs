@@ -24,8 +24,6 @@ extern "C" {
 pub fn hash_string(input: &str, hash_type: HashType) -> [u8; 32] {
     //? 将 Rust 字符串转换为 C 字符串 (以零结尾的字节数组)
     let mut output = [0u8; 32];
-    println!("{:?}", hash_type);
-
     unsafe {
         //? 调用 FFI 函数: 从其他语言（如 C）导入的函数可能不满足 Rust 的安全性要求，因此调用它们需要被标记为不安全 unsafe
         hash_function(
