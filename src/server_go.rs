@@ -4,13 +4,13 @@ use hyper::{Body, Request, Response, Server};
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
-use std::io::Write;
+use std::io::{self, Write};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
 
-use crate::{green, pink, red};
+use crate::{green, pink, prompt, read_input, red};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct MyStruct {
@@ -67,18 +67,16 @@ pub fn start_server(should_stop: Arc<AtomicBool>) {
 
 pub fn start_client() -> Result<(), Box<dyn std::error::Error>> {
     loop {
-        let mut input = String::new();
-        print!("{} ", pink!("输入一个字符串(或'exit'退出):"));
-        std::io::stdout().flush().expect("未能清除标准输出");
-        std::io::stdin().read_line(&mut input).expect("读取行失败");
-        input = input.trim().to_string();
+        let mut _input = String::new();
+        prompt!(pink!("输入数据(或'exit'退出):"));
+        read_input!(_input); //? 读取用户输入
 
-        if input == "exit" {
+        if _input == "exit" {
             println!("👋 {}", green!("拜拜!"));
             break;
         }
 
-        let url = format!("http://127.0.0.1:8080?{}", input); //? 构造URL
+        let url = format!("http://127.0.0.1:8080?{}", _input); //? 构造URL
         let response = reqwest::blocking::get(&url)?; //? 发送请求
         let body = response.text()?; //? 获取响应体
         let my_struct: Result<MyStruct, _> = serde_json::from_str(&body); //? 解析JSON
@@ -98,9 +96,8 @@ pub fn start_client() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn server_operations() {
-    let should_stop = Arc::new(AtomicBool::new(false));
-    // 启动服务器线程
-    // 启动服务器线程
+    let should_stop = Arc::new(AtomicBool::new(false)); //?
+
     let server_thread = std::thread::spawn({
         let should_stop = should_stop.clone();
         move || {

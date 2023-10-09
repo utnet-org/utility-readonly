@@ -3,6 +3,7 @@ use std::io::{self, Write};
 mod hash_go;
 mod libc;
 mod server_go;
+mod tcp;
 #[macro_use]
 mod macros;
 
@@ -11,14 +12,18 @@ fn main() {
     loop {
         println!("{}", yellow!("请选择一个操作："));
         println!("{}", green!("1: 字符串哈希"));
-        println!("{}", green!("2: 启动服务器"));
-        println!("{}", red!("3: 退出"));
+        println!("{}", green!("2: 启动HTTP服务器"));
+        println!("{}", green!("3: 启动TCP服务"));
+        println!("{}", green!("4: 连接TCP服务"));
+        println!("{}", red!("10: 退出"));
         prompt!(pink!("请输入您的选择: "));
         read_input!(choice);
         match choice.trim() {
             "1" => hash_go::hash_operations(),
             "2" => server_go::server_operations(),
-            "3" => {
+            "3" => tcp::connection(),
+            "4" => tcp::connecting_to_a_server(),
+            "10" => {
                 println!("谢谢使用，再见！👋👋👋");
                 break;
             }
