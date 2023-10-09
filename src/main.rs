@@ -33,33 +33,33 @@ async fn main() -> Result<(), sqlx::Error> {
         })
     }
     println!("数据库中的所有数据：{:#?}", vec);
-    //查询单个
-    // let list2 = sqlx::query!(r#"select * from course where id = $1"#, 1)
-    //     .fetch_all(&pool)
-    //     .await?;
-    // let mut vec2 = vec![];
-    // for row in list2 {
-    //     vec2.push(Course {
-    //         id: row.id,
-    //         teacher_id: row.teacher_id,
-    //         name: row.name,
-    //         time: row.time,
-    //     })
-    // }
-    // println!("查询单个{:#?}", vec2);
-    //增加
-    // let insert = sqlx::query!(
-    //     r#"INSERT INTO course VALUES ($1, $2, $3)"#,
-    //     100000,
-    //     11,
-    //     "gg"
-    // )
-    // .fetch_all(&pool)
-    // .await?;
-    //更新
-    // let update = sqlx::query!(r#"update  course set name=$1"#, "ogg")
-    //     .fetch_all(&pool)
-    //     .await?;
+    // 查询单个
+    let list2 = sqlx::query!(r#"select * from course where id = $1"#, 1)
+        .fetch_all(&pool)
+        .await?;
+    let mut vec2 = vec![];
+    for row in list2 {
+        vec2.push(Course {
+            id: row.id,
+            teacher_id: row.teacher_id,
+            name: row.name,
+            time: row.time,
+        })
+    }
+    println!("查询单个{:#?}", vec2);
+    // 增加
+    let insert = sqlx::query!(
+        r#"INSERT INTO course VALUES ($1, $2, $3)"#,
+        5,
+        11,
+        "gg"
+    )
+    .fetch_all(&pool)
+    .await?;
+    // 更新
+    let update = sqlx::query!(r#"update  course set name=$1"#, "ogg")
+        .fetch_all(&pool)
+        .await?;
     Ok(())
 }
 #[derive(Debug)]
