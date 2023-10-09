@@ -1,0 +1,16 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+  utility-db:
+    image: postgres
+    container_name: utility-db
+    restart: always
+    ports:
+      - "8011:5432"
+    environment:
+      POSTGRES_PASSWORD: utility123
+      POSTGRES_DB: utility
+      POSTGRES_USER: backend
+#    volumes:
+#      - /root/dbdata/utility:/var/lib/postgresql/data
