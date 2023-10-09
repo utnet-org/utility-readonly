@@ -8,10 +8,11 @@ edition = "2021"
 [dependencies]
 actix-rt = "2.8.0"
 actix-web = "4.3.0"
+#环境变量工具
 dotenv = "0.15.0"
 #时间
 chrono = { version = "0.4.23", features = ["serde"] }
 #序列化
 serde = { version = "1.0.152", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.6.2", features = ["postgres","runtime-tokio-native-tls","macros","all-types"] }
+#数据库访问工具
+sqlx = { version = "0.6.2", features = ["postgres","runtime-actix-rustls","macros","chrono"] }

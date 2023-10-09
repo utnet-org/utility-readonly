@@ -13,9 +13,9 @@ CREATE TABLE "public"."course" (
 -- ----------------------------
 -- Records of course
 -- ----------------------------
-INSERT INTO "public"."course" VALUES (1, 11, 'cml', '2022-03-25');
-INSERT INTO "public"."course" VALUES (2, 22, 'cc', '2022-03-25');
-INSERT INTO "public"."course" VALUES (3, 33, 'mm', '2022-03-25');
+INSERT INTO "public"."course" VALUES (1, 11, 'cml', '2023-10-09');
+INSERT INTO "public"."course" VALUES (2, 22, 'cc', '2023-10-09');
+INSERT INTO "public"."course" VALUES (3, 33, 'mm', '2023-10-09');
 
 -- ----------------------------
 -- Primary Key structure for table course
