@@ -95,10 +95,10 @@ fn show_help() {
     println!("Usage: utility [options]");
     println!();
     println!("Options:");
-    println!("  -h, --help      Display this help message");
-    println!("  -g, --generate  Generate a key pair (private and public keys)");
-    println!("  -s, --signature <private_key_hex> <message>  Generate a signature");
-    println!("  -v, --verify <public_key_hex> <message> <signature_hex>  Verify a signature");
+    println!("  -h, --help        Display this help message");
+    println!("  -g, --generate    Generate a key pair (private and public keys)");
+    println!("  -s, --signature   <private_key_hex> <message>  Generate a signature");
+    println!("  -v, --verify      <public_key_hex> <message> <signature_hex>  Verify a signature");
 }
 
 
