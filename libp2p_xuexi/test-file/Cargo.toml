@@ -1,0 +1,15 @@
+[package]
+name = "test-file"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[dependencies]
+libp2p = { version = "0.46",  features = ["tcp-tokio"] }
+tokio = { version = "1.19", features = ["full"] }
+futures = "0.3.1"
+clap = {version = "3.1.6", features = ["derive"]}
+async-trait = "0.1"

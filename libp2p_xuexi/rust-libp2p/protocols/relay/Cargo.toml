@@ -1,0 +1,45 @@
+[package]
+name = "libp2p-relay"
+edition = "2021"
+rust-version = { workspace = true }
+description = "Communications relaying for libp2p"
+version = "0.16.1"
+authors = ["Parity Technologies <admin@parity.io>", "Max Inden <mail@max-inden.de>"]
+license = "MIT"
+repository = "https://github.com/libp2p/rust-libp2p"
+keywords = ["peer-to-peer", "libp2p", "networking"]
+categories = ["network-programming", "asynchronous"]
+
+[dependencies]
+asynchronous-codec = "0.6"
+bytes = "1"
+either = "1.9.0"
+futures = "0.3.28"
+futures-timer = "3"
+futures-bounded = { workspace = true }
+instant = "0.1.12"
+libp2p-core = { workspace = true }
+libp2p-swarm = { workspace = true }
+libp2p-identity = { workspace = true }
+log = "0.4"
+quick-protobuf = "0.8"
+quick-protobuf-codec = { workspace = true }
+rand = "0.8.4"
+static_assertions = "1"
+thiserror = "1.0"
+void = "1"
+
+[dev-dependencies]
+env_logger = "0.10.0"
+libp2p-ping = { workspace = true }
+libp2p-plaintext = { workspace = true }
+libp2p-swarm = { workspace = true, features = ["macros", "async-std"] }
+libp2p-yamux = { workspace = true }
+quickcheck = { workspace = true }
+
+# Passing arguments to the docsrs builder in order to properly document cfg's.
+# More information: https://docs.rs/about/builds#cross-compiling
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+rustc-args = ["--cfg", "docsrs"]

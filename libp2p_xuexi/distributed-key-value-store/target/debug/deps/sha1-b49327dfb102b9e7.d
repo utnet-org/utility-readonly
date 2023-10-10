@@ -1,0 +1,11 @@
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/distributed-key-value-store/target/debug/deps/sha1-b49327dfb102b9e7.rmeta: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/consts.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/soft.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/x86.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/distributed-key-value-store/target/debug/deps/libsha1-b49327dfb102b9e7.rlib: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/consts.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/soft.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/x86.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/distributed-key-value-store/target/debug/deps/sha1-b49327dfb102b9e7.d: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/consts.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/soft.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/x86.rs
+
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/lib.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/consts.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/soft.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sha-1-0.9.8/src/compress/x86.rs:

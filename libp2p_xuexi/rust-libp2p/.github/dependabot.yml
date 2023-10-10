@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 9999
+    commit-message:
+      prefix: "deps"
+    rebase-strategy: "disabled"
+    groups:
+      trust-dns:
+        patterns:
+          - "trust-dns-*"
+          - "async-std-resolver"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "deps"
+    rebase-strategy: "disabled"

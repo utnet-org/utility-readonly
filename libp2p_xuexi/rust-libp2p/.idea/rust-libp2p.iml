@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/autonat/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/browser-webrtc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/chat/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/dcutr/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/distributed-key-value-store/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/file-sharing/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/identify/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/ipfs-kad/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/ipfs-private/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/metrics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/ping/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/relay-server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/rendezvous/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/upnp/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/identity/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/identity/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/identity/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/interop-tests/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/libp2p/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/allow-block-list/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/connection-limits/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/futures-bounded/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/keygen/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/memory-connection-limits/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/memory-connection-limits/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/metrics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/multistream-select/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/multistream-select/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/quick-protobuf-codec/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/quickcheck-ext/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/rw-stream-sink/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/misc/webrtc-utils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/mplex/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/mplex/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/mplex/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/test-harness/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/yamux/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/muxers/yamux/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/autonat/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/autonat/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/dcutr/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/dcutr/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/floodsub/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/gossipsub/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/gossipsub/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/identify/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/identify/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/kad/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/kad/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/mdns/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/mdns/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/perf/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/perf/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/ping/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/ping/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/relay/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/relay/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/rendezvous/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/rendezvous/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/request-response/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/request-response/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/protocols/upnp/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/swarm-derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/swarm-test/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/swarm/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/swarm/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/deflate/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/deflate/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/dns/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/noise/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/noise/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/plaintext/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/plaintext/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/pnet/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/pnet/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/quic/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/quic/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/tcp/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/tls/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/tls/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/uds/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/wasm-ext/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/webrtc-websys/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/webrtc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/webrtc/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/websocket/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/transports/webtransport-websys/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wasm-tests/webtransport-tests/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

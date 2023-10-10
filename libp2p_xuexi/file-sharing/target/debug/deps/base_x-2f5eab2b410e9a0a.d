@@ -1,0 +1,11 @@
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/base_x-2f5eab2b410e9a0a.rmeta: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/alphabet.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/bigint.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/decoder.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/encoder.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/libbase_x-2f5eab2b410e9a0a.rlib: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/alphabet.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/bigint.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/decoder.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/encoder.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/base_x-2f5eab2b410e9a0a.d: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/alphabet.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/bigint.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/decoder.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/encoder.rs
+
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/lib.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/alphabet.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/bigint.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/decoder.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base-x-0.2.11/src/encoder.rs:

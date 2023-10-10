@@ -1,0 +1,10 @@
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/async_std_resolver-4685729693ecd4bc.rmeta: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/net.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/runtime.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/time.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/libasync_std_resolver-4685729693ecd4bc.rlib: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/net.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/runtime.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/time.rs
+
+/Users/guodayang/work/c-code/utility/libp2p_xuexi/file-sharing/target/debug/deps/async_std_resolver-4685729693ecd4bc.d: /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/lib.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/net.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/runtime.rs /Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/time.rs
+
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/lib.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/net.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/runtime.rs:
+/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-std-resolver-0.23.0/src/time.rs:

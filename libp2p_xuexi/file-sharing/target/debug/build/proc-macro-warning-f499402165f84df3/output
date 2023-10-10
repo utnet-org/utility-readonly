@@ -1,0 +1,1 @@
+cargo:rustc-env=README_PATH=/Users/guodayang/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-warning-0.4.2/README.md
