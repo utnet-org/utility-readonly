@@ -2,10 +2,11 @@ use crate::{green, pink, prompt, read_input};
 use colored::Colorize;
 use std::io::{self};
 use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 
 fn handle_client(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) {
     let addr = stream.peer_addr().unwrap().to_string();
@@ -17,8 +18,8 @@ fn handle_client(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) {
                 break;
             }
             Ok(bytes_read) => bytes_read,
-            Err(_) => {
-                // println!("与 {} 的连接出现错误", addr);
+            Err(e) => {
+                eprintln!("与 {} 的连接出现错误: {}", addr, e); // Better error logging
                 break;
             }
         };
@@ -30,8 +31,10 @@ fn handle_client(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) {
             addr.split(":").last().unwrap()
         );
 
+        // Lock the clients list once for the entire broadcast
         let mut clients_lock = clients.lock().unwrap();
-        clients_lock.retain(|s| s.peer_addr().is_ok()); // 清除无效的客户端
+        // Clean up invalid clients first
+        clients_lock.retain(|s| s.peer_addr().is_ok());
         for mut client in clients_lock.iter() {
             if client.peer_addr().unwrap() != stream.peer_addr().unwrap() {
                 let _ = client.write(message_with_address.as_bytes());
@@ -39,23 +42,30 @@ fn handle_client(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) {
         }
     }
 
-    // 当此客户端断开连接时，从列表中移除它
+    // Remove the client after disconnecting
     clients
         .lock()
         .unwrap()
         .retain(|s| s.peer_addr().unwrap() != stream.peer_addr().unwrap());
 }
 
-pub fn connection() {
-    let clients: Arc<Mutex<Vec<TcpStream>>> = Arc::new(Mutex::new(Vec::new()));
-
+pub fn connection(
+    running: Arc<AtomicBool>,
+    clients: Arc<Mutex<Vec<TcpStream>>>,
+    active_threads: Arc<Mutex<usize>>,
+) {
     thread::spawn({
-        let clients_clone = clients.clone();
+        let clients_clone: Arc<Mutex<Vec<TcpStream>>> = clients.clone();
         move || {
-            let bind_result = TcpListener::bind("127.0.0.1:7878");
-            let listener = match bind_result {
+            let bind_result: Result<TcpListener, io::Error> = TcpListener::bind("0.0.0.0:7878");
+            let listener: TcpListener = match bind_result {
                 Ok(listener) => {
-                    println!("服务器运行在 127.0.0.1:7878");
+                    println!(
+                        "{}\n{}\n{}",
+                        green!("服务器已经启动!"),
+                        green!("127.0.0.1:7878"),
+                        green!("192.168.10.35:7878")
+                    );
                     listener
                 }
                 Err(e) => {
@@ -68,10 +78,12 @@ pub fn connection() {
                 }
             };
 
-            for stream in listener.incoming() {
-                match stream {
-                    Ok(stream) => {
-                        // println!("新的连接: {}", stream.peer_addr().unwrap());
+            // 使用while循环替代for循环来检查running的状态
+            while running.load(Ordering::Relaxed) {
+                match listener.accept() {
+                    Ok((stream, _)) => {
+                        let active_threads_clone = active_threads.clone();
+                        *active_threads_clone.lock().unwrap() += 1;
                         clients_clone
                             .lock()
                             .unwrap()
@@ -79,13 +91,19 @@ pub fn connection() {
                         let clients_inner_clone = clients_clone.clone();
                         thread::spawn(move || {
                             handle_client(stream, clients_inner_clone);
+                            *active_threads_clone.lock().unwrap() -= 1;
                         });
                     }
                     Err(e) => {
-                        eprintln!("连接失败: {}", e);
+                        if e.kind() != std::io::ErrorKind::WouldBlock {
+                            eprintln!("连接失败: {}", e);
+                        }
                     }
                 }
             }
+
+            // 关闭TcpListener以释放端口资源
+            drop(listener);
         }
     });
 
@@ -93,9 +111,36 @@ pub fn connection() {
     thread::sleep(std::time::Duration::from_secs(2));
 }
 
+// 在stop_server中
+pub fn stop_server(
+    running: Arc<AtomicBool>,
+    clients: Arc<Mutex<Vec<TcpStream>>>,
+    active_threads: Arc<Mutex<usize>>,
+) {
+    println!("正在关闭...");
+
+    running.store(false, Ordering::Relaxed);
+
+    {
+        let mut clients_guard = clients.lock().unwrap();
+        for client in clients_guard.iter_mut() {
+            let _ = client.shutdown(Shutdown::Both); // shutdown the client connection
+        }
+        clients_guard.clear(); // Clear the clients
+    }
+
+    // 循环检查直到所有线程都完成
+    while *active_threads.lock().unwrap() > 0 {
+        thread::sleep(Duration::from_millis(100));
+    }
+    // 等待一段时间，以确保服务器先于客户端启动
+    thread::sleep(std::time::Duration::from_secs(2));
+    println!("服务器已关闭！");
+}
+
 pub fn connecting_to_a_server() {
     // 连接到服务器
-    let connection = TcpStream::connect("127.0.0.1:7878");
+    let connection = TcpStream::connect("192.168.10.35:7878");
     let mut stream = match connection {
         Ok(stream) => stream,
         Err(e) => {
@@ -113,7 +158,7 @@ pub fn connecting_to_a_server() {
         while running_clone.load(Ordering::Relaxed) {
             match read_stream.read(&mut buffer) {
                 Ok(0) => {
-                    println!("👋 {}", green!("与服务器断开连接..."));
+                    prompt!(green!("👋 与服务器断开连接..."));
                     break;
                 }
                 Ok(bytes_read) => {
