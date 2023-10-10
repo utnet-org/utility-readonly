@@ -1,0 +1,116 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 472,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 478,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 508,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 513,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"libleveldb.a"
+			],
+			"targetId" : "leveldb::@6890427a1f51a3e7e1df",
+			"targetIndex" : 10,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "include/leveldb",
+			"paths" : 
+			[
+				"include/leveldb/c.h",
+				"include/leveldb/cache.h",
+				"include/leveldb/comparator.h",
+				"include/leveldb/db.h",
+				"include/leveldb/dumpfile.h",
+				"include/leveldb/env.h",
+				"include/leveldb/export.h",
+				"include/leveldb/filter_policy.h",
+				"include/leveldb/iterator.h",
+				"include/leveldb/options.h",
+				"include/leveldb/slice.h",
+				"include/leveldb/status.h",
+				"include/leveldb/table_builder.h",
+				"include/leveldb/table.h",
+				"include/leveldb/write_batch.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/leveldb",
+			"exportName" : "leveldbTargets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "leveldb::@6890427a1f51a3e7e1df",
+					"index" : 10
+				}
+			],
+			"paths" : 
+			[
+				"CMakeFiles/Export/f90a79f6c24c38ae6b0a9cccec147da8/leveldbTargets.cmake"
+			],
+			"type" : "export"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/leveldb",
+			"paths" : 
+			[
+				"cmake-build-debug/cmake/leveldbConfig.cmake",
+				"cmake-build-debug/cmake/leveldbConfigVersion.cmake"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	}
+}
