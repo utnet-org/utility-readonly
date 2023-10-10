@@ -84,7 +84,7 @@ fn main() {
             let result = verify_signature(&public_key, &message, &signature);
             println!("result: {}", result);
         } else {
-            println!("Invalid arguments for signature. Please provide private key and message.");
+            println!("Invalid arguments for verify. Please provide private key, message and signature.");
             show_help();
         }
     }
