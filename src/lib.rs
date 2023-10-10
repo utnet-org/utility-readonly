@@ -1,6 +1,140 @@
 extern crate leveldb_sys as leveldb;
+
 use std::ffi::CString;
+use std::os::raw::c_void;
 use std::ptr;
+use std::time::SystemTime;
+use chrono::NaiveDateTime;
+use leveldb::leveldb_t;
+
+// 传入db路径 返回db指针
+pub fn open_leveldb(db_path: &str) -> *mut leveldb_t {
+    // 将传入的数据库路径转换为 CString
+    let db_path_cstr = CString::new(db_path).expect("CString::new failed");
+
+    // LevelDB 选项
+    let options = unsafe { leveldb::leveldb_options_create() };
+    unsafe { leveldb::leveldb_options_set_create_if_missing(options, 1) }; // 设置 create_if_missing 为 true
+
+    // 打开 LevelDB 数据库
+    let mut err: *mut i8 = ptr::null_mut();
+    let db = unsafe {
+        leveldb::leveldb_open(options, db_path_cstr.as_ptr(), &mut err)
+    };
+
+    if err.is_null() {
+        db
+    } else {
+        unsafe {
+            leveldb::leveldb_free(err as *mut c_void);
+            panic!("Unable to open LevelDB: {:?}", std::ffi::CStr::from_ptr(err))
+        };
+    }
+}
+
+// 关闭数据库
+pub fn close_leveldb(db: *mut leveldb_t) {
+    unsafe {
+        leveldb::leveldb_close(db);
+    }
+}
+
+// 写入数据
+pub fn put_data(db: *mut leveldb_t, key: &str, value: &str) -> Result<(), String> {
+    // 将传入的键和值转换为 C 字符串
+    // let key_cstr = CString::new(key).map_err(|_| "CString::new for key failed".to_string())?;
+    // let value_cstr = CString::new(value).map_err(|_| "CString::new for value failed".to_string())?;
+
+    // 写入数据
+    let mut err: *mut i8 = ptr::null_mut();
+    unsafe {
+        leveldb::leveldb_put(
+            db,
+            leveldb::leveldb_writeoptions_create(),
+            key.as_ptr() as *const _,
+            key.len(),
+            value.as_ptr() as *const _,
+            value.len(),
+            &mut err,
+        );
+    }
+
+    // 检查是否写入成功
+    if err.is_null() {
+        Ok(())
+    } else {
+        unsafe {
+            leveldb_sys::leveldb_free(err as *mut std::os::raw::c_void);
+        }
+        Err("Error writing to LevelDB".to_string())
+    }
+}
+
+// 读取数据
+pub fn get_data(db: *mut leveldb_t, key: &str) -> Result<(String, usize), String> {
+    let mut read_err: *mut i8 = ptr::null_mut();
+    let mut read_value_len: libc::size_t = 0;
+
+    let read_value = unsafe {
+        leveldb::leveldb_get(
+            db,
+            leveldb::leveldb_readoptions_create(),
+            key.as_ptr() as *const _,
+            key.len() as libc::size_t,
+            &mut read_value_len,
+            &mut read_err,
+        )
+    };
+
+    if read_err.is_null() {
+        let value = unsafe {
+            std::str::from_utf8(&std::slice::from_raw_parts(
+                read_value as *const u8,
+                read_value_len as usize,
+            ))
+                .unwrap()
+                .to_string()
+        };
+
+        unsafe {
+            leveldb::leveldb_free(read_value as *mut std::os::raw::c_void);
+        }
+
+        Ok((value, read_value_len))
+    } else {
+        unsafe {
+            leveldb::leveldb_free(read_err as *mut std::os::raw::c_void);
+        }
+
+        Err("无法读取数据".to_string())
+    }
+}
+
+// 删除数据
+pub fn delete_data(db: *mut leveldb_t, key: &str) -> Result<(), String> {
+    let key_cstr = CString::new(key).expect("CString::new failed");
+
+    let mut err: *mut i8 = ptr::null_mut();
+    unsafe {
+        leveldb::leveldb_delete(
+            db,
+            leveldb::leveldb_writeoptions_create(),
+            key_cstr.as_ptr() as *const _,
+            key.len() as libc::size_t,
+            &mut err,
+        );
+    }
+
+    if err.is_null() {
+        Ok(())
+    } else {
+        unsafe {
+            leveldb::leveldb_free(err as *mut std::os::raw::c_void);
+        }
+        Err("Unable to delete data".to_string())
+    }
+}
+
 
 pub fn open_and_close_leveldb() {
     let options = unsafe { leveldb::leveldb_options_create() };
@@ -18,137 +152,58 @@ pub fn open_and_close_leveldb() {
     }
 }
 
-pub fn write_and_read_leveldb() {
-    let options = unsafe { leveldb::leveldb_options_create() };
-    unsafe { leveldb::leveldb_options_set_create_if_missing(options, 1) };
 
-    let db_name = CString::new("./my_db").expect("CString::new failed");
-    let mut err: *mut i8 = ptr::null_mut();
+pub fn white_for<F>(c: F)
+    where
+        F: Fn()
+{
 
-    let db = unsafe { leveldb::leveldb_open(options, db_name.as_ptr(), &mut err) };
-    assert!(err.is_null(), "Failed to open LevelDB: {:?}", unsafe { std::ffi::CStr::from_ptr(err) });
+// 获取当前时间
+    let start_time = SystemTime::now();
 
-    let key = "my_key\0";
-    let value = "my_value\0";
-
-    unsafe {
-        leveldb::leveldb_put(
-            db,
-            leveldb::leveldb_writeoptions_create(),
-            key.as_ptr() as *const _,
-            key.len() as libc::size_t,
-            value.as_ptr() as *const _,
-            value.len() as libc::size_t,
-            &mut err,
-        );
-    }
-    assert!(err.is_null(), "Error writing to LevelDB: {:?}", unsafe { std::ffi::CStr::from_ptr(err) });
-
-    let read_options = unsafe { leveldb::leveldb_readoptions_create() };
-    let mut read_err: *mut i8 = ptr::null_mut();
-    let mut read_value_len: libc::size_t = 0;
-    let read_value = unsafe {
-        leveldb::leveldb_get(
-            db,
-            read_options,
-            key.as_ptr() as *const _,
-            key.len() as libc::size_t,
-            &mut read_value_len,
-            &mut read_err,
-        )
+// 计算时间戳（以纳秒为单位）
+    let start_t = match start_time.duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(duration) => {
+            let seconds = duration.as_secs() as i64;
+            let nanos = duration.subsec_nanos() as u32;
+            NaiveDateTime::from_timestamp(seconds, nanos)
+        }
+        Err(err) => {
+            // Handle error
+            eprintln!("Error: {:?}", err);
+            return;
+        }
     };
 
-    if read_err.is_null() {
-        println!(
-            "Retrieved value value_len: {:?} for key '{}': {}",
-            read_value_len,
-            key,
-           unsafe{ std::str::from_utf8(&std::slice::from_raw_parts(
-                read_value as *const u8,
-                read_value_len as usize
-            ))}
-                .unwrap()
-        );
-    } else {
-        println!("Error retrieving value: {:?}", unsafe { std::ffi::CStr::from_ptr(read_err) });
-    }
+    // 格式化为特定格式的日期时间字符串
+    let _start_time_str = start_t.format("%Y-%m-%d %H:%M:%S").to_string();
 
-    //leveldb_free 释放内存 指定的变量的内存
-    // leveldb_readoptions_destroy 销毁
-    unsafe {
-        leveldb::leveldb_free(read_value as *mut std::os::raw::c_void);
-        leveldb::leveldb_readoptions_destroy(read_options);
-        leveldb::leveldb_free(err as *mut std::os::raw::c_void);
-    }
+    c();
 
-    unsafe {
-        leveldb::leveldb_delete(
-            db,
-            leveldb::leveldb_writeoptions_create(),
-            key.as_ptr() as *const _,
-            key.len() as libc::size_t,
-            &mut err,
-        );
-    }
+// 获取当前时间
+    let end_time = SystemTime::now();
 
-
-    let read_value = unsafe {
-        leveldb::leveldb_get(
-            db,
-            read_options,
-            key.as_ptr() as *const _,
-            key.len() as libc::size_t,
-            &mut read_value_len,
-            &mut read_err,
-        )
+// 计算时间戳（以纳秒为单位）
+    let end_t = match end_time.duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(duration) => {
+            let seconds = duration.as_secs() as i64;
+            let nanos = duration.subsec_nanos() as u32;
+            NaiveDateTime::from_timestamp(seconds, nanos)
+        }
+        Err(err) => {
+            // Handle error
+            eprintln!("Error: {:?}", err);
+            return;
+        }
     };
 
-    // 读取数据 不存在但不会报错 返回0和空的
-    if read_err.is_null() {
-        println!(
-            "Retrieved value value_len: {:?} for key '{}': {}",
-            read_value_len,
-            key,
-            unsafe{ std::str::from_utf8(&std::slice::from_raw_parts(
-                read_value as *const u8,
-                read_value_len as usize
-            ))}
-                .unwrap()
-        );
-    } else {
-        println!("Error retrieving value: {:?}", unsafe { std::ffi::CStr::from_ptr(read_err) });
-    }
+    // 格式化为特定格式的日期时间字符串
+    let _end_time_str = end_t.format("%Y-%m-%d %H:%M:%S").to_string();
 
-    assert!(err.is_null(), "Error deleting value from LevelDB: {:?}", unsafe { std::ffi::CStr::from_ptr(err) });
 
-    unsafe {
-        leveldb::leveldb_free(err as *mut std::os::raw::c_void);
-        leveldb::leveldb_close(db);
-        leveldb::leveldb_options_destroy(options);
-    }
+    // Calculate the duration in milliseconds
+    let duration = end_time.duration_since(start_time);
+    println!("Time taken to write ,start_time_str:{} ,end_time_str:{}, entries: {:?}", _start_time_str, _end_time_str, duration);
+    println!("Time taken to write ,start_time:{} ,end_time:{}, entries: {:?}", start_t, end_t, duration);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_open_and_close_leveldb() {
-        open_and_close_leveldb();
-        // Add assertions to check correctness of open_and_close_leveldb function
-    }
-
-    #[test]
-    fn test_write_and_read_leveldb() {
-        write_and_read_leveldb();
-        // Add assertions to check correctness of write_and_read_leveldb function
-    }
-
-}
-
-#[cfg(test)]
-mod benches {
-    // This will include the benchmark defined in benches.rs
-    use criterion::criterion_group;
-    include!("benches.rs");
-}

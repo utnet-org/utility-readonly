@@ -17,7 +17,6 @@ fn main() {
     let db = unsafe { leveldb::leveldb_open(options, db_name.as_ptr(), &mut err) };
     if err.is_null() {
         println!("Successfully opened the LevelDB database.");
-
         // 写入数据
         let key = "这是value\0";
         let value = "这是hello\0";

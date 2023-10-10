@@ -7,3 +7,17 @@ edition = "2021"
 [dependencies]
 leveldb-sys = { path = "leveldb-sys", version = "2.0.10" }
 libc = "0.2.*"
+chrono = "0.4.31"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["async_tokio", "html_reports"] }
+# 如果要进行基准测试，可以将这部分添加到 Cargo.toml 中
+#[[bench]]
+#name = "write_data_benchmark"
+#path = "benches/benchmarks.rs"
+#name = "benchmarks"
+#harness = false
+
+[[bench]]
+name = "find"
+harness = false
