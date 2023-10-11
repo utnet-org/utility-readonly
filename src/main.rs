@@ -25,10 +25,11 @@ async fn main() -> Result<(), sqlx::Error> {
     println!("db_pool is : {:?}", pool);
 
     // add_course(&pool).await;
-    remove_course(&pool).await;
+    // remove_course(&pool).await;
     // modify_course(&pool).await;
     // get_all_course(&pool).await;
     // get_one_course(&pool).await;
+    insert_course_tx(&pool).await;
 
     Ok(())
 }

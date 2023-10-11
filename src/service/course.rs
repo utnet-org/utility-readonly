@@ -27,4 +27,9 @@ pub mod course{
         let res_all = update_course(&pool).await;
         handle_result(res_all, "更新成功", "更新失败");
     }
+
+    pub async fn insert_course_tx(pool: &Pool<Postgres>) -> () {
+        let insert_tx = perform_transaction(&pool).await;
+        handle_result(insert_tx, "插入成功", "插入失败");
+    }
 }
