@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Client</title>
+</head>
+<body>
+<h1>WebSocket Client</h1>
+<input type="text" id="message" placeholder="Enter your message">
+<button id="sendButton">Send</button>
+<ul id="chat"></ul>
+
+<script>
+    const chat = document.getElementById("chat");
+    const messageInput = document.getElementById("message");
+    const sendButton = document.getElementById("sendButton");
+    const ws = new WebSocket("ws://127.0.0.1:8080");
+
+    // 当 WebSocket 连接打开时
+    ws.onopen = () => {
+        console.log("WebSocket connection opened.");
+        console.log(1)
+        sendButton.addEventListener("click", () => {
+            const message = messageInput.value;
+            ws.send(message);
+            const listItem = document.createElement("li");
+            listItem.textContent = message;
+            chat.appendChild(listItem);
+            messageInput.value = "";
+
+        });
+    };
+
+    ws.onmessage = (event) => {
+        const message = event.data;
+        const listItem = document.createElement("li");
+        listItem.textContent = message;
+        chat.appendChild(listItem);
+    };
+
+    ws.onclose = (event) => {
+        if (event.wasClean) {
+            console.log(`WebSocket closed cleanly, code=${event.code}, reason=${event.reason}`);
+        } else {
+            console.error("WebSocket connection closed unexpectedly");
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error(`WebSocket error: ${error.message}`);
+    };
+
+</script>
+</body>
+</html>

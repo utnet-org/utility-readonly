@@ -1,0 +1,12 @@
+[package]
+name = "demo01"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+warp = "0.3"
+tokio-tungstenite = "0.16"
+futures-util = "0.3.28"
