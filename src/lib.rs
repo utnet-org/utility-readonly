@@ -153,9 +153,9 @@ pub fn open_and_close_leveldb() {
 }
 
 
-pub fn white_for<F>(c: F)
+pub fn white_for<F>(mut c: F)
     where
-        F: Fn()
+        F: FnMut()
 {
 
 // 获取当前时间

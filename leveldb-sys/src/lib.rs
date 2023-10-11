@@ -64,15 +64,15 @@ extern "C" {
     pub fn leveldb_release_snapshot(db: *mut leveldb_t, snapshot: *const leveldb_snapshot_t);
     pub fn leveldb_property_value(db: *mut leveldb_t, propname: *const c_char) -> *mut c_char;
 
-    // TODO: const'ness of pointers here is in question
+    // TODO: const'ness of pointers here is in question 这里指针的常量是个问题
     pub fn leveldb_approximate_sizes(db: *mut leveldb_t, num_ranges: c_int, range_start_key: *const *const c_char, range_start_key_len: *const size_t, range_limit_key: *const *const c_char, range_limit_key_len: *const size_t, sizes: *mut u64);
     pub fn leveldb_compact_range(db: *mut leveldb_t, start_key: *const c_char, start_key_len: size_t, limit_key: *const c_char, limit_key_len: size_t);
 
-    // Management operations
+    // Management operations 管理运作
     pub fn leveldb_destroy_db(options: *const leveldb_options_t, name: *const c_char, errptr: *mut *mut c_char);
     pub fn leveldb_repair_db(options: *const leveldb_options_t, name: *const c_char, errptr: *mut *mut c_char);
 
-    // Iterator
+    // Iterator 迭代器
     pub fn leveldb_iter_destroy(it: *mut leveldb_iterator_t);
     pub fn leveldb_iter_valid(it: *const leveldb_iterator_t) -> c_uchar;
     pub fn leveldb_iter_seek_to_first(it: *mut leveldb_iterator_t);
@@ -84,7 +84,7 @@ extern "C" {
     pub fn leveldb_iter_value(it: *const leveldb_iterator_t, vlen: *const size_t) -> *const c_char;
     pub fn leveldb_iter_get_error(it: *const leveldb_iterator_t, errptr: *const *const c_char);
 
-    // Write batch
+    // Write batch 写入批量
     pub fn leveldb_writebatch_create() -> *mut leveldb_writebatch_t;
     pub fn leveldb_writebatch_destroy(b: *mut leveldb_writebatch_t);
     pub fn leveldb_writebatch_clear(b: *mut leveldb_writebatch_t);
@@ -120,7 +120,7 @@ extern "C" {
     pub fn leveldb_options_set_block_restart_interval(o: *mut leveldb_options_t, interval: c_int);
     pub fn leveldb_options_set_compression(o: *mut leveldb_options_t, val: Compression);
 
-    // Comparator
+    // Comparator 比较器
     pub fn leveldb_comparator_create(
         state: *mut c_void,
         destructor: extern fn(*mut c_void),
@@ -149,30 +149,30 @@ extern "C" {
     pub fn leveldb_filterpolicy_destroy(p: *mut leveldb_filterpolicy_t);
     pub fn leveldb_filterpolicy_create_bloom(bits_per_key: c_int) -> *mut leveldb_filterpolicy_t;
 
-    // Read options
+    // Read options 读取选项
     pub fn leveldb_readoptions_create() -> *mut leveldb_readoptions_t;
     pub fn leveldb_readoptions_destroy(o: *mut leveldb_readoptions_t);
     pub fn leveldb_readoptions_set_verify_checksums(o: *mut leveldb_readoptions_t, val: c_uchar);
     pub fn leveldb_readoptions_set_fill_cache(o: *mut leveldb_readoptions_t, val: c_uchar);
     pub fn leveldb_readoptions_set_snapshot(o: *mut leveldb_readoptions_t, snapshot: *const leveldb_snapshot_t);
 
-    // Write options
+    // Write options 写入选项
     pub fn leveldb_writeoptions_create() -> *mut leveldb_writeoptions_t;
     pub fn leveldb_writeoptions_destroy(o: *mut leveldb_writeoptions_t);
     pub fn leveldb_writeoptions_set_sync(o: *mut leveldb_writeoptions_t, val: c_uchar);
 
-    // Cache
+    // Cache 缓存
     pub fn leveldb_cache_create_lru(capacity: size_t) -> *mut leveldb_cache_t;
     pub fn leveldb_cache_destroy(c: *mut leveldb_cache_t);
 
-    // Env
+    // Env 环境
     pub fn leveldb_create_default_env() -> *mut leveldb_env_t;
     pub fn leveldb_env_destroy(e: *mut leveldb_env_t);
 
-    // Utility
+    // Utility 公用
     pub fn leveldb_free(ptr: *mut c_void);
 
-    // Versioning
+    // Versioning 版本控制
     pub fn leveldb_major_version() -> c_int;
     pub fn leveldb_minor_version() -> c_int;
 }
