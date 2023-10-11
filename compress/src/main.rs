@@ -3,6 +3,7 @@ extern crate flate2;
 extern crate zip;
 
 use std::fs::File;
+use std::io;
 use std::io::{Read, Write};
 use std::path::Path;
 use flate2::write::GzEncoder;
@@ -70,35 +71,54 @@ fn decompress_file_zip(zip_filename: &str, output_dir: &str) -> Result<(), Box<d
 
     Ok(())
 }
-fn compress_directory(directory_path: &str,zip_filename:&str)-> Result<(), Box<dyn std::error::Error>> {
-    let file = File::create(zip_filename)?;
-    let mut zip = ZipWriter::new(file);
 
+fn compress_directory(directory_path: &str, zip_filename: &str) -> std::io::Result<()> {
+    let output_file = File::create(zip_filename)?;
+    let mut zip = ZipWriter::new(output_file);
+
+    // 设置压缩选项
     let options = FileOptions::default()
         .compression_method(CompressionMethod::Stored)
         .unix_permissions(0o755);
 
-    let dir_path = Path::new(directory_path);
+    // 递归遍历文件夹并将文件添加到ZIP
+    add_directory_to_zip(&mut zip, directory_path, directory_path, options)?;
 
-    for entry in std::fs::read_dir(dir_path)? {
+    Ok(())
+}
+
+fn add_directory_to_zip<W>(
+    zip: &mut ZipWriter<W>,
+    base_path: &str,
+    directory_path: &str,
+    options: FileOptions,
+) -> std::io::Result<()>
+    where
+        W: Write + io::Seek,
+{
+    for entry in std::fs::read_dir(directory_path)? {
         let entry = entry?;
-        let file_name = entry.file_name();
-        let file_path = entry.path();
+        let path = entry.path();
 
-        if file_path.is_file() {
-            let relative_path = file_path.strip_prefix(dir_path)?;
-            let mut file = File::open(&file_path)?;
-            zip.start_file(relative_path, options)?;
-            std::io::copy(&mut file, &mut zip)?;
+        if path.is_dir() {
+            let dir_name = path.file_name().unwrap().to_str().unwrap();
+            zip.start_file_from_path(Path::new(&format!("{}/", dir_name)), options)?;
+            add_directory_to_zip(zip, base_path, &path.to_string_lossy(), options)?;
+        } else if path.is_file() {
+            let mut file = File::open(&path)?;
+            let relative_path = path.strip_prefix(base_path).expect("strip_prefix wrong");
+
+            zip.start_file_from_path(Path::new(relative_path), options).expect("strip_prefix wrong");
+            std::io::copy(&mut file, zip)?;
         }
     }
 
     Ok(())
 }
-fn decompress_zip(zip_filename: &str, output_directory: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn decompress_directory(zip_filename: &str, output_directory: &str) -> std::io::Result<()> {
     let zip_file = File::open(zip_filename)?;
-    let reader = GzDecoder::new(zip_file);
-    let mut archive = zip::ZipArchive::new(reader)?;
+    let reader = std::io::BufReader::new(zip_file);
+    let mut archive = ZipArchive::new(reader)?;
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
@@ -119,6 +139,7 @@ fn decompress_zip(zip_filename: &str, output_directory: &str) -> Result<(), Box<
 
     Ok(())
 }
+
 fn main() {
     println!("hello world")
 
@@ -126,7 +147,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::{compress_directory, compress_file, compress_file_zip, decompress_file, decompress_file_zip, decompress_zip};
+    use crate::{ compress_file, compress_file_zip, decompress_file, decompress_file_zip,compress_directory,decompress_directory};
 
     #[test]
     fn test_compress_file() -> Result<(), Box<dyn std::error::Error>>{
@@ -148,15 +169,15 @@ mod tests {
 
     #[test]
     fn test_compress_directory() -> Result<(), Box<dyn std::error::Error>> {
-        let input_directory = "/src/graph";
-        let compressed_zip = "/src/outcome/compressed_directory.zip";
-        let output_directory = "/src/outcome/extracted_directory";
+        let input_directory = "src/graph";
+        let compressed_zip = "src/outcome/compressed_directory.zip";
+        let output_directory = "src/outcome/extracted_graph";
 
         // 压缩文件夹
         compress_directory(input_directory, compressed_zip).expect("compress file fail");
-
-        // 解压缩文件夹
-        decompress_zip(compressed_zip, output_directory).expect("decompress file fail");
+        //
+        // // 解压缩文件夹
+        decompress_directory(compressed_zip, output_directory).expect("decompress file fail");
 
         Ok(())
     }
