@@ -7,9 +7,14 @@ edition = "2021"
 
 [dependencies]
 rust-crypto = "0.2.36"
+cipher = {version = "0.4.3", features=["block-padding"]}
+ctr = "0.9"
+# aes128
+#aes = "0.8.2"
+# aes256
 aes = "0.7.5"
 block-modes = "0.8.1"
-hex-literal = "0.2.1"
+hex-literal = "0.3.1"
 rand = "0.8.4"
 bytebuffer = "0.2.1"
 base64 = "0.13.0"
