@@ -8,7 +8,7 @@ const BASE_STR: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123
 
 pub fn test_aes256_cbc() {
     let plaintext = "EntySquare666";
-    let key = "01234567012345670123456701234567";
+    let key = &gen_ascii_chars(32);
     let iv = gen_ascii_chars(16);
     let enc = aes256_cbc_encrypt(key, plaintext, &iv);
     println!("enc {}", enc);
