@@ -1,6 +1,8 @@
 mod dao;
 mod spec;
 mod service;
+mod models;
+mod schema;
 
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
