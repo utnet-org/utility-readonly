@@ -15,9 +15,9 @@ fn main() {
     //
     // test();
 
-    leveldb_batch_put_max();
+    // leveldb_batch_put_max();
 
-    // leveldb_get_batch_put_max();
+    leveldb_get_batch_put_max();
 
     // leveldb_batch_delete_max();
 }
@@ -61,14 +61,14 @@ fn leveldb_batch_delete_max(){
 
         white_for(put_data_for);
 
-        println!("batch_put end");
+        println!("batch_delete end");
         // 回滚写入
         // leveldb_sys::leveldb_writebatch_clear(write_batch);
         leveldb_sys::leveldb_writebatch_destroy(write_batch);
         leveldb_sys::leveldb_writeoptions_destroy(write_options);
         leveldb_sys::leveldb_close(db);
 
-        println!("leveldb_batch_put_max_for end，close db");
+        println!("leveldb_batch_delete_max_for end，close db");
     }
 }
 
@@ -137,7 +137,7 @@ fn leveldb_get_batch_put_max() {
 
     let get_data_for = || {
         for i in 0..max {
-            let key = format!("batch_key{}", i);
+            let key = format!("batch_test_key{}", i);
             // get_data(db, &key).expect("Error writing to LevelDB");
             match get_data(db, &key) {
                 Ok(val) => {

@@ -32,22 +32,15 @@ pub fn open_leveldb(db_path: &str) -> *mut leveldb_t {
     }
 }
 
-// 关闭数据库
-pub fn close_leveldb(db: *mut leveldb_t) {
-    unsafe {
-        leveldb::leveldb_close(db);
-    }
-}
-
 // 写入数据
 pub fn put_data(db: *mut leveldb_t, key: &str, value: &str) -> Result<(), String> {
     // 将传入的键和值转换为 C 字符串
     // let key_cstr = CString::new(key).map_err(|_| "CString::new for key failed".to_string())?;
     // let value_cstr = CString::new(value).map_err(|_| "CString::new for value failed".to_string())?;
-
-    // 写入数据
-    let mut err: *mut i8 = ptr::null_mut();
     unsafe {
+        // 写入数据
+        let mut err: *mut i8 = ptr::null_mut();
+
         leveldb::leveldb_put(
             db,
             leveldb::leveldb_writeoptions_create(),
@@ -57,16 +50,15 @@ pub fn put_data(db: *mut leveldb_t, key: &str, value: &str) -> Result<(), String
             value.len(),
             &mut err,
         );
-    }
 
-    // 检查是否写入成功
-    if err.is_null() {
-        Ok(())
-    } else {
-        unsafe {
-            leveldb_sys::leveldb_free(err as *mut std::os::raw::c_void);
+
+        // 检查是否写入成功
+        if err.is_null() {
+            Ok(())
+        } else {
+            leveldb_sys::leveldb_free(err as *mut c_void);
+            Err("Error writing to LevelDB".to_string())
         }
-        Err("Error writing to LevelDB".to_string())
     }
 }
 
@@ -97,13 +89,13 @@ pub fn get_data(db: *mut leveldb_t, key: &str) -> Result<(String, usize), String
         };
 
         unsafe {
-            leveldb::leveldb_free(read_value as *mut std::os::raw::c_void);
+            leveldb::leveldb_free(read_value as *mut c_void);
         }
 
         Ok((value, read_value_len))
     } else {
         unsafe {
-            leveldb::leveldb_free(read_err as *mut std::os::raw::c_void);
+            leveldb::leveldb_free(read_err as *mut c_void);
         }
 
         Err("无法读取数据".to_string())
@@ -129,7 +121,7 @@ pub fn delete_data(db: *mut leveldb_t, key: &str) -> Result<(), String> {
         Ok(())
     } else {
         unsafe {
-            leveldb::leveldb_free(err as *mut std::os::raw::c_void);
+            leveldb::leveldb_free(err as *mut c_void);
         }
         Err("Unable to delete data".to_string())
     }
@@ -175,8 +167,6 @@ pub fn white_for<F>(mut c: F)
         }
     };
 
-    // 格式化为特定格式的日期时间字符串
-    let _start_time_str = start_t.format("%Y-%m-%d %H:%M:%S").to_string();
 
     c();
 
@@ -197,13 +187,9 @@ pub fn white_for<F>(mut c: F)
         }
     };
 
-    // 格式化为特定格式的日期时间字符串
-    let _end_time_str = end_t.format("%Y-%m-%d %H:%M:%S").to_string();
-
 
     // Calculate the duration in milliseconds
     let duration = end_time.duration_since(start_time);
-    println!("Time taken to write ,start_time_str:{} ,end_time_str:{}, entries: {:?}", _start_time_str, _end_time_str, duration);
-    println!("Time taken to write ,start_time:{} ,end_time:{}, entries: {:?}", start_t, end_t, duration);
+    println!("Time taken to write ,start_t:{} ,end_t:{}, entries: {:?}", start_t, end_t, duration);
 }
 
