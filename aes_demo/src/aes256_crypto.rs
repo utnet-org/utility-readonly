@@ -6,8 +6,8 @@ use rand::seq::SliceRandom;
 type AesCbc = Cbc<Aes256, Pkcs7>;
 const BASE_STR: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-pub fn test_aes256_cbc() {
-    let plaintext = "EntySquare666";
+pub fn test_aes256_cbc(txt: &str) {
+    let plaintext = txt; //"EntySquare666";
     let key = &gen_ascii_chars(32);
     let iv = gen_ascii_chars(16);
     let enc = aes256_cbc_encrypt(key, plaintext, &iv);

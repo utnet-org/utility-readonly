@@ -7,8 +7,8 @@ use aes::cipher::{
 use rand::RngCore;
 
 const DIGIT: usize = 16;
-pub fn test_aes128() {
-    let plaintext = "EntySquare666";
+pub fn test_aes128(txt: &str) {
+    let plaintext = txt; //"EntySquare666";
     // 生成随机的16字节密钥
     let mut key_data = [0u8; DIGIT];
     let mut rng = rand::thread_rng();
@@ -19,7 +19,7 @@ pub fn test_aes128() {
 
     let dec = aes128_cbc_decrypt(enc, key);
 
-    println!("明文: {:?}", std::str::from_utf8(&dec[..plaintext.len()]));
+    println!("解密后明文: {:?}", std::str::from_utf8(&dec[..plaintext.len()]).unwrap());
 
 }
 
