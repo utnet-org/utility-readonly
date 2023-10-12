@@ -6,7 +6,7 @@ use utility::{create_conn, schema::posts::dsl::*};
 fn main() {
     // let target = args().nth(1).expect("rust");
     // let pattern = format!("%{}%", target);
-    let pattern = format!("%{}%", "rust");
+    let pattern = format!("%{}%", "enty");
 
     let mut conn = create_conn();
     let num_deleted = diesel::delete(posts.filter(title.like(pattern)))

@@ -1,7 +1,7 @@
 pub mod course{
     use chrono::NaiveDate;
 
-    #[derive(Debug)]
+    #[derive(Debug,Default)]
     pub struct Course {
         pub id: i32,
         pub teacher_id: i32,

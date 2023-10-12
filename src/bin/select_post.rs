@@ -1,10 +1,10 @@
 use diesel::prelude::*;
 use utility::create_conn;
 use utility::models::Post;
-use utility::schema::posts::dsl::*; //posts对象位置,给表 (posts::table->posts) 和 字段(posts::published->published) 设置别名
+use utility::schema::posts::dsl::*;
 
 fn main() {
-    let pattern = format!("%{}%", "book");
+    let pattern = format!("%{}%", "enty");
     let mut conn = create_conn();
     let res = posts
         .filter(published.eq(false))

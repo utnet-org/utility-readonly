@@ -1,7 +1,8 @@
-pub mod course{
+pub mod course {
     use sqlx::{Pool, Postgres};
     use crate::dao::course::course::{*};
     use crate::handle_result;
+    use crate::spec::course::course::Course;
 
     pub async fn get_all_course(pool: &Pool<Postgres>) -> () {
         let res_all = query_all_course(&pool).await;
@@ -14,9 +15,16 @@ pub mod course{
     }
 
     pub async fn add_course(pool: &Pool<Postgres>) -> () {
-        let res_all = insert_course(&pool).await;
+        let cou = Course {
+            teacher_id: 0,
+            name: "Kobe".to_string(),
+            ..Default::default()
+        };
+        // let res_all = insert_course(&pool).await;
+        let res_all = insert_course_with(&pool, cou).await;
         handle_result(res_all, "插入成功", "插入失败");
     }
+
 
     pub async fn remove_course(pool: &Pool<Postgres>) -> () {
         let res_all = delete_course(&pool).await;

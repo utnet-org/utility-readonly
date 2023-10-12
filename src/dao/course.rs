@@ -14,6 +14,22 @@ pub mod course {
         Ok(())
     }
 
+    pub async fn insert_course_with(pool: &Pool<Postgres>, cou: Course) -> Result<(), sqlx::Error> {
+        // let cou = Course {
+        //     teacher_id: 0,
+        //     name: "Kobe".to_string(),
+        //     ..Default::default()
+        // };
+        let insert = sqlx::query!(
+        r#"INSERT INTO course (teacher_id, name) VALUES ($1, $2)"#,
+        cou.teacher_id,
+        cou.name,
+    )
+            .execute(pool)
+            .await?;
+        Ok(())
+    }
+
     /// 删除数据
     pub async fn delete_course(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
         // sqlx::query("DELETE From course WHERE id=?")
