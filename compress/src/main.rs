@@ -1,29 +1,35 @@
 
 extern crate flate2;
 extern crate zip;
+extern crate xz2;
+extern crate encoding;
 
 use std::fs::File;
 use std::io;
-use std::io::{Read, Write};
+use std::io::{BufReader, Read, Write};
 use std::path::Path;
+use encoding::{DecoderTrap, Encoding};
+use flate2::Compression;
 use flate2::write::GzEncoder;
 use flate2::write::GzDecoder;
+use xz2::read::XzDecoder;
+use xz2::write::XzEncoder;
 use zip::write::FileOptions;
 use zip::{CompressionMethod, ZipArchive, ZipWriter};
 
-fn compress_file_gzip(input_filename:&str,gzip_filename:&str)  -> std::io::Result<()> {
+fn compress_file_gzip(input_filename: &str, gz_filename: &str) -> io::Result<()> {
     let mut input_file = File::open(input_filename)?;
-    let output_file = File::create(gzip_filename)?;
+    let output_file = File::create(gz_filename)?;
     let mut encoder = GzEncoder::new(output_file, flate2::Compression::default());
-
     io::copy(&mut input_file, &mut encoder)?;
-
     Ok(())
 }
-fn decompress_file_gzip(gzip_filename: &str, output_filename: &str) -> std::io::Result<()> {
-    let input_file = File::open(gzip_filename)?;
+
+fn decompress_file_gzip(gz_filename: &str, output_dir: &str,output_filename : &str) -> io::Result<()> {
+    let input_file = File::open(gz_filename)?;
     let mut decoder = GzDecoder::new(input_file);
-    let mut output_file = File::create(output_filename)?;
+    let output_path = format!("{}/{}", output_dir, output_filename);
+    let mut output_file = File::create(output_path)?;
 
     io::copy(&mut decoder, &mut output_file)?;
 
@@ -48,14 +54,14 @@ fn compress_file_zip(input_filename: &str, output_filename: &str) -> Result<(), 
     Ok(())
 }
 
-fn decompress_file_zip(zip_filename: &str, output_dir: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn decompress_file_zip(zip_filename: &str, output_dir: &str,output_filename : &str) -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open(zip_filename)?;
     let mut archive = ZipArchive::new(file)?;
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
 
-        let output_path = format!("{}/{}", output_dir, file.name());
+        let output_path = format!("{}/{}", output_dir, output_filename);
         if file.is_dir() {
             std::fs::create_dir_all(&output_path)?;
         } else {
@@ -134,30 +140,60 @@ fn decompress_directory(zip_filename: &str, output_directory: &str) -> std::io::
 
     Ok(())
 }
+fn compress_to_xz(input_filename: &str, xz_filename: &str) -> io::Result<()> {
+    let mut input_file = File::open(input_filename)?;
+    let output_file = File::create(xz_filename)?;
+    let mut encoder = XzEncoder::new(output_file, 9); // 压缩级别 9
+
+    io::copy(&mut input_file, &mut encoder)?;
+
+    Ok(())
+}
+
+fn decompress_xz(input_xz_filename: &str, output_filename: &str) -> io::Result<()> {
+    let input_file = File::open(input_xz_filename)?;
+    let mut decoder = XzDecoder::new(input_file);
+    let mut output_file = File::create(output_filename)?;
+
+    io::copy(&mut decoder, &mut output_file)?;
+
+    Ok(())
+}
+
 
 fn main() {
     println!("hello world")
 
 }
 
+
 #[cfg(test)]
 mod tests {
-    use crate::{ compress_file_gzip, compress_file_zip, decompress_file_gzip, decompress_file_zip,compress_directory,decompress_directory};
+    use crate::{compress_file_gzip, compress_file_zip, decompress_file_gzip, decompress_file_zip, compress_directory, decompress_directory, compress_to_xz,decompress_xz};
 
     #[test]
     fn test_compress_file() -> Result<(), Box<dyn std::error::Error>>{
         let input_filename = "src/input.txt";
+        let input_graph = "src/graph/IMG_0755_143.jpg";
+
         let compressed_filename_gzip = "src/outcome/compressed.gz";
         let compressed_filename_zip = "src/outcome/compressed.zip";
-        let decompressed_filename_gzip = "src/outcome/decompressed.txt";
-        let decompressed_filename_zip = "src/outcome";
+        let compressed_filename_xz = "src/outcome/compressed.xz";
+        let decompressed_filename_gzip = "decompressed_gz.jpg";
+        let decompressed_filename_zip = "decompressed_zip.txt";
+        let decompressed_dir = "src/outcome";
+
+        let decompressed_filename_xz = "src/outcome/decompressed_xz.txt";
+
 
         // 压缩文件
-        compress_file_gzip(input_filename, compressed_filename_gzip).expect("compress fail");
+        compress_file_gzip(input_graph, compressed_filename_gzip).expect("compress fail");
         compress_file_zip(input_filename,compressed_filename_zip).expect("compress fail");
+        compress_to_xz(input_filename,compressed_filename_xz).expect("compress directory fail");
         // 解压缩文件
-        decompress_file_gzip(compressed_filename_gzip, decompressed_filename_gzip).expect("decompress fail");
-        decompress_file_zip(compressed_filename_zip,decompressed_filename_zip).expect("decompress fail");
+        decompress_file_gzip(compressed_filename_gzip, decompressed_dir,decompressed_filename_gzip).expect("decompress fail");
+        decompress_file_zip(compressed_filename_zip,decompressed_dir,decompressed_filename_zip).expect("decompress fail");
+        decompress_xz(compressed_filename_xz,decompressed_filename_xz).expect("decompress fail");
 
         Ok(())
     }
@@ -169,13 +205,15 @@ mod tests {
         let output_directory = "src/outcome/extracted_graph";
 
         // 压缩文件夹
-        compress_directory(input_directory, compressed_zip).expect("compress file fail");
-        //
+        compress_directory(input_directory, compressed_zip).expect("compress directory fail");
+
+
         // // 解压缩文件夹
-        decompress_directory(compressed_zip, output_directory).expect("decompress file fail");
+        decompress_directory(compressed_zip, output_directory).expect("decompress directory fail");
 
         Ok(())
     }
+
 }
 
 
