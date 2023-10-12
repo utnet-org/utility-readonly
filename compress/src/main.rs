@@ -11,26 +11,21 @@ use flate2::write::GzDecoder;
 use zip::write::FileOptions;
 use zip::{CompressionMethod, ZipArchive, ZipWriter};
 
-fn compress_file(input_filename:&str,output_filename:&str)  -> std::io::Result<()> {
-    let input_file = File::open(input_filename).expect("find input_filename wrong");
-    let output_file = File::create(output_filename).expect("create output_filename wrong");
+fn compress_file_gzip(input_filename:&str,gzip_filename:&str)  -> std::io::Result<()> {
+    let mut input_file = File::open(input_filename)?;
+    let output_file = File::create(gzip_filename)?;
     let mut encoder = GzEncoder::new(output_file, flate2::Compression::default());
-    let mut buffer = Vec::new();
-    input_file.take(1024).read_to_end(&mut buffer).expect("read buffer wrong");
 
-    encoder.write_all(&buffer).expect("write buffer wrong");
+    io::copy(&mut input_file, &mut encoder)?;
 
     Ok(())
 }
-fn decompress_file(input_filename: &str, output_filename: &str) -> std::io::Result<()> {
-    let input_file = File::open(input_filename).expect("find input_filename wrong");
-    let mut output_file = File::create(output_filename).expect("create output_filename wrong");
+fn decompress_file_gzip(gzip_filename: &str, output_filename: &str) -> std::io::Result<()> {
+    let input_file = File::open(gzip_filename)?;
     let mut decoder = GzDecoder::new(input_file);
+    let mut output_file = File::create(output_filename)?;
 
-    let mut buffer = Vec::new();
-    decoder.read_to_end(&mut buffer).expect("read buffer wrong");
-
-    output_file.write_all(&buffer).expect("write buffer wrong");
+    io::copy(&mut decoder, &mut output_file)?;
 
     Ok(())
 }
@@ -147,21 +142,21 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ compress_file, compress_file_zip, decompress_file, decompress_file_zip,compress_directory,decompress_directory};
+    use crate::{ compress_file_gzip, compress_file_zip, decompress_file_gzip, decompress_file_zip,compress_directory,decompress_directory};
 
     #[test]
     fn test_compress_file() -> Result<(), Box<dyn std::error::Error>>{
         let input_filename = "src/input.txt";
-        let compressed_filename = "src/outcome/compressed.gz";
+        let compressed_filename_gzip = "src/outcome/compressed.gz";
         let compressed_filename_zip = "src/outcome/compressed.zip";
-        let decompressed_filename = "src/outcome/decompressed.txt";
+        let decompressed_filename_gzip = "src/outcome/decompressed.txt";
         let decompressed_filename_zip = "src/outcome";
 
         // 压缩文件
-        compress_file(input_filename, compressed_filename).expect("compress fail");
+        compress_file_gzip(input_filename, compressed_filename_gzip).expect("compress fail");
         compress_file_zip(input_filename,compressed_filename_zip).expect("compress fail");
         // 解压缩文件
-        decompress_file(compressed_filename, decompressed_filename).expect("decompress fail");
+        decompress_file_gzip(compressed_filename_gzip, decompressed_filename_gzip).expect("decompress fail");
         decompress_file_zip(compressed_filename_zip,decompressed_filename_zip).expect("decompress fail");
 
         Ok(())
