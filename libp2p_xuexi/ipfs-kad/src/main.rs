@@ -30,12 +30,12 @@ use libp2p::{
 };
 use std::{env, error::Error, time::Duration};
 
-// const BOOTNODES: [&str; 4] = [
-//     "QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-//     "QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa",
-//     "QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb",
-//     "QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt",
-// ];
+const BOOTNODES: [&str; 4] = [
+    "QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
+    "QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa",
+    "QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb",
+    "QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt",
+];
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Create a random key for ourselves.
     let local_key = identity::Keypair::generate_ed25519();
     let local_peer_id = PeerId::from(local_key.public());
-
+    println!("本地 peer id: {local_peer_id}");
     // Set up a an encrypted DNS-enabled TCP Transport over the yamux protocol
     let transport = tokio_development_transport(local_key)?;
 
@@ -59,14 +59,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // Add the bootnodes to the local routing table. `libp2p-dns` built
         // into the `transport` resolves the `dnsaddr` when Kademlia tries
         // to dial these nodes.
-        // for peer in &BOOTNODES {
-        //     behaviour.add_address(&peer.parse()?, "/dnsaddr/bootstrap.libp2p.io".parse()?);
-        // }
-
-        if let Some(addr) = std::env::args().nth(1) {
-            behaviour.add_address(&addr.parse()?, "/dnsaddr/bootstrap.libp2p.io".parse()?);
-            println!("json {addr}")
+        for peer in &BOOTNODES {
+            behaviour.add_address(&peer.parse()?, "/dnsaddr/bootstrap.libp2p.io".parse()?);
         }
+
         SwarmBuilder::with_tokio_executor(transport, behaviour, local_peer_id).build()
     };
 
@@ -83,9 +79,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         let event = swarm.select_next_some().await;
         if let SwarmEvent::Behaviour(kad::Event::OutboundQueryProgressed {
-                                         result: kad::QueryResult::GetClosestPeers(result),
-                                         ..
-                                     }) = event
+            result: kad::QueryResult::GetClosestPeers(result),
+            ..
+        }) = event
         {
             match result {
                 Ok(ok) => {
