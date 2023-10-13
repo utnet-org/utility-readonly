@@ -11,6 +11,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    messages (id) {
+        id -> Int4,
+        title -> Varchar,
+        body -> Text,
+        published -> Bool,
+    }
+}
+
+diesel::table! {
     posts (id) {
         id -> Int4,
         title -> Varchar,
@@ -21,5 +30,6 @@ diesel::table! {
 
 diesel::allow_tables_to_appear_in_same_query!(
     course,
+    messages,
     posts,
 );

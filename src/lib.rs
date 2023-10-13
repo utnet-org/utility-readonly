@@ -1,8 +1,5 @@
 #[macro_use]
-extern crate diesel; //复用diesel里面的宏
-
-use std::env;
-use crate::models::{NewPost, Post};
+extern crate diesel;
 use diesel::prelude::*;
 
 pub mod models;
@@ -17,15 +14,6 @@ pub fn create_conn() -> PgConnection {
         .unwrap_or_else(|_| panic!("Error conn to {}", database_url))
 }
 
-// pub fn insert_post(conn: &PgConnection, title: &str, body: &str) -> Post {
-//     use schema::posts;
-//     let new_post = NewPost { title, body };
-//     //下面代码提示会出现问题
-//     diesel::insert_into(posts::table)
-//         .values(&new_post)
-//         .get_result::<Post>(conn)
-//         .expect("Error saving new post")
-// }
 
 
 

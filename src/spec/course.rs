@@ -1,7 +1,8 @@
 pub mod course{
     use chrono::NaiveDate;
+    use sqlx::FromRow;
 
-    #[derive(Debug,Default)]
+    #[derive(Debug,Default,FromRow)]
     pub struct Course {
         pub id: i32,
         pub teacher_id: i32,

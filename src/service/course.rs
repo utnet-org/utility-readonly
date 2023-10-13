@@ -14,14 +14,19 @@ pub mod course {
         handle_result(res_all, "查询成功", "查询失败");
     }
 
+    pub async fn get_one_course_as(pool: &Pool<Postgres>) -> () {
+        let res_all = query_as(&pool).await;
+        handle_result(res_all, "查询成功", "查询失败");
+    }
+
     pub async fn add_course(pool: &Pool<Postgres>) -> () {
         let cou = Course {
             teacher_id: 0,
             name: "Kobe".to_string(),
             ..Default::default()
         };
-        // let res_all = insert_course(&pool).await;
         let res_all = insert_course_with(&pool, cou).await;
+        // let res_all = insert_course(&pool).await;
         handle_result(res_all, "插入成功", "插入失败");
     }
 

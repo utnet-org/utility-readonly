@@ -15,13 +15,8 @@ pub mod course {
     }
 
     pub async fn insert_course_with(pool: &Pool<Postgres>, cou: Course) -> Result<(), sqlx::Error> {
-        // let cou = Course {
-        //     teacher_id: 0,
-        //     name: "Kobe".to_string(),
-        //     ..Default::default()
-        // };
         let insert = sqlx::query!(
-        r#"INSERT INTO course (teacher_id, name) VALUES ($1, $2)"#,
+        "INSERT INTO course (teacher_id, name) VALUES ($1, $2)",
         cou.teacher_id,
         cou.name,
     )
@@ -74,7 +69,7 @@ pub mod course {
         Ok(())
     }
 
-    /// 查询所有
+    /// 查询单个
     pub async fn query_one_course(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
         let list2 = sqlx::query!(r#"select * from course where id = $1"#, 1)
             .fetch_all(pool)
@@ -89,6 +84,18 @@ pub mod course {
             })
         }
         println!("查询单个{:?}", vec2);
+        Ok(())
+    }
+
+    pub async fn query_as(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+        let rows = sqlx::query_as!(Course, r#"SELECT * FROM course WHERE id = $1"#, 1)
+            .fetch_all(pool)
+            .await?;
+        let vec: Vec<Course> = vec![];
+        for row in rows.iter() {
+            println!("{:?}", row);
+        }
+        println!("数据库中的所有数据：{:#?}", vec);
         Ok(())
     }
 
