@@ -3,6 +3,7 @@ mod spec;
 mod service;
 mod models;
 mod schema;
+mod test;
 
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
@@ -31,8 +32,8 @@ async fn main() -> Result<(), sqlx::Error> {
     // modify_course(&pool).await;
     // get_all_course(&pool).await;
     // get_one_course(&pool).await;
-    get_one_course_as(&pool).await;
-    // insert_course_tx(&pool).await;
+    // get_one_course_as(&pool).await;
+    insert_course_tx(&pool).await;
 
     Ok(())
 }

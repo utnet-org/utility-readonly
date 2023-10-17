@@ -128,7 +128,7 @@ pub mod course {
             .execute(&mut tx)
             .await?;
 
-        let update_result = sqlx::query!("UPDATE course SET name = $1 WHERE id = $2", "haha", 11)
+        let update_result = sqlx::query!("UPDATE course SET name = $1 WHERE id = $2", "haha", 101)
             .execute(&mut tx)
             .await?;
 
