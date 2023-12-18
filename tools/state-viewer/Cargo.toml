@@ -1,0 +1,85 @@
+[package]
+name = "state-viewer"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+actix.workspace = true
+anyhow.workspace = true
+borsh.workspace = true
+bytesize.workspace = true
+chrono.workspace = true
+clap.workspace = true
+cloud-storage.workspace = true
+itertools.workspace = true
+once_cell.workspace = true
+rand.workspace = true
+rayon.workspace = true
+redis.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+rust-s3.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+strum.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+yansi.workspace = true
+
+near-chain-configs.workspace = true
+near-chain.workspace = true
+near-client.workspace = true
+near-crypto.workspace = true
+near-epoch-manager.workspace = true
+near-network.workspace = true
+near-o11y.workspace = true
+near-primitives-core.workspace = true
+near-primitives.workspace = true
+near-store.workspace = true
+near-test-contracts.workspace = true
+nearcore.workspace = true
+node-runtime.workspace = true
+
+[dev-dependencies]
+near-client.workspace = true
+testlib.workspace = true
+insta.workspace = true
+
+[features]
+sandbox = ["node-runtime/sandbox", "near-chain/sandbox", "near-client/sandbox"]
+nightly = [
+  "nightly_protocol",
+  "near-chain-configs/nightly",
+  "near-chain/nightly",
+  "near-client/nightly",
+  "near-epoch-manager/nightly",
+  "near-network/nightly",
+  "near-o11y/nightly",
+  "near-primitives-core/nightly",
+  "near-primitives/nightly",
+  "near-store/nightly",
+  "nearcore/nightly",
+  "node-runtime/nightly",
+]
+nightly_protocol = [
+  "near-chain-configs/nightly_protocol",
+  "near-chain/nightly_protocol",
+  "near-client/nightly_protocol",
+  "near-epoch-manager/nightly_protocol",
+  "near-network/nightly_protocol",
+  "near-o11y/nightly_protocol",
+  "near-primitives-core/nightly_protocol",
+  "near-primitives/nightly_protocol",
+  "near-store/nightly_protocol",
+  "nearcore/nightly_protocol",
+  "node-runtime/nightly_protocol",
+]

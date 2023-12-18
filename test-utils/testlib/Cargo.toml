@@ -1,0 +1,38 @@
+[package]
+name = "testlib"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+once_cell.workspace = true
+
+near-chain-configs.workspace = true
+near-chain.workspace = true
+near-crypto.workspace = true
+near-primitives.workspace = true
+near-test-contracts.workspace = true
+node-runtime.workspace = true
+
+[features]
+nightly_protocol = [
+  "near-chain-configs/nightly_protocol",
+  "near-chain/nightly_protocol",
+  "near-primitives/nightly_protocol",
+  "node-runtime/nightly_protocol",
+]
+nightly = [
+  "nightly_protocol",
+  "near-chain-configs/nightly",
+  "near-chain/nightly",
+  "near-primitives/nightly",
+  "node-runtime/nightly",
+]
+default = []
