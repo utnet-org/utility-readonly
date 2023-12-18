@@ -1,0 +1,84 @@
+[package]
+name = "near-mirror"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+actix.workspace = true
+anyhow.workspace = true
+async-trait.workspace = true
+borsh.workspace = true
+bs58.workspace = true
+clap.workspace = true
+ed25519-dalek.workspace = true
+hex.workspace = true
+hkdf.workspace = true
+once_cell.workspace = true
+openssl-probe.workspace = true
+rand_core.workspace = true
+rocksdb.workspace = true
+secp256k1.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+strum.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+nearcore.workspace = true
+near-chain-configs.workspace = true
+near-chain.workspace = true
+near-chain-primitives.workspace = true
+near-client.workspace = true
+near-client-primitives.workspace = true
+near-epoch-manager.workspace = true
+near-indexer-primitives.workspace = true
+near-indexer.workspace = true
+near-network.workspace = true
+near-primitives.workspace = true
+near-primitives-core.workspace = true
+near-o11y.workspace = true
+near-store.workspace = true
+near-crypto.workspace = true
+
+[features]
+nightly = [
+  "nightly_protocol",
+  "near-chain-configs/nightly",
+  "near-chain/nightly",
+  "near-client-primitives/nightly",
+  "near-client/nightly",
+  "near-epoch-manager/nightly",
+  "near-indexer-primitives/nightly",
+  "near-indexer/nightly",
+  "near-network/nightly",
+  "near-o11y/nightly",
+  "near-primitives-core/nightly",
+  "near-primitives/nightly",
+  "near-store/nightly",
+  "nearcore/nightly",
+]
+nightly_protocol = [
+  "near-chain-configs/nightly_protocol",
+  "near-chain/nightly_protocol",
+  "near-client-primitives/nightly_protocol",
+  "near-client/nightly_protocol",
+  "near-epoch-manager/nightly_protocol",
+  "near-indexer-primitives/nightly_protocol",
+  "near-indexer/nightly_protocol",
+  "near-network/nightly_protocol",
+  "near-o11y/nightly_protocol",
+  "near-primitives-core/nightly_protocol",
+  "near-primitives/nightly_protocol",
+  "near-store/nightly_protocol",
+  "nearcore/nightly_protocol",
+]

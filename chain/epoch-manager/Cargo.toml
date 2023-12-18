@@ -1,0 +1,52 @@
+[package]
+name = "near-epoch-manager"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+borsh.workspace = true
+chrono = { workspace = true, optional = true }
+num-rational.workspace = true
+primitive-types.workspace = true
+rand.workspace = true
+rand_hc.workspace = true
+serde_json.workspace = true
+smart-default.workspace = true
+tracing.workspace = true
+# itertools has collect_vec which is useful in quick debugging prints
+itertools.workspace = true
+
+near-crypto.workspace = true
+near-primitives.workspace = true
+near-store.workspace = true
+near-chain-configs.workspace = true
+near-chain-primitives.workspace = true
+near-cache.workspace = true
+
+[features]
+expensive_tests = []
+protocol_feature_fix_staking_threshold = [
+  "near-primitives/protocol_feature_fix_staking_threshold",
+]
+nightly = [
+  "nightly_protocol",
+  "protocol_feature_fix_staking_threshold",
+  "near-chain-configs/nightly",
+  "near-primitives/nightly",
+  "near-store/nightly",
+]
+nightly_protocol = [
+  "near-chain-configs/nightly_protocol",
+  "near-primitives/nightly_protocol",
+  "near-store/nightly_protocol",
+]
+no_cache = []
+new_epoch_sync = ["near-store/new_epoch_sync", "near-primitives/new_epoch_sync"]

@@ -1,0 +1,33 @@
+[package]
+name = "near-jsonrpc-client"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+actix-http.workspace = true
+awc.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+near-jsonrpc-primitives.workspace = true
+near-primitives.workspace = true
+
+[features]
+nightly = [
+  "nightly_protocol",
+  "near-jsonrpc-primitives/nightly",
+  "near-primitives/nightly",
+]
+nightly_protocol = [
+  "near-jsonrpc-primitives/nightly_protocol",
+  "near-primitives/nightly_protocol",
+]
