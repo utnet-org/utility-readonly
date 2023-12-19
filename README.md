@@ -70,6 +70,9 @@ Check the `nearup` repository for [more details](https://github.com/near/nearup)
 
 To learn how to become validator, checkout [documentation](https://docs.near.org/docs/develop/node/validator/staking-and-delegation).
 
+For building from source code, and run many nodes, please refer [Installation.md](Installation.md).
+
+
 ## Contributing
 
 The workflow and details of setup to contribute are described in [CONTRIBUTING.md](CONTRIBUTING.md), and security policy is described in [SECURITY.md](SECURITY.md).
