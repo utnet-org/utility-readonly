@@ -140,3 +140,13 @@ run node1 with bootnodes of node0
 ```bash
 ./target/debug/neard --home="~/Library/Near1" run --boot-nodes="ed25519:DVtQUJKcUNZkN1qPSHWpZAvYUSjGoByqc5HeySnVASbs@192.168.10.4(198.18.194.73):24567" > logfiles/logfile2 2>&1 &
 ```
+
+### run nodex
+
+```bash
+{
+  "account_id": "node2-validator",
+  "public_key": "ed25519:znYkQr9s94EmKXWFdRA9xrNTfHN125EKEVqAqSqQYzz",
+  "secret_key": "ed25519:484kNA2u6mVXBrn58sRsmsmp5GsDgKbjWnZzPDswnoQuAJTeiBsqbmzcur8KfWsvQhyXmudkBNMx1gQMoknUpcZc"
+}
+```
