@@ -138,7 +138,7 @@ network. "addr": "0.0.0.0:24568",
 ```
 run node1 with bootnodes of node0
 ```bash
-./target/debug/neard --home="~/Library/Near1" run --boot-nodes="ed25519:DVtQUJKcUNZkN1qPSHWpZAvYUSjGoByqc5HeySnVASbs@192.168.10.4(198.18.194.73):24567" > logfiles/logfile2 2>&1 &
+./target/debug/neard --home="~/Library/Near1" run --boot-nodes="ed25519:DVtQUJKcUNZkN1qPSHWpZAvYUSjGoByqc5HeySnVASbs@192.168.10.4:24567" > logfiles/logfile2 2>&1 &
 ```
 
 ### run nodex
