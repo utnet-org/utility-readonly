@@ -104,10 +104,13 @@ const TLA_MIN_LENGTH = 1;
 ```bash
 ./target/debug/neard --home="~/Library/Near1" init --chain-id="my-private-chain-id" --account-id=node1-validator
 ```
--the above cli will generate config files for node1, 
--delete genesis.json file in node1, and copy genesis.json from node0
--get public key for node1-validator from validator.json,
--and then create node1-validator from node0
+- the above cli will generate config files for node1, 
+
+- delete genesis.json file in node1, and copy [genesis.json](genesis.json) from node0
+  
+- get public key for node1-validator from validator.json,
+  
+- and then create node1-validator from node0
  ```bash
 near create-account node1-validator --masterAccount superaccount --initialBalance 10000 --networkId my-private-chain-id --publicKey [public-key you get from above step]
  ```
