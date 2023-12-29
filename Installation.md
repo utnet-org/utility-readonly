@@ -46,6 +46,18 @@ initial node before running neard
 ./target/debug/neard --home="~/Library/Near0" init --chain-id="my-private-chain-id" --account-id=superaccount
 ```
 
+### Config node0 as archival node and enable snapshot
+
+```json
+"archive": true,
+"state_snapshot_config": {
+      "state_snapshot_type": "EveryEpoch",
+      "compaction_enabled": true
+    },
+"state_snapshot_enabled": true,
+"state_snapshot_compaction_enabled": true
+```
+
 ### Run node0
 
 create logfiles folder in project root or any other location 
@@ -127,6 +139,16 @@ stake node1-validator via near-cli
 
 ```bash
 near stake <accountId> <stakingKey> <amount>
+```
+
+### config node1 to sync state from peers
+
+```json
+"state_sync_enabled": true,
+"state_sync": {
+  "dump": null,
+  "sync": "Peers"
+}
 ```
 
 ### run node1
