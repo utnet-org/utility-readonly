@@ -1,6 +1,6 @@
 use secp256k1::rand::SeedableRng;
 
-use crate::signature::{ED25519PublicKey, ED25519SecretKey, KeyType, PublicKey, SecretKey};
+use crate::signature::{ED25519PublicKey, ED25519SecretKey, KeyType, PRIVTAE_KEY_DEFAULT_RSA_KEY_BITS, PublicKey, SecretKey};
 use crate::{InMemorySigner, Signature};
 use near_account_id::AccountId;
 
@@ -21,6 +21,15 @@ fn secp256k1_secret_key_from_seed(seed: &str) -> secp256k1::SecretKey {
     secp256k1::SecretKey::new(&mut rng)
 }
 
+fn rsa2048_secret_key_from_seed(seed: &str) -> rsa::RsaPrivateKey {
+    let seed_bytes = seed.as_bytes();
+    let len = std::cmp::min(32, seed_bytes.len());
+    let mut seed: [u8; 32] = [b' '; 32];
+    seed[..len].copy_from_slice(&seed_bytes[..len]);
+    let mut rng = secp256k1::rand::rngs::StdRng::from_seed(seed);
+    rsa::RsaPrivateKey::new(&mut rng, PRIVTAE_KEY_DEFAULT_RSA_KEY_BITS).unwrap()
+}
+
 impl PublicKey {
     pub fn from_seed(key_type: KeyType, seed: &str) -> Self {
         match key_type {
@@ -31,6 +40,10 @@ impl PublicKey {
             KeyType::SECP256K1 => {
                 let secret_key = SecretKey::SECP256K1(secp256k1_secret_key_from_seed(seed));
                 PublicKey::SECP256K1(secret_key.public_key().unwrap_as_secp256k1().clone())
+            }
+            KeyType::RSA2048 => {
+                let secret_key = SecretKey::RSA(rsa2048_secret_key_from_seed(seed));
+                PublicKey::RSA(secret_key.public_key().unwrap_as_rsa2048().clone())
             }
         }
     }
@@ -44,6 +57,7 @@ impl SecretKey {
                 SecretKey::ED25519(ED25519SecretKey(keypair.to_keypair_bytes()))
             }
             KeyType::SECP256K1 => SecretKey::SECP256K1(secp256k1_secret_key_from_seed(seed)),
+            KeyType::RSA2048 => SecretKey::RSA(rsa2048_secret_key_from_seed(seed)),
         }
     }
 }
