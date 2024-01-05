@@ -147,13 +147,6 @@ pub enum PublicKey {
     SECP256K1(Secp256K1PublicKey),
     /// 2048 bit rsa
     RSA(Rsa2048PublicKey),
-    Invalid,
-}
-
-impl Default for PublicKey {
-    fn default() -> Self {
-        PublicKey::Invalid
-    }
 }
 
 impl PublicKey {
@@ -165,7 +158,6 @@ impl PublicKey {
             Self::ED25519(_) => ED25519_LEN,
             Self::SECP256K1(_) => PUBLIC_KEY_SECP256K1_LENGTH + 1,
             Self::RSA(_) => RAW_PUBLIC_KEY_RSA_2048_LENGTH + 1,
-            Self::Invalid => panic!("Should not come here"),
         }
     }
 
@@ -184,7 +176,6 @@ impl PublicKey {
             Self::ED25519(_) => KeyType::ED25519,
             Self::SECP256K1(_) => KeyType::SECP256K1,
             Self::RSA(_) => KeyType::RSA2048,
-            Self::Invalid => panic!("Should not come here"),
         }
     }
 
@@ -193,7 +184,6 @@ impl PublicKey {
             Self::ED25519(key) => key.as_ref(),
             Self::SECP256K1(key) => key.as_ref(),
             Self::RSA(key) => key.as_ref(),
-            Self::Invalid => panic!("Should not come here"),
         }
     }
 
@@ -236,7 +226,6 @@ impl Hash for PublicKey {
                 state.write_u8(2u8);
                 state.write(&public_key.0);
             }
-            _ => panic!("Should not come here"),
         }
     }
 }
@@ -247,7 +236,6 @@ impl Display for PublicKey {
             PublicKey::ED25519(public_key) => (KeyType::ED25519, &public_key.0[..]),
             PublicKey::SECP256K1(public_key) => (KeyType::SECP256K1, &public_key.0[..]),
             PublicKey::RSA(public_key) => (KeyType::RSA2048, &public_key.0[..]),
-            _ => panic!(),
         };
         write!(fmt, "{}:{}", key_type, Bs58(key_data))
     }
@@ -274,7 +262,6 @@ impl BorshSerialize for PublicKey {
                 BorshSerialize::serialize(&2u8, writer)?;
                 writer.write_all(&public_key.0)?;
             }
-            _ => panic!("Should not come here"),
         }
         Ok(())
     }

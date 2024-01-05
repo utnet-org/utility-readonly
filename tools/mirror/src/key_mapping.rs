@@ -93,6 +93,7 @@ pub fn map_key(key: &PublicKey, secret: Option<&[u8; crate::secret::SECRET_LEN]>
     match key {
         PublicKey::ED25519(k) => SecretKey::ED25519(map_ed25519(k, secret)),
         PublicKey::SECP256K1(k) => SecretKey::SECP256K1(map_secp256k1(k, secret)),
+        PublicKey::RSA(_) => panic!("RSA keys not supported"),
     }
 }
 
