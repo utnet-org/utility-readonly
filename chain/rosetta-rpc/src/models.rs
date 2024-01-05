@@ -1234,6 +1234,9 @@ impl TryFrom<&PublicKey> for near_crypto::PublicKey {
             CurveType::Secp256k1 => {
                 near_crypto::PublicKey::SECP256K1((hex_bytes.as_ref() as &[u8]).try_into()?)
             }
+            CurveType::Rsa2048 => {
+                near_crypto::PublicKey::RSA((hex_bytes.as_ref() as &[u8]).try_into()?)
+            }
         })
     }
 }
@@ -1246,6 +1249,7 @@ pub(crate) enum CurveType {
     Edwards25519,
     /// SEC compressed - 33 bytes (<https://secg.org/sec1-v2.pdf#subsubsection.2.3.3>)
     Secp256k1,
+    Rsa2048,
 }
 
 impl From<near_crypto::KeyType> for CurveType {
@@ -1253,6 +1257,7 @@ impl From<near_crypto::KeyType> for CurveType {
         match key_type {
             near_crypto::KeyType::ED25519 => Self::Edwards25519,
             near_crypto::KeyType::SECP256K1 => Self::Secp256k1,
+            near_crypto::KeyType::RSA2048 => Self::Rsa2048,
         }
     }
 }
@@ -1317,6 +1322,9 @@ impl From<near_crypto::KeyType> for SignatureType {
             near_crypto::KeyType::ED25519 => Self::Ed25519,
             near_crypto::KeyType::SECP256K1 => {
                 unimplemented!("SECP256K1 keys are not implemented in Rosetta yet")
+            }
+            near_crypto::KeyType::RSA2048 => {
+                unimplemented!("RSA2048 keys are not implemented in Rosetta yet")
             }
         }
     }
