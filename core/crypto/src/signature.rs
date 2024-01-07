@@ -9,6 +9,8 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::io::{Error, ErrorKind, Read, Write};
 use std::str::FromStr;
+use rsa::Pkcs1v15Sign;
+use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey, DecodePublicKey, DecodePrivateKey};
 
 pub static SECP256K1: Lazy<secp256k1::Secp256k1<secp256k1::All>> =
     Lazy::new(secp256k1::Secp256k1::new);
@@ -17,6 +19,7 @@ pub static SECP256K1: Lazy<secp256k1::Secp256k1<secp256k1::All>> =
 pub enum KeyType {
     ED25519 = 0,
     SECP256K1 = 1,
+    RSA2048 = 2,
 }
 
 impl Display for KeyType {
@@ -24,6 +27,7 @@ impl Display for KeyType {
         f.write_str(match self {
             KeyType::ED25519 => "ed25519",
             KeyType::SECP256K1 => "secp256k1",
+            KeyType::RSA2048 => "rsa2048",
         })
     }
 }
@@ -36,6 +40,7 @@ impl FromStr for KeyType {
         match lowercase_key_type.as_str() {
             "ed25519" => Ok(KeyType::ED25519),
             "secp256k1" => Ok(KeyType::SECP256K1),
+            "rsa2048" => Ok(KeyType::RSA2048),
             _ => Err(Self::Err::UnknownKeyType { unknown_key_type: lowercase_key_type }),
         }
     }
@@ -46,8 +51,9 @@ impl TryFrom<u8> for KeyType {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(KeyType::ED25519),
-            1 => Ok(KeyType::SECP256K1),
+            0_u8 => Ok(KeyType::ED25519),
+            1_u8 => Ok(KeyType::SECP256K1),
+            2_u8 => Ok(KeyType::RSA2048),
             unknown_key_type => {
                 Err(Self::Error::UnknownKeyType { unknown_key_type: unknown_key_type.to_string() })
             }
@@ -64,16 +70,42 @@ fn split_key_type_data(value: &str) -> Result<(KeyType, &str), crate::errors::Pa
     }
 }
 
+// RSA
+const RAW_PUBLIC_KEY_RSA_2048_LENGTH: usize = 294;
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, derive_more::AsRef, derive_more::From)]
 #[as_ref(forward)]
-pub struct Secp256K1PublicKey([u8; 64]);
+pub struct Rsa2048PublicKey([u8; RAW_PUBLIC_KEY_RSA_2048_LENGTH]);
+
+impl TryFrom<&[u8]> for crate::Rsa2048PublicKey {
+    type Error = crate::errors::ParseKeyError;
+
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        data.try_into().map(Self).map_err(|_| Self::Error::InvalidLength {
+            expected_length: RAW_PUBLIC_KEY_RSA_2048_LENGTH,
+            received_length: data.len(),
+        })
+    }
+}
+
+impl std::fmt::Debug for crate::Rsa2048PublicKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        Display::fmt(&Bs58(&self.0), f)
+    }
+}
+
+// SECP256K1
+const PUBLIC_KEY_SECP256K1_LENGTH: usize = 64;
+
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, derive_more::AsRef, derive_more::From)]
+#[as_ref(forward)]
+pub struct Secp256K1PublicKey([u8; PUBLIC_KEY_SECP256K1_LENGTH]);
 
 impl TryFrom<&[u8]> for Secp256K1PublicKey {
     type Error = crate::errors::ParseKeyError;
 
     fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
         data.try_into().map(Self).map_err(|_| Self::Error::InvalidLength {
-            expected_length: 64,
+            expected_length: PUBLIC_KEY_SECP256K1_LENGTH,
             received_length: data.len(),
         })
     }
@@ -113,6 +145,8 @@ pub enum PublicKey {
     ED25519(ED25519PublicKey),
     /// 512 bit elliptic curve based public-key used in Bitcoin's public-key cryptography.
     SECP256K1(Secp256K1PublicKey),
+    /// 2048 bit rsa
+    RSA(Rsa2048PublicKey),
 }
 
 impl PublicKey {
@@ -122,7 +156,8 @@ impl PublicKey {
         const ED25519_LEN: usize = ed25519_dalek::PUBLIC_KEY_LENGTH + 1;
         match self {
             Self::ED25519(_) => ED25519_LEN,
-            Self::SECP256K1(_) => 65,
+            Self::SECP256K1(_) => PUBLIC_KEY_SECP256K1_LENGTH + 1,
+            Self::RSA(_) => RAW_PUBLIC_KEY_RSA_2048_LENGTH + 1,
         }
     }
 
@@ -131,7 +166,8 @@ impl PublicKey {
             KeyType::ED25519 => {
                 PublicKey::ED25519(ED25519PublicKey([0u8; ed25519_dalek::PUBLIC_KEY_LENGTH]))
             }
-            KeyType::SECP256K1 => PublicKey::SECP256K1(Secp256K1PublicKey([0u8; 64])),
+            KeyType::SECP256K1 => PublicKey::SECP256K1(Secp256K1PublicKey([0u8; PUBLIC_KEY_SECP256K1_LENGTH])),
+            KeyType::RSA2048 => PublicKey::RSA(Rsa2048PublicKey([0u8; RAW_PUBLIC_KEY_RSA_2048_LENGTH])),
         }
     }
 
@@ -139,6 +175,7 @@ impl PublicKey {
         match self {
             Self::ED25519(_) => KeyType::ED25519,
             Self::SECP256K1(_) => KeyType::SECP256K1,
+            Self::RSA(_) => KeyType::RSA2048,
         }
     }
 
@@ -146,20 +183,28 @@ impl PublicKey {
         match self {
             Self::ED25519(key) => key.as_ref(),
             Self::SECP256K1(key) => key.as_ref(),
+            Self::RSA(key) => key.as_ref(),
         }
     }
 
     pub fn unwrap_as_ed25519(&self) -> &ED25519PublicKey {
         match self {
             Self::ED25519(key) => key,
-            Self::SECP256K1(_) => panic!(),
+            _ => panic!(),
         }
     }
 
     pub fn unwrap_as_secp256k1(&self) -> &Secp256K1PublicKey {
         match self {
             Self::SECP256K1(key) => key,
-            Self::ED25519(_) => panic!(),
+            _ => panic!(),
+        }
+    }
+
+    pub fn unwrap_as_rsa2048(&self) -> &Rsa2048PublicKey {
+        match self {
+            Self::RSA(key) => key,
+            _ => panic!(),
         }
     }
 }
@@ -177,6 +222,10 @@ impl Hash for PublicKey {
                 state.write_u8(1u8);
                 state.write(&public_key.0);
             }
+            PublicKey::RSA(public_key) => {
+                state.write_u8(2u8);
+                state.write(&public_key.0);
+            }
         }
     }
 }
@@ -186,6 +235,7 @@ impl Display for PublicKey {
         let (key_type, key_data) = match self {
             PublicKey::ED25519(public_key) => (KeyType::ED25519, &public_key.0[..]),
             PublicKey::SECP256K1(public_key) => (KeyType::SECP256K1, &public_key.0[..]),
+            PublicKey::RSA(public_key) => (KeyType::RSA2048, &public_key.0[..]),
         };
         write!(fmt, "{}:{}", key_type, Bs58(key_data))
     }
@@ -208,6 +258,10 @@ impl BorshSerialize for PublicKey {
                 BorshSerialize::serialize(&1u8, writer)?;
                 writer.write_all(&public_key.0)?;
             }
+            PublicKey::RSA(public_key) => {
+                BorshSerialize::serialize(&2u8, writer)?;
+                writer.write_all(&public_key.0)?;
+            }
         }
         Ok(())
     }
@@ -222,6 +276,9 @@ impl BorshDeserialize for PublicKey {
                 Ok(PublicKey::ED25519(ED25519PublicKey(BorshDeserialize::deserialize_reader(rd)?)))
             }
             KeyType::SECP256K1 => Ok(PublicKey::SECP256K1(Secp256K1PublicKey(
+                BorshDeserialize::deserialize_reader(rd)?,
+            ))),
+            KeyType::RSA2048 => Ok(PublicKey::RSA(Rsa2048PublicKey(
                 BorshDeserialize::deserialize_reader(rd)?,
             ))),
         }
@@ -259,6 +316,7 @@ impl FromStr for PublicKey {
         Ok(match key_type {
             KeyType::ED25519 => Self::ED25519(ED25519PublicKey(decode_bs58(key_data)?)),
             KeyType::SECP256K1 => Self::SECP256K1(Secp256K1PublicKey(decode_bs58(key_data)?)),
+            KeyType::RSA2048 => Self::RSA(Rsa2048PublicKey(decode_bs58(key_data)?)),
         })
     }
 }
@@ -272,6 +330,12 @@ impl From<ED25519PublicKey> for PublicKey {
 impl From<Secp256K1PublicKey> for PublicKey {
     fn from(secp256k1: Secp256K1PublicKey) -> Self {
         Self::SECP256K1(secp256k1)
+    }
+}
+
+impl From<Rsa2048PublicKey> for PublicKey {
+    fn from(rsa2048: Rsa2048PublicKey) -> Self {
+        Self::RSA(rsa2048)
     }
 }
 
@@ -293,11 +357,15 @@ impl std::fmt::Debug for ED25519SecretKey {
     }
 }
 
+
+pub(crate) const PRIVTAE_KEY_DEFAULT_RSA_KEY_BITS: usize = 2048;
+
 /// Secret key container supporting different curves.
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum SecretKey {
     ED25519(ED25519SecretKey),
     SECP256K1(secp256k1::SecretKey),
+    RSA(rsa::RsaPrivateKey),
 }
 
 impl SecretKey {
@@ -305,6 +373,7 @@ impl SecretKey {
         match self {
             SecretKey::ED25519(_) => KeyType::ED25519,
             SecretKey::SECP256K1(_) => KeyType::SECP256K1,
+            SecretKey::RSA(_) => KeyType::RSA2048,
         }
     }
 
@@ -315,6 +384,9 @@ impl SecretKey {
                 SecretKey::ED25519(ED25519SecretKey(keypair.to_keypair_bytes()))
             }
             KeyType::SECP256K1 => SecretKey::SECP256K1(secp256k1::SecretKey::new(&mut OsRng)),
+            KeyType::RSA2048 => {
+                SecretKey::RSA(rsa::RsaPrivateKey::new(&mut OsRng, PRIVTAE_KEY_DEFAULT_RSA_KEY_BITS).unwrap())
+            }
         }
     }
 
@@ -336,6 +408,11 @@ impl SecretKey {
                 buf[64] = rec_id.to_i32() as u8;
                 Signature::SECP256K1(Secp256K1Signature(buf))
             }
+            SecretKey::RSA(secret_key) => {
+                let sign_data = secret_key.sign(Pkcs1v15Sign::new_unprefixed(), data).unwrap();
+                Signature::RSA(Rsa2048Signature(<[u8; 256]>::try_from(sign_data.as_slice()).unwrap()))
+            }
+
         }
     }
 
@@ -350,6 +427,12 @@ impl SecretKey {
                 let mut public_key = Secp256K1PublicKey([0; 64]);
                 public_key.0.copy_from_slice(&serialized[1..65]);
                 PublicKey::SECP256K1(public_key)
+            },
+            SecretKey::RSA(secret_key) => {
+                let pk = secret_key.to_public_key();
+                let mut public_key = [0; RAW_PUBLIC_KEY_RSA_2048_LENGTH];
+                public_key.copy_from_slice(&pk.to_public_key_der().unwrap().as_bytes());
+                PublicKey::RSA(Rsa2048PublicKey(public_key))
             }
         }
     }
@@ -357,18 +440,27 @@ impl SecretKey {
     pub fn unwrap_as_ed25519(&self) -> &ED25519SecretKey {
         match self {
             SecretKey::ED25519(key) => key,
-            SecretKey::SECP256K1(_) => panic!(),
+            _ => panic!(),
         }
     }
 }
 
 impl std::fmt::Display for SecretKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        let (key_type, key_data) = match self {
-            SecretKey::ED25519(secret_key) => (KeyType::ED25519, &secret_key.0[..]),
-            SecretKey::SECP256K1(secret_key) => (KeyType::SECP256K1, &secret_key[..]),
-        };
-        write!(f, "{}:{}", key_type, Bs58(key_data))
+        match self {
+            SecretKey::ED25519(secret_key) => {
+                write!(f, "{}:{}", KeyType::ED25519, Bs58(&secret_key.0[..]))
+            },
+            SecretKey::SECP256K1(secret_key) => {
+                write!(f, "{}:{}", KeyType::SECP256K1, Bs58(&secret_key[..]))
+            },
+            SecretKey::RSA(secret_key) => {
+                // 先将 DER 编码的密钥存储在一个变量中
+                let pkcs8_bytes = secret_key.to_pkcs8_der().unwrap().to_bytes();
+                // 然后获取它的切片
+                write!(f, "{}:{}", KeyType::RSA2048, Bs58(&pkcs8_bytes.as_slice()))
+            },
+        }
     }
 }
 
@@ -384,6 +476,11 @@ impl FromStr for SecretKey {
                 let sk = secp256k1::SecretKey::from_slice(&data)
                     .map_err(|err| Self::Err::InvalidData { error_message: err.to_string() })?;
                 Self::SECP256K1(sk)
+            },
+            KeyType::RSA2048 => {
+                let sk = rsa::RsaPrivateKey::from_pkcs8_der(&decode_bs58::<1218>(key_data)?)
+                    .map_err(|err| Self::Err::InvalidData { error_message: err.to_string() })?;
+                Self::RSA(sk)
             }
         })
     }
@@ -487,11 +584,36 @@ impl Debug for Secp256K1Signature {
     }
 }
 
+
+// RSA Signature
+const RSA2048_SIGNATURE_LENGTH: usize = 256;
+
+#[derive(Clone, Eq, PartialEq, Hash, derive_more::From, derive_more::Into)]
+pub struct Rsa2048Signature([u8; RSA2048_SIGNATURE_LENGTH]);
+
+impl TryFrom<&[u8]> for Rsa2048Signature {
+    type Error = crate::errors::ParseSignatureError;
+
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self(data.try_into().map_err(|_| Self::Error::InvalidLength {
+            expected_length: RSA2048_SIGNATURE_LENGTH,
+            received_length: data.len(),
+        })?))
+    }
+}
+
+impl Debug for Rsa2048Signature {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        Display::fmt(&Bs58(&self.0), f)
+    }
+}
+
 /// Signature container supporting different curves.
 #[derive(Clone, PartialEq, Eq)]
 pub enum Signature {
     ED25519(ed25519_dalek::Signature),
     SECP256K1(Secp256K1Signature),
+    RSA(Rsa2048Signature),
 }
 
 // This `Hash` implementation is safe since it retains the property
@@ -501,6 +623,7 @@ impl Hash for Signature {
         match self {
             Signature::ED25519(sig) => sig.to_bytes().hash(state),
             Signature::SECP256K1(sig) => sig.hash(state),
+            Signature::RSA(sig) => sig.hash(state),
         };
     }
 }
@@ -526,6 +649,11 @@ impl Signature {
                     },
                 )?))
             }
+            KeyType::RSA2048 => Ok(Signature::RSA(Rsa2048Signature::try_from(signature_data).map_err(
+                |_| crate::errors::ParseSignatureError::InvalidData {
+                    error_message: "invalid RSA2048 signature length".to_string(),
+                },
+            )?)),
         }
     }
 
@@ -560,6 +688,14 @@ impl Signature {
                     )
                     .is_ok()
             }
+            (Signature::RSA(signature), PublicKey::RSA(public_key)) => {
+                let pk = rsa::RsaPublicKey::from_public_key_der(&public_key.0).unwrap();
+                match pk.verify(Pkcs1v15Sign::new_unprefixed(), &data, signature.0.as_ref()) {
+                    Ok(_) => true,
+                    Err(_) => false,
+                }
+            }
+
             _ => false,
         }
     }
@@ -568,6 +704,7 @@ impl Signature {
         match self {
             Signature::ED25519(_) => KeyType::ED25519,
             Signature::SECP256K1(_) => KeyType::SECP256K1,
+            Signature::RSA(_) => KeyType::RSA2048,
         }
     }
 }
@@ -587,6 +724,10 @@ impl BorshSerialize for Signature {
             }
             Signature::SECP256K1(signature) => {
                 BorshSerialize::serialize(&1u8, writer)?;
+                writer.write_all(&signature.0)?;
+            }
+            Signature::RSA(signature) => {
+                BorshSerialize::serialize(&2u8, writer)?;
                 writer.write_all(&signature.0)?;
             }
         }
@@ -615,6 +756,10 @@ impl BorshDeserialize for Signature {
                 let array: [u8; 65] = BorshDeserialize::deserialize_reader(rd)?;
                 Ok(Signature::SECP256K1(Secp256K1Signature(array)))
             }
+            KeyType::RSA2048 => {
+                let array: [u8; 256] = BorshDeserialize::deserialize_reader(rd)?;
+                Ok(Signature::RSA(Rsa2048Signature(array)))
+            }
         }
     }
 }
@@ -628,6 +773,7 @@ impl Display for Signature {
                 (KeyType::ED25519, &buf[..])
             }
             Signature::SECP256K1(signature) => (KeyType::SECP256K1, &signature.0[..]),
+            Signature::RSA(signature) => (KeyType::RSA2048, &signature.0[..]),
         };
         write!(f, "{}:{}", key_type, Bs58(&key_data))
     }
@@ -663,6 +809,7 @@ impl FromStr for Signature {
                 Signature::ED25519(sig)
             }
             KeyType::SECP256K1 => Signature::SECP256K1(Secp256K1Signature(decode_bs58(sig_data)?)),
+            KeyType::RSA2048 => Signature::RSA(Rsa2048Signature(decode_bs58(sig_data)?)),
         })
     }
 }
@@ -687,11 +834,11 @@ struct Bs58<'a>(&'a [u8]);
 
 impl<'a> core::fmt::Display for Bs58<'a> {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        debug_assert!(self.0.len() <= 65);
+        debug_assert!(self.0.len() <= 1218);
         // The largest buffer we’re ever encoding is 65-byte long.  Base58
         // increases size of the value by less than 40%.  96-byte buffer is
         // therefore enough to fit the largest value we’re ever encoding.
-        let mut buf = [0u8; 96];
+        let mut buf = [0u8; 2048];
         let len = bs58::encode(self.0).into(&mut buf[..]).unwrap();
         let output = &buf[..len];
         // SAFETY: we know that alphabet can only include ASCII characters
@@ -758,7 +905,7 @@ mod tests {
 
     #[test]
     fn test_sign_verify() {
-        for key_type in [KeyType::ED25519, KeyType::SECP256K1] {
+        for key_type in [KeyType::ED25519, KeyType::SECP256K1, KeyType::RSA2048] {
             let secret_key = SecretKey::from_random(key_type);
             let public_key = secret_key.public_key();
             use sha2::Digest;
@@ -822,10 +969,36 @@ mod tests {
     }
 
     #[test]
+    fn test_json_serialize_rsa2048() {
+        use sha2::Digest;
+        let data = sha2::Sha256::digest(b"123").to_vec();
+
+        let sk = SecretKey::from_seed(KeyType::RSA2048, "test");
+        let pk = sk.public_key();
+        let expected = "\"rsa2048:2TuPVgMCHJy5atawrsADEzjP7MCVbyyCA89UW6Wvjp9HrBuhZpGCRvEqExjN4wDfrT97k75BySeWiWgDoRmWBCVMQzCNFWQcfVmzeeZJFnVVceSziJsciYeCEeJGzjQnWBj4PEESKNgdKGWrQyUckRvknPQE3v7GVp9tXRPL81nLAgNm29E4SQ3u6ZV3DzJTCnnsoW75H8vdMMRY3zNzpTWKjEkMYA9qow6nnpS9asJ3HqXshDh3ookoAqzYgVwYmh2CDYFyw3cdwzimFFTYv3STud6erWxiMogeqP2XNnUyFYPKRWrhrrY966QDk4mEz1JgvBN9U4Vh5tsJGZLrZQPpt1owEjrGuCB6iqZQFwKxxjmNTcCZXZZn2WbdYVnSXGFR68uAjtPmHktzwS\"";
+        assert_eq!(serde_json::to_string(&pk).unwrap(), expected);
+        assert_eq!(pk, serde_json::from_str(expected).unwrap());
+        let pk2: PublicKey = pk.to_string().parse().unwrap();
+        assert_eq!(pk, pk2);
+
+        let expected = "\"rsa2048:riiewRJm2wpE3rWTs1ikUc83so8ZXMX8vp9dUTnRgMC8GyfLr99MgiVFAbK3mdNq6mGY5dNdUfn3anQVSqFHL4sPbZD4w7QBx5Dzj4MzqJ8LjqmiKxE64G9tNDjfzkyYdinPssorC9yab7EhBMe24m3dMSnwHBJHQsXXaGibBtJUBcgPCbwYerZjfJB7TjMrj7WF1A2Q9SNdLUMYNX5CuKbWnpmrgFdkUzR1rZjrcgzSyUs4LrWwPBy2uA8PjJLwRabvoPpSr6hTMoHjeGMnQsLbVxKs7SC5aucdXru6ox9jJeD9Jackd5HKjAmobBaKiR1i9f7EsoxfsmibsqML8B5fFuHCRzMT6Ea5oEETevn4H5uBszJtrPJQpM5kwNogcNchHhK8GG2FZDGY5bsZuJEvzrWeuK7XR1ef1JmAmCtSqQNLe42CkqvBun8Cwj61Gf2rkvU2He1Wc6Lg81CwQKLUZTFRDXkdmaJEjAdweXhcksbMhajDp1D5mHtL3LY3FvxvgZpHxVq4gnKQTQenCvmgoH6JAJNQK5pmP68hMaJ4EZ45LgCzfzNs5eYYq3jqUQHGY7mvKi7E4ZFkY8fmgk5VQWcTyb3WeiqXzSYB79c2cR4XSUgmXiaFnLUYM1kqaNzeUhiprCTC43k9MhX5kMw3VRcg2RzrdnofHetPn75MPeR4g9i4kooZyRRkEvdg4YAWL6rhYQ5vV99cbQvTZSAzYTasiHfUKLkB76yoXJiok57tAjbz9XBGgWeqGRF8UFFcMDw8KJqrrEA4E1FhYEEYNR84kuU4ZwnnJakBCXf1UoYC7RKJEiWtcBqcL3Epcp3x6d4qxLij3M1pCDeFPZPYyMqYPvM8yB6GfMVwcycJSxWjK7cxmVRPF9WT3HyVNqFHA4o1aXHJ9LGMgDdVCUSk1QfEC1kLxMMFZMVY6RK6ycUPmotJxbJgBL9SAFypzNg63tipocAXucqaJ3NQrA5ujLnV4GhrmwF9Eo6T7FH9qgqsKZV1FN7m83TtXUuRqSDMdpDLLNotcC4MQ6nFH46R73ct8CE4ibn6j4dtPMMJrEuWQqAE8tqpvGJoxifvVfwmtJMvozTTu69DgXn38MHZL2f3K25M7iW4yWiZjve4b7AFXhnaaKQuCwoZ6CNf31X2STT29wFvw6HMZNZt4WdXMxUrgP5mkM8r2Fio8iEQUbSfhrAj3SuZXDV3xiRYRXb45cL7umoZ446YctmQuyHzaRfP8yLsy3Y7Bn8GGTj4bbzPNhT4r4QHitobymKScePdFTms4P8HNogebkBf4K7QrNSJxA4EVRgf9aP4KejHUfhq9v7pLGsfXv3rGaxRZnCNrgTYY215e8FoJcx8mQGvykCRejto8Gghp1gw5n5eC3ddMUiYqphteoYfuhVYfiweMDSiRrajko4JAxuXpvHRVeTwSypPYUkiazcog7z8bgPSq1FNS8Vnqhyx4oSj5rBGXTK8y7MR9zPB8yN78DacxPBBLfUcMvVan4GueCi2wxq9KL8XMj8DvDccBBotc8c1jftgaYdLqESVqpiKj3ZSu8Ui3SpdhELMFzk22kwRXN2p9nK78u94Gpp44J9upyiNpHsLbkB3kpT4vtvxa8P9H1YhMqVRB2k9EhVHUwATRVb3uoznRqXVnXmE8cq\"";
+        assert_eq!(serde_json::to_string(&sk).unwrap(), expected);
+        assert_eq!(sk, serde_json::from_str(expected).unwrap());
+
+        let signature = sk.sign(&data);
+        let expected = "\"rsa2048:9UXu2UtEzfgJWw5goaHcjAueJcRkwNS9VPHsF1Re2MR8p7WcA9Q77DTPAMWXkDnEsaebWFwrQHqqk8jAZfLsZDTBmDQ28XNsPgsx3wJkwrujYT5o99Zf6J1SbFK3umfzgo26BNWGLD44nrqhFJDwy1UdXqQPMKGKs7P56g2dqbEe3daoVze6UrhHQAdLbEXN9BQJBkNz254MLey7pzbAforMfoqy2S3RdvgFRQuXdgHbsXSHJEemmQEVpMiMvDW5Hz4vVMx3XaLkLLUQfqpT9Tom6NbGsNfPn7M1Ge1xXEFs25Zcqv3e7mq5Ps8pXovCexeznHJz5VSkDGY2h2r6tpACjDM2LW\"";
+        assert_eq!(serde_json::to_string(&signature).unwrap(), expected);
+        assert_eq!(signature, serde_json::from_str(expected).unwrap());
+        let signature_str: String = signature.to_string();
+        let signature2: Signature = signature_str.parse().unwrap();
+        assert_eq!(signature, signature2);
+    }
+
+    #[test]
     fn test_borsh_serialization() {
         use sha2::Digest;
         let data = sha2::Sha256::digest(b"123").to_vec();
-        for key_type in [KeyType::ED25519, KeyType::SECP256K1] {
+        for key_type in [KeyType::ED25519, KeyType::SECP256K1, KeyType::RSA2048] {
             let sk = SecretKey::from_seed(key_type, "test");
             let pk = sk.public_key();
             let bytes = borsh::to_vec(&pk).unwrap();
@@ -845,6 +1018,14 @@ mod tests {
         let invalid = "\"secp256k1:2xVqteU8PWhadHTv99TGh3bSf\"";
         assert!(serde_json::from_str::<PublicKey>(invalid).is_err());
         assert!(serde_json::from_str::<SecretKey>(invalid).is_err());
+        assert!(serde_json::from_str::<Signature>(invalid).is_err());
+    }
+
+    #[test]
+    fn test_invalid_rsa_data() {
+        let invalid = "\"rsa2048:riiewRJm2wpE3rWTs1ikUc83so8ZXMX8vp9dUTnRgMC8GyfLr99MgiVFAbK3mdNq6mGY5dNdUfn3anQVSqFHL4sPbZD4w7QBx5Dzj4MzqJ8LjqmiKxE64G9tNDjfzkyYdinPssorC9yab7EhBMe24m3dMSnwHBJHQsXXaGibBtJUBcgPCbwYerZjfJB7TjMrj7WF1A2Q9SNdLUMYNX5CuKbWnpmrgFdkUzR1rZjrcgzSyUs4LrWwPBy2uA8PjJLwRabvoPpSr6hTMoHjeGMnQsLbVxKs7SC5aucdXru6ox9jJeD9Jackd5HKjAmobBaKiR1i9f7EsoxfsmibsqML8B5fFuHCRzMT6Ea5oEETevn4H5uBszJtrPJQpM5kwNogcNchHhK8GG2FZDGY5bsZuJEvzrWeuK7XR1ef1JmAmCtSqQNLe42CkqvBun8Cwj61Gf2rkvU2He1Wc6Lg81CwQKLUZTFRDXkdmaJEjAdweXhcksbMhajDp1D5mHtL3LY3FvxvgZpHxVq4gnKQTQenCvmgoH6JAJNQK5pmP68hMaJ4EZ45LgCzfzNs5eYYq3jqUQHGY7mvKi7E4ZFkY8fmgk5VQWcTyb3WeiqXzSYB79c2cR4XSUgmXiaFnLUYM1kqaNzeUhiprCTC43k9MhX5kMw3VRcg2RzrdnofHetPn75MPeR4g9i4kooZyRRkEvdg4YAWL6rhYQ5vV99cbQvTZSAzYTasiHfUKLkB76yoXJiok57tAjbz9XBGgWeqGRF8UFFcMDw8KJqrrEA4E1FhYEEYNR84kuU4ZwnnJakBCXf1UoYC7RKJEiWtcBqcL3Epcp3x6d4qxLij3M1pCDeFPZPYyMqYPvM8yB6GfMVwcycJSxWjK7cxmVRPF9WT3HyVNqFHA4o1aXHJ9LGMgDdVCUSk1QfEC1kLxMMFZMVY6RK6ycUPmotJxbJgBL9SAFypzNg63tipocAXucqaJ3NQrA5ujLnV4GhrmwF9Eo6T7FH9qgqsKZV1FN7m83TtXUuRqSDMdpDLLNotcC4MQ6nFH46R73ct8CE4ibn6j4dtPMMJrEuWQqAE8tqpvGJoxifvVfwmtJMvozTTu69DgXn38MHZL2f3K25M7iW4yWiZjve4b7AFXhnaaKQuCwoZ6CNf31X2STT29wFvw6HMZNZt4WdXMxUrgP5mkM8r2Fio8iEQUbSfhrAj3SuZXDV3xiRYRXb45cL7umoZ446YctmQuyHzaRfP8yLsy3Y7Bn8GGTj4bbzPNhT4r4QHitobymKScePdFTms4P8HNogebkBf4K7QrNSJxA4EVRgf9aP4KejHUfhq9v7pLGsfXv3rGaxRZnCNrgTYY215e8FoJcx8mQGvykCRejto8Gghp1gw5n5eC3ddMUiYqphteoYfuhVYfiweMDSiRrajko4JAxuXpvHRVeTwSypPYUkiazcog7z8bgPSq1FNS8Vnqhyx4oSj5rBGXTK8y7MR9zPB8yN78DacxPBBLfUcMvVan4GueCi2wxq9KL8XMj8DvDccBBotc8c1jftgaYdLqESVqpiKj3ZSu8Ui3SpdhELMFzk22kwRXN2p9nK78u94Gpp44J9upyiNpHsLbkB3kpT4vtvxa8P9H1YhMqVRB2k9EhVHUwATRVb3uoznRqXVnXmE8cq\"";
+        assert!(serde_json::from_str::<PublicKey>(invalid).is_err());
+        assert!(serde_json::from_str::<SecretKey>(invalid).is_ok());
         assert!(serde_json::from_str::<Signature>(invalid).is_err());
     }
 }
