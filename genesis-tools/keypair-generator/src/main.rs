@@ -35,6 +35,12 @@ fn main() {
                 .help("Whether to generate a config file when generating keys. Requires account-id to be specified.")
                 .action(clap::ArgAction::SetTrue),
         )
+        .arg(
+            Arg::new("key-type")
+                .long("key-type")
+                .action(clap::ArgAction::Set)
+                .help("what keypairs key-type to generate. (default 0, a.k.a ed25519)"),
+        )
         .subcommand(
             Command::new("signer-keys").about("Generate signer keys.").arg(
                 Arg::new("num-keys")
@@ -53,6 +59,7 @@ fn main() {
     fs::create_dir_all(home_dir).expect("Failed to create directory");
     let account_id = matches.get_one::<String>("account-id");
     let generate_config = matches.get_flag("generate-config");
+    let key_type: u8 = matches.get_flag("key-type").unwrap_or(0);
 
     match matches.subcommand() {
         Some(("signer-keys", args)) => {
@@ -61,7 +68,7 @@ fn main() {
                 .map(|x| x.parse().expect("Failed to parse number keys."))
                 .unwrap_or(3usize);
             let keys: Vec<SecretKey> =
-                (0..num_keys).map(|_| SecretKey::from_random(KeyType::ED25519)).collect();
+                (0..num_keys).map(|_| SecretKey::from_random(KeyType::try_from(key_type).unwrap_or(KeyType::ED25519))).collect();
             let mut pks = vec![];
             for (i, key) in keys.into_iter().enumerate() {
                 println!("Key#{}", i);
