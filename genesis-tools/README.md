@@ -29,3 +29,8 @@ Then start a single local node:
 ```bash
 cargo run --package neard --bin neard -- run --boot-nodes=
 ```
+
+## `keypair-generator`
+```bash
+cargo run --package keypair-generator --bin keypair-generator -- --account-id=test.near --key-type=2
+```
