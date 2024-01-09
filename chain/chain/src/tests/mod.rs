@@ -1,6 +1,6 @@
 mod challenges;
 mod doomslug;
-mod gc;
+mod garbage_collection;
 mod simple_chain;
 mod sync_chain;
 
@@ -11,8 +11,8 @@ use near_primitives::account::id::AccountId;
 use near_primitives::utils::MaybeValidated;
 
 impl Chain {
-    // A wrapper function around process_block that doesn't trigger all the callbacks
-    // Only used in tests
+    /// A wrapper function around process_block that doesn't trigger all the callbacks
+    /// Only used in tests
     pub(crate) fn process_block_test(
         &mut self,
         me: &Option<AccountId>,

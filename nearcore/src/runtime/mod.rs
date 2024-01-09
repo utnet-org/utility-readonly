@@ -14,14 +14,12 @@ use near_chain_configs::{
 };
 use near_crypto::PublicKey;
 use near_epoch_manager::{EpochManagerAdapter, EpochManagerHandle};
+use near_parameters::{ActionCosts, ExtCosts, RuntimeConfigStore};
 use near_pool::types::PoolIterator;
 use near_primitives::account::{AccessKey, Account};
-use near_primitives::config::ActionCosts;
-use near_primitives::config::ExtCosts;
 use near_primitives::errors::{InvalidTxError, RuntimeError, StorageError};
 use near_primitives::hash::{hash, CryptoHash};
 use near_primitives::receipt::{DelayedReceiptIndices, Receipt};
-use near_primitives::runtime::config_store::RuntimeConfigStore;
 use near_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
 use near_primitives::sandbox::state_patch::SandboxStatePatch;
 use near_primitives::shard_layout::{
@@ -58,6 +56,7 @@ use node_runtime::{
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 use std::time::Instant;
 use tracing::{debug, error, info};
 
@@ -716,7 +715,13 @@ impl RuntimeAdapter for NightshadeRuntime {
         pool_iterator: &mut dyn PoolIterator,
         chain_validate: &mut dyn FnMut(&SignedTransaction) -> bool,
         current_protocol_version: ProtocolVersion,
+        time_limit: Option<Duration>,
     ) -> Result<Vec<SignedTransaction>, Error> {
+        let start_time = std::time::Instant::now();
+        let time_limit_reached = || match time_limit {
+            Some(limit_duration) => start_time.elapsed() >= limit_duration,
+            None => false,
+        };
         let shard_uid = self.get_shard_uid_from_epoch_id(shard_id, epoch_id)?;
         let mut state_update = self.tries.new_trie_update(shard_uid, state_root);
 
@@ -768,6 +773,7 @@ impl RuntimeAdapter for NightshadeRuntime {
         while total_gas_burnt < transactions_gas_limit
             && total_size < size_limit
             && transactions.len() < new_receipt_count_limit
+            && !time_limit_reached()
         {
             if let Some(iter) = pool_iterator.next() {
                 while let Some(tx) = iter.next() {
@@ -848,6 +854,18 @@ impl RuntimeAdapter for NightshadeRuntime {
                 storage_config.state_root,
                 storage_config.use_flat_storage,
             )?,
+            StorageDataSource::DbTrieOnly => {
+                // If there is no flat storage on disk, use trie but simulate costs with enabled
+                // flat storage by not charging gas for trie nodes.
+                let mut trie = self.get_trie_for_shard(
+                    shard_id,
+                    &block.prev_block_hash,
+                    storage_config.state_root,
+                    false,
+                )?;
+                trie.dont_charge_gas_for_trie_node_access();
+                trie
+            }
             StorageDataSource::Recorded(storage) => Trie::from_recorded_storage(
                 storage,
                 storage_config.state_root,

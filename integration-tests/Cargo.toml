@@ -25,6 +25,7 @@ once_cell.workspace = true
 parking_lot.workspace = true
 primitive-types.workspace = true
 rand.workspace = true
+rlp.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
@@ -49,6 +50,7 @@ near-jsonrpc.workspace = true
 near-jsonrpc-client.workspace = true
 near-jsonrpc-primitives.workspace = true
 near-network.workspace = true
+near-parameters.workspace = true
 near-primitives.workspace = true
 near-primitives-core.workspace = true
 near-store.workspace = true
@@ -58,6 +60,7 @@ near-test-contracts.workspace = true
 near-performance-metrics.workspace = true
 near-undo-block.workspace = true
 near-vm-runner.workspace = true
+near-wallet-contract.workspace = true
 nearcore.workspace = true
 node-runtime.workspace = true
 testlib.workspace = true
@@ -99,12 +102,14 @@ nightly = [
   "near-jsonrpc/nightly",
   "near-network/nightly",
   "near-o11y/nightly",
+  "near-parameters/nightly",
   "near-primitives-core/nightly",
   "near-primitives/nightly",
   "near-store/nightly",
   "near-telemetry/nightly",
   "near-undo-block/nightly",
   "near-vm-runner/nightly",
+  "near-wallet-contract/nightly",
   "nearcore/nightly",
   "node-runtime/nightly",
   "testlib/nightly",
@@ -124,12 +129,14 @@ nightly_protocol = [
   "near-jsonrpc/nightly_protocol",
   "near-network/nightly_protocol",
   "near-o11y/nightly_protocol",
+  "near-parameters/nightly_protocol",
   "near-primitives-core/nightly_protocol",
   "near-primitives/nightly_protocol",
   "near-store/nightly_protocol",
   "near-telemetry/nightly_protocol",
   "near-undo-block/nightly_protocol",
   "near-vm-runner/nightly_protocol",
+  "near-wallet-contract/nightly_protocol",
   "nearcore/nightly_protocol",
   "node-runtime/nightly_protocol",
   "testlib/nightly_protocol",

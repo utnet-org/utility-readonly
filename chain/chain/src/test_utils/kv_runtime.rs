@@ -34,6 +34,7 @@ use near_primitives::types::{
     AccountId, ApprovalStake, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards,
     ShardId, StateChangesForSplitStates, StateRoot, StateRootNode, ValidatorInfoIdentifier,
 };
+use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
 use near_primitives::views::{
     AccessKeyInfoView, AccessKeyList, CallResult, ContractCodeView, EpochValidatorInfo,
@@ -48,6 +49,7 @@ use num_rational::Ratio;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 /// Simple key value runtime for tests.
 ///
@@ -704,6 +706,15 @@ impl EpochManagerAdapter for MockEpochManager {
         Ok(chunk_producers[index].account_id().clone())
     }
 
+    fn get_chunk_validators(
+        &self,
+        _epoch_id: &EpochId,
+        _shard_id: ShardId,
+        _height: BlockHeight,
+    ) -> Result<HashMap<AccountId, AssignmentWeight>, EpochError> {
+        Ok(HashMap::new())
+    }
+
     fn get_validator_by_account_id(
         &self,
         epoch_id: &EpochId,
@@ -1020,6 +1031,7 @@ impl RuntimeAdapter for KeyValueRuntime {
         transactions: &mut dyn PoolIterator,
         _chain_validate: &mut dyn FnMut(&SignedTransaction) -> bool,
         _current_protocol_version: ProtocolVersion,
+        _time_limit: Option<Duration>,
     ) -> Result<Vec<SignedTransaction>, Error> {
         let mut res = vec![];
         while let Some(iter) = transactions.next() {

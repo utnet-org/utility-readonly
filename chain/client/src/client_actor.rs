@@ -6,8 +6,8 @@
 //! https://github.com/near/nearcore/issues/7899
 
 use crate::adapter::{
-    BlockApproval, BlockHeadersResponse, BlockResponse, ProcessTxRequest, ProcessTxResponse,
-    RecvChallenge, SetNetworkInfo, StateResponse,
+    BlockApproval, BlockHeadersResponse, BlockResponse, ChunkStateWitnessMessage, ProcessTxRequest,
+    ProcessTxResponse, RecvChallenge, SetNetworkInfo, StateResponse,
 };
 #[cfg(feature = "test_features")]
 use crate::client::AdvProduceBlocksMode;
@@ -22,6 +22,7 @@ use crate::{metrics, StatusResponse, SyncAdapter};
 use actix::{Actor, Addr, Arbiter, AsyncContext, Context, Handler};
 use actix_rt::ArbiterHandle;
 use chrono::{DateTime, Utc};
+use itertools::Itertools;
 use near_async::messaging::{CanSend, Sender};
 use near_chain::chain::{
     ApplyStatePartsRequest, ApplyStatePartsResponse, BlockCatchUpRequest, BlockCatchUpResponse,
@@ -36,7 +37,7 @@ use near_chain::{
     byzantine_assert, near_chain_primitives, Block, BlockHeader, BlockProcessingArtifact,
     ChainGenesis, DoneApplyChunkCallback, Provenance,
 };
-use near_chain_configs::{ClientConfig, LogSummaryStyle};
+use near_chain_configs::{ClientConfig, LogSummaryStyle, StateSplitHandle};
 use near_chain_primitives::error::EpochErrorResultToChainError;
 use near_chunks::adapter::ShardsManagerRequestFromClient;
 use near_chunks::client::ShardsManagerResponse;
@@ -821,6 +822,16 @@ impl SyncRequirement {
     fn sync_needed(&self) -> bool {
         matches!(self, Self::SyncNeeded { .. })
     }
+
+    fn to_metrics_string(&self) -> String {
+        match self {
+            Self::SyncNeeded { .. } => "SyncNeeded",
+            Self::AlreadyCaughtUp { .. } => "AlreadyCaughtUp",
+            Self::NoPeers => "NoPeers",
+            Self::AdvHeaderSyncDisabled { .. } => "AdvHeaderSyncDisabled",
+        }
+        .to_string()
+    }
 }
 
 impl fmt::Display for SyncRequirement {
@@ -1576,6 +1587,7 @@ impl ClientActor {
 
         let currently_syncing = self.client.sync_status.is_syncing();
         let sync = unwrap_and_report!(self.syncing_info());
+        self.info_helper.update_sync_requirements_metrics(sync.to_metrics_string());
 
         match sync {
             SyncRequirement::AlreadyCaughtUp { .. }
@@ -1828,6 +1840,10 @@ impl ClientActor {
         if let Ok(header) = self.client.chain.get_block_header(&sync_hash) {
             let block: MaybeValidated<Block> = (*block).clone().into();
             let block_hash = *block.hash();
+            if let Err(err) = self.client.chain.validate_block(&block) {
+                byzantine_assert!(false);
+                error!(target: "client", ?err, ?block_hash, "Received an invalid block during state sync");
+            }
             // Notice that two blocks are saved differently:
             // * save_block() for one block.
             // * save_orphan() for another block.
@@ -1838,9 +1854,7 @@ impl ClientActor {
                 }
             } else if block_hash == sync_hash {
                 // The first block of the new epoch.
-                if let Err(err) = self.client.chain.save_orphan(block, false) {
-                    error!(target: "client", ?err, ?block_hash, "Received an invalid block during state sync");
-                }
+                self.client.chain.save_orphan(block, Provenance::NONE, None, false);
             }
         }
         true
@@ -1889,7 +1903,9 @@ impl Handler<WithSpanContext<BlockCatchUpResponse>> for ClientActor {
             self.client.catchup_state_syncs.get_mut(&msg.sync_hash)
         {
             assert!(blocks_catch_up_state.scheduled_blocks.remove(&msg.block_hash));
-            blocks_catch_up_state.processed_blocks.insert(msg.block_hash, msg.results);
+            blocks_catch_up_state
+                .processed_blocks
+                .insert(msg.block_hash, msg.results.into_iter().map(|res| res.1).collect_vec());
         } else {
             panic!("block catch up processing result from unknown sync hash");
         }
@@ -1975,6 +1991,22 @@ impl Handler<WithSpanContext<SyncMessage>> for ClientActor {
     }
 }
 
+impl Handler<WithSpanContext<ChunkStateWitnessMessage>> for ClientActor {
+    type Result = ();
+
+    #[perf]
+    fn handle(
+        &mut self,
+        msg: WithSpanContext<ChunkStateWitnessMessage>,
+        _: &mut Context<Self>,
+    ) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        if let Err(err) = self.client.process_chunk_state_witness(msg.0) {
+            tracing::error!(target: "client", ?err, "Error processing chunk state witness");
+        }
+    }
+}
+
 /// Returns random seed sampled from the current thread
 pub fn random_seed_from_thread() -> RngSeed {
     let mut rng_seed: RngSeed = [0; 32];
@@ -1999,7 +2031,7 @@ pub fn start_client(
     sender: Option<broadcast::Sender<()>>,
     adv: crate::adversarial::Controls,
     config_updater: Option<ConfigUpdater>,
-) -> (Addr<ClientActor>, ArbiterHandle) {
+) -> (Addr<ClientActor>, ArbiterHandle, StateSplitHandle) {
     let client_arbiter = Arbiter::new();
     let client_arbiter_handle = client_arbiter.handle();
 
@@ -2019,6 +2051,7 @@ pub fn start_client(
         snapshot_callbacks,
     )
     .unwrap();
+    let state_split_handle = client.chain.state_split_handle.clone();
     let client_addr = ClientActor::start_in_arbiter(&client_arbiter_handle, move |ctx| {
         ClientActor::new(
             client,
@@ -2035,5 +2068,5 @@ pub fn start_client(
         )
         .unwrap()
     });
-    (client_addr, client_arbiter_handle)
+    (client_addr, client_arbiter_handle, state_split_handle)
 }

@@ -41,7 +41,13 @@ fn main() {
                     .long("num-keys")
                     .action(clap::ArgAction::Set)
                     .help("Number of signer keys to generate. (default 3)"),
-            ),
+            )
+            .arg(
+                Arg::new("key-type")
+                    .long("key-type")
+                    .action(clap::ArgAction::Set)
+                    .help("what keypairs key-type to generate. (default 0, a.k.a ed25519)"),
+            )
         )
         .subcommand(
             Command::new("node-key").about("Generate key for the node communication."),
@@ -53,15 +59,17 @@ fn main() {
     fs::create_dir_all(home_dir).expect("Failed to create directory");
     let account_id = matches.get_one::<String>("account-id");
     let generate_config = matches.get_flag("generate-config");
-
     match matches.subcommand() {
         Some(("signer-keys", args)) => {
+            let key_type: u8 = args.get_one::<String>("key-type")
+            .map(|x| x.parse().expect("Failed to parse number keys."))
+            .unwrap_or(0u8);
             let num_keys = args
                 .get_one::<String>("num-keys")
                 .map(|x| x.parse().expect("Failed to parse number keys."))
                 .unwrap_or(3usize);
             let keys: Vec<SecretKey> =
-                (0..num_keys).map(|_| SecretKey::from_random(KeyType::ED25519)).collect();
+                (0..num_keys).map(|_| SecretKey::from_random(KeyType::try_from(key_type).unwrap_or(KeyType::ED25519))).collect();
             let mut pks = vec![];
             for (i, key) in keys.into_iter().enumerate() {
                 println!("Key#{}", i);
