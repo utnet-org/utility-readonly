@@ -97,6 +97,7 @@ impl HeaderSync {
         highest_height_peers: &[HighestHeightPeerInfo],
     ) -> Result<(), near_chain::Error> {
         let _span = tracing::debug_span!(target: "sync", "run", sync = "HeaderSync").entered();
+        let head = chain.head()?;
         let header_head = chain.header_head()?;
 
         // Check if we need to start a new request for a batch of header.
@@ -132,11 +133,7 @@ impl HeaderSync {
 
         // start_height is used to report the progress of header sync, e.g. to say that it's 50% complete.
         // This number has no other functional value.
-        let start_height = match &sync_status {
-            SyncStatus::HeaderSync { start_height, .. } => *start_height,
-            SyncStatus::BlockSync { start_height, .. } => *start_height,
-            _ => chain.head()?.height,
-        };
+        let start_height = sync_status.start_height().unwrap_or(head.height);
 
         sync_status.update(SyncStatus::HeaderSync {
             start_height,
@@ -238,6 +235,7 @@ impl HeaderSync {
                                 if now > *stalling_ts + self.stall_ban_timeout
                                     && *highest_height == peer.highest_block_height
                                 {
+                                    // This message is used in sync_ban.py test. Consider checking there as well if you change it.
                                     // The peer is one of the peers with the highest height, but we consider the peer stalling.
                                     warn!(target: "sync", "Sync: ban a peer: {}, for not providing enough headers. Peer's height:  {}", peer.peer_info, peer.highest_block_height);
                                     // Ban the peer, which blocks all interactions with the peer for some time.

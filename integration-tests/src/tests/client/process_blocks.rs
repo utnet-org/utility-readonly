@@ -11,9 +11,12 @@ use near_async::messaging::IntoSender;
 use near_chain::chain::ApplyStatePartsRequest;
 use near_chain::test_utils::ValidatorSchedule;
 use near_chain::types::{LatestKnown, RuntimeAdapter};
+#[cfg(not(feature = "nightly"))]
 use near_chain::validate::validate_chunk_with_chunk_extra;
+#[cfg(not(feature = "nightly"))]
+use near_chain::ChainStore;
 use near_chain::{
-    Block, BlockProcessingArtifact, ChainGenesis, ChainStore, ChainStoreAccess, Error, Provenance,
+    Block, BlockProcessingArtifact, ChainGenesis, ChainStoreAccess, Error, Provenance,
 };
 use near_chain_configs::{Genesis, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
 use near_chunks::test_utils::MockClientAdapterForShardsManager;
@@ -34,6 +37,8 @@ use near_network::types::{FullPeerInfo, NetworkRequests, NetworkResponses};
 use near_network::types::{PeerInfo, ReasonForBan};
 use near_o11y::testonly::{init_integration_logger, init_test_logger};
 use near_o11y::WithSpanContextExt;
+use near_parameters::{ActionCosts, ExtCosts};
+use near_parameters::{RuntimeConfig, RuntimeConfigStore};
 use near_primitives::block::Approval;
 use near_primitives::block_header::BlockHeader;
 use near_primitives::epoch_manager::RngSeed;
@@ -42,8 +47,6 @@ use near_primitives::errors::{ActionError, ActionErrorKind, InvalidTxError};
 use near_primitives::hash::{hash, CryptoHash};
 use near_primitives::merkle::{verify_hash, PartialMerkleTree};
 use near_primitives::receipt::DelayedReceiptIndices;
-use near_primitives::runtime::config::RuntimeConfig;
-use near_primitives::runtime::config_store::RuntimeConfigStore;
 use near_primitives::shard_layout::{get_block_shard_uid, ShardUId};
 use near_primitives::sharding::{ShardChunkHeader, ShardChunkHeaderInner, ShardChunkHeaderV3};
 use near_primitives::state_part::PartId;
@@ -63,7 +66,6 @@ use near_primitives::version::PROTOCOL_VERSION;
 use near_primitives::views::{
     BlockHeaderView, FinalExecutionStatus, QueryRequest, QueryResponseKind,
 };
-use near_primitives_core::config::{ActionCosts, ExtCosts};
 use near_primitives_core::num_rational::{Ratio, Rational32};
 use near_primitives_core::types::ShardId;
 use near_store::cold_storage::{update_cold_db, update_cold_head};
@@ -2252,7 +2254,10 @@ fn test_block_height_processed_orphan() {
     assert!(env.clients[0].chain.mut_store().is_height_processed(block_height).unwrap());
 }
 
+// Disabled until stateless validation release, because the test relies on
+// logging which is impacted by the release process.
 #[test]
+#[cfg(not(feature = "nightly"))]
 fn test_validate_chunk_extra() {
     let mut capture = near_o11y::testonly::TracingCapture::enable();
 

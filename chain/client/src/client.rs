@@ -2,6 +2,7 @@
 //! This client works completely synchronously and must be operated by some async actor outside.
 
 use crate::adapter::ProcessTxResponse;
+use crate::chunk_validation::ChunkValidator;
 use crate::debug::BlockProductionTracker;
 use crate::debug::PRODUCTION_TIMES_CACHE_SIZE;
 use crate::sync::adapter::SyncShardInfo;
@@ -17,13 +18,14 @@ use chrono::DateTime;
 use chrono::Utc;
 use itertools::Itertools;
 use lru::LruCache;
+use near_async::messaging::IntoSender;
 use near_async::messaging::{CanSend, Sender};
 use near_chain::chain::VerifyBlockHashAndSignatureResult;
 use near_chain::chain::{
     ApplyStatePartsRequest, BlockCatchUpRequest, BlockMissingChunks, BlocksCatchUpState,
-    OrphanMissingChunks,
 };
 use near_chain::flat_storage_creator::FlatStorageCreator;
+use near_chain::orphan::OrphanMissingChunks;
 use near_chain::resharding::StateSplitRequest;
 use near_chain::state_snapshot_actor::SnapshotCallbacks;
 use near_chain::test_utils::format_hash;
@@ -141,7 +143,7 @@ pub struct Client {
     >,
     pub do_not_include_chunks_from: LruCache<(EpochId, AccountId), ()>,
     /// Network adapter.
-    network_adapter: PeerManagerAdapter,
+    pub network_adapter: PeerManagerAdapter,
     /// Signer for block producer (if present).
     pub validator_signer: Option<Arc<dyn ValidatorSigner>>,
     /// Approvals for which we do not have the block yet
@@ -184,12 +186,17 @@ pub struct Client {
     /// When the "sync block" was requested.
     /// The "sync block" is the last block of the previous epoch, i.e. `prev_hash` of the `sync_hash` block.
     pub last_time_sync_block_requested: Option<DateTime<Utc>>,
+
+    pub chunk_validator: ChunkValidator,
 }
 
 impl Client {
     pub(crate) fn update_client_config(&self, update_client_config: UpdateableClientConfig) {
         self.config.expected_shutdown.update(update_client_config.expected_shutdown);
         self.config.state_split_config.update(update_client_config.state_split_config);
+        self.config
+            .produce_chunk_add_transactions_time_limit
+            .update(update_client_config.produce_chunk_add_transactions_time_limit);
     }
 }
 
@@ -325,6 +332,12 @@ impl Client {
             validator_signer.clone(),
             doomslug_threshold_mode,
         );
+        let chunk_validator = ChunkValidator::new(
+            validator_signer.clone(),
+            epoch_manager.clone(),
+            network_adapter.clone().into_sender(),
+            runtime_adapter.clone(),
+        );
         Ok(Self {
             #[cfg(feature = "test_features")]
             adv_produce_blocks: None,
@@ -367,6 +380,7 @@ impl Client {
             tier1_accounts_cache: None,
             flat_storage_creator,
             last_time_sync_block_requested: None,
+            chunk_validator,
         })
     }
 
@@ -984,6 +998,7 @@ impl Client {
                         .is_ok()
                 },
                 protocol_version,
+                self.config.produce_chunk_add_transactions_time_limit.get(),
             )?
         } else {
             vec![]
@@ -1728,6 +1743,12 @@ impl Client {
             let last_header = Chain::get_prev_chunk_header(epoch_manager, block, shard_id).unwrap();
             match self.produce_chunk(*block.hash(), &epoch_id, last_header, next_height, shard_id) {
                 Ok(Some((encoded_chunk, merkle_paths, receipts))) => {
+                    if let Err(err) = self.send_chunk_state_witness_to_chunk_validators(
+                        &epoch_id,
+                        &encoded_chunk.cloned_header(),
+                    ) {
+                        tracing::error!(target: "client", ?err, "Failed to send chunk state witness to chunk validators");
+                    }
                     self.persist_and_distribute_encoded_chunk(
                         encoded_chunk,
                         merkle_paths,

@@ -2,7 +2,7 @@
 version = "0.0.0" # managed by cargo-workspaces, see below
 authors = ["Near Inc <hello@nearprotocol.com>"]
 edition = "2021"
-rust-version = "1.74.0"
+rust-version = "1.75.0"
 repository = "https://github.com/near/nearcore"
 license = "MIT OR Apache-2.0"
 
@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 # Most crates are not stable on purpose, as maintaining API compatibility is a
 # significant developer time expense. Please think thoroughly before adding
 # anything to the list of stable crates.
-version = "0.17.0"
+version = "0.19.0"
 exclude = ["neard"]
 
 [workspace]
@@ -40,6 +40,7 @@ members = [
     "core/crypto",
     "core/dyn-configs",
     "core/o11y",
+    "core/parameters",
     "core/primitives",
     "core/primitives-core",
     "core/store",
@@ -59,6 +60,7 @@ members = [
     "runtime/near-vm/compiler-test-derive",
     "runtime/near-vm-runner",
     "runtime/near-vm-runner/fuzz",
+    "runtime/near-wallet-contract",
     "runtime/runtime",
     "runtime/runtime-params-estimator",
     "runtime/runtime-params-estimator/estimator-warehouse",
@@ -218,6 +220,7 @@ near-mainnet-res = { path = "utils/mainnet-res" }
 near-mirror = { path = "tools/mirror" }
 near-network = { path = "chain/network" }
 near-o11y = { path = "core/o11y" }
+near-parameters = { path = "core/parameters" }
 near-performance-metrics = { path = "utils/near-performance-metrics" }
 near-performance-metrics-macros = { path = "utils/near-performance-metrics-macros" }
 near-ping = { path = "tools/ping" }
@@ -246,6 +249,7 @@ near-vm-test-generator = { path = "runtime/near-vm/test-generator" }
 near-vm-types = { path = "runtime/near-vm/types" }
 near-vm-vm = { path = "runtime/near-vm/vm" }
 near-vm-wast = { path = "runtime/near-vm/wast" }
+near-wallet-contract = { path = "runtime/near-wallet-contract" }
 nix = "0.24"
 node-runtime = { path = "runtime/runtime" }
 num-bigint = "0.3"
@@ -287,6 +291,7 @@ reqwest = { version = "0.11.14", features = ["blocking"] }
 ripemd = "0.1.1"
 rkyv = "0.7.31"
 rlimit = "0.7"
+rlp = "0.5.2"
 rocksdb = { version = "0.21.0", default-features = false, features = ["snappy", "lz4", "zstd", "zlib", "jemalloc"] }
 runtime-tester = { path = "test-utils/runtime-tester" }
 rusqlite = { version = "0.29.0", features = ["bundled", "chrono", "functions"] }

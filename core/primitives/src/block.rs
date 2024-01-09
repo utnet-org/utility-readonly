@@ -157,7 +157,7 @@ impl Block {
                     ),
                 })
                 .collect();
-                println!("block type v1");
+
             Block::BlockV1(Arc::new(BlockV1 {
                 header,
                 chunks: legacy_chunks,
@@ -166,7 +166,6 @@ impl Block {
                 vrf_proof: body.vrf_proof,
             }))
         } else if !checked_feature!("stable", BlockHeaderV4, this_epoch_protocol_version) {
-            println!("block type v2");
             Block::BlockV2(Arc::new(BlockV2 {
                 header,
                 chunks: body.chunks,
@@ -175,7 +174,6 @@ impl Block {
                 vrf_proof: body.vrf_proof,
             }))
         } else {
-            println!("block type v3");
             Block::BlockV3(Arc::new(BlockV3 { header, body }))
         }
     }
