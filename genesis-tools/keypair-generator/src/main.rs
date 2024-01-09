@@ -35,19 +35,19 @@ fn main() {
                 .help("Whether to generate a config file when generating keys. Requires account-id to be specified.")
                 .action(clap::ArgAction::SetTrue),
         )
-        .arg(
-            Arg::new("key-type")
-                .long("key-type")
-                .action(clap::ArgAction::Set)
-                .help("what keypairs key-type to generate. (default 0, a.k.a ed25519)"),
-        )
         .subcommand(
             Command::new("signer-keys").about("Generate signer keys.").arg(
                 Arg::new("num-keys")
                     .long("num-keys")
                     .action(clap::ArgAction::Set)
                     .help("Number of signer keys to generate. (default 3)"),
-            ),
+            )
+            .arg(
+                Arg::new("key-type")
+                    .long("key-type")
+                    .action(clap::ArgAction::Set)
+                    .help("what keypairs key-type to generate. (default 0, a.k.a ed25519)"),
+            )
         )
         .subcommand(
             Command::new("node-key").about("Generate key for the node communication."),
@@ -59,10 +59,11 @@ fn main() {
     fs::create_dir_all(home_dir).expect("Failed to create directory");
     let account_id = matches.get_one::<String>("account-id");
     let generate_config = matches.get_flag("generate-config");
-    let key_type: u8 = matches.get_flag("key-type").unwrap_or(0);
-
     match matches.subcommand() {
         Some(("signer-keys", args)) => {
+            let key_type: u8 = args.get_one::<String>("key-type")
+            .map(|x| x.parse().expect("Failed to parse number keys."))
+            .unwrap_or(0u8);
             let num_keys = args
                 .get_one::<String>("num-keys")
                 .map(|x| x.parse().expect("Failed to parse number keys."))
