@@ -43,7 +43,7 @@ cargo build --release
 initial node before running neard
 
 ```bash
-./target/debug/neard --home="~/Library/Near0" init --chain-id="my-private-chain-id" --account-id=superaccount
+./target/release/neard --home="~/Library/Near0" init --chain-id="my-private-chain-id" --account-id=superaccount
 ```
 
 ### Config node0 as archival node and enable snapshot
@@ -69,7 +69,7 @@ sudo mkdir -p logfiles
 run node in background
 
 ```bash
-./target/debug/neard --home="~/Library/Near0" run > logfiles/logfile1 2>&1 &
+./target/release/neard --home="~/Library/Near0" run > logfiles/logfile1 2>&1 &
 ```
 
 ## Near Cli installation
@@ -114,7 +114,7 @@ const TLA_MIN_LENGTH = 1;
 ### init node1 in nearcore project root
 
 ```bash
-./target/debug/neard --home="~/Library/Near1" init --chain-id="my-private-chain-id" --account-id=node1-validator
+./target/release/neard --home="~/Library/Near1" init --chain-id="my-private-chain-id" --account-id=node1-validator
 ```
 - the above cli will generate config files for node1, 
 
@@ -160,7 +160,7 @@ network. "addr": "0.0.0.0:24568",
 ```
 run node1 with bootnodes of node0
 ```bash
-./target/debug/neard --home="[location-of-project-root]/~/Library/Near1" run --boot-nodes="ed25519:DVtQUJKcUNZkN1qPSHWpZAvYUSjGoByqc5HeySnVASbs@192.168.10.4:24567" > logfiles/logfile2 2>&1 &
+./target/release/neard --home="[location-of-project-root]/~/Library/Near1" run --boot-nodes="ed25519:DVtQUJKcUNZkN1qPSHWpZAvYUSjGoByqc5HeySnVASbs@192.168.10.4:24567" > logfiles/logfile2 2>&1 &
 ```
 
 ### run nodex
