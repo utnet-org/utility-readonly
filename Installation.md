@@ -35,7 +35,7 @@ git checkout develop
 Use Cargo to build the project:
 
 ```bash
-cargo build --release
+cargo build -p neard --release
 ```
 
 ### Init node0
