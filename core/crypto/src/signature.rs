@@ -99,6 +99,7 @@ impl std::fmt::Debug for crate::Rsa2048PublicKey {
 const PUBLIC_KEY_SECP256K1_LENGTH: usize = 64;
 
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, derive_more::AsRef, derive_more::From)]
+#[cfg_attr(test, derive(bolero::TypeGenerator))]
 #[as_ref(forward)]
 pub struct Secp256K1PublicKey([u8; PUBLIC_KEY_SECP256K1_LENGTH]);
 
@@ -938,6 +939,9 @@ mod tests {
                     }
                     KeyType::SECP256K1 => {
                         Signature::from_parts(KeyType::SECP256K1, &sign[..65]).unwrap()
+                    }
+                    KeyType::RSA2048 => {
+                        Signature::from_parts(KeyType::RSA2048, &sign[..256]).unwrap()
                     }
                 };
                 let _ = signature.verify(&data, &public_key);
