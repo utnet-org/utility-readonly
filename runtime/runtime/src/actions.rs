@@ -685,6 +685,136 @@ pub(crate) fn action_add_key(
     Ok(())
 }
 
+pub(crate) fn action_register_rsa2048_keys(
+    apply_state: &ApplyState,
+    state_update: &mut TrieUpdate,
+    account: &mut Account,
+    result: &mut ActionResult,
+    account_id: &AccountId,
+    add_key: &AddKeyAction,
+) -> Result<(), StorageError> {
+    if get_access_key(state_update, account_id, &add_key.public_key)?.is_some() {
+        result.result = Err(ActionErrorKind::AddKeyAlreadyExists {
+            account_id: account_id.to_owned(),
+            public_key: add_key.public_key.clone().into(),
+        }
+        .into());
+        return Ok(());
+    }
+    if checked_feature!("stable", AccessKeyNonceRange, apply_state.current_protocol_version) {
+        let mut access_key = add_key.access_key.clone();
+        access_key.nonce = (apply_state.block_height - 1)
+            * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+        set_access_key(state_update, account_id.clone(), add_key.public_key.clone(), &access_key);
+    } else {
+        set_access_key(
+            state_update,
+            account_id.clone(),
+            add_key.public_key.clone(),
+            &add_key.access_key,
+        );
+    };
+    let storage_config = &apply_state.config.fees.storage_usage_config;
+    account.set_storage_usage(
+        account
+            .storage_usage()
+            .checked_add(
+                borsh::object_length(&add_key.public_key).unwrap() as u64
+                    + borsh::object_length(&add_key.access_key).unwrap() as u64
+                    + storage_config.num_extra_bytes_record,
+            )
+            .ok_or_else(|| {
+                StorageError::StorageInconsistentState(format!(
+                    "Storage usage integer overflow for account {}",
+                    account_id
+                ))
+            })?,
+    );
+    Ok(())
+}
+
+/// Can only be used for implicit accounts.
+pub(crate) fn action_create_rsa2048_challenge(
+    state_update: &mut TrieUpdate,
+    apply_state: &ApplyState,
+    fee_config: &RuntimeFeesConfig,
+    account: &mut Option<Account>,
+    actor_id: &mut AccountId,
+    account_id: &AccountId,
+    transfer: &TransferAction,
+    block_height: BlockHeight,
+    current_protocol_version: ProtocolVersion,
+) {
+    *actor_id = account_id.clone();
+
+    match account_id.get_account_type() {
+        AccountType::NearImplicitAccount => {
+            let mut access_key = AccessKey::full_access();
+            // Set default nonce for newly created access key to avoid transaction hash collision.
+            // See <https://github.com/near/nearcore/issues/3779>.
+            if checked_feature!(
+                "stable",
+                AccessKeyNonceForImplicitAccounts,
+                current_protocol_version
+            ) {
+                access_key.nonce = (block_height - 1)
+                    * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+            }
+
+            // unwrap: here it's safe because the `account_id` has already been determined to be implicit by `get_account_type`
+            let public_key = PublicKey::from_near_implicit_account(account_id).unwrap();
+
+            *account = Some(Account::new(
+                transfer.deposit,
+                0,
+                CryptoHash::default(),
+                fee_config.storage_usage_config.num_bytes_account
+                    + public_key.len() as u64
+                    + borsh::object_length(&access_key).unwrap() as u64
+                    + fee_config.storage_usage_config.num_extra_bytes_record,
+            ));
+
+            set_access_key(state_update, account_id.clone(), public_key, &access_key);
+        }
+        // Invariant: The `account_id` is implicit.
+        // It holds because in the only calling site, we've checked the permissions before.
+        AccountType::EthImplicitAccount => {
+            if checked_feature!("stable", EthImplicitAccounts, current_protocol_version) {
+                // We deploy "near[wallet contract hash]" magic bytes as the contract code,
+                // to mark that this is a neard-defined contract. It will not be used on a function call.
+                // Instead, neard-defined Wallet Contract implementation will be used.
+                let magic_bytes = wallet_contract_magic_bytes();
+
+                let storage_usage = fee_config.storage_usage_config.num_bytes_account
+                    + magic_bytes.code().len() as u64
+                    + fee_config.storage_usage_config.num_extra_bytes_record;
+
+                *account =
+                    Some(Account::new(transfer.deposit, 0, *magic_bytes.hash(), storage_usage));
+                set_code(state_update, account_id.clone(), &magic_bytes);
+
+                // Precompile Wallet Contract and store result (compiled code or error) in the database.
+                // Note this contract is shared among ETH-implicit accounts and `precompile_contract`
+                // is a no-op if the contract was already compiled.
+                precompile_contract(
+                    &wallet_contract(),
+                    &apply_state.config.wasm_config,
+                    apply_state.cache.as_deref(),
+                )
+                .ok();
+            } else {
+                // This panic is unreachable as this is an implicit account creation transfer.
+                // `check_account_existence` would fail because in this protocol version `account_is_implicit`
+                // would return false for an account that is of the ETH-implicit type.
+                panic!("must be near-implicit");
+            }
+        }
+        // This panic is unreachable as this is an implicit account creation transfer.
+        // `check_account_existence` would fail because `account_is_implicit` would return false for a Named account.
+        AccountType::NamedAccount => panic!("must be implicit"),
+    }
+}
+
 pub(crate) fn apply_delegate_action(
     state_update: &mut TrieUpdate,
     apply_state: &ApplyState,

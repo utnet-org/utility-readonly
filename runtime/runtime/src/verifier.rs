@@ -14,6 +14,7 @@ use near_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum}
 use near_primitives::transaction::DeleteAccountAction;
 use near_primitives::transaction::{
     Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction, StakeAction,
+    RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 use near_primitives::types::{AccountId, Balance};
 use near_primitives::types::{BlockHeight, StorageUsage};
@@ -402,8 +403,8 @@ pub fn validate_action(
         Action::DeleteKey(_) => Ok(()),
         Action::DeleteAccount(a) => validate_delete_action(a),
         Action::Delegate(a) => validate_delegate_action(limit_config, a, current_protocol_version),
-        Action::RegisterRsa2048Keys(_) => todo!(),
-        Action::CreateRsa2048Challenge(_) => todo!(),
+        Action::RegisterRsa2048Keys(a) => validate_register_rsa2048_keys_action(limit_config, a),
+        Action::CreateRsa2048Challenge(a) => validate_create_rsa2048_challenge_action(a),
     }
 }
 
@@ -510,6 +511,62 @@ fn validate_add_key_action(
                 limit: limit_config.max_number_bytes_method_names,
             });
         }
+    }
+
+    Ok(())
+}
+
+/// Validates `AddKeyAction`. If the access key permission is `FunctionCall`, checks that the
+/// total number of bytes of the method names doesn't exceed the limit and
+/// every method name length doesn't exceed the limit.
+fn validate_register_rsa2048_keys_action(
+    limit_config: &LimitConfig,
+    action: &AddKeyAction,
+) -> Result<(), ActionsValidationError> {
+    if let AccessKeyPermission::FunctionCall(fc) = &action.access_key.permission {
+        // Check whether `receiver_id` is a valid account_id. Historically, we
+        // allowed arbitrary strings there!
+        match limit_config.account_id_validity_rules_version {
+            near_primitives_core::config::AccountIdValidityRulesVersion::V0 => (),
+            near_primitives_core::config::AccountIdValidityRulesVersion::V1 => {
+                if let Err(_) = fc.receiver_id.parse::<AccountId>() {
+                    return Err(ActionsValidationError::InvalidAccountId {
+                        account_id: truncate_string(&fc.receiver_id, AccountId::MAX_LEN * 2),
+                    });
+                }
+            }
+        }
+
+        // Checking method name length limits
+        let mut total_number_of_bytes = 0;
+        for method_name in &fc.method_names {
+            let length = method_name.len() as u64;
+            if length > limit_config.max_length_method_name {
+                return Err(ActionsValidationError::AddKeyMethodNameLengthExceeded {
+                    length,
+                    limit: limit_config.max_length_method_name,
+                });
+            }
+            // Adding terminating character to the total number of bytes
+            total_number_of_bytes += length + 1;
+        }
+        if total_number_of_bytes > limit_config.max_number_bytes_method_names {
+            return Err(ActionsValidationError::AddKeyMethodNamesNumberOfBytesExceeded {
+                total_number_of_bytes,
+                limit: limit_config.max_number_bytes_method_names,
+            });
+        }
+    }
+
+    Ok(())
+}
+
+/// Validates `StakeAction`. Checks that the `public_key` is a valid staking key.
+fn validate_create_rsa2048_challenge_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
+    if !is_valid_staking_key(&action.public_key) {
+        return Err(ActionsValidationError::UnsuitableStakingKey {
+            public_key: Box::new(action.public_key.clone()),
+        });
     }
 
     Ok(())

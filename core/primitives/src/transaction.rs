@@ -17,6 +17,7 @@ use std::hash::{Hash, Hasher};
 pub use crate::action::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
+    RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 
 pub type LogEntry = String;

@@ -445,8 +445,34 @@ impl Runtime {
                     &mut result,
                 )?;
             }
-            Action::RegisterRsa2048Keys(_) => todo!(),
-            Action::CreateRsa2048Challenge(_) => todo!(),
+            Action::RegisterRsa2048Keys(register_rsa2048_keys) => {
+                action_register_rsa2048_keys(
+                    apply_state,
+                    state_update,
+                    account.as_mut().expect(EXPECT_ACCOUNT_EXISTS),
+                    &mut result,
+                    account_id,
+                    register_rsa2048_keys,
+                )?;
+            
+            }
+            Action::CreateRsa2048Challenge(create_rsa2048_challenge) => {
+                // Implicit account creation
+                debug_assert!(apply_state.config.wasm_config.implicit_account_creation);
+                debug_assert!(!is_refund);
+                action_create_rsa2048_challenge(
+                    state_update,
+                    apply_state,
+                    &apply_state.config.fees,
+                    account,
+                    actor_id,
+                    &receipt.receiver_id,
+                    create_rsa2048_challenge,
+                    apply_state.block_height,
+                    apply_state.current_protocol_version,
+                );
+
+            }
         };
         Ok(result)
     }
