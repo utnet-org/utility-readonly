@@ -135,6 +135,8 @@ pub fn total_send_fees(
                         &delegate_action.receiver_id,
                     )?
             }
+            RegisterRsa2048Keys(_) => fees.fee(ActionCosts::register_rsa2048_keys).send_fee(sender_is_receiver),
+            CreateRsa2048Challenge(_) => fees.fee(ActionCosts::create_rsa2048_challenge).send_fee(sender_is_receiver),
         };
         result = safe_add_gas(result, delta)?;
     }
@@ -216,6 +218,8 @@ pub fn exec_fee(config: &RuntimeConfig, action: &Action, receiver_id: &AccountId
         DeleteKey(_) => fees.fee(ActionCosts::delete_key).exec_fee(),
         DeleteAccount(_) => fees.fee(ActionCosts::delete_account).exec_fee(),
         Delegate(_) => fees.fee(ActionCosts::delegate).exec_fee(),
+        RegisterRsa2048Keys(_) => fees.fee(ActionCosts::register_rsa2048_keys).exec_fee(),
+        CreateRsa2048Challenge(_) => fees.fee(ActionCosts::create_rsa2048_challenge).exec_fee(),
     }
 }
 

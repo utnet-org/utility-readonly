@@ -445,6 +445,8 @@ impl Runtime {
                     &mut result,
                 )?;
             }
+            Action::RegisterRsa2048Keys(_) => todo!(),
+            Action::CreateRsa2048Challenge(_) => todo!(),
         };
         Ok(result)
     }

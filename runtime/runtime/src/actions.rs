@@ -928,6 +928,17 @@ pub(crate) fn check_actor_permissions(
         }
         Action::CreateAccount(_) | Action::FunctionCall(_) | Action::Transfer(_) => (),
         Action::Delegate(_) => (),
+        Action::RegisterRsa2048Keys(_) => {
+            let root_id = "root".parse::<AccountId>().unwrap();
+            if account_id.clone() != root_id {
+                return Err(ActionErrorKind::ActorNoPermission {
+                    account_id: account_id.clone(),
+                    actor_id: actor_id.clone(),
+                }
+                .into());
+            }
+        },
+        Action::CreateRsa2048Challenge(_) => (),
     };
     Ok(())
 }
@@ -995,7 +1006,9 @@ pub(crate) fn check_account_existence(
         | Action::Stake(_)
         | Action::AddKey(_)
         | Action::DeleteKey(_)
-        | Action::DeleteAccount(_) => {
+        | Action::DeleteAccount(_)
+        | Action::RegisterRsa2048Keys(_)
+        | Action::CreateRsa2048Challenge(_) => {
             if account.is_none() {
                 return Err(ActionErrorKind::AccountDoesNotExist {
                     account_id: account_id.clone(),

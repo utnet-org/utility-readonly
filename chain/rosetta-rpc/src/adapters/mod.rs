@@ -482,7 +482,9 @@ impl From<NearActions> for Vec<crate::models::Operation> {
                     .into();
 
                     operations.extend(delegated_operations);
-                } // TODO(#8469): Implement delegate action support, for now they are ignored.
+                }
+                near_primitives::transaction::Action::RegisterRsa2048Keys(_) => todo!(),
+                near_primitives::transaction::Action::CreateRsa2048Challenge(_) => todo!(), // TODO(#8469): Implement delegate action support, for now they are ignored.
             }
         }
         operations

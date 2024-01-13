@@ -134,6 +134,8 @@ pub(crate) enum ActionType {
     DeleteAccount,
     DataReceipt,
     Delegate,
+    RegisterRsa2048Keys,
+    CreateRsa2048Challenge,
 }
 
 impl ContractAccount {
@@ -338,6 +340,8 @@ fn try_find_actions_spawned_by_receipt(
                                     Action::DeleteKey(_) => ActionType::DeleteKey,
                                     Action::DeleteAccount(_) => ActionType::DeleteAccount,
                                     Action::Delegate(_) => ActionType::Delegate,
+                                    Action::RegisterRsa2048Keys(_) => ActionType::RegisterRsa2048Keys,
+                                    Action::CreateRsa2048Challenge(_) => ActionType::CreateRsa2048Challenge,
                                 };
                                 entry
                                     .actions
