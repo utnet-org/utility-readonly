@@ -1,7 +1,7 @@
 use crate::config::{total_prepaid_gas, tx_cost, TransactionCost};
 use crate::near_primitives::account::Account;
 use crate::VerificationResult;
-use near_crypto::key_conversion::is_valid_staking_key;
+use near_crypto::key_conversion::{is_valid_staking_key, is_valid_challenge_key};
 use near_parameters::RuntimeConfig;
 use near_primitives::account::AccessKeyPermission;
 use near_primitives::action::delegate::SignedDelegateAction;
@@ -516,54 +516,15 @@ fn validate_add_key_action(
     Ok(())
 }
 
-/// Validates `AddKeyAction`. If the access key permission is `FunctionCall`, checks that the
-/// total number of bytes of the method names doesn't exceed the limit and
-/// every method name length doesn't exceed the limit.
 fn validate_register_rsa2048_keys_action(
     limit_config: &LimitConfig,
-    action: &AddKeyAction,
+    action: &RegisterRsa2048KeysAction,
 ) -> Result<(), ActionsValidationError> {
-    if let AccessKeyPermission::FunctionCall(fc) = &action.access_key.permission {
-        // Check whether `receiver_id` is a valid account_id. Historically, we
-        // allowed arbitrary strings there!
-        match limit_config.account_id_validity_rules_version {
-            near_primitives_core::config::AccountIdValidityRulesVersion::V0 => (),
-            near_primitives_core::config::AccountIdValidityRulesVersion::V1 => {
-                if let Err(_) = fc.receiver_id.parse::<AccountId>() {
-                    return Err(ActionsValidationError::InvalidAccountId {
-                        account_id: truncate_string(&fc.receiver_id, AccountId::MAX_LEN * 2),
-                    });
-                }
-            }
-        }
-
-        // Checking method name length limits
-        let mut total_number_of_bytes = 0;
-        for method_name in &fc.method_names {
-            let length = method_name.len() as u64;
-            if length > limit_config.max_length_method_name {
-                return Err(ActionsValidationError::AddKeyMethodNameLengthExceeded {
-                    length,
-                    limit: limit_config.max_length_method_name,
-                });
-            }
-            // Adding terminating character to the total number of bytes
-            total_number_of_bytes += length + 1;
-        }
-        if total_number_of_bytes > limit_config.max_number_bytes_method_names {
-            return Err(ActionsValidationError::AddKeyMethodNamesNumberOfBytesExceeded {
-                total_number_of_bytes,
-                limit: limit_config.max_number_bytes_method_names,
-            });
-        }
-    }
-
     Ok(())
 }
 
-/// Validates `StakeAction`. Checks that the `public_key` is a valid staking key.
-fn validate_create_rsa2048_challenge_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
-    if !is_valid_staking_key(&action.public_key) {
+fn validate_create_rsa2048_challenge_action(action: &CreateRsa2048ChallengeAction) -> Result<(), ActionsValidationError> {
+    if !is_valid_challenge_key(&action.public_key) {
         return Err(ActionsValidationError::UnsuitableStakingKey {
             public_key: Box::new(action.public_key.clone()),
         });
