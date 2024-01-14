@@ -2324,6 +2324,15 @@ pub enum StateChangeValueView {
     ContractCodeDeletion {
         account_id: AccountId,
     },
+    RsaKeyUpdate {
+        account_id: AccountId,
+        public_key: PublicKey,
+        rsa_key: RegisterRsa2048KeysAction,
+    },
+    RsaKeyDeletion {
+        account_id: AccountId,
+        public_key: PublicKey,
+    },
 }
 
 impl From<StateChangeValue> for StateChangeValueView {
@@ -2353,8 +2362,8 @@ impl From<StateChangeValue> for StateChangeValueView {
             StateChangeValue::ContractCodeDeletion { account_id } => {
                 Self::ContractCodeDeletion { account_id }
             }
-            StateChangeValue::RsaKeyUpdate { account_id, public_key, access_key } => {
-                Self::RsaKeyUpdate { account_id, public_key, access_key: access_key.into() }
+            StateChangeValue::RsaKeyUpdate { account_id, public_key, rsa_key } => {
+                Self::RsaKeyUpdate { account_id, public_key, rsa_key: rsa_key.into() }
             }
             StateChangeValue::RsaKeyDeletion { account_id, public_key } => {
                 Self::RsaKeyDeletion { account_id, public_key }
