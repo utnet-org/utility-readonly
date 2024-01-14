@@ -2353,6 +2353,12 @@ impl From<StateChangeValue> for StateChangeValueView {
             StateChangeValue::ContractCodeDeletion { account_id } => {
                 Self::ContractCodeDeletion { account_id }
             }
+            StateChangeValue::RsaKeyUpdate { account_id, public_key, access_key } => {
+                Self::RsaKeyUpdate { account_id, public_key, access_key: access_key.into() }
+            }
+            StateChangeValue::RsaKeyDeletion { account_id, public_key } => {
+                Self::RsaKeyDeletion { account_id, public_key }
+            }
         }
     }
 }
