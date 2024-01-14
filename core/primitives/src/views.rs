@@ -2223,6 +2223,9 @@ impl From<StateChangeKind> for StateChangeKindView {
             StateChangeKind::AccessKeyTouched { account_id } => {
                 Self::AccessKeyTouched { account_id }
             }
+            StateChangeKind::RsaKeyTouched { account_id } => {
+                Self::RsaKeyTouched { account_id }
+            }
             StateChangeKind::DataTouched { account_id } => Self::DataTouched { account_id },
             StateChangeKind::ContractCodeTouched { account_id } => {
                 Self::ContractCodeTouched { account_id }
