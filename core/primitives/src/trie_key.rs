@@ -12,6 +12,8 @@ pub(crate) const ACCOUNT_DATA_SEPARATOR: u8 = b',';
 // Changing it would require a very long DB migration for basically no benefits.
 pub(crate) const ACCESS_KEY_SEPARATOR: u8 = col::ACCESS_KEY;
 
+pub(crate) const RSA2048_KEY_SEPARATOR: u8 = col::RSA2048_KEY;
+
 /// Type identifiers used for DB key generation to store values in the key-value storage.
 pub mod col {
     /// This column id is used when storing `primitives::account::Account` type about a given
@@ -43,6 +45,8 @@ pub mod col {
     pub const DELAYED_RECEIPT_OR_INDICES: u8 = 7;
     /// This column id is used when storing Key-Value data from a contract on an `account_id`.
     pub const CONTRACT_DATA: u8 = 9;
+
+    pub const RSA2048_KEY: u8 = 10;
     /// All columns
     pub const NON_DELAYED_RECEIPT_COLUMNS: [(u8, &str); 8] = [
         (ACCOUNT, "Account"),
@@ -91,6 +95,9 @@ pub enum TrieKey {
     /// Used to store a key-value record `Vec<u8>` within a contract deployed on a given `AccountId`
     /// and a given key.
     ContractData { account_id: AccountId, key: Vec<u8> },
+
+    ///ca rsakeys
+    Rsa2048Keys { account_id: AccountId, public_key: PublicKey },
 }
 
 /// Provides `len` function.
@@ -149,6 +156,9 @@ impl TrieKey {
                     + account_id.len()
                     + ACCOUNT_DATA_SEPARATOR.len()
                     + key.len()
+            }
+            TrieKey::Rsa2048Keys { account_id, public_key } => {
+                col::RSA2048_KEY.len() * 2 + account_id.len() + public_key.len()
             }
         }
     }
@@ -209,6 +219,12 @@ impl TrieKey {
                 buf.push(ACCOUNT_DATA_SEPARATOR);
                 buf.extend(key);
             }
+            TrieKey::Rsa2048Keys { account_id, public_key } => {
+                buf.push(col::RSA2048_KEY);
+                buf.extend(account_id.as_bytes());
+                buf.push(RSA2048_KEY_SEPARATOR);
+                buf.extend(borsh::to_vec(&public_key).unwrap());
+            }
         };
         debug_assert_eq!(expected_len, buf.len() - start_len);
     }
@@ -232,6 +248,7 @@ impl TrieKey {
             TrieKey::DelayedReceiptIndices => None,
             TrieKey::DelayedReceipt { .. } => None,
             TrieKey::ContractData { account_id, .. } => Some(account_id.clone()),
+            TrieKey::Rsa2048Keys { account_id, .. } => Some(account_id.clone()),
         }
     }
 }
