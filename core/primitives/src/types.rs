@@ -119,6 +119,7 @@ pub enum StateChangeKind {
     AccessKeyTouched { account_id: AccountId },
     DataTouched { account_id: AccountId },
     ContractCodeTouched { account_id: AccountId },
+    RsaKeyTouched { account_id: AccountId },
 }
 
 pub type StateChangesKinds = Vec<StateChangeKind>;
@@ -146,6 +147,9 @@ impl StateChangesKinds {
                     }
                     TrieKey::ContractData { account_id, .. } => {
                         Some(Ok(StateChangeKind::DataTouched { account_id }))
+                    }
+                    TrieKey::Rsa2048Keys { account_id, .. } => {
+                        Some(Ok(StateChangeKind::RsaKeyTouched { account_id }))
                     }
                     _ => None,
                 }
