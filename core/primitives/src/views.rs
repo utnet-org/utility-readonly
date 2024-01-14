@@ -2214,6 +2214,7 @@ pub enum StateChangeKindView {
     AccessKeyTouched { account_id: AccountId },
     DataTouched { account_id: AccountId },
     ContractCodeTouched { account_id: AccountId },
+    RsaKeyTouched { account_id: AccountId },
 }
 
 impl From<StateChangeKind> for StateChangeKindView {
