@@ -273,9 +273,10 @@ impl StateChangeValue {
             | StateChangeValue::DataUpdate { account_id, .. }
             | StateChangeValue::DataDeletion { account_id, .. }
             | StateChangeValue::ContractCodeUpdate { account_id, .. }
-            | StateChangeValue::RsaKeyUpdate { account_id, .. }
-            | StateChangeValue::RsaKeyDeletion { account_id, .. }
+            | StateChangeValue::RsaKeyUpdate { account_id: AccountId, .. }
+            | StateChangeValue::RsaKeyDeletion { account_id: AccountId, .. }
             | StateChangeValue::ContractCodeDeletion { account_id } => account_id,
+        }
     }
 }
 
