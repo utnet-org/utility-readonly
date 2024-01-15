@@ -26,10 +26,7 @@ use near_primitives::version::{
     ProtocolFeature, ProtocolVersion, DELETE_KEY_STORAGE_USAGE_PROTOCOL_VERSION,
 };
 use near_primitives_core::account::id::AccountType;
-use near_store::{
-    get_access_key, get_code, remove_access_key, remove_account, set_access_key, set_code,
-    StorageError, TrieUpdate,
-};
+use near_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
 use near_vm_runner::logic::errors::{
     CompilationError, FunctionCallError, InconsistentStateError, VMRunnerError,
 };

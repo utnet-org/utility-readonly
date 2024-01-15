@@ -457,9 +457,6 @@ impl Runtime {
             
             }
             Action::CreateRsa2048Challenge(create_rsa2048_challenge) => {
-                // Implicit account creation
-                debug_assert!(apply_state.config.wasm_config.implicit_account_creation);
-                debug_assert!(!is_refund);
                 action_create_rsa2048_challenge(
                     state_update,
                     apply_state,

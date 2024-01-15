@@ -824,8 +824,8 @@ pub fn get_rsa2048_keys_raw(
 ) -> Result<Option<RegisterRsa2048KeysAction>, StorageError> {
     get(
         trie,
-        &trie_key_parsers::parse_trie_key_access_key_from_raw_key(raw_key)
-            .expect("access key in the state should be correct"),
+        &trie_key_parsers::parse_trie_key_rsa_key_from_raw_key(raw_key)
+            .expect("rsa key in the state should be correct"),
     )
 }
 
