@@ -458,16 +458,13 @@ impl Runtime {
             }
             Action::CreateRsa2048Challenge(create_rsa2048_challenge) => {
                 action_create_rsa2048_challenge(
-                    state_update,
                     apply_state,
-                    &apply_state.config.fees,
-                    account,
-                    actor_id,
-                    &receipt.receiver_id,
+                    state_update,
+                    account.as_mut().expect(EXPECT_ACCOUNT_EXISTS),
+                    &mut result,
+                    account_id,
                     create_rsa2048_challenge,
-                    apply_state.block_height,
-                    apply_state.current_protocol_version,
-                );
+                )?;
 
             }
         };

@@ -723,16 +723,24 @@ pub(crate) fn action_register_rsa2048_keys(
 }
 
 pub(crate) fn action_create_rsa2048_challenge(
-    _state_update: &mut TrieUpdate,
     _apply_state: &ApplyState,
-    _fee_config: &RuntimeFeesConfig,
-    _account: &mut Option<Account>,
-    _actor_id: &mut AccountId,
-    _account_id: &AccountId,
-    _challenge: &CreateRsa2048ChallengeAction,
-    _block_height: BlockHeight,
-    _current_protocol_version: ProtocolVersion,
-) {
+    state_update: &mut TrieUpdate,
+    _account: &mut Account,
+    result: &mut ActionResult,
+    account_id: &AccountId,
+    challenge: &CreateRsa2048ChallengeAction,
+) -> Result<(), RuntimeError>{
+    //TODO: 从root 基金会获取的公钥， 匹配验证签名以及附加参数(如算力, 矿工信息, dev_id, 等)
+    let root_id = "root".parse::<AccountId>().unwrap();
+    if get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.is_none() {
+        result.result = Err(ActionErrorKind::RsaKeysNotFound {
+            account_id: account_id.to_owned(),
+            public_key: challenge.public_key.clone().into(),
+        }.into());
+        return Ok(());
+    }
+
+    return Ok(());
 }
 
 pub(crate) fn apply_delegate_action(
@@ -979,6 +987,7 @@ pub(crate) fn check_actor_permissions(
         Action::CreateAccount(_) | Action::FunctionCall(_) | Action::Transfer(_) => (),
         Action::Delegate(_) => (),
         Action::RegisterRsa2048Keys(_) => {
+            // FIXME: 这里是硬编码, 之后RuntimeConfig中添加配置, 只有创世共识账号基金会账号, 类似registrar账号
             let root_id = "root".parse::<AccountId>().unwrap();
             if account_id.clone() != root_id {
                 return Err(ActionErrorKind::ActorNoPermission {

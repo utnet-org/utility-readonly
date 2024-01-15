@@ -508,6 +508,9 @@ pub enum ActionErrorKind {
     DelegateActionInvalidNonce { delegate_nonce: Nonce, ak_nonce: Nonce },
     /// DelegateAction nonce is larger than the upper bound given by the block height
     DelegateActionNonceTooLarge { delegate_nonce: Nonce, upper_bound: Nonce },
+
+    /// The public key used for an  not existed  rsa key
+    RsaKeysNotFound { account_id: AccountId, public_key: Box<PublicKey> },
 }
 
 impl From<ActionErrorKind> for ActionError {
@@ -832,6 +835,11 @@ impl Display for ActionErrorKind {
             ActionErrorKind::DelegateActionAccessKeyError(access_key_error) => Display::fmt(&access_key_error, f),
             ActionErrorKind::DelegateActionInvalidNonce { delegate_nonce, ak_nonce } => write!(f, "DelegateAction nonce {} must be larger than nonce of the used access key {}", delegate_nonce, ak_nonce),
             ActionErrorKind::DelegateActionNonceTooLarge { delegate_nonce, upper_bound } => write!(f, "DelegateAction nonce {} must be smaller than the access key nonce upper bound {}", delegate_nonce, upper_bound),
+            ActionErrorKind::RsaKeysNotFound { public_key, .. } => write!(
+                f,
+                "The public key {:?} is doesn't exist rsa key",
+                public_key
+            ),
         }
     }
 }
