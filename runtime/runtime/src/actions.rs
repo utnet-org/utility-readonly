@@ -723,15 +723,15 @@ pub(crate) fn action_register_rsa2048_keys(
 }
 
 pub(crate) fn action_create_rsa2048_challenge(
-    state_update: &mut TrieUpdate,
-    apply_state: &ApplyState,
-    fee_config: &RuntimeFeesConfig,
-    account: &mut Option<Account>,
-    actor_id: &mut AccountId,
-    account_id: &AccountId,
-    challenge: &CreateRsa2048ChallengeAction,
-    block_height: BlockHeight,
-    current_protocol_version: ProtocolVersion,
+    _state_update: &mut TrieUpdate,
+    _apply_state: &ApplyState,
+    _fee_config: &RuntimeFeesConfig,
+    _account: &mut Option<Account>,
+    _actor_id: &mut AccountId,
+    _account_id: &AccountId,
+    _challenge: &CreateRsa2048ChallengeAction,
+    _block_height: BlockHeight,
+    _current_protocol_version: ProtocolVersion,
 ) {
 }
 

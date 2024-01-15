@@ -517,8 +517,8 @@ fn validate_add_key_action(
 }
 
 fn validate_register_rsa2048_keys_action(
-    limit_config: &LimitConfig,
-    action: &RegisterRsa2048KeysAction,
+    _limit_config: &LimitConfig,
+    _action: &RegisterRsa2048KeysAction,
 ) -> Result<(), ActionsValidationError> {
     Ok(())
 }
