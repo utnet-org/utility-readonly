@@ -12,7 +12,7 @@ use near_primitives::account::{AccessKey, AccessKeyPermission, Account};
 use near_primitives::action::delegate::{DelegateAction, SignedDelegateAction};
 use near_primitives::checked_feature;
 use near_primitives::config::ViewConfig;
-use near_primitives::errors::{ActionError, ActionErrorKind, InvalidAccessKeyError, InvalidTxError, RuntimeError};
+use near_primitives::errors::{ActionError, ActionErrorKind, InvalidAccessKeyError, RuntimeError};
 use near_primitives::hash::CryptoHash;
 use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
 use near_primitives::transaction::{
