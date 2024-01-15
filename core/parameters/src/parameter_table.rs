@@ -534,7 +534,7 @@ mod tests {
     static BASE_0: &str = r#"
 # Comment line
 registrar_account_id: registrar
-min_allowed_top_level_account_length: 32
+min_allowed_top_level_account_length: 0
 storage_amount_per_byte: 100_000_000_000_000_000_000
 storage_num_bytes_account: 100
 storage_num_extra_bytes_record: 40
@@ -548,7 +548,7 @@ wasm_storage_read_base: { gas: 50_000_000_000, compute: 100_000_000_000 }
     static BASE_1: &str = r#"
 registrar_account_id: registrar
 # Comment line
-min_allowed_top_level_account_length: 32
+min_allowed_top_level_account_length: 0
 
 # Comment line with trailing whitespace # 
 

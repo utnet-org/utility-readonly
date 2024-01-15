@@ -157,6 +157,9 @@ pub enum Parameter {
     FunctionCallWeight,
     VmKind,
     EthImplicitAccounts,
+
+    ActionRegisterRSA2048Keys,
+    ActionCreateRSA2048Challenge,
 }
 
 #[derive(
