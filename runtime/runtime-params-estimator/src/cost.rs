@@ -205,6 +205,10 @@ pub enum Cost {
     ActionDelegateSendNotSir,
     ActionDelegateSendSir,
     ActionDelegateExec,
+
+    /// rsa2048 keys are used for signing transactions. The cost of creating
+    RegisterRsa2048Keys,
+    CreateRsa2048Challenge,
     /// Estimates `wasm_config.ext_costs.base` which is intended to be charged
     /// once on every host function call. However, this is currently
     /// inconsistent. First, we do not charge on Math API methods (`sha256`,

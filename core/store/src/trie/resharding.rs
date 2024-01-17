@@ -48,8 +48,7 @@ impl ShardTries {
                         let receipt = Receipt::try_from_slice(&value).map_err(|err| {
                             StorageError::StorageInconsistentState(format!(
                                 "invalid delayed receipt {:?}, err: {}",
-                                value,
-                                err.to_string(),
+                                value, err,
                             ))
                         })?;
                         insert_receipts.push((*index, receipt));
@@ -63,6 +62,7 @@ impl ShardTries {
                 | TrieKey::PostponedReceiptId { receiver_id: account_id, .. }
                 | TrieKey::PendingDataCount { receiver_id: account_id, .. }
                 | TrieKey::PostponedReceipt { receiver_id: account_id, .. }
+                | TrieKey::Rsa2048Keys { account_id, .. }
                 | TrieKey::ContractData { account_id, .. } => {
                     let new_shard_uid = account_id_to_shard_uid(account_id);
                     // we can safely unwrap here because the caller of this function guarantees trie_updates

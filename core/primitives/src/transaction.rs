@@ -17,6 +17,7 @@ use std::hash::{Hash, Hasher};
 pub use crate::action::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
+    RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 
 pub type LogEntry = String;
@@ -239,7 +240,7 @@ pub enum ExecutionMetadata {
     /// V2: With ProfileData by legacy `Cost` enum
     V2(ProfileDataV2),
     /// V3: With ProfileData by gas parameters
-    V3(ProfileDataV3),
+    V3(Box<ProfileDataV3>),
 }
 
 impl fmt::Debug for ExecutionOutcome {

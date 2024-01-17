@@ -17,7 +17,7 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
 use near_primitives::transaction::{
     Action, AddKeyAction, DeleteAccountAction, DeleteKeyAction, DeployContractAction,
-    FunctionCallAction, StakeAction, TransferAction,
+    FunctionCallAction, StakeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 use near_primitives::types::validator_stake::ValidatorStake;
 use near_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
@@ -26,10 +26,7 @@ use near_primitives::version::{
     ProtocolFeature, ProtocolVersion, DELETE_KEY_STORAGE_USAGE_PROTOCOL_VERSION,
 };
 use near_primitives_core::account::id::AccountType;
-use near_store::{
-    get_access_key, get_code, remove_access_key, remove_account, set_access_key, set_code,
-    StorageError, TrieUpdate,
-};
+use near_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
 use near_vm_runner::logic::errors::{
     CompilationError, FunctionCallError, InconsistentStateError, VMRunnerError,
 };
@@ -629,7 +626,7 @@ pub(crate) fn action_delete_key(
         account.set_storage_usage(account.storage_usage().saturating_sub(storage_usage));
     } else {
         result.result = Err(ActionErrorKind::DeleteKeyDoesNotExist {
-            public_key: delete_key.public_key.clone(),
+            public_key: delete_key.public_key.clone().into(),
             account_id: account_id.clone(),
         }
         .into());
@@ -648,7 +645,7 @@ pub(crate) fn action_add_key(
     if get_access_key(state_update, account_id, &add_key.public_key)?.is_some() {
         result.result = Err(ActionErrorKind::AddKeyAlreadyExists {
             account_id: account_id.to_owned(),
-            public_key: add_key.public_key.clone(),
+            public_key: add_key.public_key.clone().into(),
         }
         .into());
         return Ok(());
@@ -683,6 +680,80 @@ pub(crate) fn action_add_key(
             })?,
     );
     Ok(())
+}
+
+pub(crate) fn action_register_rsa2048_keys(
+    apply_state: &ApplyState,
+    state_update: &mut TrieUpdate,
+    account: &mut Account,
+    result: &mut ActionResult,
+    account_id: &AccountId,
+    register_key: &RegisterRsa2048KeysAction,
+) -> Result<(), StorageError> {
+    if get_rsa2048_keys(state_update, account_id, &register_key.public_key)?.is_some() {
+        result.result = Err(ActionErrorKind::AddKeyAlreadyExists {
+            account_id: account_id.to_owned(),
+            public_key: register_key.public_key.clone().into(),
+        }
+        .into());
+        return Ok(());
+    }
+    set_rsa2048_keys(
+        state_update,
+        account_id.clone(),
+        register_key.public_key.clone(),
+        &register_key,
+    );
+    let storage_config = &apply_state.config.fees.storage_usage_config;
+    account.set_storage_usage(
+        account
+            .storage_usage()
+            .checked_add(
+                borsh::object_length(&register_key).unwrap() as u64
+                    + storage_config.num_extra_bytes_record,
+            )
+            .ok_or_else(|| {
+                StorageError::StorageInconsistentState(format!(
+                    "Storage usage integer overflow for account {}",
+                    account_id
+                ))
+            })?,
+    );
+    Ok(())
+}
+
+pub(crate) fn action_create_rsa2048_challenge(
+    _apply_state: &ApplyState,
+    state_update: &mut TrieUpdate,
+    _account: &mut Account,
+    result: &mut ActionResult,
+    account_id: &AccountId,
+    challenge: &CreateRsa2048ChallengeAction,
+) -> Result<(), RuntimeError>{
+    //TODO: 从root 基金会获取的公钥， 匹配验证签名以及附加参数(如算力, 矿工信息, dev_id, 等)
+    let root_id = "root".parse::<AccountId>().unwrap();
+    if get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.is_none() {
+        result.result = Err(ActionErrorKind::RsaKeysNotFound {
+            account_id: account_id.to_owned(),
+            public_key: challenge.public_key.clone().into(),
+        }.into());
+        return Ok(());
+    }
+
+    //FIXME： 计算发起challenge 的nonce 随机数
+    // 直接使用 root证书里面的args, 如算力
+    let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
+    match serde_json::from_slice::<serde_json::Value>(&args) {
+        Ok(parsed_args) => {
+            serde_json::to_string_pretty(&parsed_args)
+                .unwrap_or_else(|_| "".to_string())
+                .replace('\n', "\n                                 ")
+        }
+        Err(_) => {
+            return Ok(());
+        }
+    };
+    return Ok(());
 }
 
 pub(crate) fn apply_delegate_action(
@@ -801,7 +872,7 @@ fn validate_delegate_action_key(
             result.result = Err(ActionErrorKind::DelegateActionAccessKeyError(
                 InvalidAccessKeyError::AccessKeyNotFound {
                     account_id: delegate_action.sender_id.clone(),
-                    public_key: delegate_action.public_key.clone(),
+                    public_key: delegate_action.public_key.clone().into(),
                 },
             )
             .into());
@@ -928,6 +999,18 @@ pub(crate) fn check_actor_permissions(
         }
         Action::CreateAccount(_) | Action::FunctionCall(_) | Action::Transfer(_) => (),
         Action::Delegate(_) => (),
+        Action::RegisterRsa2048Keys(_) => {
+            // FIXME: 这里是硬编码, 之后RuntimeConfig中添加配置, 只有创世共识账号基金会账号, 类似registrar账号
+            let root_id = "root".parse::<AccountId>().unwrap();
+            if account_id.clone() != root_id {
+                return Err(ActionErrorKind::ActorNoPermission {
+                    account_id: account_id.clone(),
+                    actor_id: actor_id.clone(),
+                }
+                .into());
+            }
+        },
+        Action::CreateRsa2048Challenge(_) => (),
     };
     Ok(())
 }
@@ -995,7 +1078,9 @@ pub(crate) fn check_account_existence(
         | Action::Stake(_)
         | Action::AddKey(_)
         | Action::DeleteKey(_)
-        | Action::DeleteAccount(_) => {
+        | Action::DeleteAccount(_)
+        | Action::RegisterRsa2048Keys(_)
+        | Action::CreateRsa2048Challenge(_) => {
             if account.is_none() {
                 return Err(ActionErrorKind::AccountDoesNotExist {
                     account_id: account_id.clone(),
@@ -1514,7 +1599,7 @@ mod tests {
             Err(ActionErrorKind::DelegateActionAccessKeyError(
                 InvalidAccessKeyError::AccessKeyNotFound {
                     account_id: sender_id,
-                    public_key: sender_pub_key,
+                    public_key: sender_pub_key.into(),
                 },
             )
             .into())

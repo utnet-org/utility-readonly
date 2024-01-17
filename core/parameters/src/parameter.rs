@@ -157,6 +157,9 @@ pub enum Parameter {
     FunctionCallWeight,
     VmKind,
     EthImplicitAccounts,
+
+    ActionRegisterRSA2048Keys,
+    ActionCreateRSA2048Challenge,
 }
 
 #[derive(
@@ -189,6 +192,8 @@ pub enum FeeParameter {
     ActionAddFunctionCallKeyPerByte,
     ActionDeleteKey,
     ActionDelegate,
+    ActionRegisterRSA2048Keys,
+    ActionCreateRSA2048Challenge,
 }
 
 impl Parameter {
@@ -248,6 +253,8 @@ impl From<ActionCosts> for FeeParameter {
             ActionCosts::new_action_receipt => Self::ActionReceiptCreation,
             ActionCosts::new_data_receipt_base => Self::DataReceiptCreationBase,
             ActionCosts::new_data_receipt_byte => Self::DataReceiptCreationPerByte,
+            ActionCosts::register_rsa2048_keys => Self::ActionRegisterRSA2048Keys,
+            ActionCosts::create_rsa2048_challenge => Self::ActionCreateRSA2048Challenge,
         }
     }
 }

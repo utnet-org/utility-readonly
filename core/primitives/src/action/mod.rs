@@ -152,6 +152,61 @@ pub struct TransferAction {
     pub deposit: Balance,
 }
 
+#[serde_as]
+#[derive(
+    BorshSerialize,
+    BorshDeserialize, 
+    serde::Serialize, 
+    serde::Deserialize, 
+    PartialEq, Eq, Clone,
+)]
+pub struct RegisterRsa2048KeysAction {
+    /// this only can be used by the owner of root account
+    /// Public key used to sign this rsa keys action.
+    pub public_key: PublicKey,
+    /// addkeys or deletekeys
+    pub operation_type: u8,
+    /// attach args such as Miner id, sequence number，power，etc.
+    #[serde_as(as = "Base64")]
+    pub args: Vec<u8>,
+}
+
+impl fmt::Debug for RegisterRsa2048KeysAction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RegisterRsa2048KeysAction")
+            .field("public_key", &format_args!("{}", &self.public_key))
+            .field("operation_type", &format_args!("{}", &self.operation_type))
+            .field("args", &format_args!("{}", base64(&self.args)))
+            .finish()
+    }
+}
+
+#[serde_as]
+#[derive(
+    BorshSerialize,
+    BorshDeserialize, 
+    serde::Serialize, 
+    serde::Deserialize, 
+    PartialEq, Eq, Clone,
+)]
+pub struct CreateRsa2048ChallengeAction {
+    /// real miner request to create rsa2048 challenge
+    /// Public key used to sign this rsa keys action.
+    pub public_key: PublicKey,
+    /// attach args such as Miner id, sequence number，power，etc.
+    #[serde_as(as = "Base64")]
+    pub args: Vec<u8>,
+}
+
+impl fmt::Debug for CreateRsa2048ChallengeAction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CreateRsa2048ChallengeAction")
+            .field("public_key", &format_args!("{}", &self.public_key))
+            .field("args", &format_args!("{}", base64(&self.args)))
+            .finish()
+    }
+}
+
 #[derive(
     BorshSerialize,
     BorshDeserialize,
@@ -177,6 +232,8 @@ pub enum Action {
     DeleteKey(Box<DeleteKeyAction>),
     DeleteAccount(DeleteAccountAction),
     Delegate(Box<delegate::SignedDelegateAction>),
+    RegisterRsa2048Keys(Box<RegisterRsa2048KeysAction>),
+    CreateRsa2048Challenge(Box<CreateRsa2048ChallengeAction>),
 }
 // Note: If this number ever goes down, please adjust the equality accordingly. Otherwise,
 // we would get used to better performance and would be subject to a performance loss should
@@ -250,5 +307,17 @@ impl From<DeleteKeyAction> for Action {
 impl From<DeleteAccountAction> for Action {
     fn from(delete_account_action: DeleteAccountAction) -> Self {
         Self::DeleteAccount(delete_account_action)
+    }
+}
+
+impl From<RegisterRsa2048KeysAction> for Action {
+    fn from(rsa2048_keys_action: RegisterRsa2048KeysAction) -> Self {
+        Self::RegisterRsa2048Keys(Box::new(rsa2048_keys_action))
+    }
+}
+
+impl From<CreateRsa2048ChallengeAction> for Action {
+    fn from(create_rsa2048_challenge_action: CreateRsa2048ChallengeAction) -> Self {
+        Self::CreateRsa2048Challenge(Box::new(create_rsa2048_challenge_action))
     }
 }

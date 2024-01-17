@@ -255,6 +255,8 @@ pub enum ActionCosts {
     new_data_receipt_base = 13,
     new_data_receipt_byte = 14,
     delegate = 15,
+    register_rsa2048_keys = 16,
+    create_rsa2048_challenge = 17,
 }
 
 impl ExtCosts {
@@ -451,6 +453,16 @@ impl RuntimeFeesConfig {
                     send_sir: 200_000_000_000,
                     send_not_sir: 200_000_000_000,
                     execution: 200_000_000_000,
+                },
+                ActionCosts::register_rsa2048_keys => Fee {
+                    send_sir: 101765125000,
+                    send_not_sir: 101765125000,
+                    execution: 101765125000,
+                },
+                ActionCosts::create_rsa2048_challenge => Fee {
+                    send_sir: 115123062500,
+                    send_not_sir: 115123062500,
+                    execution: 115123062500,
                 },
             },
         }

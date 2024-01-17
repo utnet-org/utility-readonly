@@ -8,6 +8,7 @@ use std::{fmt, io};
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use metadata::{DbKind, DbVersion, KIND_KEY, VERSION_KEY};
+use near_primitives::transaction::RegisterRsa2048KeysAction;
 use once_cell::sync::Lazy;
 use strum;
 
@@ -786,6 +787,45 @@ pub fn get_access_key_raw(
         trie,
         &trie_key_parsers::parse_trie_key_access_key_from_raw_key(raw_key)
             .expect("access key in the state should be correct"),
+    )
+}
+
+pub fn set_rsa2048_keys(
+    state_update: &mut TrieUpdate,
+    account_id: AccountId,
+    public_key: PublicKey,
+    rsa_key: &RegisterRsa2048KeysAction,
+) {
+    set(state_update, TrieKey::Rsa2048Keys { account_id, public_key }, rsa_key);
+}
+
+pub fn remove_rsa2048_keys(
+    state_update: &mut TrieUpdate,
+    account_id: AccountId,
+    public_key: PublicKey,
+) {
+    state_update.remove(TrieKey::Rsa2048Keys { account_id, public_key });
+}
+
+pub fn get_rsa2048_keys(
+    trie: &dyn TrieAccess,
+    account_id: &AccountId,
+    public_key: &PublicKey,
+) -> Result<Option<RegisterRsa2048KeysAction>, StorageError> {
+    get(
+        trie,
+        &TrieKey::Rsa2048Keys { account_id: account_id.clone(), public_key: public_key.clone() },
+    )
+}
+
+pub fn get_rsa2048_keys_raw(
+    trie: &dyn TrieAccess,
+    raw_key: &[u8],
+) -> Result<Option<RegisterRsa2048KeysAction>, StorageError> {
+    get(
+        trie,
+        &trie_key_parsers::parse_trie_key_rsa_key_from_raw_key(raw_key)
+            .expect("rsa key in the state should be correct"),
     )
 }
 

@@ -11,6 +11,13 @@ pub fn is_valid_staking_key(public_key: &PublicKey) -> bool {
     }
 }
 
+pub fn is_valid_challenge_key(public_key: &PublicKey) -> bool {
+    match public_key {
+        PublicKey::RSA(_) => true,
+        _ => false,
+    }
+}
+
 pub fn convert_public_key(key: &signature::ED25519PublicKey) -> Option<vrf::PublicKey> {
     let ep: EdwardsPoint = CompressedEdwardsY::from_slice(&key.0).ok()?.decompress()?;
     // All properly generated public keys are torsion-free. RistrettoPoint type can handle some values that are not torsion-free, but not all.

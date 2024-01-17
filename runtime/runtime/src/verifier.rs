@@ -1,7 +1,7 @@
 use crate::config::{total_prepaid_gas, tx_cost, TransactionCost};
 use crate::near_primitives::account::Account;
 use crate::VerificationResult;
-use near_crypto::key_conversion::is_valid_staking_key;
+use near_crypto::key_conversion::{is_valid_staking_key, is_valid_challenge_key};
 use near_parameters::RuntimeConfig;
 use near_primitives::account::AccessKeyPermission;
 use near_primitives::action::delegate::SignedDelegateAction;
@@ -14,6 +14,7 @@ use near_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum}
 use near_primitives::transaction::DeleteAccountAction;
 use near_primitives::transaction::{
     Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction, StakeAction,
+    RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 use near_primitives::types::{AccountId, Balance};
 use near_primitives::types::{BlockHeight, StorageUsage};
@@ -157,7 +158,7 @@ pub fn verify_and_charge_transaction(
             return Err(InvalidTxError::InvalidAccessKeyError(
                 InvalidAccessKeyError::AccessKeyNotFound {
                     account_id: signer_id.clone(),
-                    public_key: transaction.public_key.clone(),
+                    public_key: transaction.public_key.clone().into(),
                 },
             )
             .into());
@@ -202,7 +203,7 @@ pub fn verify_and_charge_transaction(
             *allowance = allowance.checked_sub(total_cost).ok_or_else(|| {
                 InvalidTxError::InvalidAccessKeyError(InvalidAccessKeyError::NotEnoughAllowance {
                     account_id: signer_id.clone(),
-                    public_key: transaction.public_key.clone(),
+                    public_key: transaction.public_key.clone().into(),
                     allowance: *allowance,
                     cost: total_cost,
                 })
@@ -402,6 +403,8 @@ pub fn validate_action(
         Action::DeleteKey(_) => Ok(()),
         Action::DeleteAccount(a) => validate_delete_action(a),
         Action::Delegate(a) => validate_delegate_action(limit_config, a, current_protocol_version),
+        Action::RegisterRsa2048Keys(a) => validate_register_rsa2048_keys_action(limit_config, a),
+        Action::CreateRsa2048Challenge(a) => validate_create_rsa2048_challenge_action(a),
     }
 }
 
@@ -461,7 +464,7 @@ fn validate_function_call_action(
 fn validate_stake_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
     if !is_valid_staking_key(&action.public_key) {
         return Err(ActionsValidationError::UnsuitableStakingKey {
-            public_key: action.public_key.clone(),
+            public_key: Box::new(action.public_key.clone()),
         });
     }
 
@@ -508,6 +511,23 @@ fn validate_add_key_action(
                 limit: limit_config.max_number_bytes_method_names,
             });
         }
+    }
+
+    Ok(())
+}
+
+fn validate_register_rsa2048_keys_action(
+    _limit_config: &LimitConfig,
+    _action: &RegisterRsa2048KeysAction,
+) -> Result<(), ActionsValidationError> {
+    Ok(())
+}
+
+fn validate_create_rsa2048_challenge_action(action: &CreateRsa2048ChallengeAction) -> Result<(), ActionsValidationError> {
+    if !is_valid_challenge_key(&action.public_key) {
+        return Err(ActionsValidationError::UnsuitableStakingKey {
+            public_key: Box::new(action.public_key.clone()),
+        });
     }
 
     Ok(())
@@ -900,7 +920,7 @@ mod tests {
             RuntimeError::InvalidTxError(InvalidTxError::InvalidAccessKeyError(
                 InvalidAccessKeyError::AccessKeyNotFound {
                     account_id: alice_account(),
-                    public_key: bad_signer.public_key(),
+                    public_key: bad_signer.public_key().into(),
                 },
             )),
         );
@@ -1103,7 +1123,7 @@ mod tests {
         )) = err
         {
             assert_eq!(account_id, alice_account());
-            assert_eq!(public_key, signer.public_key());
+            assert_eq!(*public_key, signer.public_key());
             assert_eq!(allowance, 100);
             assert!(cost > allowance);
         } else {
@@ -1767,7 +1787,7 @@ mod tests {
             )
             .expect_err("Expected an error"),
             ActionsValidationError::UnsuitableStakingKey {
-                public_key: PublicKey::empty(KeyType::ED25519),
+                public_key: PublicKey::empty(KeyType::ED25519).into(),
             },
         );
     }

@@ -128,7 +128,7 @@ pub struct ActionResult {
     pub logs: Vec<LogEntry>,
     pub new_receipts: Vec<Receipt>,
     pub validator_proposals: Vec<ValidatorStake>,
-    pub profile: ProfileDataV3,
+    pub profile: Box<ProfileDataV3>,
 }
 
 impl ActionResult {
@@ -444,6 +444,28 @@ impl Runtime {
                     signed_delegate_action,
                     &mut result,
                 )?;
+            }
+            Action::RegisterRsa2048Keys(register_rsa2048_keys) => {
+                action_register_rsa2048_keys(
+                    apply_state,
+                    state_update,
+                    account.as_mut().expect(EXPECT_ACCOUNT_EXISTS),
+                    &mut result,
+                    account_id,
+                    register_rsa2048_keys,
+                )?;
+            
+            }
+            Action::CreateRsa2048Challenge(create_rsa2048_challenge) => {
+                action_create_rsa2048_challenge(
+                    apply_state,
+                    state_update,
+                    account.as_mut().expect(EXPECT_ACCOUNT_EXISTS),
+                    &mut result,
+                    account_id,
+                    create_rsa2048_challenge,
+                )?;
+
             }
         };
         Ok(result)

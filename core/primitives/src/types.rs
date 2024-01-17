@@ -1,4 +1,5 @@
 use crate::account::{AccessKey, Account};
+use crate::action::RegisterRsa2048KeysAction;
 use crate::challenge::ChallengesResult;
 use crate::errors::EpochError;
 use crate::hash::CryptoHash;
@@ -118,6 +119,7 @@ pub enum StateChangeKind {
     AccessKeyTouched { account_id: AccountId },
     DataTouched { account_id: AccountId },
     ContractCodeTouched { account_id: AccountId },
+    RsaKeyTouched { account_id: AccountId },
 }
 
 pub type StateChangesKinds = Vec<StateChangeKind>;
@@ -145,6 +147,9 @@ impl StateChangesKinds {
                     }
                     TrieKey::ContractData { account_id, .. } => {
                         Some(Ok(StateChangeKind::DataTouched { account_id }))
+                    }
+                    TrieKey::Rsa2048Keys { account_id, .. } => {
+                        Some(Ok(StateChangeKind::RsaKeyTouched { account_id }))
                     }
                     _ => None,
                 }
@@ -258,6 +263,8 @@ pub enum StateChangeValue {
     DataDeletion { account_id: AccountId, key: StoreKey },
     ContractCodeUpdate { account_id: AccountId, code: Vec<u8> },
     ContractCodeDeletion { account_id: AccountId },
+    RsaKeyUpdate { account_id: AccountId, public_key: PublicKey, rsa_key: RegisterRsa2048KeysAction },
+    RsaKeyDeletion { account_id: AccountId, public_key: PublicKey },
 }
 
 impl StateChangeValue {
@@ -270,6 +277,8 @@ impl StateChangeValue {
             | StateChangeValue::DataUpdate { account_id, .. }
             | StateChangeValue::DataDeletion { account_id, .. }
             | StateChangeValue::ContractCodeUpdate { account_id, .. }
+            | StateChangeValue::RsaKeyUpdate { account_id, .. }
+            | StateChangeValue::RsaKeyDeletion { account_id, .. }
             | StateChangeValue::ContractCodeDeletion { account_id } => account_id,
         }
     }
@@ -371,6 +380,26 @@ impl StateChanges {
                 TrieKey::PostponedReceipt { .. } => {}
                 TrieKey::DelayedReceiptIndices => {}
                 TrieKey::DelayedReceipt { .. } => {}
+                TrieKey::Rsa2048Keys { account_id, public_key } => {
+                    state_changes.extend(changes.into_iter().map(
+                        |RawStateChange { cause, data }| StateChangeWithCause {
+                            cause,
+                            value: if let Some(change_data) = data {
+                                StateChangeValue::AccessKeyUpdate {
+                                    account_id: account_id.clone(),
+                                    public_key: public_key.clone(),
+                                    access_key: <_>::try_from_slice(&change_data)
+                                        .expect("Failed to parse internally stored access key"),
+                                }
+                            } else {
+                                StateChangeValue::AccessKeyDeletion {
+                                    account_id: account_id.clone(),
+                                    public_key: public_key.clone(),
+                                }
+                            },
+                        },
+                    ))
+                }
             }
         }
 

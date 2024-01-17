@@ -35,6 +35,8 @@ use crate::types::{
     StateChangeWithCause, StateChangesRequest, StateRoot, StorageUsage, StoreKey, StoreValue,
     ValidatorKickoutReason,
 };
+
+use crate::action::{RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction};
 use crate::version::{ProtocolVersion, Version};
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::DateTime;
@@ -1204,6 +1206,17 @@ pub enum ActionView {
         delegate_action: DelegateAction,
         signature: Signature,
     },
+    RegisterRsa2048Keys {
+        public_key: PublicKey,
+        operation_type: u8,
+        #[serde_as(as = "Base64")]
+        args: Vec<u8>,
+    },
+    CreateRsa2048Challenge {
+        public_key: PublicKey,
+        #[serde_as(as = "Base64")]
+        args: Vec<u8>,
+    },
 }
 
 impl From<Action> for ActionView {
@@ -1235,6 +1248,15 @@ impl From<Action> for ActionView {
             Action::Delegate(action) => ActionView::Delegate {
                 delegate_action: action.delegate_action,
                 signature: action.signature,
+            },
+            Action::RegisterRsa2048Keys(action) => ActionView::RegisterRsa2048Keys {
+                public_key: action.public_key,
+                operation_type: action.operation_type,
+                args: action.args.into(),
+            },
+            Action::CreateRsa2048Challenge(action) => ActionView::CreateRsa2048Challenge {
+                public_key: action.public_key,
+                args: action.args.into(),
             },
         }
     }
@@ -1272,6 +1294,19 @@ impl TryFrom<ActionView> for Action {
             }
             ActionView::Delegate { delegate_action, signature } => {
                 Action::Delegate(Box::new(SignedDelegateAction { delegate_action, signature }))
+            }
+            ActionView::RegisterRsa2048Keys { public_key, operation_type, args } => {
+                Action::RegisterRsa2048Keys(Box::new(RegisterRsa2048KeysAction {
+                    public_key,
+                    operation_type,
+                    args: args.into(),
+                }))
+            }
+            ActionView::CreateRsa2048Challenge { public_key, args } => {
+                Action::CreateRsa2048Challenge(Box::new(CreateRsa2048ChallengeAction {
+                    public_key,
+                    args: args.into(),
+                }))
             }
         })
     }
@@ -2179,6 +2214,7 @@ pub enum StateChangeKindView {
     AccessKeyTouched { account_id: AccountId },
     DataTouched { account_id: AccountId },
     ContractCodeTouched { account_id: AccountId },
+    RsaKeyTouched { account_id: AccountId },
 }
 
 impl From<StateChangeKind> for StateChangeKindView {
@@ -2187,6 +2223,9 @@ impl From<StateChangeKind> for StateChangeKindView {
             StateChangeKind::AccountTouched { account_id } => Self::AccountTouched { account_id },
             StateChangeKind::AccessKeyTouched { account_id } => {
                 Self::AccessKeyTouched { account_id }
+            }
+            StateChangeKind::RsaKeyTouched { account_id } => {
+                Self::RsaKeyTouched { account_id }
             }
             StateChangeKind::DataTouched { account_id } => Self::DataTouched { account_id },
             StateChangeKind::ContractCodeTouched { account_id } => {
@@ -2285,6 +2324,15 @@ pub enum StateChangeValueView {
     ContractCodeDeletion {
         account_id: AccountId,
     },
+    RsaKeyUpdate {
+        account_id: AccountId,
+        public_key: PublicKey,
+        rsa_key: RegisterRsa2048KeysAction,
+    },
+    RsaKeyDeletion {
+        account_id: AccountId,
+        public_key: PublicKey,
+    },
 }
 
 impl From<StateChangeValue> for StateChangeValueView {
@@ -2313,6 +2361,12 @@ impl From<StateChangeValue> for StateChangeValueView {
             }
             StateChangeValue::ContractCodeDeletion { account_id } => {
                 Self::ContractCodeDeletion { account_id }
+            }
+            StateChangeValue::RsaKeyUpdate { account_id, public_key, rsa_key } => {
+                Self::RsaKeyUpdate { account_id, public_key, rsa_key: rsa_key.into() }
+            }
+            StateChangeValue::RsaKeyDeletion { account_id, public_key } => {
+                Self::RsaKeyDeletion { account_id, public_key }
             }
         }
     }
@@ -2389,7 +2443,7 @@ mod tests {
     #[test]
     #[cfg_attr(feature = "nightly", ignore)]
     fn test_exec_metadata_v3_view() {
-        let metadata = ExecutionMetadata::V3(ProfileDataV3::test());
+        let metadata = ExecutionMetadata::V3(ProfileDataV3::test().into());
         let view = ExecutionMetadataView::from(metadata);
         insta::assert_json_snapshot!(view);
     }
