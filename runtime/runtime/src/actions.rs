@@ -748,10 +748,27 @@ pub(crate) fn action_create_rsa2048_challenge(
     let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
         Ok(parsed_args) => {
-            let parsed_args = serde_json::to_string_pretty(&parsed_args)
-                .unwrap_or_else(|_| "".to_string())
-                .replace('\n', "\n                                 ");
-            print!("parsed_args: {}", parsed_args);
+            if let Some(power_val) = parsed_args.get("power") {
+                match power_val.as_str() {
+                    Some(power_str) => {
+                        match power_str.parse::<u128>() {
+                            Ok(power) => {
+                                // attach power to account
+                                _account.set_power(power);
+                                println!("Power (as u128): {}", power);
+                            }
+                            Err(_) => println!("Power value is not a valid u128 number"),
+                        }
+                    },
+                    None => {
+                        if let Some(power_number) = power_val.as_u64() {
+                            println!("Power (as u64, converted from u128): {}", power_number);
+                        } else {
+                            println!("Power value is not a string or a number that fits into u64");
+                        }
+                    }
+                }
+            }
         }
         Err(_) => {
             return Ok(());
