@@ -189,15 +189,15 @@ impl<'a> External for RuntimeExt<'a> {
         self.trie_update.trie().get_trie_nodes_count()
     }
 
-    fn validator_stake(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
+    fn validator_power(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
         self.epoch_info_provider
-            .validator_stake(self.epoch_id, self.prev_block_hash, account_id)
+            .validator_power(self.epoch_id, self.prev_block_hash, account_id)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
-    fn validator_total_stake(&self) -> ExtResult<Balance> {
+    fn validator_total_power(&self) -> ExtResult<Balance> {
         self.epoch_info_provider
-            .validator_total_stake(self.epoch_id, self.prev_block_hash)
+            .validator_total_power(self.epoch_id, self.prev_block_hash)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 

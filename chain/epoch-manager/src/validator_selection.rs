@@ -3,7 +3,7 @@ use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::EpochError;
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, Balance, NumShards, ProtocolVersion, ValidatorId, ValidatorKickoutReason,
 };
@@ -18,7 +18,7 @@ pub fn proposals_to_epoch_info(
     epoch_config: &EpochConfig,
     rng_seed: RngSeed,
     prev_epoch_info: &EpochInfo,
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
     mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -77,20 +77,20 @@ pub fn proposals_to_epoch_info(
 
     // process remaining chunk_producer_proposals that were not selected for either role
     for OrderedValidatorStake(p) in chunk_producer_proposals {
-        let stake = p.stake();
+        let power = p.power();
         let account_id = p.account_id();
-        if stake >= epoch_config.fishermen_threshold {
+        if power >= epoch_config.fishermen_threshold {
             fishermen.push(p);
         } else {
             *stake_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)
                 || prev_epoch_info.account_is_fisherman(account_id)
             {
-                debug_assert!(stake < threshold);
+                debug_assert!(power < threshold);
                 let account_id = p.take_account_id();
                 validator_kickout.insert(
                     account_id,
-                    ValidatorKickoutReason::NotEnoughStake { stake, threshold },
+                    ValidatorKickoutReason::NotEnoughPower { power, threshold },
                 );
             }
         }
@@ -98,7 +98,7 @@ pub fn proposals_to_epoch_info(
 
     let num_chunk_producers = chunk_producers.len();
     // Constructing `all_validators` such that a validators position corresponds to its `ValidatorId`.
-    let mut all_validators: Vec<ValidatorStake> = Vec::with_capacity(num_chunk_producers);
+    let mut all_validators: Vec<ValidatorPower> = Vec::with_capacity(num_chunk_producers);
     let mut validator_to_index = HashMap::new();
     let mut block_producers_settlement = Vec::with_capacity(block_producers.len());
 
@@ -230,13 +230,13 @@ pub fn proposals_to_epoch_info(
 ///        as last epoch, adjusted by rewards from last epoch, if any
 /// 4. If account was fisherman last epoch, it is included in fishermen
 fn proposals_with_rollover(
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
     prev_epoch_info: &EpochInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
     stake_change: &mut BTreeMap<AccountId, Balance>,
-    fishermen: &mut Vec<ValidatorStake>,
-) -> HashMap<AccountId, ValidatorStake> {
+    fishermen: &mut Vec<ValidatorPower>,
+) -> HashMap<AccountId, ValidatorPower> {
     let mut proposals_by_account = HashMap::new();
     for p in proposals {
         let account_id = p.account_id();
@@ -244,7 +244,7 @@ fn proposals_with_rollover(
             let account_id = p.take_account_id();
             stake_change.insert(account_id, 0);
         } else {
-            stake_change.insert(account_id.clone(), p.stake());
+            stake_change.insert(account_id.clone(), p.power());
             proposals_by_account.insert(account_id.clone(), p);
         }
     }
@@ -257,9 +257,9 @@ fn proposals_with_rollover(
         }
         let p = proposals_by_account.entry(account_id).or_insert(r);
         if let Some(reward) = validator_reward.get(p.account_id()) {
-            *p.stake_mut() += *reward;
+            *p.power_mut() += *reward;
         }
-        stake_change.insert(p.account_id().clone(), p.stake());
+        stake_change.insert(p.account_id().clone(), p.power());
     }
 
     for r in prev_epoch_info.fishermen_iter() {
@@ -271,7 +271,7 @@ fn proposals_with_rollover(
         if !proposals_by_account.contains_key(account_id) {
             // safe to do this here because fishermen from previous epoch is guaranteed to have no
             // duplicates.
-            stake_change.insert(account_id.clone(), r.stake());
+            stake_change.insert(account_id.clone(), r.power());
             fishermen.push(r);
         }
     }
@@ -279,7 +279,7 @@ fn proposals_with_rollover(
     proposals_by_account
 }
 
-fn order_proposals<I: IntoIterator<Item = ValidatorStake>>(
+fn order_proposals<I: IntoIterator<Item = ValidatorPower>>(
     proposals: I,
 ) -> BinaryHeap<OrderedValidatorStake> {
     proposals.into_iter().map(OrderedValidatorStake).collect()
@@ -290,7 +290,7 @@ fn select_block_producers(
     max_num_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorStake>, Balance) {
+) -> (Vec<ValidatorPower>, Balance) {
     select_validators(block_producer_proposals, max_num_selected, min_stake_ratio, protocol_version)
 }
 
@@ -300,7 +300,7 @@ fn select_chunk_producers(
     min_stake_ratio: Ratio<u128>,
     num_shards: u64,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorStake>, Balance) {
+) -> (Vec<ValidatorPower>, Balance) {
     select_validators(
         all_proposals,
         max_num_selected,
@@ -318,17 +318,17 @@ fn select_validators(
     max_number_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorStake>, Balance) {
-    let mut total_stake = 0;
+) -> (Vec<ValidatorPower>, Balance) {
+    let mut total_power = 0;
     let n = cmp::min(max_number_selected, proposals.len());
     let mut validators = Vec::with_capacity(n);
     for _ in 0..n {
         let p = proposals.pop().unwrap().0;
-        let p_stake = p.stake();
-        let total_stake_with_p = total_stake + p_stake;
-        if Ratio::new(p_stake, total_stake_with_p) > min_stake_ratio {
+        let p_power = p.power();
+        let total_power_with_p = total_power + p_power;
+        if Ratio::new(p_power, total_power_with_p) > min_stake_ratio {
             validators.push(p);
-            total_stake = total_stake_with_p;
+            total_power = total_power_with_p;
         } else {
             // p was not included, return it to the list of proposals
             proposals.push(OrderedValidatorStake(p));
@@ -338,7 +338,7 @@ fn select_validators(
     if validators.len() == max_number_selected {
         // all slots were filled, so the threshold stake is 1 more than the current
         // smallest stake
-        let threshold = validators.last().unwrap().stake() + 1;
+        let threshold = validators.last().unwrap().power() + 1;
         (validators, threshold)
     } else {
         // the stake ratio condition prevented all slots from being filled,
@@ -349,12 +349,12 @@ fn select_validators(
             FixStakingThreshold,
             protocol_version
         ) {
-            (min_stake_ratio * Ratio::from_integer(total_stake)
+            (min_stake_ratio * Ratio::from_integer(total_power)
                 / (Ratio::from_integer(1u128) - min_stake_ratio))
                 .ceil()
                 .to_integer()
         } else {
-            (min_stake_ratio * Ratio::new(total_stake, 1)).ceil().to_integer()
+            (min_stake_ratio * Ratio::new(total_power, 1)).ceil().to_integer()
         };
         (validators, threshold)
     }
@@ -364,10 +364,10 @@ fn select_validators(
 /// with the largest state and (in case of a tie) lexicographically smallest
 /// AccountId comes at the top.
 #[derive(Eq, PartialEq)]
-struct OrderedValidatorStake(ValidatorStake);
+struct OrderedValidatorStake(ValidatorPower);
 impl OrderedValidatorStake {
     fn key(&self) -> impl Ord + '_ {
-        (self.0.stake(), std::cmp::Reverse(self.0.account_id()))
+        (self.0.power(), std::cmp::Reverse(self.0.account_id()))
     }
 }
 impl PartialOrd for OrderedValidatorStake {

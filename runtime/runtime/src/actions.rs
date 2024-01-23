@@ -19,7 +19,7 @@ use near_primitives::transaction::{
     Action, AddKeyAction, DeleteAccountAction, DeleteKeyAction, DeployContractAction,
     FunctionCallAction, StakeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
 use near_primitives::utils::{account_is_implicit, create_random_seed};
 use near_primitives::version::{
@@ -331,7 +331,7 @@ pub(crate) fn action_stake(
         }
 
         if stake.stake > 0 {
-            let minimum_stake = epoch_info_provider.minimum_stake(last_block_hash)?;
+            let minimum_stake = epoch_info_provider.minimum_power(last_block_hash)?;
             if stake.stake < minimum_stake {
                 result.result = Err(ActionErrorKind::InsufficientStake {
                     account_id: account_id.clone(),
@@ -342,11 +342,12 @@ pub(crate) fn action_stake(
                 return Ok(());
             }
         }
-
-        result.validator_proposals.push(ValidatorStake::new(
+        // TO DO : get power args via rsa pub key
+        let power = 5000000000000;
+        result.validator_proposals.push(ValidatorPower::new(
             account_id.clone(),
             stake.public_key.clone(),
-            stake.stake,
+            power,
         ));
         if stake.stake > account.locked() {
             // We've checked above `account.amount >= increment`
@@ -442,6 +443,7 @@ pub(crate) fn action_create_account(
     *account = Some(Account::new(
         0,
         0,
+        0,
         CryptoHash::default(),
         fee_config.storage_usage_config.num_bytes_account,
     ));
@@ -481,6 +483,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
             *account = Some(Account::new(
                 transfer.deposit,
                 0,
+                0,
                 CryptoHash::default(),
                 fee_config.storage_usage_config.num_bytes_account
                     + public_key.len() as u64
@@ -504,7 +507,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
                     + fee_config.storage_usage_config.num_extra_bytes_record;
 
                 *account =
-                    Some(Account::new(transfer.deposit, 0, *magic_bytes.hash(), storage_usage));
+                    Some(Account::new(transfer.deposit, 0, 0, *magic_bytes.hash(), storage_usage));
                 set_code(state_update, account_id.clone(), &magic_bytes);
 
                 // Precompile Wallet Contract and store result (compiled code or error) in the database.
@@ -745,9 +748,10 @@ pub(crate) fn action_create_rsa2048_challenge(
     let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
         Ok(parsed_args) => {
-            serde_json::to_string_pretty(&parsed_args)
+            let parsed_args = serde_json::to_string_pretty(&parsed_args)
                 .unwrap_or_else(|_| "".to_string())
-                .replace('\n', "\n                                 ")
+                .replace('\n', "\n                                 ");
+            print!("parsed_args: {}", parsed_args);
         }
         Err(_) => {
             return Ok(());

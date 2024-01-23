@@ -1,4 +1,4 @@
-use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter, ValidatorStakeV1};
+use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
 use crate::types::StateRoot;
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_primitives_core::hash::CryptoHash;
@@ -44,10 +44,10 @@ impl ShardChunkHeaderInner {
     }
 
     #[inline]
-    pub fn prev_validator_proposals(&self) -> ValidatorStakeIter {
+    pub fn prev_validator_proposals(&self) -> ValidatorPowerIter {
         match self {
-            Self::V1(inner) => ValidatorStakeIter::v1(&inner.prev_validator_proposals),
-            Self::V2(inner) => ValidatorStakeIter::new(&inner.prev_validator_proposals),
+            Self::V1(inner) => ValidatorPowerIter::v1(&inner.prev_validator_proposals),
+            Self::V2(inner) => ValidatorPowerIter::new(&inner.prev_validator_proposals),
         }
     }
 
@@ -139,7 +139,7 @@ pub struct ShardChunkHeaderInnerV1 {
     /// Tx merkle root.
     pub tx_root: CryptoHash,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_proposals: Vec<ValidatorStakeV1>,
+    pub prev_validator_proposals: Vec<ValidatorPowerV1>,
 }
 
 // V1 -> V2: Use versioned ValidatorStake structure in proposals
@@ -166,5 +166,5 @@ pub struct ShardChunkHeaderInnerV2 {
     /// Tx merkle root.
     pub tx_root: CryptoHash,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_proposals: Vec<ValidatorStake>,
+    pub prev_validator_proposals: Vec<ValidatorPower>,
 }

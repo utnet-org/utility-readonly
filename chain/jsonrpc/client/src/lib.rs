@@ -11,7 +11,7 @@ use near_jsonrpc_primitives::types::transactions::{
 use near_jsonrpc_primitives::types::validator::RpcValidatorsOrderedRequest;
 use near_primitives::hash::CryptoHash;
 use near_primitives::types::{BlockId, BlockReference, EpochReference, MaybeBlockId, ShardId};
-use near_primitives::views::validator_stake_view::ValidatorStakeView;
+use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, GasPriceView, StatusResponse,
 };
@@ -232,7 +232,7 @@ impl JsonRpcClient {
     pub fn EXPERIMENTAL_validators_ordered(
         &self,
         request: RpcValidatorsOrderedRequest,
-    ) -> RpcRequest<Vec<ValidatorStakeView>> {
+    ) -> RpcRequest<Vec<ValidatorPowerView>> {
         call_method(&self.client, &self.server_addr, "EXPERIMENTAL_validators_ordered", request)
     }
 

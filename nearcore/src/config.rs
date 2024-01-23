@@ -31,7 +31,7 @@ use near_primitives::static_clock::StaticClock;
 use near_primitives::test_utils::create_test_signer;
 use near_primitives::types::{
     AccountId, AccountInfo, Balance, BlockHeight, BlockHeightDelta, Gas, NumBlocks, NumSeats,
-    NumShards, ShardId,
+    NumShards, ShardId, Power,
 };
 use near_primitives::utils::{generate_random_string, get_num_seats_per_shard};
 use near_primitives::validator_signer::{InMemoryValidatorSigner, ValidatorSigner};
@@ -56,6 +56,9 @@ pub const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * NEAR_BASE;
 
 /// Validator's stake used in tests.
 pub const TESTING_INIT_STAKE: Balance = 50_000_000 * NEAR_BASE;
+
+///
+pub const TESTING_INIT_POWER: Power = 5;
 
 /// One NEAR, divisible by 10^24.
 pub const NEAR_BASE: Balance = 1_000_000_000_000_000_000_000_000;
@@ -499,6 +502,7 @@ impl Genesis {
                     account_id: account.clone(),
                     public_key: signer.public_key.clone(),
                     amount: TESTING_INIT_STAKE,
+                    power: 0,
                 });
             }
             add_account_with_key(
@@ -507,6 +511,7 @@ impl Genesis {
                 &signer.public_key.clone(),
                 TESTING_INIT_BALANCE - if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
                 if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
+                if i < num_validator_seats { TESTING_INIT_POWER } else { 0 },
                 CryptoHash::default(),
             );
         }
@@ -729,6 +734,7 @@ fn add_protocol_account(records: &mut Vec<StateRecord>) {
         &signer.public_key,
         TESTING_INIT_BALANCE,
         0,
+        0,
         CryptoHash::default(),
     );
 }
@@ -743,11 +749,12 @@ fn add_account_with_key(
     public_key: &PublicKey,
     amount: u128,
     staked: u128,
+    power:  u128,
     code_hash: CryptoHash,
 ) {
     records.push(StateRecord::Account {
         account_id: account_id.clone(),
-        account: Account::new(amount, staked, code_hash, 0),
+        account: Account::new(amount, staked, power, code_hash, 0),
     });
     records.push(StateRecord::AccessKey {
         account_id,
@@ -1075,6 +1082,7 @@ pub fn init_configs(
                 &signer.public_key(),
                 TESTING_INIT_BALANCE,
                 TESTING_INIT_STAKE,
+                TESTING_INIT_POWER,
                 CryptoHash::default(),
             );
             add_protocol_account(&mut records);
@@ -1116,6 +1124,7 @@ pub fn init_configs(
                     account_id: signer.account_id.clone(),
                     public_key: signer.public_key(),
                     amount: TESTING_INIT_STAKE,
+                    power: 0,
                 }],
                 transaction_validity_period: TRANSACTION_VALIDITY_PERIOD,
                 protocol_reward_rate: PROTOCOL_REWARD_RATE,

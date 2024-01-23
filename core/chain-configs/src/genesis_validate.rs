@@ -204,7 +204,7 @@ mod test {
     const VALID_ED25519_RISTRETTO_KEY: &str = "ed25519:KuTCtARNzxZQ3YvXDeLjx83FDqxv2SdQTSbiq876zR7";
 
     fn create_account() -> Account {
-        Account::new(100, 10, Default::default(), 0)
+        Account::new(100, 10, 5, Default::default(), 0)
     }
 
     #[test]
@@ -215,6 +215,7 @@ mod test {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
+            power: 10,
         }];
         let records = GenesisRecords(vec![StateRecord::Account {
             account_id: "test".parse().unwrap(),
@@ -232,6 +233,7 @@ mod test {
             account_id: "test".parse().unwrap(),
             public_key: PublicKey::empty(KeyType::ED25519),
             amount: 10,
+            power: 10,
         }];
         let records = GenesisRecords(vec![StateRecord::Account {
             account_id: "test".parse().unwrap(),
@@ -249,6 +251,7 @@ mod test {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 100,
+            power: 100,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![StateRecord::Account {
@@ -279,6 +282,7 @@ mod test {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
+            power: 10,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![
@@ -301,6 +305,7 @@ mod test {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
+            power: 10,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![

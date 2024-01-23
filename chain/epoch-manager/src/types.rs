@@ -4,7 +4,7 @@ use near_primitives::challenge::SlashedValidator;
 use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::hash::CryptoHash;
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, Balance, BlockHeight, EpochId, ShardId, ValidatorId, ValidatorStats,
 };
@@ -26,7 +26,7 @@ pub struct BlockHeaderInfo {
     pub random_value: CryptoHash,
     pub last_finalized_height: BlockHeight,
     pub last_finalized_block_hash: CryptoHash,
-    pub proposals: Vec<ValidatorStake>,
+    pub proposals: Vec<ValidatorPower>,
     pub slashed_validators: Vec<SlashedValidator>,
     pub chunk_mask: Vec<bool>,
     pub total_supply: Balance,
@@ -63,7 +63,7 @@ pub struct EpochInfoAggregator {
     /// Latest protocol version that each validator supports.
     pub version_tracker: HashMap<ValidatorId, ProtocolVersion>,
     /// All proposals in this epoch up to this block.
-    pub all_proposals: BTreeMap<AccountId, ValidatorStake>,
+    pub all_proposals: BTreeMap<AccountId, ValidatorPower>,
     /// Id of the epoch that this aggregator is in.
     pub epoch_id: EpochId,
     /// Last block hash recorded.

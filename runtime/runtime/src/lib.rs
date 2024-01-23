@@ -30,7 +30,7 @@ use near_primitives::transaction::{
 };
 use near_primitives::trie_key::TrieKey;
 use near_primitives::types::{
-    validator_stake::ValidatorStake, AccountId, Balance, Compute, EpochInfoProvider, Gas,
+    validator_power::ValidatorPower, AccountId, Balance, Compute, EpochInfoProvider, Gas,
     RawStateChangesWithTrieKey, StateChangeCause, StateRoot,
 };
 use near_primitives::utils::{
@@ -107,7 +107,7 @@ pub struct ApplyStats {
 pub struct ApplyResult {
     pub state_root: StateRoot,
     pub trie_changes: TrieChanges,
-    pub validator_proposals: Vec<ValidatorStake>,
+    pub validator_proposals: Vec<ValidatorPower>,
     pub outgoing_receipts: Vec<Receipt>,
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub state_changes: Vec<RawStateChangesWithTrieKey>,
@@ -127,7 +127,7 @@ pub struct ActionResult {
     pub result: Result<ReturnData, ActionError>,
     pub logs: Vec<LogEntry>,
     pub new_receipts: Vec<Receipt>,
-    pub validator_proposals: Vec<ValidatorStake>,
+    pub validator_proposals: Vec<ValidatorPower>,
     pub profile: Box<ProfileDataV3>,
 }
 
@@ -478,7 +478,7 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorStake>,
+        validator_proposals: &mut Vec<ValidatorPower>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {
@@ -853,7 +853,7 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorStake>,
+        validator_proposals: &mut Vec<ValidatorPower>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<Option<ExecutionOutcomeWithId>, RuntimeError> {
@@ -2636,7 +2636,7 @@ pub mod estimator {
     use near_primitives::receipt::Receipt;
     use near_primitives::runtime::apply_state::ApplyState;
     use near_primitives::transaction::ExecutionOutcomeWithId;
-    use near_primitives::types::validator_stake::ValidatorStake;
+    use near_primitives::types::validator_power::ValidatorPower;
     use near_primitives::types::EpochInfoProvider;
     use near_store::TrieUpdate;
 
@@ -2649,7 +2649,7 @@ pub mod estimator {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorStake>,
+        validator_proposals: &mut Vec<ValidatorPower>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {

@@ -20,6 +20,7 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
+use near_primitives_core::types::Power;
 
 /// Returns a `NearConfig` with genesis records taken from the current state.
 /// If `records_path` argument is provided, then records will be streamed into a separate file,
@@ -46,8 +47,8 @@ pub fn state_dump(
         .into_iter()
         .filter_map(|(info, is_slashed)| {
             if !is_slashed {
-                let (account_id, public_key, stake) = info.destructure();
-                Some((account_id, (public_key, stake)))
+                let (account_id, public_key, power) = info.destructure();
+                Some((account_id, (public_key, power)))
             } else {
                 None
             }
@@ -61,10 +62,11 @@ pub fn state_dump(
     genesis_config.genesis_time = Utc::now();
     genesis_config.validators = validators
         .iter()
-        .map(|(account_id, (public_key, amount))| AccountInfo {
+        .map(|(account_id, (public_key, power))| AccountInfo {
             account_id: account_id.clone(),
             public_key: public_key.clone(),
-            amount: *amount,
+            amount: 0,
+            power: *power,
         })
         .collect();
     genesis_config.validators.sort_by_key(|account_info| account_info.account_id.clone());
@@ -216,7 +218,7 @@ fn iterate_over_records(
     runtime: Arc<NightshadeRuntime>,
     state_roots: &[StateRoot],
     last_block_header: BlockHeader,
-    validators: &HashMap<AccountId, (PublicKey, Balance)>,
+    validators: &HashMap<AccountId, (PublicKey, Power)>,
     protocol_treasury_account: &AccountId,
     mut callback: impl FnMut(StateRecord),
     change_config: &GenesisChangeConfig,

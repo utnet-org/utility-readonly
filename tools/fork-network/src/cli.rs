@@ -21,7 +21,7 @@ use near_primitives::state_record::StateRecord;
 use near_primitives::trie_key::col;
 use near_primitives::trie_key::trie_key_parsers::parse_account_id_from_account_key;
 use near_primitives::types::{
-    AccountId, AccountInfo, Balance, BlockHeight, EpochId, NumBlocks, ShardId, StateRoot,
+    AccountId, AccountInfo, Balance, BlockHeight, EpochId, NumBlocks, ShardId, StateRoot, Power,
 };
 use near_primitives::version::PROTOCOL_VERSION;
 use near_store::db::RocksDB;
@@ -117,6 +117,8 @@ struct Validator {
     public_key: PublicKey,
     #[serde(with = "dec_format")]
     amount: Option<Balance>,
+    #[serde(with = "dec_format")]
+    power: Option<Power>,
 }
 
 type MakeSingleShardStorageMutatorFn =
@@ -741,6 +743,7 @@ impl ForkNetworkCommand {
             let validator_account = AccountInfo {
                 account_id: validator.account_id,
                 amount: validator.amount.unwrap_or(50_000 * NEAR_BASE),
+                power: validator.power.unwrap_or(5),
                 public_key: validator.public_key,
             };
             new_validator_accounts.push(validator_account.clone());
@@ -749,6 +752,7 @@ impl ForkNetworkCommand {
                 Account::new(
                     liquid_balance,
                     validator_account.amount,
+                    validator_account.power,
                     CryptoHash::default(),
                     storage_bytes,
                 ),

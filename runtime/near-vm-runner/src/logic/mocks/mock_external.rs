@@ -2,7 +2,7 @@ use crate::logic::types::ReceiptIndex;
 use crate::logic::TrieNodesCount;
 use crate::logic::{External, StorageGetMode, ValuePtr};
 use near_primitives_core::hash::{hash, CryptoHash};
-use near_primitives_core::types::{AccountId, Balance, Gas, GasWeight};
+use near_primitives_core::types::{AccountId, Balance, Gas, GasWeight, Power};
 use std::collections::HashMap;
 
 #[derive(serde::Serialize)]
@@ -142,11 +142,11 @@ impl External for MockedExternal {
         TrieNodesCount { db_reads: 0, mem_reads: 0 }
     }
 
-    fn validator_stake(&self, account_id: &AccountId) -> Result<Option<Balance>> {
+    fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>> {
         Ok(self.validators.get(account_id).cloned())
     }
 
-    fn validator_total_stake(&self) -> Result<Balance> {
+    fn validator_total_power(&self) -> Result<Power> {
         Ok(self.validators.values().sum())
     }
 

@@ -23,7 +23,7 @@ use near_primitives::receipt::Receipt;
 use near_primitives::shard_layout::{ShardLayout, ShardUId};
 use near_primitives::state_part::PartId;
 use near_primitives::transaction::{ExecutionOutcomeWithId, SignedTransaction};
-use near_primitives::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
+use near_primitives::types::validator_power::{ValidatorPower, ValidatorPowerIter};
 use near_primitives::types::{
     Balance, BlockHeight, BlockHeightDelta, EpochId, Gas, MerkleHash, NumBlocks, ShardId,
     StateChangesForResharding, StateRoot, StateRootNode,
@@ -105,7 +105,7 @@ pub struct ApplyChunkResult {
     pub new_root: StateRoot,
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub outgoing_receipts: Vec<Receipt>,
-    pub validator_proposals: Vec<ValidatorStake>,
+    pub validator_proposals: Vec<ValidatorPower>,
     pub total_gas_burnt: Gas,
     pub total_balance_burnt: Balance,
     pub proof: Option<PartialStorage>,
@@ -305,7 +305,7 @@ impl ApplyChunkBlockContext {
 
 pub struct ApplyChunkShardContext<'a> {
     pub shard_id: ShardId,
-    pub last_validator_proposals: ValidatorStakeIter<'a>,
+    pub last_validator_proposals: ValidatorPowerIter<'a>,
     pub gas_limit: Gas,
     pub is_new_chunk: bool,
     pub is_first_block_with_chunk_of_version: bool,

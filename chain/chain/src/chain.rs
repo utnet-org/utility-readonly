@@ -923,7 +923,7 @@ impl Chain {
                 .epoch_manager
                 .get_epoch_block_approvers_ordered(header.prev_hash())?
                 .iter()
-                .map(|(x, is_slashed)| (x.stake_this_epoch, x.stake_next_epoch, *is_slashed))
+                .map(|(x, is_slashed)| (x.power_this_epoch, x.power_next_epoch, *is_slashed))
                 .collect::<Vec<_>>();
             if !Doomslug::can_approved_block_be_produced(
                 self.doomslug_threshold_mode,
@@ -1825,7 +1825,7 @@ impl Chain {
             let mut count = 0;
             let mut stake = 0;
             if let Ok(producers) = self.epoch_manager.get_epoch_chunk_producers(&tip.epoch_id) {
-                stake += producers.iter().map(|info| info.stake()).sum::<Balance>();
+                stake += producers.iter().map(|info| info.power()).sum::<Balance>();
                 count += producers.len();
             }
 
