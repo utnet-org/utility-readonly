@@ -25,7 +25,7 @@ use crate::version::PROTOCOL_VERSION;
 use crate::views::{ExecutionStatusView, FinalExecutionOutcomeView, FinalExecutionStatus};
 
 pub fn account_new(amount: Balance, code_hash: CryptoHash) -> Account {
-    Account::new(amount, 0, code_hash, std::mem::size_of::<Account>() as u64)
+    Account::new(amount, 0, 0, code_hash, std::mem::size_of::<Account>() as u64)
 }
 
 impl Transaction {
@@ -500,7 +500,7 @@ impl MockEpochInfoProvider {
 }
 
 impl EpochInfoProvider for MockEpochInfoProvider {
-    fn validator_stake(
+    fn validator_power(
         &self,
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
@@ -509,7 +509,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         Ok(self.validators.get(account_id).cloned())
     }
 
-    fn validator_total_stake(
+    fn validator_total_power(
         &self,
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
@@ -517,7 +517,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         Ok(self.validators.values().sum())
     }
 
-    fn minimum_stake(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    fn minimum_power(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         Ok(0)
     }
 }

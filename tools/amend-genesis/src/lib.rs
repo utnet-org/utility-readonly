@@ -9,7 +9,7 @@ use near_primitives::types::{AccountId, AccountInfo};
 use near_primitives::utils;
 use near_primitives::version::ProtocolVersion;
 use near_primitives_core::account::{AccessKey, Account};
-use near_primitives_core::types::{Balance, BlockHeightDelta, NumBlocks, NumSeats, NumShards};
+use near_primitives_core::types::{Balance, BlockHeightDelta, NumBlocks, NumSeats, NumShards, Power};
 use num_rational::Rational32;
 use serde::ser::{SerializeSeq, Serializer};
 use std::collections::{hash_map, HashMap};
@@ -47,22 +47,22 @@ fn set_total_balance(dst: &mut Account, src: &Account) {
 }
 
 impl AccountRecords {
-    fn new(amount: Balance, locked: Balance, num_bytes_account: u64) -> Self {
+    fn new(amount: Balance, locked: Balance, power: Power, num_bytes_account: u64) -> Self {
         let mut ret = Self::default();
-        ret.set_account(amount, locked, num_bytes_account);
+        ret.set_account(amount, locked, power, num_bytes_account);
         ret
     }
 
-    fn new_validator(stake: Balance, num_bytes_account: u64) -> Self {
+    fn new_validator(stake: Balance, power: Power, num_bytes_account: u64) -> Self {
         let mut ret = Self::default();
-        ret.set_account(0, stake, num_bytes_account);
+        ret.set_account(0, stake, power, num_bytes_account);
         ret.amount_needed = true;
         ret
     }
 
-    fn set_account(&mut self, amount: Balance, locked: Balance, num_bytes_account: u64) {
+    fn set_account(&mut self, amount: Balance, locked: Balance, power: Power, num_bytes_account: u64) {
         assert!(self.account.is_none());
-        let account = Account::new(amount, locked, CryptoHash::default(), num_bytes_account);
+        let account = Account::new(amount, locked, power, CryptoHash::default(), num_bytes_account);
         self.account = Some(account);
     }
 
@@ -74,6 +74,7 @@ impl AccountRecords {
                 // end we will add to the storage usage with any extra keys added for this account
                 account.set_storage_usage(existing.storage_usage());
                 account.set_code_hash(existing.code_hash());
+                account.set_power(existing.power());
                 if self.amount_needed {
                     set_total_balance(account, existing);
                 }
@@ -82,6 +83,7 @@ impl AccountRecords {
                 let mut account = existing.clone();
                 account.set_amount(account.amount() + account.locked());
                 account.set_locked(0);
+                account.set_power(0);
                 self.account = Some(account);
             }
         }
@@ -139,8 +141,8 @@ fn validator_records(
     num_bytes_account: u64,
 ) -> anyhow::Result<HashMap<AccountId, AccountRecords>> {
     let mut records = HashMap::new();
-    for AccountInfo { account_id, public_key, amount } in validators.iter() {
-        let mut r = AccountRecords::new_validator(*amount, num_bytes_account);
+    for AccountInfo { account_id, public_key, amount, power } in validators.iter() {
+        let mut r = AccountRecords::new_validator(*amount,  *power, num_bytes_account);
         r.keys.insert(public_key.clone(), AccessKey::full_access());
         if records.insert(account_id.clone(), r).is_some() {
             anyhow::bail!("validator {} specified twice", account_id);
@@ -181,6 +183,7 @@ fn parse_extra_records(
                         let r = AccountRecords::new(
                             account.amount(),
                             account.locked(),
+                            account.power(),
                             num_bytes_account,
                         );
                         e.insert(r);
@@ -194,7 +197,7 @@ fn parse_extra_records(
                                 &account_id
                             ));
                         }
-                        r.set_account(account.amount(), account.locked(), num_bytes_account);
+                        r.set_account(account.amount(), account.locked(), account.power(), num_bytes_account);
                     }
                 }
             }

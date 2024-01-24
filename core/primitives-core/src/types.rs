@@ -22,6 +22,8 @@ pub type EpochHeight = u64;
 pub type ShardId = u64;
 /// Balance is type for storing amounts of tokens.
 pub type Balance = u128;
+///
+pub type Power = u128;
 /// Gas is a type for storing amount of gas.
 pub type Gas = u64;
 /// Compute is a type for storing compute time. Measured in femtoseconds (10^-15 seconds).

@@ -9,7 +9,7 @@ use near_crypto::Signature;
 use near_primitives::block::{Approval, ApprovalInner};
 use near_primitives::hash::CryptoHash;
 use near_primitives::static_clock::StaticClock;
-use near_primitives::types::{AccountId, ApprovalStake, Balance, BlockHeight, BlockHeightDelta};
+use near_primitives::types::{AccountId, ApprovalPower, Balance, BlockHeight, BlockHeightDelta};
 use near_primitives::validator_signer::ValidatorSigner;
 use tracing::{debug, debug_span, field, info};
 
@@ -284,7 +284,7 @@ impl DoomslugApprovalsTrackersAtHeight {
         &mut self,
         now: Instant,
         approval: &Approval,
-        stakes: &[(ApprovalStake, bool)],
+        stakes: &[(ApprovalPower, bool)],
         threshold_mode: DoomslugThresholdMode,
     ) -> DoomslugBlockProductionReadiness {
         if let Some(last_parent) = self.last_approval_per_account.get(&approval.account_id) {
@@ -308,7 +308,7 @@ impl DoomslugApprovalsTrackersAtHeight {
                 if *is_slashed {
                     None
                 } else {
-                    Some((x.account_id.clone(), (x.stake_this_epoch, x.stake_next_epoch)))
+                    Some((x.account_id.clone(), (x.power_this_epoch, x.power_next_epoch)))
                 }
             })
             .collect::<HashMap<_, _>>();
@@ -631,14 +631,14 @@ impl Doomslug {
         &mut self,
         now: Instant,
         approval: &Approval,
-        stakes: &[(ApprovalStake, bool)],
+        powers: &[(ApprovalPower, bool)],
     ) -> DoomslugBlockProductionReadiness {
         let threshold_mode = self.threshold_mode;
         let ret = self
             .approval_tracking
             .entry(approval.target_height)
             .or_insert_with(|| DoomslugApprovalsTrackersAtHeight::new())
-            .process_approval(now, approval, stakes, threshold_mode);
+            .process_approval(now, approval, powers, threshold_mode);
 
         if approval.target_height > self.largest_approval_height.get() {
             self.largest_approval_height.set(approval.target_height);
@@ -658,7 +658,7 @@ impl Doomslug {
         &mut self,
         now: Instant,
         approval: &Approval,
-        stakes: &[(ApprovalStake, bool)],
+        stakes: &[(ApprovalPower, bool)],
     ) {
         if approval.target_height < self.tip.height
             || approval.target_height > self.tip.height + MAX_HEIGHTS_AHEAD_TO_STORE_APPROVALS

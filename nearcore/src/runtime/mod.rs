@@ -337,7 +337,7 @@ impl NightshadeRuntime {
                 let last_proposals = last_validator_proposals
                     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
                     .fold(HashMap::new(), |mut acc, v| {
-                        let (account_id, stake) = v.account_and_stake();
+                        let (account_id, stake) = v.account_and_power();
                         acc.insert(account_id, stake);
                         acc
                     });

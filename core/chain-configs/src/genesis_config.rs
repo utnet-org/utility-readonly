@@ -10,7 +10,7 @@ use near_config_utils::ValidationError;
 use near_parameters::{RuntimeConfig, RuntimeConfigView};
 use near_primitives::epoch_manager::EpochConfig;
 use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::StateRoot;
 use near_primitives::{
     hash::CryptoHash,
@@ -327,14 +327,14 @@ impl GenesisConfig {
     }
 
     /// Get validators from genesis config
-    pub fn validators(&self) -> Vec<ValidatorStake> {
+    pub fn validators(&self) -> Vec<ValidatorPower> {
         self.validators
             .iter()
             .map(|account_info| {
-                ValidatorStake::new(
+                ValidatorPower::new(
                     account_info.account_id.clone(),
                     account_info.public_key.clone(),
-                    account_info.amount,
+                    account_info.power,
                 )
             })
             .collect()

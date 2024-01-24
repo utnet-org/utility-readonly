@@ -33,7 +33,7 @@ use crate::types::{
     AccountId, AccountWithPublicKey, Balance, BlockHeight, EpochHeight, EpochId, FunctionArgs, Gas,
     Nonce, NumBlocks, ShardId, StateChangeCause, StateChangeKind, StateChangeValue,
     StateChangeWithCause, StateChangesRequest, StateRoot, StorageUsage, StoreKey, StoreValue,
-    ValidatorKickoutReason,
+    ValidatorKickoutReason, Power,
 };
 
 use crate::action::{RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction};
@@ -52,7 +52,7 @@ use std::fmt;
 use std::ops::Range;
 use std::sync::Arc;
 use strum::IntoEnumIterator;
-use validator_stake_view::ValidatorStakeView;
+use validator_power_view::ValidatorPowerView;
 
 /// A view of the account
 #[derive(serde::Serialize, serde::Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -61,6 +61,8 @@ pub struct AccountView {
     pub amount: Balance,
     #[serde(with = "dec_format")]
     pub locked: Balance,
+    #[serde(with = "dec_format")]
+    pub power: Power,
     pub code_hash: CryptoHash,
     pub storage_usage: StorageUsage,
     /// TODO(2271): deprecated.
@@ -104,6 +106,7 @@ impl From<&Account> for AccountView {
         AccountView {
             amount: account.amount(),
             locked: account.locked(),
+            power: account.power(),
             code_hash: account.code_hash(),
             storage_usage: account.storage_usage(),
             storage_paid_at: 0,
@@ -119,7 +122,7 @@ impl From<Account> for AccountView {
 
 impl From<&AccountView> for Account {
     fn from(view: &AccountView) -> Self {
-        Account::new(view.amount, view.locked, view.code_hash, view.storage_usage)
+        Account::new(view.amount, view.locked, view.power,  view.code_hash, view.storage_usage)
     }
 }
 
@@ -755,7 +758,7 @@ pub struct BlockHeaderView {
     #[serde(with = "dec_format")]
     pub timestamp_nanosec: u64,
     pub random_value: CryptoHash,
-    pub validator_proposals: Vec<ValidatorStakeView>,
+    pub validator_proposals: Vec<ValidatorPowerView>,
     pub chunk_mask: Vec<bool>,
     #[serde(with = "dec_format")]
     pub gas_price: Balance,
@@ -1051,7 +1054,7 @@ pub struct ChunkHeaderView {
     pub balance_burnt: Balance,
     pub outgoing_receipts_root: CryptoHash,
     pub tx_root: CryptoHash,
-    pub validator_proposals: Vec<ValidatorStakeView>,
+    pub validator_proposals: Vec<ValidatorPowerView>,
     pub signature: Signature,
 }
 
@@ -1214,6 +1217,7 @@ pub enum ActionView {
     },
     CreateRsa2048Challenge {
         public_key: PublicKey,
+        challenge_key: PublicKey,
         #[serde_as(as = "Base64")]
         args: Vec<u8>,
     },
@@ -1256,6 +1260,7 @@ impl From<Action> for ActionView {
             },
             Action::CreateRsa2048Challenge(action) => ActionView::CreateRsa2048Challenge {
                 public_key: action.public_key,
+                challenge_key: action.challenge_key,
                 args: action.args.into(),
             },
         }
@@ -1302,9 +1307,10 @@ impl TryFrom<ActionView> for Action {
                     args: args.into(),
                 }))
             }
-            ActionView::CreateRsa2048Challenge { public_key, args } => {
+            ActionView::CreateRsa2048Challenge { public_key, challenge_key, args } => {
                 Action::CreateRsa2048Challenge(Box::new(CreateRsa2048ChallengeAction {
                     public_key,
+                    challenge_key,
                     args: args.into(),
                 }))
             }
@@ -1817,9 +1823,9 @@ pub struct FinalExecutionOutcomeWithReceiptView {
     pub receipts: Vec<ReceiptView>,
 }
 
-pub mod validator_stake_view {
-    pub use super::ValidatorStakeViewV1;
-    use crate::types::validator_stake::ValidatorStake;
+pub mod validator_power_view {
+    pub use super::ValidatorPowerViewV1;
+    use crate::types::validator_power::ValidatorPower;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::types::AccountId;
     use serde::Deserialize;
@@ -1827,13 +1833,13 @@ pub mod validator_stake_view {
     #[derive(
         BorshSerialize, BorshDeserialize, serde::Serialize, Deserialize, Debug, Clone, Eq, PartialEq,
     )]
-    #[serde(tag = "validator_stake_struct_version")]
-    pub enum ValidatorStakeView {
-        V1(ValidatorStakeViewV1),
+    #[serde(tag = "validator_power_struct_version")]
+    pub enum ValidatorPowerView {
+        V1(ValidatorPowerViewV1),
     }
 
-    impl ValidatorStakeView {
-        pub fn into_validator_stake(self) -> ValidatorStake {
+    impl ValidatorPowerView {
+        pub fn into_validator_stake(self) -> ValidatorPower {
             self.into()
         }
 
@@ -1852,22 +1858,22 @@ pub mod validator_stake_view {
         }
     }
 
-    impl From<ValidatorStake> for ValidatorStakeView {
-        fn from(stake: ValidatorStake) -> Self {
+    impl From<ValidatorPower> for ValidatorPowerView {
+        fn from(stake: ValidatorPower) -> Self {
             match stake {
-                ValidatorStake::V1(v1) => Self::V1(ValidatorStakeViewV1 {
+                ValidatorPower::V1(v1) => Self::V1(ValidatorPowerViewV1 {
                     account_id: v1.account_id,
                     public_key: v1.public_key,
-                    stake: v1.stake,
+                    power: v1.power,
                 }),
             }
         }
     }
 
-    impl From<ValidatorStakeView> for ValidatorStake {
-        fn from(view: ValidatorStakeView) -> Self {
+    impl From<ValidatorPowerView> for ValidatorPower {
+        fn from(view: ValidatorPowerView) -> Self {
             match view {
-                ValidatorStakeView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.stake),
+                ValidatorPowerView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power),
             }
         }
     }
@@ -1883,11 +1889,11 @@ pub mod validator_stake_view {
     serde::Serialize,
     serde::Deserialize,
 )]
-pub struct ValidatorStakeViewV1 {
+pub struct ValidatorPowerViewV1 {
     pub account_id: AccountId,
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
-    pub stake: Balance,
+    pub power: Power,
 }
 
 #[derive(
@@ -2034,11 +2040,11 @@ pub struct EpochValidatorInfo {
     /// Validators for the next epoch
     pub next_validators: Vec<NextEpochValidatorInfo>,
     /// Fishermen for the current epoch
-    pub current_fishermen: Vec<ValidatorStakeView>,
+    pub current_fishermen: Vec<ValidatorPowerView>,
     /// Fishermen for the next epoch
-    pub next_fishermen: Vec<ValidatorStakeView>,
+    pub next_fishermen: Vec<ValidatorPowerView>,
     /// Proposals in the current epoch
-    pub current_proposals: Vec<ValidatorStakeView>,
+    pub current_proposals: Vec<ValidatorPowerView>,
     /// Kickout in the previous epoch
     pub prev_epoch_kickout: Vec<ValidatorKickoutView>,
     /// Epoch start block height
@@ -2116,7 +2122,7 @@ pub struct LightClientBlockView {
     pub next_block_inner_hash: CryptoHash,
     pub inner_lite: BlockHeaderInnerLiteView,
     pub inner_rest_hash: CryptoHash,
-    pub next_bps: Option<Vec<ValidatorStakeView>>,
+    pub next_bps: Option<Vec<ValidatorPowerView>>,
     pub approvals_after_next: Vec<Option<Box<Signature>>>,
 }
 

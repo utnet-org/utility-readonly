@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
-use near_primitives::types::EpochId;
+use near_primitives::types::{EpochId, Power};
 use near_store::Store;
 use num_rational::Ratio;
 
@@ -14,7 +14,7 @@ use near_primitives::epoch_manager::block_info::BlockInfoV2;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{AllEpochConfig, EpochConfig, ValidatorWeight};
 use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, Balance, BlockHeight, BlockHeightDelta, EpochHeight, NumSeats, NumShards,
     ValidatorId, ValidatorKickoutReason,
@@ -39,8 +39,8 @@ pub fn hash_range(num: usize) -> Vec<CryptoHash> {
     result
 }
 
-pub fn change_stake(stake_changes: Vec<(AccountId, Balance)>) -> BTreeMap<AccountId, Balance> {
-    stake_changes.into_iter().collect()
+pub fn change_power(power_changes: Vec<(AccountId, Balance)>) -> BTreeMap<AccountId, Balance> {
+    power_changes.into_iter().collect()
 }
 
 pub fn epoch_info(
@@ -93,14 +93,14 @@ pub fn epoch_info_with_num_seats(
     });
     let fishermen_to_index =
         fishermen.iter().enumerate().map(|(i, (s, _))| (s.clone(), i as ValidatorId)).collect();
-    let account_to_validators = |accounts: Vec<(AccountId, Balance)>| -> Vec<ValidatorStake> {
+    let account_to_validators = |accounts: Vec<(AccountId, Balance)>| -> Vec<ValidatorPower> {
         accounts
             .into_iter()
-            .map(|(account_id, stake)| {
-                ValidatorStake::new(
+            .map(|(account_id, power)| {
+                ValidatorPower::new(
                     account_id.clone(),
                     SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key(),
-                    stake,
+                    power,
                 )
             })
             .collect()
@@ -189,9 +189,9 @@ pub fn epoch_config(
     )
 }
 
-pub fn stake(account_id: AccountId, amount: Balance) -> ValidatorStake {
+pub fn do_power(account_id: AccountId, power: Power) -> ValidatorPower {
     let public_key = SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key();
-    ValidatorStake::new(account_id, public_key, amount)
+    ValidatorPower::new(account_id, public_key, power)
 }
 
 /// No-op reward calculator. Will produce no reward
@@ -240,7 +240,7 @@ pub fn setup_epoch_manager(
         reward_calculator,
         validators
             .iter()
-            .map(|(account_id, balance)| stake(account_id.clone(), *balance))
+            .map(|(account_id, power)| do_power(account_id.clone(), *power))
             .collect(),
     )
     .unwrap()
@@ -305,7 +305,7 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
         default_reward_calculator(),
         validators
             .iter()
-            .map(|(account_id, balance)| stake(account_id.clone(), *balance))
+            .map(|(account_id, power)| do_power(account_id.clone(), *power))
             .collect(),
     )
     .unwrap();
@@ -326,7 +326,7 @@ pub fn record_block_with_final_block_hash(
     cur_h: CryptoHash,
     last_final_block_hash: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
 ) {
     epoch_manager
         .record_block_info(
@@ -355,7 +355,7 @@ pub fn record_block_with_slashes(
     prev_h: CryptoHash,
     cur_h: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
     slashed: Vec<SlashedValidator>,
 ) {
     epoch_manager
@@ -385,7 +385,7 @@ pub fn record_block(
     prev_h: CryptoHash,
     cur_h: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
 ) {
     record_block_with_slashes(epoch_manager, prev_h, cur_h, height, proposals, vec![]);
 }

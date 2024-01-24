@@ -2,7 +2,7 @@ use crate::challenge::ChallengesResult;
 use crate::hash::{hash, CryptoHash};
 use crate::merkle::combine_hash;
 use crate::network::PeerId;
-use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter, ValidatorStakeV1};
+use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
 use crate::types::{AccountId, Balance, BlockHeight, EpochId, MerkleHash, NumBlocks};
 use crate::utils::{from_timestamp, to_timestamp};
 use crate::validator_signer::ValidatorSigner;
@@ -47,7 +47,7 @@ pub struct BlockHeaderInnerRest {
     /// The output of the randomness beacon
     pub random_value: CryptoHash,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_proposals: Vec<ValidatorStakeV1>,
+    pub prev_validator_proposals: Vec<ValidatorPowerV1>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -83,7 +83,7 @@ pub struct BlockHeaderInnerRestV2 {
     /// The output of the randomness beacon
     pub random_value: CryptoHash,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_proposals: Vec<ValidatorStakeV1>,
+    pub prev_validator_proposals: Vec<ValidatorPowerV1>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -122,7 +122,7 @@ pub struct BlockHeaderInnerRestV3 {
     /// The output of the randomness beacon
     pub random_value: CryptoHash,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_proposals: Vec<ValidatorStake>,
+    pub prev_validator_proposals: Vec<ValidatorPower>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -167,7 +167,7 @@ pub struct BlockHeaderInnerRestV4 {
     /// The output of the randomness beacon
     pub random_value: CryptoHash,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_proposals: Vec<ValidatorStake>,
+    pub prev_validator_proposals: Vec<ValidatorPower>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -416,7 +416,7 @@ impl BlockHeader {
         timestamp: u64,
         challenges_root: MerkleHash,
         random_value: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorStake>,
+        prev_validator_proposals: Vec<ValidatorPower>,
         chunk_mask: Vec<bool>,
         block_ordinal: NumBlocks,
         epoch_id: EpochId,
@@ -908,19 +908,19 @@ impl BlockHeader {
     }
 
     #[inline]
-    pub fn prev_validator_proposals(&self) -> ValidatorStakeIter {
+    pub fn prev_validator_proposals(&self) -> ValidatorPowerIter {
         match self {
             BlockHeader::BlockHeaderV1(header) => {
-                ValidatorStakeIter::v1(&header.inner_rest.prev_validator_proposals)
+                ValidatorPowerIter::v1(&header.inner_rest.prev_validator_proposals)
             }
             BlockHeader::BlockHeaderV2(header) => {
-                ValidatorStakeIter::v1(&header.inner_rest.prev_validator_proposals)
+                ValidatorPowerIter::v1(&header.inner_rest.prev_validator_proposals)
             }
             BlockHeader::BlockHeaderV3(header) => {
-                ValidatorStakeIter::new(&header.inner_rest.prev_validator_proposals)
+                ValidatorPowerIter::new(&header.inner_rest.prev_validator_proposals)
             }
             BlockHeader::BlockHeaderV4(header) => {
-                ValidatorStakeIter::new(&header.inner_rest.prev_validator_proposals)
+                ValidatorPowerIter::new(&header.inner_rest.prev_validator_proposals)
             }
         }
     }

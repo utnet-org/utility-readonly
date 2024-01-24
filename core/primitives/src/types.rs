@@ -46,6 +46,8 @@ pub struct AccountInfo {
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
     pub amount: Balance,
+    #[serde(with = "dec_format")]
+    pub power: Power,
 }
 
 /// This type is used to mark keys (arrays of bytes) that are queried from store.
@@ -523,59 +525,61 @@ impl std::str::FromStr for EpochId {
         Ok(EpochId(CryptoHash::from_str(epoch_id_str)?))
     }
 }
+/// TODO
 
-/// Stores validator and its stake for two consecutive epochs.
+/// TODO
+/// Stores validator and its power for two consecutive epochs.
 /// It is necessary because the blocks on the epoch boundary need to contain approvals from both
 /// epochs.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
-pub struct ApprovalStake {
-    /// Account that stakes money.
+pub struct ApprovalPower {
+    /// Account that has power.
     pub account_id: AccountId,
     /// Public key of the proposed validator.
     pub public_key: PublicKey,
-    /// Stake / weight of the validator.
-    pub stake_this_epoch: Balance,
-    pub stake_next_epoch: Balance,
+    /// Power / weight of the validator.
+    pub power_this_epoch: Power,
+    pub power_next_epoch: Power,
 }
 
-pub mod validator_stake {
-    use crate::types::ApprovalStake;
+pub mod validator_power {
+    use crate::types::ApprovalPower;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Balance};
+    use near_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
 
-    pub use super::ValidatorStakeV1;
+    pub use super::ValidatorPowerV1;
 
-    /// Stores validator and its stake.
+    /// Stores validator and its power.
     #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq)]
-    #[serde(tag = "validator_stake_struct_version")]
-    pub enum ValidatorStake {
-        V1(ValidatorStakeV1),
+    #[serde(tag = "validator_power_struct_version")]
+    pub enum ValidatorPower {
+        V1(ValidatorPowerV1),
     }
 
-    pub struct ValidatorStakeIter<'a> {
-        collection: ValidatorStakeIterSource<'a>,
+    pub struct ValidatorPowerIter<'a> {
+        collection: ValidatorPowerIterSource<'a>,
         curr_index: usize,
         len: usize,
     }
 
-    impl<'a> ValidatorStakeIter<'a> {
+    impl<'a> ValidatorPowerIter<'a> {
         pub fn empty() -> Self {
-            Self { collection: ValidatorStakeIterSource::V2(&[]), curr_index: 0, len: 0 }
+            Self { collection: ValidatorPowerIterSource::V2(&[]), curr_index: 0, len: 0 }
         }
 
-        pub fn v1(collection: &'a [ValidatorStakeV1]) -> Self {
+        pub fn v1(collection: &'a [ValidatorPowerV1]) -> Self {
             Self {
-                collection: ValidatorStakeIterSource::V1(collection),
+                collection: ValidatorPowerIterSource::V1(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
         }
 
-        pub fn new(collection: &'a [ValidatorStake]) -> Self {
+        pub fn new(collection: &'a [ValidatorPower]) -> Self {
             Self {
-                collection: ValidatorStakeIterSource::V2(collection),
+                collection: ValidatorPowerIterSource::V2(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
@@ -586,16 +590,16 @@ pub mod validator_stake {
         }
     }
 
-    impl<'a> Iterator for ValidatorStakeIter<'a> {
-        type Item = ValidatorStake;
+    impl<'a> Iterator for ValidatorPowerIter<'a> {
+        type Item = ValidatorPower;
 
         fn next(&mut self) -> Option<Self::Item> {
             if self.curr_index < self.len {
                 let item = match self.collection {
-                    ValidatorStakeIterSource::V1(collection) => {
-                        ValidatorStake::V1(collection[self.curr_index].clone())
+                    ValidatorPowerIterSource::V1(collection) => {
+                        ValidatorPower::V1(collection[self.curr_index].clone())
                     }
-                    ValidatorStakeIterSource::V2(collection) => collection[self.curr_index].clone(),
+                    ValidatorPowerIterSource::V2(collection) => collection[self.curr_index].clone(),
                 };
                 self.curr_index += 1;
                 Some(item)
@@ -605,37 +609,37 @@ pub mod validator_stake {
         }
     }
 
-    enum ValidatorStakeIterSource<'a> {
-        V1(&'a [ValidatorStakeV1]),
-        V2(&'a [ValidatorStake]),
+    enum ValidatorPowerIterSource<'a> {
+        V1(&'a [ValidatorPowerV1]),
+        V2(&'a [ValidatorPower]),
     }
 
-    impl ValidatorStake {
-        pub fn new_v1(account_id: AccountId, public_key: PublicKey, stake: Balance) -> Self {
-            Self::V1(ValidatorStakeV1 { account_id, public_key, stake })
+    impl ValidatorPower {
+        pub fn new_v1(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
+            Self::V1(ValidatorPowerV1 { account_id, public_key, power })
         }
 
-        pub fn new(account_id: AccountId, public_key: PublicKey, stake: Balance) -> Self {
-            Self::new_v1(account_id, public_key, stake)
+        pub fn new(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
+            Self::new_v1(account_id, public_key, power)
         }
 
-        pub fn into_v1(self) -> ValidatorStakeV1 {
+        pub fn into_v1(self) -> ValidatorPowerV1 {
             match self {
                 Self::V1(v1) => v1,
             }
         }
 
         #[inline]
-        pub fn account_and_stake(self) -> (AccountId, Balance) {
+        pub fn account_and_power(self) -> (AccountId, Power) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.stake),
+                Self::V1(v1) => (v1.account_id, v1.power),
             }
         }
 
         #[inline]
-        pub fn destructure(self) -> (AccountId, PublicKey, Balance) {
+        pub fn destructure(self) -> (AccountId, PublicKey, Power) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.public_key, v1.stake),
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power),
             }
         }
 
@@ -668,83 +672,83 @@ pub mod validator_stake {
         }
 
         #[inline]
-        pub fn stake(&self) -> Balance {
+        pub fn power(&self) -> Power {
             match self {
-                Self::V1(v1) => v1.stake,
+                Self::V1(v1) => v1.power,
             }
         }
 
         #[inline]
-        pub fn stake_mut(&mut self) -> &mut Balance {
+        pub fn power_mut(&mut self) -> &mut Balance {
             match self {
-                Self::V1(v1) => &mut v1.stake,
+                Self::V1(v1) => &mut v1.power,
             }
         }
 
-        pub fn get_approval_stake(&self, is_next_epoch: bool) -> ApprovalStake {
-            ApprovalStake {
+        pub fn get_approval_power(&self, is_next_epoch: bool) -> ApprovalPower {
+            ApprovalPower {
                 account_id: self.account_id().clone(),
                 public_key: self.public_key().clone(),
-                stake_this_epoch: if is_next_epoch { 0 } else { self.stake() },
-                stake_next_epoch: if is_next_epoch { self.stake() } else { 0 },
+                power_this_epoch: if is_next_epoch { 0 } else { self.power() },
+                power_next_epoch: if is_next_epoch { self.power() } else { 0 },
             }
         }
 
-        /// Returns the validator's number of mandates (rounded down) at `stake_per_seat`.
+        /// Returns the validator's number of mandates (rounded down) at `power_per_seat`.
         ///
         /// It returns `u16` since it allows infallible conversion to `usize` and with [`u16::MAX`]
         /// equalling 65_535 it should be sufficient to hold the number of mandates per validator.
         ///
         /// # Why `u16` should be sufficient
         ///
-        /// As of October 2023, a [recommended lower bound] for the stake required per mandate is
-        /// 25k $NEAR. At this price, the validator with highest stake would have 1_888 mandates,
+        /// As of October 2023, a [recommended lower bound] for the power required per mandate is
+        /// 25k $NEAR. At this price, the validator with highest power would have 1_888 mandates,
         /// which is well below `u16::MAX`.
         ///
         /// From another point of view, with more than `u16::MAX` mandates for validators, sampling
         /// mandates might become computationally too expensive. This might trigger an increase in
-        /// the required stake per mandate, bringing down the number of mandates per validator.
+        /// the required power per mandate, bringing down the number of mandates per validator.
         ///
         /// [recommended lower bound]: https://near.zulipchat.com/#narrow/stream/407237-pagoda.2Fcore.2Fstateless-validation/topic/validator.20seat.20assignment/near/393792901
         ///
         /// # Panics
         ///
         /// Panics if the number of mandates overflows `u16`.
-        pub fn num_mandates(&self, stake_per_mandate: Balance) -> u16 {
+        pub fn num_mandates(&self, power_per_mandate: Power) -> u16 {
             // Integer division in Rust returns the floor as described here
             // https://doc.rust-lang.org/std/primitive.u64.html#method.div_euclid
-            u16::try_from(self.stake() / stake_per_mandate)
+            u16::try_from(self.power() / power_per_mandate)
                 .expect("number of mandats should fit u16")
         }
 
         /// Returns the weight attributed to the validator's partial mandate.
         ///
-        /// A validator has a partial mandate if its stake cannot be divided evenly by
-        /// `stake_per_mandate`. The remainder of that division is the weight of the partial
+        /// A validator has a partial mandate if its power cannot be divided evenly by
+        /// `power_per_mandate`. The remainder of that division is the weight of the partial
         /// mandate.
         ///
         /// Due to this definintion a validator has exactly one partial mandate with `0 <= weight <
-        /// stake_per_mandate`.
+        /// power_per_mandate`.
         ///
         /// # Example
         ///
-        /// Let `V` be a validator with stake of 12. If `stake_per_mandate` equals 5 then the weight
+        /// Let `V` be a validator with power of 12. If `power_per_mandate` equals 5 then the weight
         /// of `V`'s partial mandate is `12 % 5 = 2`.
-        pub fn partial_mandate_weight(&self, stake_per_mandate: Balance) -> Balance {
-            self.stake() % stake_per_mandate
+        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Balance {
+            self.power() % power_per_mandate
         }
     }
 }
 
-/// Stores validator and its stake.
+/// Stores validator and its power.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
-pub struct ValidatorStakeV1 {
-    /// Account that stakes money.
+pub struct ValidatorPowerV1 {
+    /// Account that has power.
     pub account_id: AccountId,
     /// Public key of the proposed validator.
     pub public_key: PublicKey,
-    /// Stake / weight of the validator.
-    pub stake: Balance,
+    /// Power / weight of the validator.
+    pub power: Power,
 }
 
 /// Information after block was processed.
@@ -754,7 +758,7 @@ pub struct BlockExtra {
 }
 
 pub mod chunk_extra {
-    use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
+    use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
     use crate::types::StateRoot;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
@@ -776,7 +780,7 @@ pub mod chunk_extra {
         /// Root of merklizing results of receipts (transactions) execution.
         pub outcome_root: CryptoHash,
         /// Validator proposals produced by given chunk.
-        pub validator_proposals: Vec<ValidatorStake>,
+        pub validator_proposals: Vec<ValidatorPower>,
         /// Actually how much gas were used.
         pub gas_used: Gas,
         /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -793,7 +797,7 @@ pub mod chunk_extra {
         pub fn new(
             state_root: &StateRoot,
             outcome_root: CryptoHash,
-            validator_proposals: Vec<ValidatorStake>,
+            validator_proposals: Vec<ValidatorPower>,
             gas_used: Gas,
             gas_limit: Gas,
             balance_burnt: Balance,
@@ -833,10 +837,10 @@ pub mod chunk_extra {
         }
 
         #[inline]
-        pub fn validator_proposals(&self) -> ValidatorStakeIter {
+        pub fn validator_proposals(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorStakeIter::v1(&v1.validator_proposals),
-                Self::V2(v2) => ValidatorStakeIter::new(&v2.validator_proposals),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validator_proposals),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.validator_proposals),
             }
         }
 
@@ -874,7 +878,7 @@ pub struct ChunkExtraV1 {
     /// Root of merklizing results of receipts (transactions) execution.
     pub outcome_root: CryptoHash,
     /// Validator proposals produced by given chunk.
-    pub validator_proposals: Vec<ValidatorStakeV1>,
+    pub validator_proposals: Vec<ValidatorPowerV1>,
     /// Actually how much gas were used.
     pub gas_used: Gas,
     /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -999,16 +1003,16 @@ pub enum ValidatorKickoutReason {
     NotEnoughBlocks { produced: NumBlocks, expected: NumBlocks },
     /// Validator didn't produce enough chunks.
     NotEnoughChunks { produced: NumBlocks, expected: NumBlocks },
-    /// Validator unstaked themselves.
-    Unstaked,
-    /// Validator stake is now below threshold
-    NotEnoughStake {
-        #[serde(with = "dec_format", rename = "stake_u128")]
-        stake: Balance,
+    /// Validator unpowered themselves.
+    Unpowered,
+    /// Validator power is now below threshold
+    NotEnoughPower {
+        #[serde(with = "dec_format", rename = "power_u128")]
+        power: Power,
         #[serde(with = "dec_format", rename = "threshold_u128")]
-        threshold: Balance,
+        threshold: Power,
     },
-    /// Enough stake but is not chosen because of seat limits.
+    /// Enough power but is not chosen because of seat limits.
     DidNotGetASeat,
 }
 
@@ -1022,23 +1026,23 @@ pub enum TransactionOrReceiptId {
 /// Provides information about current epoch validators.
 /// Used to break dependency between epoch manager and runtime.
 pub trait EpochInfoProvider {
-    /// Get current stake of a validator in the given epoch.
+    /// Get current power of a validator in the given epoch.
     /// If the account is not a validator, returns `None`.
-    fn validator_stake(
+    fn validator_power(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<Option<Balance>, EpochError>;
+    ) -> Result<Option<Power>, EpochError>;
 
-    /// Get the total stake of the given epoch.
-    fn validator_total_stake(
+    /// Get the total power of the given epoch.
+    fn validator_total_power(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
-    ) -> Result<Balance, EpochError>;
+    ) -> Result<Power, EpochError>;
 
-    fn minimum_stake(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError>;
+    fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<Power, EpochError>;
 }
 
 /// Mode of the trie cache.
@@ -1079,29 +1083,29 @@ pub struct StateChangesForShard {
 #[cfg(test)]
 mod tests {
     use near_crypto::{KeyType, PublicKey};
-    use near_primitives_core::types::Balance;
+    use near_primitives_core::types::Power;
 
-    use super::validator_stake::ValidatorStake;
+    use super::validator_power::ValidatorPower;
 
-    fn new_validator_stake(stake: Balance) -> ValidatorStake {
-        ValidatorStake::new(
+    fn new_validator_power(power: Power) -> ValidatorPower {
+        ValidatorPower::new(
             "test_account".parse().unwrap(),
             PublicKey::empty(KeyType::ED25519),
-            stake,
+            power,
         )
     }
 
     #[test]
-    fn test_validator_stake_num_mandates() {
-        assert_eq!(new_validator_stake(0).num_mandates(5), 0);
-        assert_eq!(new_validator_stake(10).num_mandates(5), 2);
-        assert_eq!(new_validator_stake(12).num_mandates(5), 2);
+    fn test_validator_power_num_mandates() {
+        assert_eq!(new_validator_power(0).num_mandates(5), 0);
+        assert_eq!(new_validator_power(10).num_mandates(5), 2);
+        assert_eq!(new_validator_power(12).num_mandates(5), 2);
     }
 
     #[test]
     fn test_validator_partial_mandate_weight() {
-        assert_eq!(new_validator_stake(0).partial_mandate_weight(5), 0);
-        assert_eq!(new_validator_stake(10).partial_mandate_weight(5), 0);
-        assert_eq!(new_validator_stake(12).partial_mandate_weight(5), 2);
+        assert_eq!(new_validator_power(0).partial_mandate_weight(5), 0);
+        assert_eq!(new_validator_power(10).partial_mandate_weight(5), 0);
+        assert_eq!(new_validator_power(12).partial_mandate_weight(5), 2);
     }
 }

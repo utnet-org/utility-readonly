@@ -1,7 +1,7 @@
 use crate::challenge::SlashedValidator;
 use crate::num_rational::Rational32;
 use crate::shard_layout::ShardLayout;
-use crate::types::validator_stake::ValidatorStakeV1;
+use crate::types::validator_power::ValidatorPowerV1;
 use crate::types::{
     AccountId, Balance, BlockHeightDelta, EpochHeight, EpochId, NumSeats, ProtocolVersion,
     ValidatorId, ValidatorKickoutReason,
@@ -235,7 +235,7 @@ pub struct ValidatorSelectionConfig {
 pub mod block_info {
     use super::SlashState;
     use crate::challenge::SlashedValidator;
-    use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
+    use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
     use crate::types::EpochId;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
@@ -264,7 +264,7 @@ pub mod block_info {
             last_finalized_height: BlockHeight,
             last_final_block_hash: CryptoHash,
             prev_hash: CryptoHash,
-            proposals: Vec<ValidatorStake>,
+            proposals: Vec<ValidatorPower>,
             validator_mask: Vec<bool>,
             slashed: Vec<SlashedValidator>,
             total_supply: Balance,
@@ -299,10 +299,10 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn proposals_iter(&self) -> ValidatorStakeIter {
+        pub fn proposals_iter(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorStakeIter::v1(&v1.proposals),
-                Self::V2(v2) => ValidatorStakeIter::new(&v2.proposals),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.proposals),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.proposals),
             }
         }
 
@@ -439,7 +439,7 @@ pub mod block_info {
         pub prev_hash: CryptoHash,
         pub epoch_first_block: CryptoHash,
         pub epoch_id: EpochId,
-        pub proposals: Vec<ValidatorStake>,
+        pub proposals: Vec<ValidatorPower>,
         pub chunk_mask: Vec<bool>,
         /// Latest protocol version this validator observes.
         pub latest_protocol_version: ProtocolVersion,
@@ -463,7 +463,7 @@ pub struct BlockInfoV1 {
     pub prev_hash: CryptoHash,
     pub epoch_first_block: CryptoHash,
     pub epoch_id: EpochId,
-    pub proposals: Vec<ValidatorStakeV1>,
+    pub proposals: Vec<ValidatorPowerV1>,
     pub chunk_mask: Vec<bool>,
     /// Latest protocol version this validator observes.
     pub latest_protocol_version: ProtocolVersion,
@@ -481,7 +481,7 @@ impl BlockInfoV1 {
         last_finalized_height: BlockHeight,
         last_final_block_hash: CryptoHash,
         prev_hash: CryptoHash,
-        proposals: Vec<ValidatorStakeV1>,
+        proposals: Vec<ValidatorPowerV1>,
         validator_mask: Vec<bool>,
         slashed: Vec<SlashedValidator>,
         total_supply: Balance,
@@ -519,22 +519,22 @@ impl BlockInfoV1 {
 pub struct ValidatorWeight(ValidatorId, u64);
 
 pub mod epoch_info {
-    use crate::epoch_manager::ValidatorWeight;
-    use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
+use crate::epoch_manager::ValidatorWeight;
+    use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
     use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason};
     use crate::validator_mandates::{ValidatorMandates, ValidatorMandatesAssignment};
     use crate::version::PROTOCOL_VERSION;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
     use near_primitives_core::types::{
-        AccountId, Balance, EpochHeight, ProtocolVersion, ValidatorId,
+        AccountId, Balance, EpochHeight, ProtocolVersion, ValidatorId, Power,
     };
     use rand::SeedableRng;
     use rand_chacha::ChaCha20Rng;
     use smart_default::SmartDefault;
     use std::collections::{BTreeMap, HashMap};
 
-    use crate::types::validator_stake::ValidatorStakeV1;
+    use crate::types::validator_power::ValidatorPowerV1;
     use crate::{epoch_manager::RngSeed, rand::WeightedIndex};
     use near_primitives_core::{
         checked_feature,
@@ -575,7 +575,7 @@ pub mod epoch_info {
         /// There can be multiple epochs with the same ordinal in case of long forks.
         pub epoch_height: EpochHeight,
         /// List of current validators.
-        pub validators: Vec<ValidatorStake>,
+        pub validators: Vec<ValidatorPower>,
         /// Validator account id to index in proposals.
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         /// Settlement of validators responsible for block production.
@@ -585,7 +585,7 @@ pub mod epoch_info {
         /// Settlement of hidden validators with weights used to determine how many shards they will validate.
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
         /// List of current fishermen.
-        pub fishermen: Vec<ValidatorStake>,
+        pub fishermen: Vec<ValidatorPower>,
         /// Fisherman account id to index of proposal.
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         /// New stake for validators.
@@ -617,12 +617,12 @@ pub mod epoch_info {
     )]
     pub struct EpochInfoV3 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorStake>,
+        pub validators: Vec<ValidatorPower>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorStake>,
+        pub fishermen: Vec<ValidatorPower>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub stake_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
@@ -650,12 +650,12 @@ pub mod epoch_info {
     )]
     pub struct EpochInfoV4 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorStake>,
+        pub validators: Vec<ValidatorPower>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorStake>,
+        pub fishermen: Vec<ValidatorPower>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub stake_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
@@ -675,12 +675,12 @@ pub mod epoch_info {
     impl EpochInfo {
         pub fn new(
             epoch_height: EpochHeight,
-            validators: Vec<ValidatorStake>,
+            validators: Vec<ValidatorPower>,
             validator_to_index: HashMap<AccountId, ValidatorId>,
             block_producers_settlement: Vec<ValidatorId>,
             chunk_producers_settlement: Vec<Vec<ValidatorId>>,
             hidden_validators_settlement: Vec<ValidatorWeight>,
-            fishermen: Vec<ValidatorStake>,
+            fishermen: Vec<ValidatorPower>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
             stake_change: BTreeMap<AccountId, Balance>,
             validator_reward: HashMap<AccountId, Balance>,
@@ -696,7 +696,7 @@ pub mod epoch_info {
                     WeightedIndex::new(
                         ids.iter()
                             .copied()
-                            .map(|validator_id| validators[validator_id as usize].stake())
+                            .map(|validator_id| validators[validator_id as usize].power())
                             .collect(),
                     )
                 };
@@ -769,19 +769,19 @@ pub mod epoch_info {
             Self::V1(EpochInfoV1 {
                 epoch_height: 10,
                 validators: vec![
-                    ValidatorStakeV1 {
+                    ValidatorPowerV1 {
                         account_id: "test".parse().unwrap(),
                         public_key: "ed25519:6E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
-                        stake: 0,
+                        power: 0,
                     },
-                    ValidatorStakeV1 {
+                    ValidatorPowerV1 {
                         account_id: "validator".parse().unwrap(),
                         public_key: "ed25519:9E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
-                        stake: 0,
+                        power: 0,
                     },
                 ],
                 validator_to_index: HashMap::new(),
@@ -900,32 +900,32 @@ pub mod epoch_info {
         }
 
         #[inline]
-        pub fn validators_iter(&self) -> ValidatorStakeIter {
+        pub fn validators_iter(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorStakeIter::v1(&v1.validators),
-                Self::V2(v2) => ValidatorStakeIter::new(&v2.validators),
-                Self::V3(v3) => ValidatorStakeIter::new(&v3.validators),
-                Self::V4(v4) => ValidatorStakeIter::new(&v4.validators),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validators),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.validators),
+                Self::V3(v3) => ValidatorPowerIter::new(&v3.validators),
+                Self::V4(v4) => ValidatorPowerIter::new(&v4.validators),
             }
         }
 
         #[inline]
-        pub fn fishermen_iter(&self) -> ValidatorStakeIter {
+        pub fn fishermen_iter(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorStakeIter::v1(&v1.fishermen),
-                Self::V2(v2) => ValidatorStakeIter::new(&v2.fishermen),
-                Self::V3(v3) => ValidatorStakeIter::new(&v3.fishermen),
-                Self::V4(v4) => ValidatorStakeIter::new(&v4.fishermen),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.fishermen),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.fishermen),
+                Self::V3(v3) => ValidatorPowerIter::new(&v3.fishermen),
+                Self::V4(v4) => ValidatorPowerIter::new(&v4.fishermen),
             }
         }
 
         #[inline]
-        pub fn validator_stake(&self, validator_id: u64) -> Balance {
+        pub fn validator_power(&self, validator_id: u64) -> Power {
             match self {
-                Self::V1(v1) => v1.validators[validator_id as usize].stake,
-                Self::V2(v2) => v2.validators[validator_id as usize].stake(),
-                Self::V3(v3) => v3.validators[validator_id as usize].stake(),
-                Self::V4(v4) => v4.validators[validator_id as usize].stake(),
+                Self::V1(v1) => v1.validators[validator_id as usize].power,
+                Self::V2(v2) => v2.validators[validator_id as usize].power(),
+                Self::V3(v3) => v3.validators[validator_id as usize].power(),
+                Self::V4(v4) => v4.validators[validator_id as usize].power(),
             }
         }
 
@@ -958,10 +958,10 @@ pub mod epoch_info {
             }
         }
 
-        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorStake> {
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPower> {
             match self {
                 Self::V1(v1) => v1.validator_to_index.get(account_id).map(|validator_id| {
-                    ValidatorStake::V1(v1.validators[*validator_id as usize].clone())
+                    ValidatorPower::V1(v1.validators[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .validator_to_index
@@ -979,9 +979,9 @@ pub mod epoch_info {
         }
 
         #[inline]
-        pub fn get_validator(&self, validator_id: u64) -> ValidatorStake {
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPower {
             match self {
-                Self::V1(v1) => ValidatorStake::V1(v1.validators[validator_id as usize].clone()),
+                Self::V1(v1) => ValidatorPower::V1(v1.validators[validator_id as usize].clone()),
                 Self::V2(v2) => v2.validators[validator_id as usize].clone(),
                 Self::V3(v3) => v3.validators[validator_id as usize].clone(),
                 Self::V4(v4) => v4.validators[validator_id as usize].clone(),
@@ -998,10 +998,10 @@ pub mod epoch_info {
             }
         }
 
-        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorStake> {
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPower> {
             match self {
                 Self::V1(v1) => v1.fishermen_to_index.get(account_id).map(|validator_id| {
-                    ValidatorStake::V1(v1.fishermen[*validator_id as usize].clone())
+                    ValidatorPower::V1(v1.fishermen[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .fishermen_to_index
@@ -1019,9 +1019,9 @@ pub mod epoch_info {
         }
 
         #[inline]
-        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorStake {
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPower {
             match self {
-                Self::V1(v1) => ValidatorStake::V1(v1.fishermen[fisherman_id as usize].clone()),
+                Self::V1(v1) => ValidatorPower::V1(v1.fishermen[fisherman_id as usize].clone()),
                 Self::V2(v2) => v2.fishermen[fisherman_id as usize].clone(),
                 Self::V3(v3) => v3.fishermen[fisherman_id as usize].clone(),
                 Self::V4(v4) => v4.fishermen[fisherman_id as usize].clone(),
@@ -1156,7 +1156,7 @@ pub mod epoch_info {
     pub struct EpochSummary {
         pub prev_epoch_last_block_hash: CryptoHash,
         /// Proposals from the epoch, only the latest one per account
-        pub all_proposals: Vec<ValidatorStake>,
+        pub all_proposals: Vec<ValidatorPower>,
         /// Kickout set, includes slashed
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         /// Only for validators who met the threshold and didn't get slashed
@@ -1175,7 +1175,7 @@ pub struct EpochInfoV1 {
     /// There can be multiple epochs with the same ordinal in case of long forks.
     pub epoch_height: EpochHeight,
     /// List of current validators.
-    pub validators: Vec<ValidatorStakeV1>,
+    pub validators: Vec<ValidatorPowerV1>,
     /// Validator account id to index in proposals.
     pub validator_to_index: HashMap<AccountId, ValidatorId>,
     /// Settlement of validators responsible for block production.
@@ -1185,7 +1185,7 @@ pub struct EpochInfoV1 {
     /// Settlement of hidden validators with weights used to determine how many shards they will validate.
     pub hidden_validators_settlement: Vec<ValidatorWeight>,
     /// List of current fishermen.
-    pub fishermen: Vec<ValidatorStakeV1>,
+    pub fishermen: Vec<ValidatorPowerV1>,
     /// Fisherman account id to index of proposal.
     pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
     /// New stake for validators.

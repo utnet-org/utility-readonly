@@ -2,7 +2,7 @@ use crate::hash::{hash, CryptoHash};
 use crate::merkle::{combine_hash, merklize, verify_path, MerklePath};
 use crate::receipt::Receipt;
 use crate::transaction::SignedTransaction;
-use crate::types::validator_stake::{ValidatorStake, ValidatorStakeIter, ValidatorStakeV1};
+use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
 use crate::types::{Balance, BlockHeight, Gas, MerkleHash, ShardId, StateRoot};
 use crate::validator_signer::ValidatorSigner;
 use crate::version::{ProtocolFeature, ProtocolVersion, SHARD_CHUNK_HEADER_UPGRADE_VERSION};
@@ -125,7 +125,7 @@ impl ShardChunkHeaderV2 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorStakeV1>,
+        prev_validator_proposals: Vec<ValidatorPowerV1>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInnerV1 {
@@ -189,7 +189,7 @@ impl ShardChunkHeaderV3 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorStake>,
+        prev_validator_proposals: Vec<ValidatorPower>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInner::V2(ShardChunkHeaderInnerV2 {
@@ -284,10 +284,10 @@ impl ShardChunkHeader {
     }
 
     #[inline]
-    pub fn prev_validator_proposals(&self) -> ValidatorStakeIter {
+    pub fn prev_validator_proposals(&self) -> ValidatorPowerIter {
         match self {
-            Self::V1(header) => ValidatorStakeIter::v1(&header.inner.prev_validator_proposals),
-            Self::V2(header) => ValidatorStakeIter::v1(&header.inner.prev_validator_proposals),
+            Self::V1(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_proposals),
+            Self::V2(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_proposals),
             Self::V3(header) => header.inner.prev_validator_proposals(),
         }
     }
@@ -454,7 +454,7 @@ impl ShardChunkHeaderV1 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorStakeV1>,
+        prev_validator_proposals: Vec<ValidatorPowerV1>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInnerV1 {
@@ -1036,7 +1036,7 @@ impl EncodedShardChunk {
         gas_limit: Gas,
         prev_balance_burnt: Balance,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorStake>,
+        prev_validator_proposals: Vec<ValidatorPower>,
         transactions: Vec<SignedTransaction>,
         prev_outgoing_receipts: &[Receipt],
         prev_outgoing_receipts_root: CryptoHash,

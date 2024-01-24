@@ -3,7 +3,7 @@ use near_epoch_manager::EpochManagerAdapter;
 use near_primitives::block::BlockHeader;
 use near_primitives::hash::{hash, CryptoHash};
 use near_primitives::types::EpochId;
-use near_primitives::views::validator_stake_view::ValidatorStakeView;
+use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{BlockHeaderInnerLiteView, LightClientBlockView};
 
 use crate::ChainStoreAccess;
@@ -12,7 +12,7 @@ pub fn get_epoch_block_producers_view(
     epoch_id: &EpochId,
     prev_hash: &CryptoHash,
     epoch_manager: &dyn EpochManagerAdapter,
-) -> Result<Vec<ValidatorStakeView>, Error> {
+) -> Result<Vec<ValidatorPowerView>, Error> {
     Ok(epoch_manager
         .get_epoch_block_producers_ordered(epoch_id, prev_hash)?
         .iter()
@@ -36,7 +36,7 @@ pub fn get_epoch_block_producers_view(
 pub fn create_light_client_block_view(
     block_header: &BlockHeader,
     chain_store: &dyn ChainStoreAccess,
-    next_block_producers: Option<Vec<ValidatorStakeView>>,
+    next_block_producers: Option<Vec<ValidatorPowerView>>,
 ) -> Result<LightClientBlockView, Error> {
     let inner_lite_view = BlockHeaderInnerLiteView {
         height: block_header.height(),

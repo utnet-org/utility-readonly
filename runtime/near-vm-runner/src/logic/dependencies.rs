@@ -6,7 +6,7 @@ use super::VMLogicError;
 use near_crypto::PublicKey;
 use near_parameters::vm::StorageGetMode;
 use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::Gas;
+use near_primitives_core::types::{Gas, Power};
 use near_primitives_core::types::GasWeight;
 use near_primitives_core::types::Nonce;
 use near_primitives_core::types::{AccountId, Balance};
@@ -246,10 +246,10 @@ pub trait External {
 
     /// Returns the validator stake for given account in the current epoch.
     /// If the account is not a validator, returns `None`.
-    fn validator_stake(&self, account_id: &AccountId) -> Result<Option<Balance>>;
+    fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>>;
 
     /// Returns total stake of validators in the current epoch.
-    fn validator_total_stake(&self) -> Result<Balance>;
+    fn validator_total_power(&self) -> Result<Power>;
 
     /// Create a receipt which will be executed after all the receipts identified by
     /// `receipt_indices` are complete.

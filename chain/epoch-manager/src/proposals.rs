@@ -4,7 +4,7 @@ use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::EpochError;
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason,
 };
@@ -41,7 +41,7 @@ pub fn proposals_to_epoch_info(
     epoch_config: &EpochConfig,
     rng_seed: RngSeed,
     prev_epoch_info: &EpochInfo,
-    proposals: Vec<ValidatorStake>,
+    proposals: Vec<ValidatorPower>,
     validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -81,7 +81,7 @@ mod old_validator_selection {
     use near_primitives::epoch_manager::epoch_info::EpochInfo;
     use near_primitives::epoch_manager::EpochConfig;
     use near_primitives::errors::EpochError;
-    use near_primitives::types::validator_stake::ValidatorStake;
+    use near_primitives::types::validator_power::ValidatorPower;
     use near_primitives::types::{
         AccountId, Balance, NumSeats, ValidatorId, ValidatorKickoutReason,
     };
@@ -97,7 +97,7 @@ mod old_validator_selection {
         epoch_config: &EpochConfig,
         rng_seed: RngSeed,
         prev_epoch_info: &EpochInfo,
-        proposals: Vec<ValidatorStake>,
+        proposals: Vec<ValidatorPower>,
         mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         validator_reward: HashMap<AccountId, Balance>,
         minted_amount: Balance,
@@ -106,7 +106,7 @@ mod old_validator_selection {
         // Combine proposals with rollovers.
         let mut ordered_proposals = BTreeMap::new();
         // Account -> new_stake
-        let mut stake_change = BTreeMap::new();
+        let mut power_change = BTreeMap::new();
         let mut fishermen = vec![];
         debug_assert!(
             proposals.iter().map(|stake| stake.account_id()).collect::<HashSet<_>>().len()
@@ -118,33 +118,33 @@ mod old_validator_selection {
             let account_id = p.account_id();
             if validator_kickout.contains_key(account_id) {
                 let account_id = p.take_account_id();
-                stake_change.insert(account_id, 0);
+                power_change.insert(account_id, 0);
             } else {
-                stake_change.insert(account_id.clone(), p.stake());
+                power_change.insert(account_id.clone(), p.power());
                 ordered_proposals.insert(account_id.clone(), p);
             }
         }
         for r in prev_epoch_info.validators_iter() {
             let account_id = r.account_id().clone();
             if validator_kickout.contains_key(&account_id) {
-                stake_change.insert(account_id, 0);
+                power_change.insert(account_id, 0);
                 continue;
             }
             let p = ordered_proposals.entry(account_id.clone()).or_insert(r);
-            *p.stake_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
-            stake_change.insert(account_id, p.stake());
+            *p.power_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
+            power_change.insert(account_id, p.power());
         }
 
         for r in prev_epoch_info.fishermen_iter() {
             let account_id = r.account_id();
             if validator_kickout.contains_key(account_id) {
-                stake_change.insert(account_id.clone(), 0);
+                power_change.insert(account_id.clone(), 0);
                 continue;
             }
             if !ordered_proposals.contains_key(account_id) {
                 // safe to do this here because fishermen from previous epoch is guaranteed to have no
                 // duplicates.
-                stake_change.insert(account_id.clone(), r.stake());
+                power_change.insert(account_id.clone(), r.power());
                 fishermen.push(r);
             }
         }
@@ -153,26 +153,26 @@ mod old_validator_selection {
         let num_hidden_validator_seats: NumSeats =
             epoch_config.avg_hidden_validator_seats_per_shard.iter().sum();
         let num_total_seats = epoch_config.num_block_producer_seats + num_hidden_validator_seats;
-        let stakes = ordered_proposals.iter().map(|(_, p)| p.stake()).collect::<Vec<_>>();
+        let stakes = ordered_proposals.iter().map(|(_, p)| p.power()).collect::<Vec<_>>();
         let threshold = find_threshold(&stakes, num_total_seats)?;
         // Remove proposals under threshold.
         let mut final_proposals = vec![];
 
         for (account_id, p) in ordered_proposals {
-            let stake = p.stake();
-            if stake >= threshold {
+            let power = p.power();
+            if power >= threshold {
                 final_proposals.push(p);
-            } else if stake >= epoch_config.fishermen_threshold {
+            } else if power >= epoch_config.fishermen_threshold {
                 // Do not return stake back since they will become fishermen
                 fishermen.push(p);
             } else {
-                *stake_change.get_mut(&account_id).unwrap() = 0;
+                *power_change.get_mut(&account_id).unwrap() = 0;
                 if prev_epoch_info.account_is_validator(&account_id)
                     || prev_epoch_info.account_is_fisherman(&account_id)
                 {
                     validator_kickout.insert(
                         account_id,
-                        ValidatorKickoutReason::NotEnoughStake { stake, threshold },
+                        ValidatorKickoutReason::NotEnoughPower { power, threshold },
                     );
                 }
             }
@@ -182,7 +182,7 @@ mod old_validator_selection {
         let mut dup_proposals = final_proposals
             .iter()
             .enumerate()
-            .flat_map(|(i, p)| iter::repeat(i as u64).take((p.stake() / threshold) as usize))
+            .flat_map(|(i, p)| iter::repeat(i as u64).take((p.power() / threshold) as usize))
             .collect::<Vec<_>>();
 
         assert!(dup_proposals.len() >= num_total_seats as usize, "bug in find_threshold");
@@ -205,12 +205,12 @@ mod old_validator_selection {
             },
         );
         for p in proposals_to_remove {
-            debug_assert!(p.stake() >= threshold);
-            if p.stake() >= epoch_config.fishermen_threshold {
+            debug_assert!(p.power() >= threshold);
+            if p.power() >= epoch_config.fishermen_threshold {
                 fishermen.push(p);
             } else {
                 let account_id = p.take_account_id();
-                stake_change.insert(account_id.clone(), 0);
+                power_change.insert(account_id.clone(), 0);
                 if prev_epoch_info.account_is_validator(&account_id)
                     || prev_epoch_info.account_is_fisherman(&account_id)
                 {
@@ -261,7 +261,7 @@ mod old_validator_selection {
             vec![],
             fishermen,
             fishermen_to_index,
-            stake_change,
+            power_change,
             validator_reward,
             validator_kickout,
             minted_amount,

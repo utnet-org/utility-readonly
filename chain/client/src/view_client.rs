@@ -50,7 +50,7 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId,
     ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier,
 };
-use near_primitives::views::validator_stake_view::ValidatorStakeView;
+use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView,
     FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView,
@@ -792,7 +792,7 @@ impl Handler<WithSpanContext<GetValidatorInfo>> for ViewClientActor {
 }
 
 impl Handler<WithSpanContext<GetValidatorOrdered>> for ViewClientActor {
-    type Result = Result<Vec<ValidatorStakeView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
 
     #[perf]
     fn handle(

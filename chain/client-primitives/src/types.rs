@@ -10,7 +10,7 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockReference, EpochId, EpochReference, MaybeBlockId, ShardId,
     TransactionOrReceiptId,
 };
-use near_primitives::views::validator_stake_view::ValidatorStakeView;
+use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView,
     GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView,
@@ -785,7 +785,7 @@ pub struct GetValidatorOrdered {
 }
 
 impl Message for GetValidatorOrdered {
-    type Result = Result<Vec<ValidatorStakeView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
 }
 
 #[derive(Debug)]

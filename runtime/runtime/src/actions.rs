@@ -19,7 +19,7 @@ use near_primitives::transaction::{
     Action, AddKeyAction, DeleteAccountAction, DeleteKeyAction, DeployContractAction,
     FunctionCallAction, StakeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
 use near_primitives::utils::{account_is_implicit, create_random_seed};
 use near_primitives::version::{
@@ -331,7 +331,7 @@ pub(crate) fn action_stake(
         }
 
         if stake.stake > 0 {
-            let minimum_stake = epoch_info_provider.minimum_stake(last_block_hash)?;
+            let minimum_stake = epoch_info_provider.minimum_power(last_block_hash)?;
             if stake.stake < minimum_stake {
                 result.result = Err(ActionErrorKind::InsufficientStake {
                     account_id: account_id.clone(),
@@ -342,12 +342,13 @@ pub(crate) fn action_stake(
                 return Ok(());
             }
         }
-
-        result.validator_proposals.push(ValidatorStake::new(
-            account_id.clone(),
-            stake.public_key.clone(),
-            stake.stake,
-        ));
+        // TO DO : get power args via rsa pub key
+        // let power = 5000000000000;
+        // result.validator_proposals.push(ValidatorPower::new(
+        //     account_id.clone(),
+        //     stake.public_key.clone(),
+        //     power,
+        // ));
         if stake.stake > account.locked() {
             // We've checked above `account.amount >= increment`
             account.set_amount(account.amount() - increment);
@@ -442,6 +443,7 @@ pub(crate) fn action_create_account(
     *account = Some(Account::new(
         0,
         0,
+        0,
         CryptoHash::default(),
         fee_config.storage_usage_config.num_bytes_account,
     ));
@@ -481,6 +483,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
             *account = Some(Account::new(
                 transfer.deposit,
                 0,
+                0,
                 CryptoHash::default(),
                 fee_config.storage_usage_config.num_bytes_account
                     + public_key.len() as u64
@@ -504,7 +507,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
                     + fee_config.storage_usage_config.num_extra_bytes_record;
 
                 *account =
-                    Some(Account::new(transfer.deposit, 0, *magic_bytes.hash(), storage_usage));
+                    Some(Account::new(transfer.deposit, 0, 0, *magic_bytes.hash(), storage_usage));
                 set_code(state_update, account_id.clone(), &magic_bytes);
 
                 // Precompile Wallet Contract and store result (compiled code or error) in the database.
@@ -731,7 +734,7 @@ pub(crate) fn action_create_rsa2048_challenge(
     challenge: &CreateRsa2048ChallengeAction,
 ) -> Result<(), RuntimeError>{
     //TODO: 从root 基金会获取的公钥， 匹配验证签名以及附加参数(如算力, 矿工信息, dev_id, 等)
-    let root_id = "root".parse::<AccountId>().unwrap();
+    let root_id = "jamesavechives".parse::<AccountId>().unwrap();
     if get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.is_none() {
         result.result = Err(ActionErrorKind::RsaKeysNotFound {
             account_id: account_id.to_owned(),
@@ -745,9 +748,33 @@ pub(crate) fn action_create_rsa2048_challenge(
     let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
         Ok(parsed_args) => {
-            serde_json::to_string_pretty(&parsed_args)
-                .unwrap_or_else(|_| "".to_string())
-                .replace('\n', "\n                                 ")
+            if let Some(power_val) = parsed_args.get("power") {
+                match power_val.as_str() {
+                    Some(power_str) => {
+                        match power_str.parse::<u128>() {
+                            Ok(power) => {
+                                // push power to validator proposal
+                                result.validator_proposals.push(ValidatorPower::new(
+                                    account_id.clone(),
+                                    challenge.public_key.clone().into(),
+                                    power,
+                                ));
+                                // attach power to account
+                                _account.set_power(power);
+                                println!("Power (as u128): {}", power);
+                            }
+                            Err(_) => println!("Power value is not a valid u128 number"),
+                        }
+                    },
+                    None => {
+                        if let Some(power_number) = power_val.as_u64() {
+                            println!("Power (as u64, converted from u128): {}", power_number);
+                        } else {
+                            println!("Power value is not a string or a number that fits into u64");
+                        }
+                    }
+                }
+            }
         }
         Err(_) => {
             return Ok(());
@@ -1001,7 +1028,7 @@ pub(crate) fn check_actor_permissions(
         Action::Delegate(_) => (),
         Action::RegisterRsa2048Keys(_) => {
             // FIXME: 这里是硬编码, 之后RuntimeConfig中添加配置, 只有创世共识账号基金会账号, 类似registrar账号
-            let root_id = "root".parse::<AccountId>().unwrap();
+            let root_id = "jamesavechives".parse::<AccountId>().unwrap();
             if account_id.clone() != root_id {
                 return Err(ActionErrorKind::ActorNoPermission {
                     account_id: account_id.clone(),

@@ -9,7 +9,7 @@ use near_primitives::hash::{hash, CryptoHash};
 use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
 use near_primitives::state_record::StateRecord;
 use near_primitives::transaction::{Action, FunctionCallAction};
-use near_primitives::types::{AccountId, AccountInfo, Balance, Gas};
+use near_primitives::types::{AccountId, AccountInfo, Balance, Gas, Power};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -106,6 +106,7 @@ struct Row {
     amount: Balance,
     is_treasury: bool,
     validator_stake: Balance,
+    validator_power: Power,
     validator_key: Option<PublicKey>,
     #[serde(with = "crate::serde_with::peer_info_to_str")]
     peer_info: Option<PeerInfo>,
@@ -156,6 +157,7 @@ where
                 account_id: row.account_id.clone(),
                 public_key: validator_key.clone(),
                 amount: row.validator_stake,
+                power: row.validator_power,
             });
         }
 
@@ -187,7 +189,7 @@ fn account_records(row: &Row, gas_price: Balance) -> Vec<StateRecord> {
 
     let mut res = vec![StateRecord::Account {
         account_id: row.account_id.clone(),
-        account: Account::new(row.amount, row.validator_stake, smart_contract_hash, 0),
+        account: Account::new(row.amount, row.validator_stake, row.validator_power, smart_contract_hash, 0),
     }];
 
     // Add restricted access keys.

@@ -638,8 +638,8 @@ impl<'a> VMLogic<'a> {
         self.gas_counter.pay_base(base)?;
         let account_id = self.read_and_parse_account_id(account_id_ptr, account_id_len)?;
         self.gas_counter.pay_base(validator_stake_base)?;
-        let balance = self.ext.validator_stake(&account_id)?.unwrap_or_default();
-        self.memory.set_u128(&mut self.gas_counter, stake_ptr, balance)
+        let power = self.ext.validator_power(&account_id)?.unwrap_or_default();
+        self.memory.set_u128(&mut self.gas_counter, stake_ptr, power)
     }
 
     /// Get the total validator stake of the current epoch.
@@ -652,8 +652,8 @@ impl<'a> VMLogic<'a> {
     pub fn validator_total_stake(&mut self, stake_ptr: u64) -> Result<()> {
         self.gas_counter.pay_base(base)?;
         self.gas_counter.pay_base(validator_total_stake_base)?;
-        let total_stake = self.ext.validator_total_stake()?;
-        self.memory.set_u128(&mut self.gas_counter, stake_ptr, total_stake)
+        let total_power = self.ext.validator_total_power()?;
+        self.memory.set_u128(&mut self.gas_counter, stake_ptr, total_power)
     }
 
     /// Returns the number of bytes used by the contract if it was saved to the trie as of the

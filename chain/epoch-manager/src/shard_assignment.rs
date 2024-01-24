@@ -1,4 +1,4 @@
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{Balance, NumShards, ShardId};
 use near_primitives::utils::min_heap::{MinHeap, PeekMut};
 
@@ -144,9 +144,9 @@ pub trait HasStake {
     fn get_stake(&self) -> Balance;
 }
 
-impl HasStake for ValidatorStake {
+impl HasStake for ValidatorPower {
     fn get_stake(&self) -> Balance {
-        self.stake()
+        self.power()
     }
 }
 
