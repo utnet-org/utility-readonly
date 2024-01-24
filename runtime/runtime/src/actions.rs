@@ -343,12 +343,12 @@ pub(crate) fn action_stake(
             }
         }
         // TO DO : get power args via rsa pub key
-        let power = 5000000000000;
-        result.validator_proposals.push(ValidatorPower::new(
-            account_id.clone(),
-            stake.public_key.clone(),
-            power,
-        ));
+        // let power = 5000000000000;
+        // result.validator_proposals.push(ValidatorPower::new(
+        //     account_id.clone(),
+        //     stake.public_key.clone(),
+        //     power,
+        // ));
         if stake.stake > account.locked() {
             // We've checked above `account.amount >= increment`
             account.set_amount(account.amount() - increment);
@@ -753,6 +753,12 @@ pub(crate) fn action_create_rsa2048_challenge(
                     Some(power_str) => {
                         match power_str.parse::<u128>() {
                             Ok(power) => {
+                                // push power to validator proposal
+                                result.validator_proposals.push(ValidatorPower::new(
+                                    account_id.clone(),
+                                    challenge.public_key.clone().into(),
+                                    power,
+                                ));
                                 // attach power to account
                                 _account.set_power(power);
                                 println!("Power (as u128): {}", power);

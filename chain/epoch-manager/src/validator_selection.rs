@@ -234,7 +234,7 @@ fn proposals_with_rollover(
     prev_epoch_info: &EpochInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
-    stake_change: &mut BTreeMap<AccountId, Balance>,
+    power_change: &mut BTreeMap<AccountId, Balance>,
     fishermen: &mut Vec<ValidatorPower>,
 ) -> HashMap<AccountId, ValidatorPower> {
     let mut proposals_by_account = HashMap::new();
@@ -242,9 +242,9 @@ fn proposals_with_rollover(
         let account_id = p.account_id();
         if validator_kickout.contains_key(account_id) {
             let account_id = p.take_account_id();
-            stake_change.insert(account_id, 0);
+            power_change.insert(account_id, 0);
         } else {
-            stake_change.insert(account_id.clone(), p.power());
+            power_change.insert(account_id.clone(), p.power());
             proposals_by_account.insert(account_id.clone(), p);
         }
     }
@@ -252,26 +252,26 @@ fn proposals_with_rollover(
     for r in prev_epoch_info.validators_iter() {
         let account_id = r.account_id().clone();
         if validator_kickout.contains_key(&account_id) {
-            stake_change.insert(account_id, 0);
+            power_change.insert(account_id, 0);
             continue;
         }
         let p = proposals_by_account.entry(account_id).or_insert(r);
         if let Some(reward) = validator_reward.get(p.account_id()) {
             *p.power_mut() += *reward;
         }
-        stake_change.insert(p.account_id().clone(), p.power());
+        power_change.insert(p.account_id().clone(), p.power());
     }
 
     for r in prev_epoch_info.fishermen_iter() {
         let account_id = r.account_id();
         if validator_kickout.contains_key(account_id) {
-            stake_change.insert(account_id.clone(), 0);
+            power_change.insert(account_id.clone(), 0);
             continue;
         }
         if !proposals_by_account.contains_key(account_id) {
             // safe to do this here because fishermen from previous epoch is guaranteed to have no
             // duplicates.
-            stake_change.insert(account_id.clone(), r.power());
+            power_change.insert(account_id.clone(), r.power());
             fishermen.push(r);
         }
     }
@@ -389,7 +389,7 @@ mod tests {
     use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochInfoV3};
     use near_primitives::epoch_manager::ValidatorSelectionConfig;
     use near_primitives::shard_layout::ShardLayout;
-    use near_primitives::types::validator_stake::ValidatorStake;
+    use near_primitives::types::validator_power::ValidatorPower;
     #[cfg(feature = "nightly")]
     use near_primitives::validator_mandates::{AssignmentWeight, ValidatorMandatesAssignment};
     use near_primitives::version::PROTOCOL_VERSION;
@@ -422,7 +422,7 @@ mod tests {
 
         // assign block producers in decreasing order of stake
         let mut sorted_proposals = proposals;
-        sorted_proposals.sort_unstable_by(|a, b| b.stake().cmp(&a.stake()));
+        sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert_eq!(sorted_proposals, epoch_info.validators_iter().collect::<Vec<_>>());
 
         // All proposals become block producers
@@ -493,7 +493,7 @@ mod tests {
 
         // the top stakes are the chosen block producers
         let mut sorted_proposals = proposals;
-        sorted_proposals.sort_unstable_by(|a, b| b.stake().cmp(&a.stake()));
+        sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert!(sorted_proposals.iter().take(num_bp_seats as usize).cloned().eq(epoch_info
             .block_producers_settlement()
             .into_iter()
@@ -506,13 +506,13 @@ mod tests {
         );
 
         // The top proposals are all chunk producers
-        let mut chosen_chunk_producers: Vec<ValidatorStake> = epoch_info
+        let mut chosen_chunk_producers: Vec<ValidatorPower> = epoch_info
             .chunk_producers_settlement()
             .into_iter()
             .flatten()
             .map(|id| epoch_info.get_validator(*id))
             .collect();
-        chosen_chunk_producers.sort_unstable_by(|a, b| b.stake().cmp(&a.stake()));
+        chosen_chunk_producers.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert!(sorted_proposals
             .into_iter()
             .take((num_bp_seats + num_cp_seats) as usize)
@@ -523,11 +523,11 @@ mod tests {
         assert_eq!(kickout.len(), 2);
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test1")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughStake { stake: test1_stake, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughPower { power: test1_stake, threshold: 2011 },
         );
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test2")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughStake { stake: 2002, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughPower { power: 2002, threshold: 2011 },
         );
     }
 
@@ -779,11 +779,11 @@ mod tests {
         let expected_threshold = 300;
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test5")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughStake { stake: 100, threshold: expected_threshold },
+            &ValidatorKickoutReason::NotEnoughPower { power: 100, threshold: expected_threshold },
         );
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test6")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughStake { stake: 50, threshold: expected_threshold },
+            &ValidatorKickoutReason::NotEnoughPower { power: 50, threshold: expected_threshold },
         );
 
         let bp_threshold = epoch_info.seat_price();
@@ -848,7 +848,7 @@ mod tests {
         );
         let mut kick_out = HashMap::new();
         // test1 is kicked out
-        kick_out.insert("test1".parse().unwrap(), ValidatorKickoutReason::Unstaked);
+        kick_out.insert("test1".parse().unwrap(), ValidatorKickoutReason::Unpowered);
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
@@ -892,10 +892,10 @@ mod tests {
         )
         .unwrap();
 
-        for (v, ((_, stake), reward)) in
+        for (v, ((_, power), reward)) in
             epoch_info.validators_iter().zip(validators.iter().zip(rewards.iter()))
         {
-            assert_eq!(v.stake(), stake + reward);
+            assert_eq!(v.power(), power + reward);
         }
     }
 
@@ -903,7 +903,7 @@ mod tests {
         epoch_info: &EpochInfo,
         validator_ids: I,
     ) -> u128 {
-        validator_ids.into_iter().map(|id| epoch_info.get_validator(*id).stake()).sum()
+        validator_ids.into_iter().map(|id| epoch_info.get_validator(*id).power()).sum()
     }
 
     /// Create EpochConfig, only filling in the fields important for validator selection.
@@ -948,11 +948,11 @@ mod tests {
         EpochInfo::V3(result)
     }
 
-    fn to_map(vs: &[ValidatorStake]) -> HashMap<AccountId, ValidatorId> {
+    fn to_map(vs: &[ValidatorPower]) -> HashMap<AccountId, ValidatorId> {
         vs.iter().enumerate().map(|(i, v)| (v.account_id().clone(), i as u64)).collect()
     }
 
-    fn create_proposals<I, T>(ps: I) -> Vec<ValidatorStake>
+    fn create_proposals<I, T>(ps: I) -> Vec<ValidatorPower>
     where
         T: IntoValidatorStake,
         I: IntoIterator<Item = T>,
@@ -967,41 +967,41 @@ mod tests {
     }
 
     trait IntoValidatorStake {
-        fn into_validator_stake(self) -> ValidatorStake;
+        fn into_validator_stake(self) -> ValidatorPower;
     }
 
     impl IntoValidatorStake for &str {
-        fn into_validator_stake(self) -> ValidatorStake {
-            ValidatorStake::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
+        fn into_validator_stake(self) -> ValidatorPower {
+            ValidatorPower::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance) {
-        fn into_validator_stake(self) -> ValidatorStake {
-            ValidatorStake::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorPower {
+            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance) {
-        fn into_validator_stake(self) -> ValidatorStake {
-            ValidatorStake::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorPower {
+            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorStake {
-            ValidatorStake::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorPower {
+            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorStake {
-            ValidatorStake::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorPower {
+            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl<T: IntoValidatorStake + Copy> IntoValidatorStake for &T {
-        fn into_validator_stake(self) -> ValidatorStake {
+        fn into_validator_stake(self) -> ValidatorPower {
             (*self).into_validator_stake()
         }
     }

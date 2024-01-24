@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::Arc;
 
 use crate::test_utils::{
-    hash_range, record_block_with_slashes, setup_default_epoch_manager, stake,
+    hash_range, record_block_with_slashes, setup_default_epoch_manager, do_power,
 };
 use crate::EpochManager;
 use near_primitives::challenge::SlashedValidator;
@@ -12,7 +12,7 @@ use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::SlashState;
 use near_primitives::hash::CryptoHash;
-use near_primitives::types::validator_stake::ValidatorStake;
+use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{AccountId, Balance, EpochId, ValidatorKickoutReason};
 
 const DEBUG_PRINT: bool = false;
@@ -86,13 +86,13 @@ fn do_random_test<RngImpl: Rng>(
     validate(&mut epoch_manager, heights_to_pick, slashes_per_block);
 }
 
-fn random_proposals<RngImpl: Rng>(rng: &mut RngImpl) -> Vec<ValidatorStake> {
+fn random_proposals<RngImpl: Rng>(rng: &mut RngImpl) -> Vec<ValidatorPower> {
     let mut proposals = Vec::new();
     let proposal_chance = 0.2;
     if rng.gen_range(0.0..1.0) < proposal_chance {
         let account_id = AccountId::try_from(format!("test{}", rng.gen_range(1..6))).unwrap();
         let stake_amount = rng.gen_range(100..2000);
-        proposals.push(stake(account_id, stake_amount));
+        proposals.push(do_power(account_id, stake_amount));
     }
     proposals
 }
@@ -374,6 +374,6 @@ fn get_stakes_map(epoch_info: &EpochInfo) -> HashMap<AccountId, Balance> {
     epoch_info
         .validators_iter()
         .chain(epoch_info.fishermen_iter())
-        .map(|stake| stake.account_and_stake())
+        .map(|power| power.account_and_power())
         .collect::<HashMap<_, _>>()
 }

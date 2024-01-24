@@ -1217,6 +1217,7 @@ pub enum ActionView {
     },
     CreateRsa2048Challenge {
         public_key: PublicKey,
+        challenge_key: PublicKey,
         #[serde_as(as = "Base64")]
         args: Vec<u8>,
     },
@@ -1259,6 +1260,7 @@ impl From<Action> for ActionView {
             },
             Action::CreateRsa2048Challenge(action) => ActionView::CreateRsa2048Challenge {
                 public_key: action.public_key,
+                challenge_key: action.challenge_key,
                 args: action.args.into(),
             },
         }
@@ -1305,9 +1307,10 @@ impl TryFrom<ActionView> for Action {
                     args: args.into(),
                 }))
             }
-            ActionView::CreateRsa2048Challenge { public_key, args } => {
+            ActionView::CreateRsa2048Challenge { public_key, challenge_key, args } => {
                 Action::CreateRsa2048Challenge(Box::new(CreateRsa2048ChallengeAction {
                     public_key,
+                    challenge_key,
                     args: args.into(),
                 }))
             }

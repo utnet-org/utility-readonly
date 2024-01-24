@@ -205,7 +205,7 @@ mod tests {
     use near_primitives::epoch_manager::{AllEpochConfig, EpochConfig};
     use near_primitives::hash::CryptoHash;
     use near_primitives::shard_layout::ShardLayout;
-    use near_primitives::types::validator_stake::ValidatorStake;
+    use near_primitives::types::validator_power::ValidatorPower;
     use near_primitives::types::{BlockHeight, EpochId, NumShards, ProtocolVersion, ShardId};
     use near_primitives::version::ProtocolFeature::SimpleNightshade;
     use near_primitives::version::PROTOCOL_VERSION;
@@ -253,7 +253,7 @@ mod tests {
             AllEpochConfig::new(use_production_config, initial_epoch_config, "test-chain"),
             genesis_protocol_version,
             reward_calculator,
-            vec![ValidatorStake::new(
+            vec![ValidatorPower::new(
                 "test".parse().unwrap(),
                 PublicKey::empty(KeyType::ED25519),
                 100,
@@ -268,7 +268,7 @@ mod tests {
         prev_h: CryptoHash,
         cur_h: CryptoHash,
         height: BlockHeight,
-        proposals: Vec<ValidatorStake>,
+        proposals: Vec<ValidatorPower>,
         protocol_version: ProtocolVersion,
     ) {
         epoch_manager

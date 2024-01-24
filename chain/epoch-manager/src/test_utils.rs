@@ -39,8 +39,8 @@ pub fn hash_range(num: usize) -> Vec<CryptoHash> {
     result
 }
 
-pub fn change_stake(stake_changes: Vec<(AccountId, Balance)>) -> BTreeMap<AccountId, Balance> {
-    stake_changes.into_iter().collect()
+pub fn change_power(power_changes: Vec<(AccountId, Balance)>) -> BTreeMap<AccountId, Balance> {
+    power_changes.into_iter().collect()
 }
 
 pub fn epoch_info(
