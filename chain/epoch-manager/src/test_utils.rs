@@ -39,7 +39,7 @@ pub fn hash_range(num: usize) -> Vec<CryptoHash> {
     result
 }
 
-pub fn change_power(power_changes: Vec<(AccountId, Balance)>) -> BTreeMap<AccountId, Balance> {
+pub fn change_power(power_changes: Vec<(AccountId, Power)>) -> BTreeMap<AccountId, Power> {
     power_changes.into_iter().collect()
 }
 

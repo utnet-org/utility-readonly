@@ -52,6 +52,7 @@ use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::debug;
+use near_primitives_core::types::Power;
 
 mod actions;
 pub mod adapter;
@@ -69,12 +70,12 @@ const EXPECT_ACCOUNT_EXISTS: &str = "account exists, checked above";
 /// Contains information to update validators accounts at the first block of a new epoch.
 #[derive(Debug)]
 pub struct ValidatorAccountsUpdate {
-    /// Maximum stake across last 3 epochs.
-    pub stake_info: HashMap<AccountId, Balance>,
+    /// Maximum power across last 3 epochs.
+    pub power_info: HashMap<AccountId, Power>,
     /// Rewards to distribute to validators.
     pub validator_rewards: HashMap<AccountId, Balance>,
-    /// Stake proposals from the last chunk.
-    pub last_proposals: HashMap<AccountId, Balance>,
+    /// Power proposals from the last chunk.
+    pub last_proposals: HashMap<AccountId, Power>,
     /// The ID of the protocol treasury account if it belongs to the current shard.
     pub protocol_treasury_account_id: Option<AccountId>,
     /// Accounts to slash and the slashed amount (None means everything)
@@ -1009,95 +1010,89 @@ impl Runtime {
         &self,
         state_update: &mut TrieUpdate,
         validator_accounts_update: &ValidatorAccountsUpdate,
-        stats: &mut ApplyStats,
+        _stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        for (account_id, max_of_stakes) in &validator_accounts_update.stake_info {
+        for (account_id, max_of_power) in &validator_accounts_update.power_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to stake {}", account_id, reward, account.locked());
-                    account.set_locked(
+                    debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
+                    account.set_amount(
                         account
-                            .locked()
+                            .amount()
                             .checked_add(*reward)
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
                 }
 
                 debug!(target: "runtime",
-                       "account {} stake {} max_of_stakes: {}",
-                       account_id, account.locked(), max_of_stakes
+                       "account {} power {} max_of_power: {}",
+                       account_id, account.power(), max_of_power
                 );
-                if account.locked() < *max_of_stakes {
+                if account.power() < *max_of_power {
                     return Err(StorageError::StorageInconsistentState(format!(
                         "FATAL: staking invariant does not hold. \
-                         Account stake {} is less than maximum of stakes {} in the past three epochs",
-                        account.locked(),
-                        max_of_stakes)).into());
+                         Account power {} is less than maximum of power {} in the past three epochs",
+                        account.power(),
+                        max_of_power)).into());
                 }
                 let last_proposal =
                     *validator_accounts_update.last_proposals.get(account_id).unwrap_or(&0);
-                let return_stake = account
-                    .locked()
-                    .checked_sub(max(*max_of_stakes, last_proposal))
+                let return_power = account
+                    .power()
+                    .checked_sub(max(*max_of_power, last_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return stake {}", account_id, return_stake);
-                account.set_locked(
+                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
+                account.set_power(
                     account
-                        .locked()
-                        .checked_sub(return_stake)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                account.set_amount(
-                    account
-                        .amount()
-                        .checked_add(return_stake)
+                        .power()
+                        .checked_sub(return_power)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
 
                 set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_stakes > 0 {
-                // if max_of_stakes > 0, it means that the account must have locked balance
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
                 // and therefore must exist
                 return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of stakes {} is not found",
-                    account_id, max_of_stakes
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
                 ))
                 .into());
             }
         }
-
-        for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
-            if let Some(mut account) = get_account(state_update, account_id)? {
-                let amount_to_slash = stake.unwrap_or(account.locked());
-                debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.locked(), account_id);
-                if account.locked() < amount_to_slash {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. Account locked {} is less than slashed {}",
-                        account.locked(), amount_to_slash)).into());
-                }
-                stats.slashed_burnt_amount = stats
-                    .slashed_burnt_amount
-                    .checked_add(amount_to_slash)
-                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                account.set_locked(
-                    account
-                        .locked()
-                        .checked_sub(amount_to_slash)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                set_account(state_update, account_id.clone(), &account);
-            } else {
-                return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} to slash is not found",
-                    account_id
-                ))
-                .into());
-            }
-        }
+        // for now, we do not slash
+        // for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
+        //     if let Some(mut account) = get_account(state_update, account_id)? {
+        //         let amount_to_slash = stake.unwrap_or(account.locked());
+        //         debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.locked(), account_id);
+        //         if account.locked() < amount_to_slash {
+        //             return Err(StorageError::StorageInconsistentState(format!(
+        //                 "FATAL: staking invariant does not hold. Account locked {} is less than slashed {}",
+        //                 account.locked(), amount_to_slash)).into());
+        //         }
+        //         stats.slashed_burnt_amount = stats
+        //             .slashed_burnt_amount
+        //             .checked_add(amount_to_slash)
+        //             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+        //         account.set_locked(
+        //             account
+        //                 .locked()
+        //                 .checked_sub(amount_to_slash)
+        //                 .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+        //         );
+        //         set_account(state_update, account_id.clone(), &account);
+        //     } else {
+        //         return Err(StorageError::StorageInconsistentState(format!(
+        //             "Account {} to slash is not found",
+        //             account_id
+        //         ))
+        //         .into());
+        //     }
+        // }
 
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
-            if !validator_accounts_update.stake_info.contains_key(account_id) {
+            if !validator_accounts_update.power_info.contains_key(account_id) {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",

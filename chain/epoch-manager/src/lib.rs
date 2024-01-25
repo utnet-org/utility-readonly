@@ -13,11 +13,7 @@ use near_primitives::errors::EpochError;
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
 use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{
-    AccountId, ApprovalPower, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
-    EpochInfoProvider, NumBlocks, NumSeats, ShardId, ValidatorId, ValidatorInfoIdentifier,
-    ValidatorKickoutReason, ValidatorStats,
-};
+use near_primitives::types::{AccountId, ApprovalPower, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use near_primitives::views::{
@@ -616,7 +612,7 @@ impl EpochManager {
         for (account_id, proposal) in all_proposals {
             if !slashed_validators.contains_key(&account_id) {
                 if proposal.power() == 0
-                    && *next_epoch_info.stake_change().get(&account_id).unwrap_or(&0) != 0
+                    && *next_epoch_info.power_change().get(&account_id).unwrap_or(&0) != 0
                 {
                     validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Unpowered);
                 }
@@ -789,7 +785,7 @@ impl EpochManager {
                                 .slashed_mut()
                                 .entry(account_id.clone())
                                 .or_insert(SlashState::AlreadySlashed);
-                        } else if epoch_info.stake_change().contains_key(account_id) {
+                        } else if epoch_info.power_change().contains_key(account_id) {
                             block_info
                                 .slashed_mut()
                                 .entry(account_id.clone())
@@ -1163,11 +1159,11 @@ impl EpochManager {
     /// # Returns
     /// If successful, a triple of (hashmap of account id to max of stakes in the past three epochs,
     /// validator rewards in the last epoch, double sign slashing for the past epoch).
-    pub fn compute_stake_return_info(
+    pub fn compute_power_return_info(
         &self,
         last_block_hash: &CryptoHash,
     ) -> Result<
-        (HashMap<AccountId, Balance>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
+        (HashMap<AccountId, Power>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
         EpochError,
     > {
         let next_next_epoch_id = EpochId(*last_block_hash);
@@ -1183,23 +1179,23 @@ impl EpochManager {
         let last_block_info = self.get_block_info(last_block_hash)?;
         // Since stake changes for epoch T are stored in epoch info for T+2, the one stored by epoch_id
         // is the prev_prev_stake_change.
-        let prev_prev_stake_change = self.get_epoch_info(&epoch_id)?.stake_change().clone();
-        let prev_stake_change = self.get_epoch_info(&next_epoch_id)?.stake_change().clone();
-        let stake_change = self.get_epoch_info(&next_next_epoch_id)?.stake_change().clone();
+        let prev_prev_power_change = self.get_epoch_info(&epoch_id)?.power_change().clone();
+        let prev_power_change = self.get_epoch_info(&next_epoch_id)?.power_change().clone();
+        let power_change = self.get_epoch_info(&next_next_epoch_id)?.power_change().clone();
         debug!(target: "epoch_manager",
-            "prev_prev_stake_change: {:?}, prev_stake_change: {:?}, stake_change: {:?}, slashed: {:?}",
-            prev_prev_stake_change, prev_stake_change, stake_change, last_block_info.slashed()
+            "prev_prev_power_change: {:?}, prev_power_change: {:?}, power_change: {:?}, slashed: {:?}",
+            prev_prev_power_change, prev_power_change, power_change, last_block_info.slashed()
         );
-        let all_stake_changes =
-            prev_prev_stake_change.iter().chain(&prev_stake_change).chain(&stake_change);
-        let all_keys: HashSet<&AccountId> = all_stake_changes.map(|(key, _)| key).collect();
+        let all_power_changes =
+            prev_prev_power_change.iter().chain(&prev_power_change).chain(&power_change);
+        let all_keys: HashSet<&AccountId> = all_power_changes.map(|(key, _)| key).collect();
 
         let mut stake_info = HashMap::new();
         for account_id in all_keys {
             if last_block_info.slashed().contains_key(account_id) {
-                if prev_prev_stake_change.contains_key(account_id)
-                    && !prev_stake_change.contains_key(account_id)
-                    && !stake_change.contains_key(account_id)
+                if prev_prev_power_change.contains_key(account_id)
+                    && !prev_power_change.contains_key(account_id)
+                    && !power_change.contains_key(account_id)
                 {
                     // slashed in prev_prev epoch so it is safe to return the remaining stake in case of
                     // a double sign without violating the staking invariant.
@@ -1207,9 +1203,9 @@ impl EpochManager {
                     continue;
                 }
             }
-            let new_stake = *stake_change.get(account_id).unwrap_or(&0);
-            let prev_stake = *prev_stake_change.get(account_id).unwrap_or(&0);
-            let prev_prev_stake = *prev_prev_stake_change.get(account_id).unwrap_or(&0);
+            let new_stake = *power_change.get(account_id).unwrap_or(&0);
+            let prev_stake = *prev_power_change.get(account_id).unwrap_or(&0);
+            let prev_prev_stake = *prev_prev_power_change.get(account_id).unwrap_or(&0);
             let max_of_stakes =
                 vec![prev_prev_stake, prev_stake, new_stake].into_iter().max().unwrap();
             stake_info.insert(account_id.clone(), max_of_stakes);

@@ -4,9 +4,7 @@ use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::EpochError;
 use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{
-    AccountId, Balance, NumShards, ProtocolVersion, ValidatorId, ValidatorKickoutReason,
-};
+use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorId, ValidatorKickoutReason};
 use near_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
 use num_rational::Ratio;
 use std::cmp::{self, Ordering};
@@ -234,7 +232,7 @@ fn proposals_with_rollover(
     prev_epoch_info: &EpochInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
-    power_change: &mut BTreeMap<AccountId, Balance>,
+    power_change: &mut BTreeMap<AccountId, Power>,
     fishermen: &mut Vec<ValidatorPower>,
 ) -> HashMap<AccountId, ValidatorPower> {
     let mut proposals_by_account = HashMap::new();
@@ -255,11 +253,18 @@ fn proposals_with_rollover(
             power_change.insert(account_id, 0);
             continue;
         }
+        // I will not change the power when get reward
+        // TODO, add reward directly to the amount
+        // let p = proposals_by_account.entry(account_id).or_insert(r);
+        // if let Some(reward) = validator_reward.get(p.account_id()) {
+        //     *p.power_mut() += *reward;
+        // }
+        // power_change.insert(p.account_id().clone(), p.power());
         let p = proposals_by_account.entry(account_id).or_insert(r);
         if let Some(reward) = validator_reward.get(p.account_id()) {
-            *p.power_mut() += *reward;
+            println!("get reward : {}", *reward);
         }
-        power_change.insert(p.account_id().clone(), p.power());
+
     }
 
     for r in prev_epoch_info.fishermen_iter() {

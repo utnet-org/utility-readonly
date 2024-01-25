@@ -756,7 +756,7 @@ pub(crate) fn action_create_rsa2048_challenge(
                                 // push power to validator proposal
                                 result.validator_proposals.push(ValidatorPower::new(
                                     account_id.clone(),
-                                    challenge.public_key.clone().into(),
+                                    challenge.challenge_key.clone().into(),
                                     power,
                                 ));
                                 // attach power to account

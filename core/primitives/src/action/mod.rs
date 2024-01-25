@@ -204,6 +204,7 @@ impl fmt::Debug for CreateRsa2048ChallengeAction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("CreateRsa2048ChallengeAction")
             .field("public_key", &format_args!("{}", &self.public_key))
+            .field("challenge_key", &format_args!("{}", &self.challenge_key))
             .field("args", &format_args!("{}", base64(&self.args)))
             .finish()
     }

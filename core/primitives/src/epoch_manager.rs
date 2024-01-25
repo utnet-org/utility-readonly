@@ -10,7 +10,7 @@ use crate::version::PROTOCOL_VERSION;
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_primitives_core::checked_feature;
 use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::BlockHeight;
+use near_primitives_core::types::{BlockHeight, Power};
 use smart_default::SmartDefault;
 use std::collections::{BTreeMap, HashMap};
 
@@ -589,7 +589,7 @@ use crate::epoch_manager::ValidatorWeight;
         /// Fisherman account id to index of proposal.
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         /// New stake for validators.
-        pub stake_change: BTreeMap<AccountId, Balance>,
+        pub power_change: BTreeMap<AccountId, Power>,
         /// Validator reward for the epoch.
         pub validator_reward: HashMap<AccountId, Balance>,
         /// Validators who are kicked out in this epoch.
@@ -624,7 +624,7 @@ use crate::epoch_manager::ValidatorWeight;
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
         pub fishermen: Vec<ValidatorPower>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
-        pub stake_change: BTreeMap<AccountId, Balance>,
+        pub power_change: BTreeMap<AccountId, Power>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         pub minted_amount: Balance,
@@ -657,7 +657,7 @@ use crate::epoch_manager::ValidatorWeight;
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
         pub fishermen: Vec<ValidatorPower>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
-        pub stake_change: BTreeMap<AccountId, Balance>,
+        pub power_change: BTreeMap<AccountId, Power>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         pub minted_amount: Balance,
@@ -682,7 +682,7 @@ use crate::epoch_manager::ValidatorWeight;
             hidden_validators_settlement: Vec<ValidatorWeight>,
             fishermen: Vec<ValidatorPower>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
-            stake_change: BTreeMap<AccountId, Balance>,
+            power_change: BTreeMap<AccountId, Power>,
             validator_reward: HashMap<AccountId, Balance>,
             validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
             minted_amount: Balance,
@@ -712,7 +712,7 @@ use crate::epoch_manager::ValidatorWeight;
                         block_producers_settlement,
                         chunk_producers_settlement,
                         hidden_validators_settlement,
-                        stake_change,
+                        power_change,
                         validator_reward,
                         validator_kickout,
                         fishermen_to_index,
@@ -733,7 +733,7 @@ use crate::epoch_manager::ValidatorWeight;
                         block_producers_settlement,
                         chunk_producers_settlement,
                         hidden_validators_settlement,
-                        stake_change,
+                        power_change,
                         validator_reward,
                         validator_kickout,
                         fishermen_to_index,
@@ -754,7 +754,7 @@ use crate::epoch_manager::ValidatorWeight;
                     block_producers_settlement,
                     chunk_producers_settlement,
                     hidden_validators_settlement,
-                    stake_change,
+                    power_change,
                     validator_reward,
                     validator_kickout,
                     fishermen_to_index,
@@ -790,7 +790,7 @@ use crate::epoch_manager::ValidatorWeight;
                 hidden_validators_settlement: vec![],
                 fishermen: vec![],
                 fishermen_to_index: HashMap::new(),
-                stake_change: BTreeMap::new(),
+                power_change: BTreeMap::new(),
                 validator_reward: HashMap::new(),
                 validator_kickout: HashMap::new(),
                 minted_amount: 1,
@@ -880,12 +880,12 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn stake_change(&self) -> &BTreeMap<AccountId, Balance> {
+        pub fn power_change(&self) -> &BTreeMap<AccountId, Power> {
             match self {
-                Self::V1(v1) => &v1.stake_change,
-                Self::V2(v2) => &v2.stake_change,
-                Self::V3(v3) => &v3.stake_change,
-                Self::V4(v4) => &v4.stake_change,
+                Self::V1(v1) => &v1.power_change,
+                Self::V2(v2) => &v2.power_change,
+                Self::V3(v3) => &v3.power_change,
+                Self::V4(v4) => &v4.power_change,
             }
         }
 
@@ -1189,7 +1189,7 @@ pub struct EpochInfoV1 {
     /// Fisherman account id to index of proposal.
     pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
     /// New stake for validators.
-    pub stake_change: BTreeMap<AccountId, Balance>,
+    pub power_change: BTreeMap<AccountId, Power>,
     /// Validator reward for the epoch.
     pub validator_reward: HashMap<AccountId, Balance>,
     /// Validators who are kicked out in this epoch.
