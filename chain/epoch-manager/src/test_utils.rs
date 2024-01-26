@@ -45,12 +45,13 @@ pub fn change_power(power_changes: Vec<(AccountId, Power)>) -> BTreeMap<AccountI
 
 pub fn epoch_info(
     epoch_height: EpochHeight,
-    accounts: Vec<(AccountId, Balance)>,
+    accounts: Vec<(AccountId, Power, Balance)>,
     block_producers_settlement: Vec<ValidatorId>,
     chunk_producers_settlement: Vec<Vec<ValidatorId>>,
     hidden_validators_settlement: Vec<ValidatorWeight>,
-    fishermen: Vec<(AccountId, Balance)>,
-    stake_change: BTreeMap<AccountId, Balance>,
+    fishermen: Vec<(AccountId, Power, Balance)>,
+    power_change: BTreeMap<AccountId, Power>,
+    frozen_change: BTreeMap<AccountId, Balance>,
     validator_kickout: Vec<(AccountId, ValidatorKickoutReason)>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -63,7 +64,8 @@ pub fn epoch_info(
         chunk_producers_settlement,
         hidden_validators_settlement,
         fishermen,
-        stake_change,
+        power_change,
+        frozen_change,
         validator_kickout,
         validator_reward,
         minted_amount,
@@ -73,34 +75,36 @@ pub fn epoch_info(
 
 pub fn epoch_info_with_num_seats(
     epoch_height: EpochHeight,
-    mut accounts: Vec<(AccountId, Balance)>,
+    mut accounts: Vec<(AccountId, Power, Balance)>,
     block_producers_settlement: Vec<ValidatorId>,
     chunk_producers_settlement: Vec<Vec<ValidatorId>>,
     hidden_validators_settlement: Vec<ValidatorWeight>,
-    fishermen: Vec<(AccountId, Balance)>,
-    stake_change: BTreeMap<AccountId, Balance>,
+    fishermen: Vec<(AccountId, Power, Balance)>,
+    power_change: BTreeMap<AccountId, Power>,
+    frozen_change: BTreeMap<AccountId, Balance>,
     validator_kickout: Vec<(AccountId, ValidatorKickoutReason)>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
     num_seats: NumSeats,
 ) -> EpochInfo {
     let seat_price =
-        find_threshold(&accounts.iter().map(|(_, s)| *s).collect::<Vec<_>>(), num_seats).unwrap();
+        find_threshold(&accounts.iter().map(|(_,_, s)| *s).collect::<Vec<_>>(), num_seats).unwrap();
     accounts.sort();
     let validator_to_index = accounts.iter().enumerate().fold(HashMap::new(), |mut acc, (i, x)| {
         acc.insert(x.0.clone(), i as u64);
         acc
     });
     let fishermen_to_index =
-        fishermen.iter().enumerate().map(|(i, (s, _))| (s.clone(), i as ValidatorId)).collect();
-    let account_to_validators = |accounts: Vec<(AccountId, Balance)>| -> Vec<ValidatorPower> {
+        fishermen.iter().enumerate().map(|(i, (s,_ , _))| (s.clone(), i as ValidatorId)).collect();
+    let account_to_validators = |accounts: Vec<(AccountId, Power, Balance)>| -> Vec<ValidatorPower> {
         accounts
             .into_iter()
-            .map(|(account_id, power)| {
+            .map(|(account_id, power,locked)| {
                 ValidatorPower::new(
                     account_id.clone(),
                     SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key(),
                     power,
+                    locked,
                 )
             })
             .collect()
@@ -123,7 +127,8 @@ pub fn epoch_info_with_num_seats(
         hidden_validators_settlement,
         account_to_validators(fishermen),
         fishermen_to_index,
-        stake_change,
+        power_change,
+        frozen_change,
         validator_reward,
         validator_kickout.into_iter().collect(),
         minted_amount,
@@ -189,9 +194,9 @@ pub fn epoch_config(
     )
 }
 
-pub fn do_power(account_id: AccountId, power: Power) -> ValidatorPower {
+pub fn do_power(account_id: AccountId, power: Power, frozen: Balance) -> ValidatorPower {
     let public_key = SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key();
-    ValidatorPower::new(account_id, public_key, power)
+    ValidatorPower::new(account_id, public_key, power, frozen)
 }
 
 /// No-op reward calculator. Will produce no reward
@@ -213,7 +218,7 @@ pub fn reward(info: Vec<(AccountId, Balance)>) -> HashMap<AccountId, Balance> {
 }
 
 pub fn setup_epoch_manager(
-    validators: Vec<(AccountId, Balance)>,
+    validators: Vec<(AccountId, Power, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -240,14 +245,14 @@ pub fn setup_epoch_manager(
         reward_calculator,
         validators
             .iter()
-            .map(|(account_id, power)| do_power(account_id.clone(), *power))
+            .map(|(account_id, power, frozen)| do_power(account_id.clone(), *power, *frozen))
             .collect(),
     )
     .unwrap()
 }
 
 pub fn setup_default_epoch_manager(
-    validators: Vec<(AccountId, Balance)>,
+    validators: Vec<(AccountId, Power, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -279,12 +284,15 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
     epoch_length: BlockHeightDelta,
 ) -> EpochManager {
     let num_block_producers = block_producers.len() as u64;
+    let block_producer_power = 1_000_000 as u128;
     let block_producer_stake = 1_000_000 as u128;
     let mut total_stake = 0;
+    let mut total_power = 0;
     let mut validators = vec![];
     for block_producer in &block_producers {
-        validators.push((block_producer.clone(), block_producer_stake));
+        validators.push((block_producer.clone(), block_producer_power, block_producer_stake));
         total_stake += block_producer_stake;
+        total_power += block_producer_power;
     }
     for chunk_only_producer in &chunk_only_producers {
         let minimum_stake_to_ensure_election =
@@ -294,8 +302,16 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
             stake >= minimum_stake_to_ensure_election,
             "Could not honor the specified list of producers"
         );
-        validators.push((chunk_only_producer.clone(), stake));
+        let minimum_power_to_ensure_election =
+            total_power * 160 / 1_000_000 / num_shards as u128 + 1;
+        let power = block_producer_power - 1;
+        assert!(
+            power >= minimum_power_to_ensure_election,
+            "Could not honor the specified list of producers"
+        );
+        validators.push((chunk_only_producer.clone(), power, stake));
         total_stake += stake;
+        total_power += power;
     }
     let config = epoch_config(epoch_length, num_shards, num_block_producers, 0, 0, 0, 0);
     let epoch_manager = EpochManager::new(
@@ -305,7 +321,7 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
         default_reward_calculator(),
         validators
             .iter()
-            .map(|(account_id, power)| do_power(account_id.clone(), *power))
+            .map(|(account_id, power, frozen)| do_power(account_id.clone(), *power, *frozen))
             .collect(),
     )
     .unwrap();

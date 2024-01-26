@@ -190,6 +190,7 @@ impl EpochManager {
         )
     }
 
+
     fn new_all_epoch_config_with_test_overrides(
         genesis_config: &GenesisConfig,
         test_overrides: Option<AllEpochConfigTestOverrides>,
@@ -1306,12 +1307,13 @@ impl EpochManager {
                             .cloned()
                             .collect::<Vec<ShardId>>();
                         shards.sort();
-                        let (account_id, public_key, stake) = info.destructure();
+                        let (account_id, public_key, power, frozen) = info.destructure();
                         Ok(CurrentEpochValidatorInfo {
                             is_slashed: false, // currently there is no slashing
                             account_id,
                             public_key,
-                            stake,
+                            power,
+                            frozen,
                             // TODO: Maybe fill in the per shard info about the chunk produced for requests coming from RPC.
                             num_produced_chunks_per_shard: vec![0; shards.len()],
                             num_expected_chunks_per_shard: vec![0; shards.len()],
@@ -1363,12 +1365,13 @@ impl EpochManager {
                             .into_iter()
                             .collect::<Vec<ShardId>>();
                         shards.sort();
-                        let (account_id, public_key, stake) = info.destructure();
+                        let (account_id, public_key, power, frozen) = info.destructure();
                         Ok(CurrentEpochValidatorInfo {
                             is_slashed: false, // currently there is no slashing
                             account_id,
                             public_key,
-                            stake,
+                            power,
+                            frozen,
                             shards: shards.clone(),
                             num_produced_blocks: block_stats.produced,
                             num_expected_blocks: block_stats.expected,
@@ -1412,8 +1415,8 @@ impl EpochManager {
                     .into_iter()
                     .collect::<Vec<ShardId>>();
                 shards.sort();
-                let (account_id, public_key, stake) = info.destructure();
-                NextEpochValidatorInfo { account_id, public_key, stake, shards }
+                let (account_id, public_key, power, frozen) = info.destructure();
+                NextEpochValidatorInfo { account_id, public_key, power, frozen, shards }
             })
             .collect();
         let prev_epoch_kickout = next_epoch_info

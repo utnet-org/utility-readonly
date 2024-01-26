@@ -107,6 +107,7 @@ mod old_validator_selection {
         let mut ordered_proposals = BTreeMap::new();
         // Account -> new_stake
         let mut power_change = BTreeMap::new();
+        let mut frozen_change = BTreeMap::new();
         let mut fishermen = vec![];
         debug_assert!(
             proposals.iter().map(|stake| stake.account_id()).collect::<HashSet<_>>().len()
@@ -118,33 +119,36 @@ mod old_validator_selection {
             let account_id = p.account_id();
             if validator_kickout.contains_key(account_id) {
                 let account_id = p.take_account_id();
-                power_change.insert(account_id, 0);
+                frozen_change.insert(account_id,0);
             } else {
                 power_change.insert(account_id.clone(), p.power());
+                frozen_change.insert(account_id.clone(), p.frozen());
                 ordered_proposals.insert(account_id.clone(), p);
             }
         }
         for r in prev_epoch_info.validators_iter() {
             let account_id = r.account_id().clone();
             if validator_kickout.contains_key(&account_id) {
-                power_change.insert(account_id, 0);
+                frozen_change.insert(account_id,0);
                 continue;
             }
             let p = ordered_proposals.entry(account_id.clone()).or_insert(r);
-            *p.power_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
-            power_change.insert(account_id, p.power());
+            *p.frozen_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
+            power_change.insert(account_id.clone(), p.power());
+            frozen_change.insert(account_id, p.frozen());
         }
 
         for r in prev_epoch_info.fishermen_iter() {
             let account_id = r.account_id();
             if validator_kickout.contains_key(account_id) {
-                power_change.insert(account_id.clone(), 0);
+                frozen_change.insert(account_id.clone(), 0);
                 continue;
             }
             if !ordered_proposals.contains_key(account_id) {
                 // safe to do this here because fishermen from previous epoch is guaranteed to have no
                 // duplicates.
                 power_change.insert(account_id.clone(), r.power());
+                frozen_change.insert(account_id.clone(), r.frozen());
                 fishermen.push(r);
             }
         }
@@ -210,7 +214,7 @@ mod old_validator_selection {
                 fishermen.push(p);
             } else {
                 let account_id = p.take_account_id();
-                power_change.insert(account_id.clone(), 0);
+                frozen_change.insert(account_id.clone(), 0);
                 if prev_epoch_info.account_is_validator(&account_id)
                     || prev_epoch_info.account_is_fisherman(&account_id)
                 {
@@ -262,6 +266,7 @@ mod old_validator_selection {
             fishermen,
             fishermen_to_index,
             power_change,
+            frozen_change,
             validator_reward,
             validator_kickout,
             minted_amount,

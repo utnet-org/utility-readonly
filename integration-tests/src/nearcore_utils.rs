@@ -15,7 +15,7 @@ use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{BlockHeightDelta, EpochId};
 use near_primitives::validator_signer::ValidatorSigner;
 use near_primitives::version::PROTOCOL_VERSION;
-use nearcore::config::{GenesisExt, TESTING_INIT_STAKE};
+use nearcore::config::{GenesisExt, TESTING_INIT_POWER, TESTING_INIT_STAKE};
 use nearcore::{load_test_config, NearConfig};
 
 // This assumes that there is no height skipped. Otherwise epoch hash calculation will be wrong.
@@ -50,6 +50,7 @@ pub fn add_blocks(
         let next_bp_hash = CryptoHash::hash_borsh_iter([ValidatorPower::new(
             "other".parse().unwrap(),
             signer.public_key(),
+            TESTING_INIT_POWER,
             TESTING_INIT_STAKE,
         )]);
         let block = Block::produce(

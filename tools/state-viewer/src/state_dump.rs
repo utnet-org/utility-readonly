@@ -47,8 +47,8 @@ pub fn state_dump(
         .into_iter()
         .filter_map(|(info, is_slashed)| {
             if !is_slashed {
-                let (account_id, public_key, power) = info.destructure();
-                Some((account_id, (public_key, power)))
+                let (account_id, public_key, power, frozen) = info.destructure();
+                Some((account_id, (public_key, power, frozen)))
             } else {
                 None
             }
@@ -62,11 +62,12 @@ pub fn state_dump(
     genesis_config.genesis_time = Utc::now();
     genesis_config.validators = validators
         .iter()
-        .map(|(account_id, (public_key, power))| AccountInfo {
+        .map(|(account_id, (public_key, power,frozen))| AccountInfo {
             account_id: account_id.clone(),
             public_key: public_key.clone(),
             amount: 0,
             power: *power,
+            locked: *frozen,
         })
         .collect();
     genesis_config.validators.sort_by_key(|account_info| account_info.account_id.clone());
@@ -218,7 +219,7 @@ fn iterate_over_records(
     runtime: Arc<NightshadeRuntime>,
     state_roots: &[StateRoot],
     last_block_header: BlockHeader,
-    validators: &HashMap<AccountId, (PublicKey, Power)>,
+    validators: &HashMap<AccountId, (PublicKey, Power, Balance)>,
     protocol_treasury_account: &AccountId,
     mut callback: impl FnMut(StateRecord),
     change_config: &GenesisChangeConfig,
@@ -245,7 +246,7 @@ fn iterate_over_records(
                 }
                 if let StateRecord::Account { account_id, account } = &mut sr {
                     if account.locked() > 0 {
-                        let stake = *validators.get(account_id).map(|(_, s)| s).unwrap_or(&0);
+                        let stake = *validators.get(account_id).map(|(_,_, s)| s).unwrap_or(&0);
                         if account.locked() > stake {
                             account.set_amount(account.amount() + account.locked() - stake);
                         }

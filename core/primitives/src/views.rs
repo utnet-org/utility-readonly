@@ -1859,12 +1859,13 @@ pub mod validator_power_view {
     }
 
     impl From<ValidatorPower> for ValidatorPowerView {
-        fn from(stake: ValidatorPower) -> Self {
-            match stake {
+        fn from(power: ValidatorPower) -> Self {
+            match power {
                 ValidatorPower::V1(v1) => Self::V1(ValidatorPowerViewV1 {
                     account_id: v1.account_id,
                     public_key: v1.public_key,
                     power: v1.power,
+                    frozen: v1.frozen,
                 }),
             }
         }
@@ -1873,7 +1874,7 @@ pub mod validator_power_view {
     impl From<ValidatorPowerView> for ValidatorPower {
         fn from(view: ValidatorPowerView) -> Self {
             match view {
-                ValidatorPowerView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power),
+                ValidatorPowerView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power, v1.frozen),
             }
         }
     }
@@ -1894,6 +1895,7 @@ pub struct ValidatorPowerViewV1 {
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
     pub power: Power,
+    pub frozen: Balance,
 }
 
 #[derive(
@@ -2074,7 +2076,9 @@ pub struct CurrentEpochValidatorInfo {
     pub public_key: PublicKey,
     pub is_slashed: bool,
     #[serde(with = "dec_format")]
-    pub stake: Balance,
+    pub power: Power,
+    #[serde(with = "dec_format")]
+    pub frozen: Balance,
     pub shards: Vec<ShardId>,
     pub num_produced_blocks: NumBlocks,
     pub num_expected_blocks: NumBlocks,
@@ -2103,7 +2107,9 @@ pub struct NextEpochValidatorInfo {
     pub account_id: AccountId,
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
-    pub stake: Balance,
+    pub power: Power,
+    #[serde(with = "dec_format")]
+    pub frozen: Balance,
     pub shards: Vec<ShardId>,
 }
 

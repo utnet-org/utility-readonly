@@ -335,6 +335,7 @@ impl GenesisConfig {
                     account_info.account_id.clone(),
                     account_info.public_key.clone(),
                     account_info.power,
+                    account_info.locked,
                 )
             })
             .collect()

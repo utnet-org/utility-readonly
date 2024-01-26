@@ -503,6 +503,7 @@ impl Genesis {
                     public_key: signer.public_key.clone(),
                     amount: TESTING_INIT_STAKE,
                     power: 0,
+                    locked: 0,
                 });
             }
             add_account_with_key(
@@ -1125,6 +1126,7 @@ pub fn init_configs(
                     public_key: signer.public_key(),
                     amount: TESTING_INIT_STAKE,
                     power: 0,
+                    locked: 0,
                 }],
                 transaction_validity_period: TRANSACTION_VALIDITY_PERIOD,
                 protocol_reward_rate: PROTOCOL_REWARD_RATE,

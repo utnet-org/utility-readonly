@@ -216,6 +216,7 @@ mod test {
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
             power: 10,
+            locked: 5,
         }];
         let records = GenesisRecords(vec![StateRecord::Account {
             account_id: "test".parse().unwrap(),

@@ -35,14 +35,16 @@ pub fn proposals_to_epoch_info(
         Ratio::new(*rational.numer() as u128, *rational.denom() as u128)
     };
     let max_bp_selected = epoch_config.num_block_producer_seats as usize;
-    let mut stake_change = BTreeMap::new();
+    let mut power_change = BTreeMap::new();
+    let mut frozen_change = BTreeMap::new();
     let mut fishermen = vec![];
     let proposals = proposals_with_rollover(
         proposals,
         prev_epoch_info,
         &validator_reward,
         &validator_kickout,
-        &mut stake_change,
+        &mut power_change,
+        &mut frozen_change,
         &mut fishermen,
     );
     let mut block_producer_proposals = order_proposals(proposals.values().cloned());
@@ -74,13 +76,14 @@ pub fn proposals_to_epoch_info(
     let threshold = cmp::min(bp_stake_threshold, cp_stake_threshold);
 
     // process remaining chunk_producer_proposals that were not selected for either role
-    for OrderedValidatorStake(p) in chunk_producer_proposals {
+    for OrderedValidatorPower(p) in chunk_producer_proposals {
         let power = p.power();
         let account_id = p.account_id();
         if power >= epoch_config.fishermen_threshold {
             fishermen.push(p);
         } else {
-            *stake_change.get_mut(account_id).unwrap() = 0;
+            *power_change.get_mut(account_id).unwrap() = 0;
+            *frozen_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)
                 || prev_epoch_info.account_is_fisherman(account_id)
             {
@@ -205,7 +208,8 @@ pub fn proposals_to_epoch_info(
         vec![],
         fishermen,
         fishermen_to_index,
-        stake_change,
+        power_change,
+        frozen_change,
         validator_reward,
         validator_kickout,
         minted_amount,
@@ -233,6 +237,7 @@ fn proposals_with_rollover(
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
     power_change: &mut BTreeMap<AccountId, Power>,
+    frozen_change: &mut BTreeMap<AccountId, Balance>,
     fishermen: &mut Vec<ValidatorPower>,
 ) -> HashMap<AccountId, ValidatorPower> {
     let mut proposals_by_account = HashMap::new();
@@ -255,15 +260,11 @@ fn proposals_with_rollover(
         }
         // I will not change the power when get reward
         // TODO, add reward directly to the amount
-        // let p = proposals_by_account.entry(account_id).or_insert(r);
-        // if let Some(reward) = validator_reward.get(p.account_id()) {
-        //     *p.power_mut() += *reward;
-        // }
-        // power_change.insert(p.account_id().clone(), p.power());
         let p = proposals_by_account.entry(account_id).or_insert(r);
         if let Some(reward) = validator_reward.get(p.account_id()) {
-            println!("get reward : {}", *reward);
+            *p.frozen_mut() += *reward;
         }
+        frozen_change.insert(p.account_id().clone(), p.frozen());
 
     }
 
@@ -286,12 +287,12 @@ fn proposals_with_rollover(
 
 fn order_proposals<I: IntoIterator<Item = ValidatorPower>>(
     proposals: I,
-) -> BinaryHeap<OrderedValidatorStake> {
-    proposals.into_iter().map(OrderedValidatorStake).collect()
+) -> BinaryHeap<OrderedValidatorPower> {
+    proposals.into_iter().map(OrderedValidatorPower).collect()
 }
 
 fn select_block_producers(
-    block_producer_proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    block_producer_proposals: &mut BinaryHeap<OrderedValidatorPower>,
     max_num_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
@@ -300,7 +301,7 @@ fn select_block_producers(
 }
 
 fn select_chunk_producers(
-    all_proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    all_proposals: &mut BinaryHeap<OrderedValidatorPower>,
     max_num_selected: usize,
     min_stake_ratio: Ratio<u128>,
     num_shards: u64,
@@ -319,7 +320,7 @@ fn select_chunk_producers(
 // slots are filled, or the stake ratio falls too low, the threshold stake to be included
 // is also returned.
 fn select_validators(
-    proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    proposals: &mut BinaryHeap<OrderedValidatorPower>,
     max_number_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
@@ -336,7 +337,7 @@ fn select_validators(
             total_power = total_power_with_p;
         } else {
             // p was not included, return it to the list of proposals
-            proposals.push(OrderedValidatorStake(p));
+            proposals.push(OrderedValidatorPower(p));
             break;
         }
     }
@@ -369,18 +370,18 @@ fn select_validators(
 /// with the largest state and (in case of a tie) lexicographically smallest
 /// AccountId comes at the top.
 #[derive(Eq, PartialEq)]
-struct OrderedValidatorStake(ValidatorPower);
-impl OrderedValidatorStake {
+struct OrderedValidatorPower(ValidatorPower);
+impl OrderedValidatorPower {
     fn key(&self) -> impl Ord + '_ {
         (self.0.power(), std::cmp::Reverse(self.0.account_id()))
     }
 }
-impl PartialOrd for OrderedValidatorStake {
+impl PartialOrd for OrderedValidatorPower {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-impl Ord for OrderedValidatorStake {
+impl Ord for OrderedValidatorPower {
     fn cmp(&self, other: &Self) -> Ordering {
         self.key().cmp(&other.key())
     }

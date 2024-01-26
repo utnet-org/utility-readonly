@@ -48,6 +48,8 @@ pub struct AccountInfo {
     pub amount: Balance,
     #[serde(with = "dec_format")]
     pub power: Power,
+    #[serde(with = "dec_format")]
+    pub locked: Balance,
 }
 
 /// This type is used to mark keys (arrays of bytes) that are queried from store.
@@ -615,12 +617,12 @@ pub mod validator_power {
     }
 
     impl ValidatorPower {
-        pub fn new_v1(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
-            Self::V1(ValidatorPowerV1 { account_id, public_key, power })
+        pub fn new_v1(account_id: AccountId, public_key: PublicKey, power: Power, frozen: Balance) -> Self {
+            Self::V1(ValidatorPowerV1 { account_id, public_key, power, frozen })
         }
 
-        pub fn new(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
-            Self::new_v1(account_id, public_key, power)
+        pub fn new(account_id: AccountId, public_key: PublicKey, power: Power, frozen: Balance) -> Self {
+            Self::new_v1(account_id, public_key, power, frozen)
         }
 
         pub fn into_v1(self) -> ValidatorPowerV1 {
@@ -637,9 +639,9 @@ pub mod validator_power {
         }
 
         #[inline]
-        pub fn destructure(self) -> (AccountId, PublicKey, Power) {
+        pub fn destructure(self) -> (AccountId, PublicKey, Power, Balance) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power),
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.frozen),
             }
         }
 
@@ -668,6 +670,20 @@ pub mod validator_power {
         pub fn public_key(&self) -> &PublicKey {
             match self {
                 Self::V1(v1) => &v1.public_key,
+            }
+        }
+
+        #[inline]
+        pub fn frozen(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.frozen,
+            }
+        }
+
+        #[inline]
+        pub fn frozen_mut(&mut self) -> &mut Balance {
+            match self {
+                Self::V1(v1) => &mut v1.frozen,
             }
         }
 
@@ -749,6 +765,8 @@ pub struct ValidatorPowerV1 {
     pub public_key: PublicKey,
     /// Power / weight of the validator.
     pub power: Power,
+    /// Stake of the validator.
+    pub frozen: Balance,
 }
 
 /// Information after block was processed.

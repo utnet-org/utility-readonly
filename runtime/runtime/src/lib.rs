@@ -1010,15 +1010,15 @@ impl Runtime {
         &self,
         state_update: &mut TrieUpdate,
         validator_accounts_update: &ValidatorAccountsUpdate,
-        _stats: &mut ApplyStats,
+        stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
         for (account_id, max_of_power) in &validator_accounts_update.power_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
                     debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
-                    account.set_amount(
+                    account.set_locked(
                         account
-                            .amount()
+                            .locked()
                             .checked_add(*reward)
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
@@ -1048,7 +1048,6 @@ impl Runtime {
                         .checked_sub(return_power)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
-
                 set_account(state_update, account_id.clone(), &account);
             } else if *max_of_power > 0 {
                 // if max_of_power > 0, it means that the account must have power
@@ -1060,35 +1059,35 @@ impl Runtime {
                 .into());
             }
         }
-        // for now, we do not slash
-        // for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
-        //     if let Some(mut account) = get_account(state_update, account_id)? {
-        //         let amount_to_slash = stake.unwrap_or(account.locked());
-        //         debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.locked(), account_id);
-        //         if account.locked() < amount_to_slash {
-        //             return Err(StorageError::StorageInconsistentState(format!(
-        //                 "FATAL: staking invariant does not hold. Account locked {} is less than slashed {}",
-        //                 account.locked(), amount_to_slash)).into());
-        //         }
-        //         stats.slashed_burnt_amount = stats
-        //             .slashed_burnt_amount
-        //             .checked_add(amount_to_slash)
-        //             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-        //         account.set_locked(
-        //             account
-        //                 .locked()
-        //                 .checked_sub(amount_to_slash)
-        //                 .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-        //         );
-        //         set_account(state_update, account_id.clone(), &account);
-        //     } else {
-        //         return Err(StorageError::StorageInconsistentState(format!(
-        //             "Account {} to slash is not found",
-        //             account_id
-        //         ))
-        //         .into());
-        //     }
-        // }
+        // Slash only to the accounts that are in the current shard.
+        for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                let amount_to_slash = stake.unwrap_or(account.locked());
+                debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.locked(), account_id);
+                if account.locked() < amount_to_slash {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: staking invariant does not hold. Account locked {} is less than slashed {}",
+                        account.locked(), amount_to_slash)).into());
+                }
+                stats.slashed_burnt_amount = stats
+                    .slashed_burnt_amount
+                    .checked_add(amount_to_slash)
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                account.set_locked(
+                    account
+                        .locked()
+                        .checked_sub(amount_to_slash)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else {
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} to slash is not found",
+                    account_id
+                ))
+                .into());
+            }
+        }
 
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
@@ -1557,6 +1556,10 @@ mod tests {
         near * 10u128.pow(24)
     }
 
+    fn to_yocto2(near: Power) -> Power {
+        near * 10u128.pow(12)
+    }
+
     fn create_receipt_with_actions(
         account_id: AccountId,
         signer: Arc<InMemorySigner>,
@@ -1614,6 +1617,7 @@ mod tests {
     fn setup_runtime(
         initial_balance: Balance,
         initial_locked: Balance,
+        initial_power: Power,
         gas_limit: Gas,
     ) -> (Runtime, ShardTries, CryptoHash, ApplyState, Arc<InMemorySigner>, impl EpochInfoProvider)
     {
@@ -1632,6 +1636,7 @@ mod tests {
         // For the account and a full access key
         initial_account.set_storage_usage(182);
         initial_account.set_locked(initial_locked);
+        initial_account.set_power(initial_power);
         set_account(&mut initial_state, account_id.clone(), &initial_account);
         set_access_key(
             &mut initial_state,
@@ -1669,7 +1674,7 @@ mod tests {
     #[test]
     fn test_apply_no_op() {
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), 0, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), 0,0, 10u64.pow(15));
         runtime
             .apply(
                 tries.get_trie_for_shard(ShardUId::single_shard(), root),
@@ -1686,13 +1691,14 @@ mod tests {
     #[test]
     fn test_apply_check_balance_validation_rewards() {
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let reward = to_yocto(10_000_000);
         let small_refund = to_yocto(500);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let validator_accounts_update = ValidatorAccountsUpdate {
-            stake_info: vec![(alice_account(), initial_locked)].into_iter().collect(),
+            power_info: vec![(alice_account(), initial_power)].into_iter().collect(),
             validator_rewards: vec![(alice_account(), reward)].into_iter().collect(),
             last_proposals: Default::default(),
             protocol_treasury_account_id: None,
@@ -1716,10 +1722,11 @@ mod tests {
     fn test_apply_refund_receipts() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 10;
         let receipts = generate_refund_receipts(small_transfer, n);
@@ -1761,10 +1768,11 @@ mod tests {
     fn test_apply_delayed_receipts_feed_all_at_once() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 10;
         let receipts = generate_receipts(small_transfer, n);
@@ -1806,9 +1814,10 @@ mod tests {
     fn test_apply_delayed_receipts_add_more_using_chunks() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_gas_cost =
             apply_state.config.fees.fee(ActionCosts::new_action_receipt).exec_fee()
@@ -1857,9 +1866,10 @@ mod tests {
     fn test_apply_delayed_receipts_adjustable_gas_limit() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_gas_cost =
             apply_state.config.fees.fee(ActionCosts::new_action_receipt).exec_fee()
@@ -1960,9 +1970,10 @@ mod tests {
     fn test_apply_delayed_receipts_local_tx() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_exec_gas_fee = 1000;
         let mut free_config = RuntimeConfig::free();
@@ -2205,10 +2216,11 @@ mod tests {
     fn test_apply_deficit_gas_for_transfer() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 1;
         let mut receipts = generate_receipts(small_transfer, n);
@@ -2234,9 +2246,10 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_covered() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let gas = 2 * 10u64.pow(14);
         let gas_price = GAS_PRICE / 10;
@@ -2297,9 +2310,10 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_partial() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let gas = 1_000_000;
         let gas_price = GAS_PRICE / 10;
@@ -2352,8 +2366,9 @@ mod tests {
     #[test]
     fn test_delete_key_add_key() {
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let initial_account_state = get_account(&state_update, &alice_account()).unwrap().unwrap();
@@ -2396,8 +2411,9 @@ mod tests {
     #[test]
     fn test_delete_key_underflow() {
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let mut state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let mut initial_account_state =
@@ -2485,7 +2501,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit() {
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), 1);
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 1);
 
         let mut free_config = RuntimeConfig::free();
         let sha256_cost = ParameterCost {
@@ -2582,7 +2598,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit_with_failed_receipt() {
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 10u64.pow(15));
 
         let deploy_contract_receipt = create_receipt_with_actions(
             alice_account(),
