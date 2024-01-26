@@ -1,7 +1,10 @@
 use crate::challenge::SlashedValidator;
 use crate::num_rational::Rational32;
 use crate::shard_layout::ShardLayout;
+use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozenV1;
 use crate::types::validator_power::ValidatorPowerV1;
+use crate::types::validator_frozen::ValidatorFrozenV1;
+
 use crate::types::{
     AccountId, Balance, BlockHeightDelta, EpochHeight, EpochId, NumSeats, ProtocolVersion,
     ValidatorId, ValidatorKickoutReason,
@@ -463,7 +466,8 @@ pub struct BlockInfoV1 {
     pub prev_hash: CryptoHash,
     pub epoch_first_block: CryptoHash,
     pub epoch_id: EpochId,
-    pub proposals: Vec<ValidatorPowerV1>,
+    pub power_proposals: Vec<ValidatorPowerV1>,
+    pub frozen_proposals: Vec<ValidatorFrozenV1>,
     pub chunk_mask: Vec<bool>,
     /// Latest protocol version this validator observes.
     pub latest_protocol_version: ProtocolVersion,
@@ -783,7 +787,6 @@ use crate::epoch_manager::ValidatorWeight;
                             .parse()
                             .unwrap(),
                         power: 0,
-                        frozen: 0,
                     },
                     ValidatorPowerV1 {
                         account_id: "validator".parse().unwrap(),
@@ -791,7 +794,6 @@ use crate::epoch_manager::ValidatorWeight;
                             .parse()
                             .unwrap(),
                         power: 0,
-                        frozen: 0,
                     },
                 ],
                 validator_to_index: HashMap::new(),
@@ -887,6 +889,16 @@ use crate::epoch_manager::ValidatorWeight;
                 Self::V2(v2) => v2.protocol_version,
                 Self::V3(v3) => v3.protocol_version,
                 Self::V4(v4) => v4.protocol_version,
+            }
+        }
+
+        #[inline]
+        pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
+            match self {
+                Self::V1(v1) => &v1.frozen_change,
+                Self::V2(v2) => &v2.frozen_change,
+                Self::V3(v3) => &v3.frozen_change,
+                Self::V4(v4) => &v4.frozen_change,
             }
         }
 
@@ -1186,7 +1198,7 @@ pub struct EpochInfoV1 {
     /// There can be multiple epochs with the same ordinal in case of long forks.
     pub epoch_height: EpochHeight,
     /// List of current validators.
-    pub validators: Vec<ValidatorPowerV1>,
+    pub validators: Vec<ValidatorPowerAndFrozenV1>,
     /// Validator account id to index in proposals.
     pub validator_to_index: HashMap<AccountId, ValidatorId>,
     /// Settlement of validators responsible for block production.

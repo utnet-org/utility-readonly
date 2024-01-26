@@ -534,6 +534,326 @@ impl std::str::FromStr for EpochId {
 /// It is necessary because the blocks on the epoch boundary need to contain approvals from both
 /// epochs.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
+pub struct ApprovalFrozen {
+    /// Account that has frozen.
+    pub account_id: AccountId,
+    /// Public key of the proposed validator.
+    pub public_key: PublicKey,
+    /// Frozen / weight of the validator.
+    pub frozen_this_epoch: Balance,
+    /// Stake of the validator.
+    pub frozen_next_epoch: Balance,
+}
+
+pub mod validator_power_and_frozen {
+    use borsh::{BorshDeserialize, BorshSerialize};
+    use near_crypto::PublicKey;
+    use near_primitives_core::types::{AccountId, Balance};
+    use serde::Serialize;
+
+    pub use super::ValidatorPowerAndFrozenV1;
+
+    /// Stores validator and its power with frozen.
+    #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq)]
+    #[serde(tag = "validator_power_and_frozen_struct_version")]
+    pub enum ValidatorPowerAndFrozen {
+        V1(ValidatorPowerAndFrozenV1),
+    }
+
+    pub struct ValidatorPowerAndFrozenIter<'a> {
+        collection: ValidatorPowerAndFrozenIterSource<'a>,
+        curr_index: usize,
+        len: usize,
+    }
+
+    impl<'a> ValidatorPowerAndFrozenIter<'a> {
+        pub fn empty() -> Self {
+            Self { collection: ValidatorPowerAndFrozenIterSource::V2(&[]), curr_index: 0, len: 0 }
+        }
+
+        pub fn v1(collection: &'a [ValidatorPowerAndFrozenV1]) -> Self {
+            Self {
+                collection: ValidatorPowerAndFrozenIterSource::V1(collection),
+                curr_index: 0,
+                len: collection.len(),
+            }
+        }
+
+        pub fn new(collection: &'a [ValidatorPowerAndFrozen]) -> Self {
+            Self {
+                collection: ValidatorPowerAndFrozenIterSource::V2(collection),
+                curr_index: 0,
+                len: collection.len(),
+            }
+        }
+
+        pub fn len(&self) -> usize {
+            self.len
+        }
+    }
+
+    impl<'a> Iterator for ValidatorPowerAndFrozenIter<'a> {
+        type Item = ValidatorPowerAndFrozen;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.curr_index < self.len {
+                let item = match self.collection {
+                    ValidatorPowerAndFrozenIterSource::V1(collection) => {
+                        ValidatorPowerAndFrozen::V1(collection[self.curr_index].clone())
+                    }
+                    ValidatorPowerAndFrozenIterSource::V2(collection) => {
+                        collection[self.curr_index].clone()
+                    }
+                };
+                self.curr_index += 1;
+                Some(item)
+            } else {
+                None
+            }
+        }
+    }
+
+    enum ValidatorPowerAndFrozenIterSource<'a> {
+        V1(&'a [ValidatorPowerAndFrozenV1]),
+        V2(&'a [ValidatorPowerAndFrozen]),
+    }
+
+    impl ValidatorPowerAndFrozen {
+        pub fn new_v1(
+            account_id: AccountId,
+            public_key: PublicKey,
+            power: Balance,
+            frozen: Balance,
+        ) -> Self {
+            Self::V1(ValidatorPowerAndFrozenV1 { account_id, public_key, power, frozen })
+        }
+
+        pub fn new(
+            account_id: AccountId,
+            public_key: PublicKey,
+            power: Balance,
+            frozen: Balance,
+        ) -> Self {
+            Self::new_v1(account_id, public_key, power, frozen)
+        }
+
+        pub fn into_v1(self) -> ValidatorPowerAndFrozenV1 {
+            match self {
+                Self::V1(v1) => v1,
+            }
+        }
+
+        #[inline]
+        pub fn account_and_power(self) -> (AccountId, Balance) {
+            match self {
+                Self::V1(v1) => (v1.account_id, v1.power),
+            }
+        }
+
+        #[inline]
+        pub fn destructure(self) -> (AccountId, PublicKey, Balance, Balance) {
+            match self {
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.frozen),
+            }
+        }
+
+        #[inline]
+        pub fn take_account_id(self) -> AccountId {
+            match self {
+                Self::V1(v1) => v1.account_id,
+            }
+        }
+
+        #[inline]
+        pub fn account_id(&self) -> &AccountId {
+            match self {
+                Self::V1(v1) => &v1.account_id,
+            }
+        }
+
+        #[inline]
+        pub fn take_public_key(self) -> PublicKey {
+            match self {
+                Self::V1(v1) => v1.public_key,
+            }
+        }
+
+        #[inline]
+        pub fn public_key(&self) -> &PublicKey {
+            match self {
+                Self::V1(v1) => &v1.public_key,
+            }
+        }
+
+        #[inline]
+        pub fn power(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.power,
+            }
+        }
+
+        #[inline]
+        pub fn power_mut(&mut self) -> &mut Balance {
+            match self {
+                Self::V1(v1) => &mut v1.power,
+            }
+        }
+
+        #[inline]
+        pub fn frozen(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.frozen,
+            }
+        }
+    }
+}
+
+pub mod validator_frozen {
+    use borsh::{BorshDeserialize, BorshSerialize};
+    use near_crypto::PublicKey;
+    use near_primitives_core::types::{AccountId, Balance};
+    use serde::Serialize;
+
+    pub use super::ValidatorFrozenV1;
+
+    /// Stores validator and its frozen.
+    #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq)]
+    #[serde(tag = "validator_validator_struct_version")]
+    pub enum ValidatorFrozen {
+        V1(ValidatorFrozenV1),
+    }
+
+    pub struct ValidatorFrozenIter<'a> {
+        collection: ValidatorFrozenIterSource<'a>,
+        curr_index: usize,
+        len: usize,
+    }
+
+    impl<'a> ValidatorFrozenIter<'a> {
+        pub fn empty() -> Self {
+            Self { collection: ValidatorFrozenIterSource::V2(&[]), curr_index: 0, len: 0 }
+        }
+
+        pub fn v1(collection: &'a [ValidatorFrozenV1]) -> Self {
+            Self {
+                collection: ValidatorFrozenIterSource::V1(collection),
+                curr_index: 0,
+                len: collection.len(),
+            }
+        }
+
+        pub fn new(collection: &'a [ValidatorFrozen]) -> Self {
+            Self {
+                collection: ValidatorFrozenIterSource::V2(collection),
+                curr_index: 0,
+                len: collection.len(),
+            }
+        }
+
+        pub fn len(&self) -> usize {
+            self.len
+        }
+    }
+
+    impl<'a> Iterator for ValidatorFrozenIter<'a> {
+        type Item = ValidatorFrozen;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.curr_index < self.len {
+                let item = match self.collection {
+                    ValidatorFrozenIterSource::V1(collection) => {
+                        ValidatorFrozen::V1(collection[self.curr_index].clone())
+                    }
+                    ValidatorFrozenIterSource::V2(collection) => collection[self.curr_index].clone(),
+                };
+                self.curr_index += 1;
+                Some(item)
+            } else {
+                None
+            }
+        }
+    }
+
+    enum ValidatorFrozenIterSource<'a> {
+        V1(&'a [ValidatorFrozenV1]),
+        V2(&'a [ValidatorFrozen]),
+    }
+
+    impl ValidatorFrozen {
+        pub fn new_v1(account_id: AccountId, public_key: PublicKey, frozen: Balance) -> Self {
+            Self::V1(ValidatorFrozenV1 { account_id, public_key, frozen })
+        }
+
+        pub fn new(account_id: AccountId, public_key: PublicKey, frozen: Balance) -> Self {
+            Self::new_v1(account_id, public_key, frozen)
+        }
+
+        pub fn into_v1(self) -> ValidatorFrozenV1 {
+            match self {
+                Self::V1(v1) => v1,
+            }
+        }
+
+        #[inline]
+        pub fn account_and_frozen(self) -> (AccountId, Balance) {
+            match self {
+                Self::V1(v1) => (v1.account_id, v1.frozen),
+            }
+        }
+
+        #[inline]
+        pub fn destructure(self) -> (AccountId, PublicKey, Balance) {
+            match self {
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.frozen),
+            }
+        }
+
+        #[inline]
+        pub fn take_account_id(self) -> AccountId {
+            match self {
+                Self::V1(v1) => v1.account_id,
+            }
+        }
+
+        #[inline]
+        pub fn account_id(&self) -> &AccountId {
+            match self {
+                Self::V1(v1) => &v1.account_id,
+            }
+        }
+
+        #[inline]
+        pub fn take_public_key(self) -> PublicKey {
+            match self {
+                Self::V1(v1) => v1.public_key,
+            }
+        }
+
+        #[inline]
+        pub fn public_key(&self) -> &PublicKey {
+            match self {
+                Self::V1(v1) => &v1.public_key,
+            }
+        }
+
+        #[inline]
+        pub fn frozen(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.frozen,
+            }
+        }
+
+        #[inline]
+        pub fn frozen_mut(&mut self) -> &mut Balance {
+            match self {
+                Self::V1(v1) => &mut v1.frozen,
+            }
+        }
+    }
+
+
+}
+#[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
 pub struct ApprovalPower {
     /// Account that has power.
     pub account_id: AccountId,
@@ -617,12 +937,12 @@ pub mod validator_power {
     }
 
     impl ValidatorPower {
-        pub fn new_v1(account_id: AccountId, public_key: PublicKey, power: Power, frozen: Balance) -> Self {
-            Self::V1(ValidatorPowerV1 { account_id, public_key, power, frozen })
+        pub fn new_v1(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
+            Self::V1(ValidatorPowerV1 { account_id, public_key, power})
         }
 
-        pub fn new(account_id: AccountId, public_key: PublicKey, power: Power, frozen: Balance) -> Self {
-            Self::new_v1(account_id, public_key, power, frozen)
+        pub fn new(account_id: AccountId, public_key: PublicKey, power: Power) -> Self {
+            Self::new_v1(account_id, public_key, power)
         }
 
         pub fn into_v1(self) -> ValidatorPowerV1 {
@@ -639,9 +959,9 @@ pub mod validator_power {
         }
 
         #[inline]
-        pub fn destructure(self) -> (AccountId, PublicKey, Power, Balance) {
+        pub fn destructure(self) -> (AccountId, PublicKey, Power) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.frozen),
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power),
             }
         }
 
@@ -670,20 +990,6 @@ pub mod validator_power {
         pub fn public_key(&self) -> &PublicKey {
             match self {
                 Self::V1(v1) => &v1.public_key,
-            }
-        }
-
-        #[inline]
-        pub fn frozen(&self) -> Balance {
-            match self {
-                Self::V1(v1) => v1.frozen,
-            }
-        }
-
-        #[inline]
-        pub fn frozen_mut(&mut self) -> &mut Balance {
-            match self {
-                Self::V1(v1) => &mut v1.frozen,
             }
         }
 
@@ -755,6 +1061,29 @@ pub mod validator_power {
         }
     }
 }
+/// Stores validator and its power with frozen.
+#[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
+pub struct ValidatorPowerAndFrozenV1 {
+    /// Account that has power.
+    pub account_id: AccountId,
+    /// Public key of the proposed validator.
+    pub public_key: PublicKey,
+    /// Power / weight of the validator.
+    pub power: Power,
+    /// Frozen / weight of the validator.
+    pub frozen: Balance,
+}
+
+/// Stores validator and its frozen.
+#[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
+pub struct ValidatorFrozenV1 {
+    /// Account that has frozen.
+    pub account_id: AccountId,
+    /// Public key of the proposed validator.
+    pub public_key: PublicKey,
+    /// Frozen / weight of the validator.
+    pub frozen: Balance,
+}
 
 /// Stores validator and its power.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
@@ -765,8 +1094,6 @@ pub struct ValidatorPowerV1 {
     pub public_key: PublicKey,
     /// Power / weight of the validator.
     pub power: Power,
-    /// Stake of the validator.
-    pub frozen: Balance,
 }
 
 /// Information after block was processed.
@@ -777,6 +1104,7 @@ pub struct BlockExtra {
 
 pub mod chunk_extra {
     use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
+    use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
     use crate::types::StateRoot;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
@@ -798,7 +1126,9 @@ pub mod chunk_extra {
         /// Root of merklizing results of receipts (transactions) execution.
         pub outcome_root: CryptoHash,
         /// Validator proposals produced by given chunk.
-        pub validator_proposals: Vec<ValidatorPower>,
+        pub validator_power_proposals: Vec<ValidatorPower>,
+        /// Validator proposals produced by given chunk.
+        pub validator_frozen_proposals: Vec<ValidatorFrozen>,
         /// Actually how much gas were used.
         pub gas_used: Gas,
         /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -815,7 +1145,8 @@ pub mod chunk_extra {
         pub fn new(
             state_root: &StateRoot,
             outcome_root: CryptoHash,
-            validator_proposals: Vec<ValidatorPower>,
+            validator_power_proposals: Vec<ValidatorPower>,
+            validator_frozen_proposals: Vec<ValidatorFrozen>,
             gas_used: Gas,
             gas_limit: Gas,
             balance_burnt: Balance,
@@ -823,7 +1154,8 @@ pub mod chunk_extra {
             Self::V2(ChunkExtraV2 {
                 state_root: *state_root,
                 outcome_root,
-                validator_proposals,
+                validator_power_proposals,
+                validator_frozen_proposals,
                 gas_used,
                 gas_limit,
                 balance_burnt,
@@ -855,10 +1187,18 @@ pub mod chunk_extra {
         }
 
         #[inline]
-        pub fn validator_proposals(&self) -> ValidatorPowerIter {
+        pub fn validator_power_proposals(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validator_proposals),
-                Self::V2(v2) => ValidatorPowerIter::new(&v2.validator_proposals),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validator_power_proposals),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.validator_power_proposals),
+            }
+        }
+
+        #[inline]
+        pub fn validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+            match self {
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validator_frozen_proposals),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.validator_frozen_proposals),
             }
         }
 
@@ -896,7 +1236,9 @@ pub struct ChunkExtraV1 {
     /// Root of merklizing results of receipts (transactions) execution.
     pub outcome_root: CryptoHash,
     /// Validator proposals produced by given chunk.
-    pub validator_proposals: Vec<ValidatorPowerV1>,
+    pub validator_power_proposals: Vec<ValidatorPowerV1>,
+    /// Validator proposals produced by given chunk.
+    pub validator_frozen_proposals: Vec<ValidatorFrozenV1>,
     /// Actually how much gas were used.
     pub gas_used: Gas,
     /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -1061,6 +1403,24 @@ pub trait EpochInfoProvider {
     ) -> Result<Power, EpochError>;
 
     fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<Power, EpochError>;
+
+    /// Get current frozen of a validator in the given epoch.
+    /// If the account is not a validator, returns `None`.
+    fn validator_frozen(
+        &self,
+        epoch_id: &EpochId,
+        last_block_hash: &CryptoHash,
+        account_id: &AccountId,
+    ) -> Result<Option<Balance>, EpochError>;
+
+    /// Get the total frozen of the given epoch.
+    fn validator_total_frozen(
+        &self,
+        epoch_id: &EpochId,
+        last_block_hash: &CryptoHash,
+    ) -> Result<Balance, EpochError>;
+
+    fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError>;
 }
 
 /// Mode of the trie cache.
@@ -1101,7 +1461,7 @@ pub struct StateChangesForShard {
 #[cfg(test)]
 mod tests {
     use near_crypto::{KeyType, PublicKey};
-    use near_primitives_core::types::Power;
+    use near_primitives_core::types::{Balance, Power};
 
     use super::validator_power::ValidatorPower;
 

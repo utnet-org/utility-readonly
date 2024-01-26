@@ -1164,7 +1164,7 @@ impl EpochManager {
         &self,
         last_block_hash: &CryptoHash,
     ) -> Result<
-        (HashMap<AccountId, Power>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
+        (HashMap<AccountId, Power>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
         EpochError,
     > {
         let next_next_epoch_id = EpochId(*last_block_hash);
@@ -1180,23 +1180,46 @@ impl EpochManager {
         let last_block_info = self.get_block_info(last_block_hash)?;
         // Since stake changes for epoch T are stored in epoch info for T+2, the one stored by epoch_id
         // is the prev_prev_stake_change.
+        let prev_prev_frozen_change = self.get_epoch_info(&epoch_id)?.frozen_change().clone();
+        let prev_frozen_change = self.get_epoch_info(&next_epoch_id)?.frozen_change().clone();
+        let frozen_change = self.get_epoch_info(&next_next_epoch_id)?.frozen_change().clone();
+        // Power changes are similar like stake changes
         let prev_prev_power_change = self.get_epoch_info(&epoch_id)?.power_change().clone();
         let prev_power_change = self.get_epoch_info(&next_epoch_id)?.power_change().clone();
         let power_change = self.get_epoch_info(&next_next_epoch_id)?.power_change().clone();
+
         debug!(target: "epoch_manager",
-            "prev_prev_power_change: {:?}, prev_power_change: {:?}, power_change: {:?}, slashed: {:?}",
-            prev_prev_power_change, prev_power_change, power_change, last_block_info.slashed()
+            "prev_prev_power_change: {:?}, prev_power_change: {:?}, power_change: {:?}, slashed: {:?},
+             prev_prev_frozen_change: {:?}, prev_frozen_change: {:?}, frozen_change: {:?}",
+            prev_prev_power_change, prev_power_change, power_change, last_block_info.slashed(),
+            prev_prev_frozen_change, prev_frozen_change, frozen_change
         );
         let all_power_changes =
             prev_prev_power_change.iter().chain(&prev_power_change).chain(&power_change);
-        let all_keys: HashSet<&AccountId> = all_power_changes.map(|(key, _)| key).collect();
+        let all_power_keys: HashSet<&AccountId> = all_power_changes.map(|(key, _)| key).collect();
 
-        let mut stake_info = HashMap::new();
-        for account_id in all_keys {
+        let mut power_info = HashMap::new();
+        for account_id in all_power_keys {
+            let new_power = *power_change.get(account_id).unwrap_or(&0);
+            let prev_power = *prev_power_change.get(account_id).unwrap_or(&0);
+            let prev_prev_power = *prev_prev_power_change.get(account_id).unwrap_or(&0);
+            let max_of_power =
+                vec![prev_prev_power, prev_power, new_power].into_iter().max().unwrap();
+            power_info.insert(account_id.clone(), max_of_power);
+        }
+
+        let all_frozen_changes = prev_prev_frozen_change
+            .iter()
+            .chain(&prev_frozen_change)
+            .chain(&frozen_change);
+        let all_frozen_keys: HashSet<&AccountId> = all_frozen_changes.map(|(key, _)| key).collect();
+
+        let mut frozen_info = HashMap::new();
+        for account_id in all_frozen_keys {
             if last_block_info.slashed().contains_key(account_id) {
-                if prev_prev_power_change.contains_key(account_id)
-                    && !prev_power_change.contains_key(account_id)
-                    && !power_change.contains_key(account_id)
+                if prev_prev_frozen_change.contains_key(account_id)
+                    && !prev_frozen_change.contains_key(account_id)
+                    && !frozen_change.contains_key(account_id)
                 {
                     // slashed in prev_prev epoch so it is safe to return the remaining stake in case of
                     // a double sign without violating the staking invariant.
@@ -1204,16 +1227,17 @@ impl EpochManager {
                     continue;
                 }
             }
-            let new_stake = *power_change.get(account_id).unwrap_or(&0);
-            let prev_stake = *prev_power_change.get(account_id).unwrap_or(&0);
-            let prev_prev_stake = *prev_prev_power_change.get(account_id).unwrap_or(&0);
-            let max_of_stakes =
-                vec![prev_prev_stake, prev_stake, new_stake].into_iter().max().unwrap();
-            stake_info.insert(account_id.clone(), max_of_stakes);
+            let new_frozen = *frozen_change.get(account_id).unwrap_or(&0);
+            let prev_frozen = *prev_frozen_change.get(account_id).unwrap_or(&0);
+            let prev_prev_frozen = *prev_prev_frozen_change.get(account_id).unwrap_or(&0);
+            let max_of_frozen =
+                vec![prev_prev_frozen, prev_frozen, new_frozen].into_iter().max().unwrap();
+            frozen_info.insert(account_id.clone(), max_of_frozen);
         }
+        
         let slashing_info = self.compute_double_sign_slashing_info(last_block_hash)?;
-        debug!(target: "epoch_manager", "stake_info: {:?}, validator_reward: {:?}", stake_info, validator_reward);
-        Ok((stake_info, validator_reward, slashing_info))
+        debug!(target: "epoch_manager", "stake_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
+        Ok((power_info, frozen_info, validator_reward, slashing_info))
     }
 
     /// Compute slashing information. Returns a hashmap of account id to slashed amount for double sign

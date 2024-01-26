@@ -520,6 +520,27 @@ impl EpochInfoProvider for MockEpochInfoProvider {
     fn minimum_power(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         Ok(0)
     }
+
+    fn validator_frozen(
+            &self,
+            epoch_id: &EpochId,
+            last_block_hash: &CryptoHash,
+            account_id: &AccountId,
+        ) -> Result<Option<Balance>, EpochError> {
+        
+    }
+
+    fn validator_total_frozen(
+        &self,
+        _epoch_id: &EpochId,
+        _last_block_hash: &CryptoHash,
+    ) -> Result<Balance, EpochError> {
+        Ok(0)
+    }
+
+    fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+        Ok(0)
+    }
 }
 
 /// Encode array of `u64` to be passed as a smart contract argument.

@@ -320,9 +320,15 @@ impl NightshadeRuntime {
                 .collect();
 
             if epoch_manager.is_next_block_epoch_start(prev_block_hash)? {
-                let (power_info, validator_reward, double_sign_slashing_info) =
+                let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
                     epoch_manager.compute_power_return_info(prev_block_hash)?;
                 let power_info = power_info
+                    .into_iter()
+                    .filter(|(account_id, _)| {
+                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                    })
+                    .collect();
+                let frozen_info = frozen_info
                     .into_iter()
                     .filter(|(account_id, _)| {
                         account_id_to_shard_id(account_id, &shard_layout) == shard_id

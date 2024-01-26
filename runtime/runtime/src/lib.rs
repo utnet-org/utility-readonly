@@ -72,10 +72,12 @@ const EXPECT_ACCOUNT_EXISTS: &str = "account exists, checked above";
 pub struct ValidatorAccountsUpdate {
     /// Maximum power across last 3 epochs.
     pub power_info: HashMap<AccountId, Power>,
+    /// Maximum frozen across last 3 epochs.
+    pub frozen_info: HashMap<AccountId, Balance>,
     /// Rewards to distribute to validators.
     pub validator_rewards: HashMap<AccountId, Balance>,
     /// Power proposals from the last chunk.
-    pub last_proposals: HashMap<AccountId, Power>,
+    pub last_power_proposals: HashMap<AccountId, Power>,
     /// The ID of the protocol treasury account if it belongs to the current shard.
     pub protocol_treasury_account_id: Option<AccountId>,
     /// Accounts to slash and the slashed amount (None means everything)
@@ -1458,6 +1460,8 @@ impl Runtime {
             set(&mut state_update, TrieKey::DelayedReceiptIndices, &delayed_receipts_indices);
         }
 
+        // Just ignore this checker for now.
+        // We will work on this later.
         check_balance(
             &apply_state.config,
             &state_update,

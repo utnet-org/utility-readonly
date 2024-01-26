@@ -1,3 +1,4 @@
+use crate::proposals;
 use crate::shard_assignment::assign_shards;
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
@@ -233,6 +234,7 @@ pub fn proposals_to_epoch_info(
 /// 4. If account was fisherman last epoch, it is included in fishermen
 fn proposals_with_rollover(
     proposals: Vec<ValidatorPower>,
+    proposals: Vec<ValidatorFrozen>,
     prev_epoch_info: &EpochInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
@@ -245,9 +247,10 @@ fn proposals_with_rollover(
         let account_id = p.account_id();
         if validator_kickout.contains_key(account_id) {
             let account_id = p.take_account_id();
-            power_change.insert(account_id, 0);
+            frozen_change.insert(account_id, 0);
         } else {
             power_change.insert(account_id.clone(), p.power());
+            frozen_change.insert(account_id.clone(), p.frozen());
             proposals_by_account.insert(account_id.clone(), p);
         }
     }
@@ -255,11 +258,11 @@ fn proposals_with_rollover(
     for r in prev_epoch_info.validators_iter() {
         let account_id = r.account_id().clone();
         if validator_kickout.contains_key(&account_id) {
-            power_change.insert(account_id, 0);
+            frozen_change.insert(account_id, 0);
             continue;
         }
-        // I will not change the power when get reward
-        // TODO, add reward directly to the amount
+        // The reward will given to the validator in the next epoch, 
+        //  so we need to add it to the stake but not power.
         let p = proposals_by_account.entry(account_id).or_insert(r);
         if let Some(reward) = validator_reward.get(p.account_id()) {
             *p.frozen_mut() += *reward;
@@ -271,13 +274,14 @@ fn proposals_with_rollover(
     for r in prev_epoch_info.fishermen_iter() {
         let account_id = r.account_id();
         if validator_kickout.contains_key(account_id) {
-            power_change.insert(account_id.clone(), 0);
+            frozen_change.insert(account_id.clone(), 0);
             continue;
         }
         if !proposals_by_account.contains_key(account_id) {
             // safe to do this here because fishermen from previous epoch is guaranteed to have no
             // duplicates.
             power_change.insert(account_id.clone(), r.power());
+            frozen_change.insert(account_id.clone(), r.frozen());
             fishermen.push(r);
         }
     }
