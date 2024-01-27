@@ -1,5 +1,7 @@
 use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{Balance, NumShards, ShardId};
+use near_primitives::types::validator_frozen::ValidatorFrozen;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 use near_primitives::utils::min_heap::{MinHeap, PeekMut};
 
 /// Assign chunk producers (a.k.a. validators) to shards.  The i-th element
@@ -147,6 +149,18 @@ pub trait HasStake {
 impl HasStake for ValidatorPower {
     fn get_stake(&self) -> Balance {
         self.power()
+    }
+}
+
+impl HasStake for ValidatorFrozen {
+    fn get_stake(&self) -> Balance {
+        self.frozen()
+    }
+}
+
+impl HasStake for ValidatorPowerAndFrozen {
+    fn get_stake(&self) -> Balance {
+        self.frozen()
     }
 }
 

@@ -550,6 +550,7 @@ pub mod validator_power_and_frozen {
     use near_crypto::PublicKey;
     use near_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
+    use crate::types::ApprovalPower;
 
     pub use super::ValidatorPowerAndFrozenV1;
 
@@ -703,6 +704,15 @@ pub mod validator_power_and_frozen {
         pub fn frozen(&self) -> Balance {
             match self {
                 Self::V1(v1) => v1.frozen,
+            }
+        }
+
+        pub fn get_approval_power(&self, is_next_epoch: bool) -> ApprovalPower {
+            ApprovalPower {
+                account_id: self.account_id().clone(),
+                public_key: self.public_key().clone(),
+                power_this_epoch: if is_next_epoch { 0 } else { self.power() },
+                power_next_epoch: if is_next_epoch { self.power() } else { 0 },
             }
         }
 
@@ -1375,6 +1385,8 @@ pub enum ValidatorKickoutReason {
         #[serde(with = "dec_format", rename = "power_threshold_u128")]
         threshold: Power,
     },
+    /// Validator unfrozen themselves.
+    Unfrozen,
     /// Validator power is now below threshold
     NotEnoughFrozen {
         #[serde(with = "dec_format", rename = "frozen_u128")]

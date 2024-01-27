@@ -363,7 +363,8 @@ pub fn record_block_with_final_block_hash(
     cur_h: CryptoHash,
     last_final_block_hash: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
 ) {
     epoch_manager
         .record_block_info(
@@ -373,8 +374,8 @@ pub fn record_block_with_final_block_hash(
                 height.saturating_sub(2),
                 last_final_block_hash,
                 prev_h,
-                vec![],
-                vec![],
+                power_proposals,
+                frozen_proposals,
                 vec![],
                 vec![],
                 DEFAULT_TOTAL_SUPPLY,

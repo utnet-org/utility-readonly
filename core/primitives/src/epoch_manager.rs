@@ -558,6 +558,7 @@ use crate::epoch_manager::ValidatorWeight;
         hash::hash,
         types::{BlockHeight, ShardId},
     };
+    use crate::types::validator_frozen::ValidatorFrozen;
     use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 
     pub use super::EpochInfoV1;
@@ -1204,8 +1205,10 @@ use crate::epoch_manager::ValidatorWeight;
     #[derive(BorshSerialize, BorshDeserialize)]
     pub struct EpochSummary {
         pub prev_epoch_last_block_hash: CryptoHash,
-        /// Proposals from the epoch, only the latest one per account
-        pub all_proposals: Vec<ValidatorPower>,
+        /// Power proposals from the epoch, only the latest one per account
+        pub all_power_proposals: Vec<ValidatorPower>,
+        /// Frozen proposals from the epoch, only the latest one per account
+        pub all_frozen_proposals: Vec<ValidatorFrozen>,
         /// Kickout set, includes slashed
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         /// Only for validators who met the threshold and didn't get slashed

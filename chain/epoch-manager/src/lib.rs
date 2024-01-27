@@ -27,6 +27,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tracing::{debug, warn};
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -134,7 +135,7 @@ impl EpochInfoProvider for EpochManagerHandle {
 
     fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         let epoch_manager = self.read();
-        epoch_manager.minimum_stake(prev_block_hash)
+        epoch_manager.minimum_frozen(prev_block_hash)
     }
 
 }
@@ -157,12 +158,12 @@ pub struct EpochManager {
     /// Cache of epoch id to epoch start height
     epoch_id_to_start: SyncLruCache<EpochId, BlockHeight>,
     /// Epoch validators ordered by `block_producer_settlement`.
-    epoch_validators_ordered: SyncLruCache<EpochId, Arc<[(ValidatorPower, bool)]>>,
+    epoch_validators_ordered: SyncLruCache<EpochId, Arc<[(ValidatorPowerAndFrozen, bool)]>>,
     /// Unique validators ordered by `block_producer_settlement`.
-    epoch_validators_ordered_unique: SyncLruCache<EpochId, Arc<[(ValidatorPower, bool)]>>,
+    epoch_validators_ordered_unique: SyncLruCache<EpochId, Arc<[(ValidatorPowerAndFrozen, bool)]>>,
 
     /// Unique chunk producers.
-    epoch_chunk_producers_unique: SyncLruCache<EpochId, Arc<[ValidatorPower]>>,
+    epoch_chunk_producers_unique: SyncLruCache<EpochId, Arc<[ValidatorPowerAndFrozen]>>,
     /// Aggregator that keeps statistics about the current epoch.  It’s data are
     /// synced up to the last final block.  The information are updated by
     /// [`Self::update_epoch_info_aggregator_upto_final`] method.  To get
@@ -194,12 +195,29 @@ impl EpochManager {
         let reward_calculator = RewardCalculator::new(genesis_config);
         let all_epoch_config =
             Self::new_all_epoch_config_with_test_overrides(genesis_config, test_overrides);
+        let validators = genesis_config.validators();
+        // Transforming ValidatorPowerAndFrozen to ValidatorPower
+        let power_validators: Vec<ValidatorPower> = validators.into_iter().map(|validator| {
+            match validator {
+                ValidatorPowerAndFrozen::V1(v) => {
+                    ValidatorPower::new_v1(v.account_id, v.public_key, v.power)
+                },
+            }
+        }).collect();
+        let frozen_validators: Vec<ValidatorFrozen> = validators.into_iter().map(|validator| {
+            match validator {
+                ValidatorPowerAndFrozen::V1(v) => {
+                    ValidatorFrozen::new_v1(v.account_id, v.public_key, v.frozen)
+                },
+            }
+        }).collect();
         Self::new(
             store,
             all_epoch_config,
             genesis_config.protocol_version,
             reward_calculator,
-            genesis_config.validators(),
+            power_validators,
+            frozen_validators,
         )
     }
 
@@ -591,12 +609,14 @@ impl EpochManager {
         let EpochInfoAggregator {
             block_tracker: block_validator_tracker,
             shard_tracker: chunk_validator_tracker,
-            all_proposals,
+            all_power_proposals,
+            all_frozen_proposals,
             version_tracker,
             ..
         } = self.get_epoch_info_aggregator_upto_last(last_block_hash)?;
 
-        let mut proposals = vec![];
+        let mut power_proposals = vec![];
+        let mut frozen_proposals = vec![];
         let mut validator_kickout = HashMap::new();
 
         // Next protocol version calculation.
@@ -645,14 +665,25 @@ impl EpochManager {
             validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Slashed);
         }
 
-        for (account_id, proposal) in all_proposals {
+        for (account_id, power_proposal) in all_power_proposals {
             if !slashed_validators.contains_key(&account_id) {
-                if proposal.power() == 0
+                if power_proposal.power() == 0
                     && *next_epoch_info.power_change().get(&account_id).unwrap_or(&0) != 0
                 {
                     validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Unpowered);
                 }
-                proposals.push(proposal.clone());
+                power_proposals.push(power_proposal.clone());
+            }
+        }
+
+        for (account_id, frozen_proposal) in all_frozen_proposals {
+            if !slashed_validators.contains_key(&account_id) {
+                if frozen_proposal.frozen() == 0
+                    && *next_epoch_info.frozen_change().get(&account_id).unwrap_or(&0) != 0
+                {
+                    validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Unfrozen);
+                }
+                frozen_proposals.push(frozen_proposal.clone());
             }
         }
 
@@ -673,13 +704,14 @@ impl EpochManager {
         validator_kickout.extend(kickout);
         debug!(
             target: "epoch_manager",
-            "All proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
-            proposals, validator_kickout, block_validator_tracker, chunk_validator_tracker
+            "All power proposals: {:?}, All frozen proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
+            all_power_proposals, all_frozen_proposals, validator_kickout, block_validator_tracker, chunk_validator_tracker
         );
 
         Ok(EpochSummary {
             prev_epoch_last_block_hash,
-            all_proposals: proposals,
+            all_power_proposals: power_proposals,
+            all_frozen_proposals: frozen_proposals,
             validator_kickout,
             validator_block_chunk_stats,
             next_version,
@@ -704,7 +736,8 @@ impl EpochManager {
         self.save_epoch_validator_info(store_update, block_info.epoch_id(), &epoch_summary)?;
 
         let EpochSummary {
-            all_proposals,
+            all_power_proposals,
+            all_frozen_proposals,
             validator_kickout,
             validator_block_chunk_stats,
             next_version,
@@ -732,7 +765,8 @@ impl EpochManager {
             &next_next_epoch_config,
             rng_seed,
             &next_epoch_info,
-            all_proposals,
+            all_power_proposals,
+            all_frozen_proposals,
             validator_kickout,
             validator_reward,
             minted_amount,
@@ -778,7 +812,7 @@ impl EpochManager {
         if !self.has_block_info(&current_hash)? {
             if block_info.prev_hash() == &CryptoHash::default() {
                 // This is genesis block, we special case as new epoch.
-                assert_eq!(block_info.proposals_iter().len(), 0);
+                assert_eq!(block_info.power_proposals_iter().len(), 0);
                 let pre_genesis_epoch_id = EpochId::default();
                 let genesis_epoch_info = self.get_epoch_info(&pre_genesis_epoch_id)?;
                 self.save_block_info(&mut store_update, Arc::new(block_info))?;
@@ -879,7 +913,7 @@ impl EpochManager {
         &self,
         epoch_id: &EpochId,
         height: BlockHeight,
-    ) -> Result<ValidatorPower, EpochError> {
+    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         let validator_id = Self::block_producer_from_info(&epoch_info, height);
         Ok(epoch_info.get_validator(validator_id))
@@ -890,7 +924,7 @@ impl EpochManager {
         &self,
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
-    ) -> Result<Arc<[(ValidatorPower, bool)]>, EpochError> {
+    ) -> Result<Arc<[(ValidatorPowerAndFrozen, bool)]>, EpochError> {
         // TODO(3674): Revisit this when we enable slashing
         self.epoch_validators_ordered.get_or_try_put(epoch_id.clone(), |epoch_id| {
             let block_info = self.get_block_info(last_known_block_hash)?;
@@ -914,7 +948,7 @@ impl EpochManager {
         &self,
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
-    ) -> Result<Arc<[(ValidatorPower, bool)]>, EpochError> {
+    ) -> Result<Arc<[(ValidatorPowerAndFrozen, bool)]>, EpochError> {
         self.epoch_validators_ordered_unique.get_or_try_put(epoch_id.clone(), |epoch_id| {
             let settlement =
                 self.get_all_block_producers_settlement(epoch_id, last_known_block_hash)?;
@@ -935,7 +969,7 @@ impl EpochManager {
     pub fn get_all_chunk_producers(
         &self,
         epoch_id: &EpochId,
-    ) -> Result<Arc<[ValidatorPower]>, EpochError> {
+    ) -> Result<Arc<[ValidatorPowerAndFrozen]>, EpochError> {
         self.epoch_chunk_producers_unique.get_or_try_put(epoch_id.clone(), |epoch_id| {
             let mut producers: HashSet<u64> = HashSet::default();
 
@@ -1043,7 +1077,7 @@ impl EpochManager {
         epoch_id: &EpochId,
         height: BlockHeight,
         shard_id: ShardId,
-    ) -> Result<ValidatorPower, EpochError> {
+    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         let validator_id = Self::chunk_producer_from_info(&epoch_info, height, shard_id);
         Ok(epoch_info.get_validator(validator_id))
@@ -1055,7 +1089,7 @@ impl EpochManager {
         &self,
         epoch_id: &EpochId,
         account_id: &AccountId,
-    ) -> Result<ValidatorPower, EpochError> {
+    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         epoch_info
             .get_validator_by_account(account_id)
@@ -1067,7 +1101,7 @@ impl EpochManager {
         &self,
         epoch_id: &EpochId,
         account_id: &AccountId,
-    ) -> Result<ValidatorPower, EpochError> {
+    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         epoch_info
             .get_fisherman_by_account(account_id)
@@ -1347,7 +1381,7 @@ impl EpochManager {
         // This ugly code arises because of the incompatible types between `block_tracker` in `EpochInfoAggregator`
         // and `validator_block_chunk_stats` in `EpochSummary`. Rust currently has no support for Either type
         // in std.
-        let (current_validators, next_epoch_id, all_proposals) = match &epoch_identifier {
+        let (current_validators, next_epoch_id, all_power_proposals, all_frozen_proposals) = match &epoch_identifier {
             ValidatorInfoIdentifier::EpochId(id) => {
                 let epoch_summary = self.get_epoch_validator_info(id)?;
                 let cur_validators = cur_epoch_info
@@ -1387,7 +1421,8 @@ impl EpochManager {
                 (
                     cur_validators,
                     EpochId(epoch_summary.prev_epoch_last_block_hash),
-                    epoch_summary.all_proposals.into_iter().map(Into::into).collect(),
+                    epoch_summary.all_power_proposals.into_iter().map(Into::into).collect(),
+                    epoch_summary.all_frozen_proposals.into_iter().map(Into::into).collect(),
                 )
             }
             ValidatorInfoIdentifier::BlockHash(ref h) => {
@@ -1447,10 +1482,12 @@ impl EpochManager {
                         })
                     })
                     .collect::<Result<Vec<CurrentEpochValidatorInfo>, EpochError>>()?;
-                let all_proposals =
-                    aggregator.all_proposals.iter().map(|(_, p)| p.clone().into()).collect();
+                let all_power_proposals =
+                    aggregator.all_power_proposals.iter().map(|(_, p)| p.clone().into()).collect();
+                let all_frozen_proposals =
+                    aggregator.all_frozen_proposals.iter().map(|(_, p)| p.clone().into()).collect();
                 let next_epoch_id = self.get_next_epoch_id(h)?;
-                (cur_validators, next_epoch_id, all_proposals)
+                (cur_validators, next_epoch_id, all_power_proposals, all_frozen_proposals)
             }
         };
 
@@ -1492,7 +1529,8 @@ impl EpochManager {
             next_validators,
             current_fishermen: cur_epoch_info.fishermen_iter().map(Into::into).collect(),
             next_fishermen: next_epoch_info.fishermen_iter().map(Into::into).collect(),
-            current_proposals: all_proposals,
+            current_power_proposals: all_power_proposals,
+            current_frozen_proposals: all_frozen_proposals,
             prev_epoch_kickout,
             epoch_start_height,
             epoch_height,
@@ -1506,12 +1544,14 @@ impl EpochManager {
         // Check that genesis block doesn't have any proposals.
         assert!(
             block_header_info.height > 0
-                || (block_header_info.proposals.is_empty()
+                || (block_header_info.power_proposals.is_empty()
+                    && block_header_info.frozen_proposals.is_empty()
                     && block_header_info.slashed_validators.is_empty())
         );
         debug!(target: "epoch_manager",
             height = block_header_info.height,
-            proposals = ?block_header_info.proposals,
+            power_proposals = ?block_header_info.power_proposals,
+            frozen_proposals = ?block_header_info.frozen_proposals,
             "add_validator_proposals");
         // Deal with validator proposals and epoch finishing.
         let block_info = BlockInfo::new(
@@ -1520,7 +1560,8 @@ impl EpochManager {
             block_header_info.last_finalized_height,
             block_header_info.last_finalized_block_hash,
             block_header_info.prev_hash,
-            block_header_info.proposals,
+            block_header_info.power_proposals,
+            block_header_info.frozen_proposals,
             block_header_info.chunk_mask,
             block_header_info.slashed_validators,
             block_header_info.total_supply,

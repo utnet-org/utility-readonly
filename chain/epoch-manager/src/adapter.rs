@@ -13,7 +13,6 @@ use near_primitives::errors::EpochError;
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardLayoutError};
 use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
-use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, ApprovalPower, Balance, BlockHeight, EpochHeight, EpochId, ShardId,
     ValidatorInfoIdentifier,
@@ -25,6 +24,7 @@ use near_store::{ShardUId, StoreUpdate};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::Arc;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// A trait that abstracts the interface of the EpochManager.
 /// The two implementations are EpochManagerHandle and KeyValueEpochManager.
@@ -159,7 +159,7 @@ pub trait EpochManagerAdapter: Send + Sync {
         &self,
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
-    ) -> Result<Vec<(ValidatorPower, bool)>, EpochError>;
+    ) -> Result<Vec<(ValidatorPowerAndFrozen, bool)>, EpochError>;
 
     fn get_epoch_block_approvers_ordered(
         &self,
@@ -170,7 +170,7 @@ pub trait EpochManagerAdapter: Send + Sync {
     fn get_epoch_chunk_producers(
         &self,
         epoch_id: &EpochId,
-    ) -> Result<Vec<ValidatorPower>, EpochError>;
+    ) -> Result<Vec<ValidatorPowerAndFrozen>, EpochError>;
 
     /// Block producers for given height for the main block. Return EpochError if outside of known boundaries.
     fn get_block_producer(
@@ -200,14 +200,14 @@ pub trait EpochManagerAdapter: Send + Sync {
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError>;
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError>;
 
     fn get_fisherman_by_account_id(
         &self,
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError>;
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError>;
 
     /// WARNING: this call may be expensive.
     ///
@@ -611,7 +611,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
         &self,
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
-    ) -> Result<Vec<(ValidatorPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ValidatorPowerAndFrozen, bool)>, EpochError> {
         let epoch_manager = self.read();
         Ok(epoch_manager.get_all_block_producers_ordered(epoch_id, last_known_block_hash)?.to_vec())
     }
@@ -627,7 +627,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
     fn get_epoch_chunk_producers(
         &self,
         epoch_id: &EpochId,
-    ) -> Result<Vec<ValidatorPower>, EpochError> {
+    ) -> Result<Vec<ValidatorPowerAndFrozen>, EpochError> {
         let epoch_manager = self.read();
         Ok(epoch_manager.get_all_chunk_producers(epoch_id)?.to_vec())
     }
@@ -666,7 +666,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         let epoch_manager = self.read();
         let validator = epoch_manager.get_validator_by_account_id(epoch_id, account_id)?;
         let block_info = epoch_manager.get_block_info(last_known_block_hash)?;
@@ -678,7 +678,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
         epoch_id: &EpochId,
         last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         let epoch_manager = self.read();
         let fisherman = epoch_manager.get_fisherman_by_account_id(epoch_id, account_id)?;
         let block_info = epoch_manager.get_block_info(last_known_block_hash)?;

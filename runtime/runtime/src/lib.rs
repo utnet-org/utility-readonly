@@ -1017,6 +1017,7 @@ impl Runtime {
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
         for (account_id, max_of_power) in &validator_accounts_update.power_info {
+            let max_of_frozen = validator_accounts_update.frozen_info.get(&account_id.clone()).unwrap();
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
                     debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
@@ -1027,29 +1028,41 @@ impl Runtime {
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
                 }
-
                 debug!(target: "runtime",
                        "account {} power {} max_of_power: {}",
                        account_id, account.power(), max_of_power
                 );
                 if account.power() < *max_of_power {
                     return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. \
+                        "FATAL: powering invariant does not hold. \
                          Account power {} is less than maximum of power {} in the past three epochs",
                         account.power(),
                         max_of_power)).into());
                 }
-                let last_proposal =
-                    *validator_accounts_update.last_proposals.get(account_id).unwrap_or(&0);
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
                 let return_power = account
                     .power()
-                    .checked_sub(max(*max_of_power, last_proposal))
+                    .checked_sub(max(*max_of_power, last_power_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
                 debug!(target: "runtime", "account {} return power {}", account_id, return_power);
                 account.set_power(
                     account
                         .power()
                         .checked_sub(return_power)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                let last_frozen_proposal =
+                    *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
+                let return_frozen = account
+                    .locked()
+                    .checked_sub(max(*max_of_frozen, last_frozen_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return frozen {}", account_id, return_frozen);
+                account.set_locked(
+                    account
+                        .locked()
+                        .checked_sub(return_frozen)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
                 set_account(state_update, account_id.clone(), &account);

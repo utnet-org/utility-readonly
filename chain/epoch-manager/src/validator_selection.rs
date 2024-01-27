@@ -4,7 +4,7 @@ use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::EpochError;
 use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1};
+use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
 use near_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
 use num_rational::Ratio;
 use std::cmp::{self, Ordering};
@@ -57,8 +57,8 @@ pub fn proposals_to_epoch_info(
         &mut frozen_change,
         &mut fishermen,
     );
-    let mut bp_power_proposals = order_power_proposals(power_proposals.values().clone());
-    let mut bp_frozen_proposals = order_frozen_proposals(frozen_proposals.values().clone());
+    let mut bp_power_proposals = order_power_proposals(power_proposals.values().cloned());
+    let mut bp_frozen_proposals = order_frozen_proposals(frozen_proposals.values().cloned());
     let (block_producers, bp_stake_threshold) = select_block_producers(
         &mut bp_power_proposals,
         &mut bp_frozen_proposals,
@@ -88,16 +88,21 @@ pub fn proposals_to_epoch_info(
     // since block producer proposals could become chunk producers, their actual stake threshold
     // is the smaller of the two thresholds
     let threshold = cmp::min(bp_stake_threshold, cp_stake_threshold);
-
+    let cp_frozen_map = create_frozen_map(cp_frozen_proposals);
     // process remaining chunk_producer_proposals that were not selected for either role
     for OrderedValidatorPower(p) in cp_power_proposals {
         let power = p.power();
         let account_id = p.account_id();
-        
-        if power >= epoch_config.fishermen_threshold {
-            fishermen.push(p);
+        let frozen = cp_frozen_map.get(&account_id.clone()).unwrap();
+        let r_p = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+            account_id : account_id.clone(),
+            public_key : p.public_key().clone(),
+            power : power.clone(),
+            frozen : frozen.clone(),
+        });
+        if power >= epoch_config.fishermen_threshold && frozen > &0 {
+            fishermen.push(r_p);
         } else {
-            *power_change.get_mut(account_id).unwrap() = 0;
             *frozen_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)
                 || prev_epoch_info.account_is_fisherman(account_id)
@@ -114,7 +119,7 @@ pub fn proposals_to_epoch_info(
 
     let num_chunk_producers = chunk_producers.len();
     // Constructing `all_validators` such that a validators position corresponds to its `ValidatorId`.
-    let mut all_validators: Vec<ValidatorPower> = Vec::with_capacity(num_chunk_producers);
+    let mut all_validators: Vec<ValidatorPowerAndFrozen> = Vec::with_capacity(num_chunk_producers);
     let mut validator_to_index = HashMap::new();
     let mut block_producers_settlement = Vec::with_capacity(block_producers.len());
 
@@ -284,13 +289,26 @@ fn proposals_with_rollover(
             frozen_change.insert(account_id, 0);
             continue;
         }
+        let r_f = ValidatorFrozen::V1(ValidatorFrozenV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            frozen : r.frozen().clone(),
+        });
+        let r_p = ValidatorPower::V1(ValidatorPowerV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            power : r.power().clone(),
+        });
         // The reward will given to the validator in the next epoch, 
         //  so we need to add it to the stake but not power.
-        let f = frozen_proposals_by_account.entry(account_id).or_insert(r);
+        let f = frozen_proposals_by_account.entry(account_id.clone()).or_insert(r_f);
         if let Some(reward) = validator_reward.get(f.account_id()) {
             *f.frozen_mut() += *reward;
         }
         frozen_change.insert(f.account_id().clone(), f.frozen());
+
+        let p = power_proposals_by_account.entry(account_id).or_insert(r_p);
+        power_change.insert(p.account_id().clone(), p.power());
 
     }
 
@@ -318,7 +336,7 @@ fn order_power_proposals<I: IntoIterator<Item = ValidatorPower>>(
     proposals.into_iter().map(OrderedValidatorPower).collect()
 }
 
-fn order_frozen_proposals<I: IntoIterator<Item = ValidatorFrozen>>(
+fn order_frozen_proposals<I:  IntoIterator<Item = ValidatorFrozen>>(
     proposals: I,
 ) -> BinaryHeap<OrderedValidatorFrozen> {
     proposals.into_iter().map(OrderedValidatorFrozen).collect()
@@ -349,6 +367,27 @@ fn select_chunk_producers(
         protocol_version,
     )
 }
+#[allow(irrefutable_let_patterns)]
+fn create_frozen_map(heap: BinaryHeap<OrderedValidatorFrozen>) -> HashMap<AccountId, Balance> {
+    let mut frozen_map = HashMap::new();
+
+    // Explicitly define cloned_heap as an owned BinaryHeap
+    let cloned_heap: BinaryHeap<OrderedValidatorFrozen> = heap.clone();
+
+    // Now we can call into_sorted_vec() on this owned BinaryHeap
+    let vec = cloned_heap.into_sorted_vec();
+
+    // Iterate through the vector and populate the hash map
+    for ordered_validator in vec {
+        if let ValidatorFrozen::V1(ref v1) = ordered_validator.0 {
+            frozen_map.insert(v1.account_id.clone(), v1.frozen);
+        }
+    }
+
+    frozen_map
+}
+
+
 
 // Takes the top N proposals (by stake), or fewer if there are not enough or the
 // next proposals is too small relative to the others. In the case where all N
@@ -364,11 +403,11 @@ fn select_validators(
     let mut total_power = 0;
     let n = cmp::min(max_number_selected, power_proposals.len());
     let mut validators = Vec::with_capacity(n);
-
+    let frozen_map = create_frozen_map(frozen_proposals);
     for _ in 0..n {
         let p = power_proposals.pop().unwrap().0;
         let p_power = p.power();
-        let frozen = frozen_proposals.get(p.account_id().clone()).unwrap().frozen();
+        let frozen = frozen_map.get(&p.account_id().clone()).unwrap_or(&0);
         let p_r = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
             account_id : p.account_id().clone(),
             public_key : p.public_key().clone(),
@@ -376,7 +415,7 @@ fn select_validators(
             frozen : frozen.clone(),
         });
         let total_power_with_p = total_power + p_power;
-        if Ratio::new(p_power, total_power_with_p) > min_stake_ratio && frozen > 0 {
+        if Ratio::new(p_power, total_power_with_p) > min_stake_ratio && frozen > &0 {
             validators.push(p_r);
             total_power = total_power_with_p;
         } else {
@@ -413,7 +452,7 @@ fn select_validators(
 /// We store stakes in max heap and want to order them such that the validator
 /// with the largest state and (in case of a tie) lexicographically smallest
 /// AccountId comes at the top.
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 struct OrderedValidatorFrozen(ValidatorFrozen);
 impl crate::validator_selection::OrderedValidatorFrozen {
     fn key(&self) -> impl Ord + '_ {

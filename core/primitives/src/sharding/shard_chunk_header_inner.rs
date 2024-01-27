@@ -1,8 +1,9 @@
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
-use crate::types::StateRoot;
+use crate::types::{StateRoot, ValidatorFrozenV1};
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_primitives_core::hash::CryptoHash;
 use near_primitives_core::types::{Balance, BlockHeight, Gas, ShardId};
+use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum ShardChunkHeaderInner {
@@ -44,10 +45,18 @@ impl ShardChunkHeaderInner {
     }
 
     #[inline]
-    pub fn prev_validator_proposals(&self) -> ValidatorPowerIter {
+    pub fn prev_validator_power_proposals(&self) -> ValidatorPowerIter {
         match self {
-            Self::V1(inner) => ValidatorPowerIter::v1(&inner.prev_validator_proposals),
-            Self::V2(inner) => ValidatorPowerIter::new(&inner.prev_validator_proposals),
+            Self::V1(inner) => ValidatorPowerIter::v1(&inner.prev_validator_power_proposals),
+            Self::V2(inner) => ValidatorPowerIter::new(&inner.prev_validator_power_proposals),
+        }
+    }
+
+    #[inline]
+    pub fn prev_validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+        match self {
+            Self::V1(inner) => ValidatorFrozenIter::v1(&inner.prev_validator_frozen_proposals),
+            Self::V2(inner) => ValidatorFrozenIter::new(&inner.prev_validator_frozen_proposals),
         }
     }
 
@@ -139,7 +148,9 @@ pub struct ShardChunkHeaderInnerV1 {
     /// Tx merkle root.
     pub tx_root: CryptoHash,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_proposals: Vec<ValidatorPowerV1>,
+    pub prev_validator_power_proposals: Vec<ValidatorPowerV1>,
+    /// Validator proposals from the previous chunk.
+    pub prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
 }
 
 // V1 -> V2: Use versioned ValidatorStake structure in proposals
@@ -166,5 +177,7 @@ pub struct ShardChunkHeaderInnerV2 {
     /// Tx merkle root.
     pub tx_root: CryptoHash,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_proposals: Vec<ValidatorPower>,
+    pub prev_validator_power_proposals: Vec<ValidatorPower>,
+    /// Validator proposals from the previous chunk.
+    pub prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
 }
