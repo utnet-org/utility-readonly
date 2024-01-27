@@ -78,6 +78,8 @@ pub struct ValidatorAccountsUpdate {
     pub validator_rewards: HashMap<AccountId, Balance>,
     /// Power proposals from the last chunk.
     pub last_power_proposals: HashMap<AccountId, Power>,
+    /// Frozen proposals from the last chunk.
+    pub last_frozen_proposals: HashMap<AccountId, Balance>,
     /// The ID of the protocol treasury account if it belongs to the current shard.
     pub protocol_treasury_account_id: Option<AccountId>,
     /// Accounts to slash and the slashed amount (None means everything)

@@ -5,6 +5,7 @@ use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::EpochError;
 use near_primitives::types::validator_power::ValidatorPower;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 use near_primitives::types::{
     AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason,
 };
@@ -41,7 +42,8 @@ pub fn proposals_to_epoch_info(
     epoch_config: &EpochConfig,
     rng_seed: RngSeed,
     prev_epoch_info: &EpochInfo,
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
     validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -53,7 +55,8 @@ pub fn proposals_to_epoch_info(
             epoch_config,
             rng_seed,
             prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             validator_kickout,
             validator_reward,
             minted_amount,
@@ -65,7 +68,8 @@ pub fn proposals_to_epoch_info(
             epoch_config,
             rng_seed,
             prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             validator_kickout,
             validator_reward,
             minted_amount,
@@ -82,13 +86,13 @@ mod old_validator_selection {
     use near_primitives::epoch_manager::EpochConfig;
     use near_primitives::errors::EpochError;
     use near_primitives::types::validator_power::ValidatorPower;
-    use near_primitives::types::{
-        AccountId, Balance, NumSeats, ValidatorId, ValidatorKickoutReason,
-    };
+    use near_primitives::types::validator_frozen::ValidatorFrozen;
+    use near_primitives::types::{AccountId, Balance, NumSeats, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
     use near_primitives::validator_mandates::ValidatorMandates;
     use near_primitives::version::ProtocolVersion;
     use rand::{RngCore, SeedableRng};
     use rand_hc::Hc128Rng;
+    use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
     use crate::proposals::find_threshold;
     use crate::types::RngSeed;
@@ -97,45 +101,70 @@ mod old_validator_selection {
         epoch_config: &EpochConfig,
         rng_seed: RngSeed,
         prev_epoch_info: &EpochInfo,
-        proposals: Vec<ValidatorPower>,
+        power_proposals: Vec<ValidatorPower>,
+        frozen_proposals: Vec<ValidatorFrozen>,
         mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         validator_reward: HashMap<AccountId, Balance>,
         minted_amount: Balance,
         next_version: ProtocolVersion,
     ) -> Result<EpochInfo, EpochError> {
         // Combine proposals with rollovers.
-        let mut ordered_proposals = BTreeMap::new();
+        let mut ordered_power_proposals = BTreeMap::new();
+        let mut ordered_frozen_proposals= BTreeMap::new();
         // Account -> new_stake
         let mut power_change = BTreeMap::new();
         let mut frozen_change = BTreeMap::new();
         let mut fishermen = vec![];
         debug_assert!(
-            proposals.iter().map(|stake| stake.account_id()).collect::<HashSet<_>>().len()
-                == proposals.len(),
-            "Proposals should not have duplicates"
+            power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+                == power_proposals.len(),
+            "Power proposals should not have duplicates"
         );
 
-        for p in proposals {
+        debug_assert!(
+            frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
+                == frozen_proposals.len(),
+            "Frozen proposals should not have duplicates"
+        );
+
+        for p in power_proposals {
             let account_id = p.account_id();
+            power_change.insert(account_id.clone(), p.power());
+            ordered_power_proposals.insert(account_id.clone(), p);
+        }
+
+        for f in frozen_proposals {
+            let account_id = f.account_id();
             if validator_kickout.contains_key(account_id) {
-                let account_id = p.take_account_id();
+                let account_id = f.take_account_id();
                 frozen_change.insert(account_id,0);
             } else {
-                power_change.insert(account_id.clone(), p.power());
-                frozen_change.insert(account_id.clone(), p.frozen());
-                ordered_proposals.insert(account_id.clone(), p);
+                frozen_change.insert(account_id.clone(), f.frozen());
+                ordered_frozen_proposals.insert(account_id.clone(), f);
             }
         }
+
         for r in prev_epoch_info.validators_iter() {
             let account_id = r.account_id().clone();
             if validator_kickout.contains_key(&account_id) {
                 frozen_change.insert(account_id,0);
                 continue;
             }
-            let p = ordered_proposals.entry(account_id.clone()).or_insert(r);
-            *p.frozen_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
+            let r_p = ValidatorPower::V1(ValidatorPowerV1{
+                account_id: r.account_id().clone(),
+                public_key: r.public_key().clone(),
+                power: r.power().clone(),
+            });
+            let p = ordered_power_proposals.entry(account_id.clone()).or_insert(r_p);
             power_change.insert(account_id.clone(), p.power());
-            frozen_change.insert(account_id, p.frozen());
+            let r_f = ValidatorFrozen::V1(ValidatorFrozenV1{
+                account_id: r.account_id().clone(),
+                public_key: r.public_key().clone(),
+                frozen: r.frozen().clone(),
+            });
+            let f = ordered_frozen_proposals.entry(account_id.clone()).or_insert(r_f);
+            *f.frozen_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
+            frozen_change.insert(account_id, f.frozen());
         }
 
         for r in prev_epoch_info.fishermen_iter() {
@@ -144,7 +173,7 @@ mod old_validator_selection {
                 frozen_change.insert(account_id.clone(), 0);
                 continue;
             }
-            if !ordered_proposals.contains_key(account_id) {
+            if !ordered_frozen_proposals.contains_key(account_id) {
                 // safe to do this here because fishermen from previous epoch is guaranteed to have no
                 // duplicates.
                 power_change.insert(account_id.clone(), r.power());
@@ -157,26 +186,33 @@ mod old_validator_selection {
         let num_hidden_validator_seats: NumSeats =
             epoch_config.avg_hidden_validator_seats_per_shard.iter().sum();
         let num_total_seats = epoch_config.num_block_producer_seats + num_hidden_validator_seats;
-        let stakes = ordered_proposals.iter().map(|(_, p)| p.power()).collect::<Vec<_>>();
-        let threshold = find_threshold(&stakes, num_total_seats)?;
+        let frozen = ordered_frozen_proposals.iter().map(|(_, p)| p.frozen()).collect::<Vec<_>>();
+        let threshold = find_threshold(&frozen, num_total_seats)?;
         // Remove proposals under threshold.
         let mut final_proposals = vec![];
 
-        for (account_id, p) in ordered_proposals {
-            let power = p.power();
-            if power >= threshold {
-                final_proposals.push(p);
-            } else if power >= epoch_config.fishermen_threshold {
+        for (account_id, p) in ordered_frozen_proposals {
+            let frozen = p.frozen();
+            let power = ordered_power_proposals.get(&account_id.clone()).unwrap().power();
+            let p_f = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+                account_id: account_id.clone(),
+                public_key: p.public_key().clone(),
+                power: power.clone(),
+                frozen: frozen.clone(),
+            });
+            if frozen >= threshold {
+                final_proposals.push(p_f);
+            } else if frozen >= epoch_config.fishermen_threshold {
                 // Do not return stake back since they will become fishermen
-                fishermen.push(p);
+                fishermen.push(p_f);
             } else {
-                *power_change.get_mut(&account_id).unwrap() = 0;
+                *frozen_change.get_mut(&account_id).unwrap() = 0;
                 if prev_epoch_info.account_is_validator(&account_id)
                     || prev_epoch_info.account_is_fisherman(&account_id)
                 {
                     validator_kickout.insert(
                         account_id,
-                        ValidatorKickoutReason::NotEnoughPower { power, threshold },
+                        ValidatorKickoutReason::NotEnoughFrozen { frozen, threshold },
                     );
                 }
             }
@@ -186,7 +222,7 @@ mod old_validator_selection {
         let mut dup_proposals = final_proposals
             .iter()
             .enumerate()
-            .flat_map(|(i, p)| iter::repeat(i as u64).take((p.power() / threshold) as usize))
+            .flat_map(|(i, p)| iter::repeat(i as u64).take((p.frozen() / threshold) as usize))
             .collect::<Vec<_>>();
 
         assert!(dup_proposals.len() >= num_total_seats as usize, "bug in find_threshold");
@@ -209,8 +245,8 @@ mod old_validator_selection {
             },
         );
         for p in proposals_to_remove {
-            debug_assert!(p.power() >= threshold);
-            if p.power() >= epoch_config.fishermen_threshold {
+            debug_assert!(p.frozen() >= threshold);
+            if p.frozen() >= epoch_config.fishermen_threshold {
                 fishermen.push(p);
             } else {
                 let account_id = p.take_account_id();

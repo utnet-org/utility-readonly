@@ -244,6 +244,7 @@ pub mod block_info {
     use near_primitives_core::hash::CryptoHash;
     use near_primitives_core::types::{AccountId, Balance, BlockHeight, ProtocolVersion};
     use std::collections::HashMap;
+    use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
     pub use super::BlockInfoV1;
 
@@ -267,7 +268,8 @@ pub mod block_info {
             last_finalized_height: BlockHeight,
             last_final_block_hash: CryptoHash,
             prev_hash: CryptoHash,
-            proposals: Vec<ValidatorPower>,
+            power_proposals: Vec<ValidatorPower>,
+            frozen_proposals: Vec<ValidatorFrozen>,
             validator_mask: Vec<bool>,
             slashed: Vec<SlashedValidator>,
             total_supply: Balance,
@@ -280,7 +282,8 @@ pub mod block_info {
                 last_finalized_height,
                 last_final_block_hash,
                 prev_hash,
-                proposals,
+                power_proposals,
+                frozen_proposals,
                 chunk_mask: validator_mask,
                 latest_protocol_version,
                 slashed: slashed
@@ -302,10 +305,18 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn proposals_iter(&self) -> ValidatorPowerIter {
+        pub fn power_proposals_iter(&self) -> ValidatorPowerIter {
             match self {
-                Self::V1(v1) => ValidatorPowerIter::v1(&v1.proposals),
-                Self::V2(v2) => ValidatorPowerIter::new(&v2.proposals),
+                Self::V1(v1) => ValidatorPowerIter::v1(&v1.power_proposals),
+                Self::V2(v2) => ValidatorPowerIter::new(&v2.power_proposals),
+            }
+        }
+
+        #[inline]
+        pub fn frozen_proposals_iter(&self) -> ValidatorFrozenIter {
+            match self {
+                Self::V1(v1) => ValidatorFrozenIter::v1(&v1.frozen_proposals),
+                Self::V2(v2) => ValidatorFrozenIter::new(&v2.frozen_proposals),
             }
         }
 
@@ -442,7 +453,8 @@ pub mod block_info {
         pub prev_hash: CryptoHash,
         pub epoch_first_block: CryptoHash,
         pub epoch_id: EpochId,
-        pub proposals: Vec<ValidatorPower>,
+        pub power_proposals: Vec<ValidatorPower>,
+        pub frozen_proposals: Vec<ValidatorFrozen>,
         pub chunk_mask: Vec<bool>,
         /// Latest protocol version this validator observes.
         pub latest_protocol_version: ProtocolVersion,
@@ -485,7 +497,8 @@ impl BlockInfoV1 {
         last_finalized_height: BlockHeight,
         last_final_block_hash: CryptoHash,
         prev_hash: CryptoHash,
-        proposals: Vec<ValidatorPowerV1>,
+        power_proposals: Vec<ValidatorPowerV1>,
+        frozen_proposals: Vec<ValidatorFrozenV1>,
         validator_mask: Vec<bool>,
         slashed: Vec<SlashedValidator>,
         total_supply: Balance,
@@ -498,7 +511,8 @@ impl BlockInfoV1 {
             last_finalized_height,
             last_final_block_hash,
             prev_hash,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             chunk_mask: validator_mask,
             latest_protocol_version,
             slashed: slashed
@@ -524,8 +538,8 @@ pub struct ValidatorWeight(ValidatorId, u64);
 
 pub mod epoch_info {
 use crate::epoch_manager::ValidatorWeight;
-    use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
-    use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason};
+    use crate::types::validator_power::{ValidatorPower};
+    use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason, ValidatorPowerAndFrozenV1};
     use crate::validator_mandates::{ValidatorMandates, ValidatorMandatesAssignment};
     use crate::version::PROTOCOL_VERSION;
     use borsh::{BorshDeserialize, BorshSerialize};
@@ -538,13 +552,13 @@ use crate::epoch_manager::ValidatorWeight;
     use smart_default::SmartDefault;
     use std::collections::{BTreeMap, HashMap};
 
-    use crate::types::validator_power::ValidatorPowerV1;
     use crate::{epoch_manager::RngSeed, rand::WeightedIndex};
     use near_primitives_core::{
         checked_feature,
         hash::hash,
         types::{BlockHeight, ShardId},
     };
+    use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 
     pub use super::EpochInfoV1;
 
@@ -579,7 +593,7 @@ use crate::epoch_manager::ValidatorWeight;
         /// There can be multiple epochs with the same ordinal in case of long forks.
         pub epoch_height: EpochHeight,
         /// List of current validators.
-        pub validators: Vec<ValidatorPower>,
+        pub validators: Vec<ValidatorPowerAndFrozen>,
         /// Validator account id to index in proposals.
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         /// Settlement of validators responsible for block production.
@@ -589,7 +603,7 @@ use crate::epoch_manager::ValidatorWeight;
         /// Settlement of hidden validators with weights used to determine how many shards they will validate.
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
         /// List of current fishermen.
-        pub fishermen: Vec<ValidatorPower>,
+        pub fishermen: Vec<ValidatorPowerAndFrozen>,
         /// Fisherman account id to index of proposal.
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         /// New power for validators.
@@ -623,12 +637,12 @@ use crate::epoch_manager::ValidatorWeight;
     )]
     pub struct EpochInfoV3 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorPower>,
+        pub validators: Vec<ValidatorPowerAndFrozen>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorPower>,
+        pub fishermen: Vec<ValidatorPowerAndFrozen>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
         pub frozen_change: BTreeMap<AccountId, Balance>,
@@ -657,12 +671,12 @@ use crate::epoch_manager::ValidatorWeight;
     )]
     pub struct EpochInfoV4 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorPower>,
+        pub validators: Vec<ValidatorPowerAndFrozen>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorPower>,
+        pub fishermen: Vec<ValidatorPowerAndFrozen>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
         pub frozen_change: BTreeMap<AccountId, Balance>,
@@ -683,12 +697,12 @@ use crate::epoch_manager::ValidatorWeight;
     impl EpochInfo {
         pub fn new(
             epoch_height: EpochHeight,
-            validators: Vec<ValidatorPower>,
+            validators: Vec<ValidatorPowerAndFrozen>,
             validator_to_index: HashMap<AccountId, ValidatorId>,
             block_producers_settlement: Vec<ValidatorId>,
             chunk_producers_settlement: Vec<Vec<ValidatorId>>,
             hidden_validators_settlement: Vec<ValidatorWeight>,
-            fishermen: Vec<ValidatorPower>,
+            fishermen: Vec<ValidatorPowerAndFrozen>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
             power_change: BTreeMap<AccountId, Power>,
             frozen_change: BTreeMap<AccountId, Balance>,
@@ -781,19 +795,21 @@ use crate::epoch_manager::ValidatorWeight;
             Self::V1(EpochInfoV1 {
                 epoch_height: 10,
                 validators: vec![
-                    ValidatorPowerV1 {
+                    ValidatorPowerAndFrozenV1 {
                         account_id: "test".parse().unwrap(),
                         public_key: "ed25519:6E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
                         power: 0,
+                        frozen: 0,
                     },
-                    ValidatorPowerV1 {
+                    ValidatorPowerAndFrozenV1 {
                         account_id: "validator".parse().unwrap(),
                         public_key: "ed25519:9E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
                         power: 0,
+                        frozen: 0,
                     },
                 ],
                 validator_to_index: HashMap::new(),
@@ -923,22 +939,22 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn validators_iter(&self) -> ValidatorPowerIter {
+        pub fn validators_iter(&self) -> ValidatorPowerAndFrozenIter {
             match self {
-                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validators),
-                Self::V2(v2) => ValidatorPowerIter::new(&v2.validators),
-                Self::V3(v3) => ValidatorPowerIter::new(&v3.validators),
-                Self::V4(v4) => ValidatorPowerIter::new(&v4.validators),
+                Self::V1(v1) => ValidatorPowerAndFrozenIter::v1(&v1.validators),
+                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.validators),
+                Self::V3(v3) => ValidatorPowerAndFrozenIter::new(&v3.validators),
+                Self::V4(v4) => ValidatorPowerAndFrozenIter::new(&v4.validators),
             }
         }
 
         #[inline]
-        pub fn fishermen_iter(&self) -> ValidatorPowerIter {
+        pub fn fishermen_iter(&self) -> ValidatorPowerAndFrozenIter {
             match self {
-                Self::V1(v1) => ValidatorPowerIter::v1(&v1.fishermen),
-                Self::V2(v2) => ValidatorPowerIter::new(&v2.fishermen),
-                Self::V3(v3) => ValidatorPowerIter::new(&v3.fishermen),
-                Self::V4(v4) => ValidatorPowerIter::new(&v4.fishermen),
+                Self::V1(v1) => ValidatorPowerAndFrozenIter::v1(&v1.fishermen),
+                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.fishermen),
+                Self::V3(v3) => ValidatorPowerAndFrozenIter::new(&v3.fishermen),
+                Self::V4(v4) => ValidatorPowerAndFrozenIter::new(&v4.fishermen),
             }
         }
 
@@ -949,6 +965,16 @@ use crate::epoch_manager::ValidatorWeight;
                 Self::V2(v2) => v2.validators[validator_id as usize].power(),
                 Self::V3(v3) => v3.validators[validator_id as usize].power(),
                 Self::V4(v4) => v4.validators[validator_id as usize].power(),
+            }
+        }
+
+        #[inline]
+        pub fn validator_frozen(&self, validator_id: u64) -> Balance {
+            match self {
+                Self::V1(v1) => v1.validators[validator_id as usize].frozen,
+                Self::V2(v2) => v2.validators[validator_id as usize].frozen(),
+                Self::V3(v3) => v3.validators[validator_id as usize].frozen(),
+                Self::V4(v4) => v4.validators[validator_id as usize].frozen(),
             }
         }
 
@@ -981,10 +1007,10 @@ use crate::epoch_manager::ValidatorWeight;
             }
         }
 
-        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPower> {
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
             match self {
                 Self::V1(v1) => v1.validator_to_index.get(account_id).map(|validator_id| {
-                    ValidatorPower::V1(v1.validators[*validator_id as usize].clone())
+                    ValidatorPowerAndFrozen::V1(v1.validators[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .validator_to_index
@@ -1002,9 +1028,9 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn get_validator(&self, validator_id: u64) -> ValidatorPower {
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndFrozen {
             match self {
-                Self::V1(v1) => ValidatorPower::V1(v1.validators[validator_id as usize].clone()),
+                Self::V1(v1) => ValidatorPowerAndFrozen::V1(v1.validators[validator_id as usize].clone()),
                 Self::V2(v2) => v2.validators[validator_id as usize].clone(),
                 Self::V3(v3) => v3.validators[validator_id as usize].clone(),
                 Self::V4(v4) => v4.validators[validator_id as usize].clone(),
@@ -1021,10 +1047,10 @@ use crate::epoch_manager::ValidatorWeight;
             }
         }
 
-        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPower> {
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
             match self {
                 Self::V1(v1) => v1.fishermen_to_index.get(account_id).map(|validator_id| {
-                    ValidatorPower::V1(v1.fishermen[*validator_id as usize].clone())
+                    ValidatorPowerAndFrozen::V1(v1.fishermen[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .fishermen_to_index
@@ -1042,9 +1068,9 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPower {
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndFrozen {
             match self {
-                Self::V1(v1) => ValidatorPower::V1(v1.fishermen[fisherman_id as usize].clone()),
+                Self::V1(v1) => ValidatorPowerAndFrozen::V1(v1.fishermen[fisherman_id as usize].clone()),
                 Self::V2(v2) => v2.fishermen[fisherman_id as usize].clone(),
                 Self::V3(v3) => v3.fishermen[fisherman_id as usize].clone(),
                 Self::V4(v4) => v4.fishermen[fisherman_id as usize].clone(),
@@ -1208,7 +1234,7 @@ pub struct EpochInfoV1 {
     /// Settlement of hidden validators with weights used to determine how many shards they will validate.
     pub hidden_validators_settlement: Vec<ValidatorWeight>,
     /// List of current fishermen.
-    pub fishermen: Vec<ValidatorPowerV1>,
+    pub fishermen: Vec<ValidatorPowerAndFrozenV1>,
     /// Fisherman account id to index of proposal.
     pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
     /// New power for validators.

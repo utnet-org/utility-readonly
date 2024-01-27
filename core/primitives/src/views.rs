@@ -1823,6 +1823,78 @@ pub struct FinalExecutionOutcomeWithReceiptView {
     pub receipts: Vec<ReceiptView>,
 }
 
+pub mod validator_frozen_view {
+    pub use super::ValidatorPowerViewV1;
+    use borsh::{BorshDeserialize, BorshSerialize};
+    use near_primitives_core::types::AccountId;
+    use serde::Deserialize;
+    use crate::types::validator_frozen::ValidatorFrozen;
+
+    #[derive(
+    BorshSerialize, BorshDeserialize, serde::Serialize, Deserialize, Debug, Clone, Eq, PartialEq,
+    )]
+    #[serde(tag = "validator_frozen_struct_version")]
+    pub enum ValidatorFrozenView {
+        V1(crate::views::ValidatorFrozenViewV1),
+    }
+
+    impl crate::views::validator_frozen_view::ValidatorFrozenView {
+        pub fn into_validator_frozen(self) -> ValidatorFrozen {
+            self.into()
+        }
+
+        #[inline]
+        pub fn take_account_id(self) -> AccountId {
+            match self {
+                Self::V1(v1) => v1.account_id,
+            }
+        }
+
+        #[inline]
+        pub fn account_id(&self) -> &AccountId {
+            match self {
+                Self::V1(v1) => &v1.account_id,
+            }
+        }
+    }
+
+    impl From<ValidatorFrozen> for crate::views::validator_frozen_view::ValidatorFrozenView {
+        fn from(frozen: ValidatorFrozen) -> Self {
+            match frozen {
+                ValidatorFrozen::V1(v1) => Self::V1(crate::views::ValidatorFrozenViewV1 {
+                    account_id: v1.account_id,
+                    public_key: v1.public_key,
+                    frozen: v1.frozen,
+                }),
+            }
+        }
+    }
+
+    impl From<crate::views::validator_frozen_view::ValidatorFrozenView> for ValidatorFrozen {
+        fn from(view: crate::views::validator_frozen_view::ValidatorFrozenView) -> Self {
+            match view {
+                crate::views::validator_frozen_view::ValidatorFrozenView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.frozen),
+            }
+        }
+    }
+}
+
+#[derive(
+BorshSerialize,
+BorshDeserialize,
+Debug,
+Clone,
+Eq,
+PartialEq,
+serde::Serialize,
+serde::Deserialize,
+)]
+pub struct ValidatorFrozenViewV1 {
+    pub account_id: AccountId,
+    pub public_key: PublicKey,
+    #[serde(with = "dec_format")]
+    pub frozen: Balance,
+}
 pub mod validator_power_view {
     pub use super::ValidatorPowerViewV1;
     use crate::types::validator_power::ValidatorPower;
@@ -1865,7 +1937,6 @@ pub mod validator_power_view {
                     account_id: v1.account_id,
                     public_key: v1.public_key,
                     power: v1.power,
-                    frozen: v1.frozen,
                 }),
             }
         }
@@ -1874,7 +1945,7 @@ pub mod validator_power_view {
     impl From<ValidatorPowerView> for ValidatorPower {
         fn from(view: ValidatorPowerView) -> Self {
             match view {
-                ValidatorPowerView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power, v1.frozen),
+                ValidatorPowerView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power),
             }
         }
     }
@@ -1895,7 +1966,6 @@ pub struct ValidatorPowerViewV1 {
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
     pub power: Power,
-    pub frozen: Balance,
 }
 
 #[derive(

@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use near_crypto::{EmptySigner, InMemorySigner, KeyType, PublicKey, SecretKey, Signature, Signer};
 use near_primitives_core::account::id::AccountIdRef;
-use near_primitives_core::types::ProtocolVersion;
+use near_primitives_core::types::{Power, ProtocolVersion};
 
 use crate::account::{AccessKey, AccessKeyPermission, Account};
 use crate::block::Block;
@@ -505,7 +505,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<Option<Balance>, EpochError> {
+    ) -> Result<Option<Power>, EpochError> {
         Ok(self.validators.get(account_id).cloned())
     }
 
@@ -513,7 +513,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         &self,
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
-    ) -> Result<Balance, EpochError> {
+    ) -> Result<Power, EpochError> {
         Ok(self.validators.values().sum())
     }
 
@@ -523,11 +523,11 @@ impl EpochInfoProvider for MockEpochInfoProvider {
 
     fn validator_frozen(
             &self,
-            epoch_id: &EpochId,
-            last_block_hash: &CryptoHash,
+            _epoch_id: &EpochId,
+            _last_block_hash: &CryptoHash,
             account_id: &AccountId,
         ) -> Result<Option<Balance>, EpochError> {
-        
+        Ok(self.validators.get(account_id).cloned())
     }
 
     fn validator_total_frozen(
@@ -538,7 +538,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         Ok(0)
     }
 
-    fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    fn minimum_frozen(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         Ok(0)
     }
 }

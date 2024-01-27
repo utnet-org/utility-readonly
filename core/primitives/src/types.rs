@@ -548,7 +548,7 @@ pub struct ApprovalFrozen {
 pub mod validator_power_and_frozen {
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Balance};
+    use near_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
 
     pub use super::ValidatorPowerAndFrozenV1;
@@ -705,7 +705,52 @@ pub mod validator_power_and_frozen {
                 Self::V1(v1) => v1.frozen,
             }
         }
+
+        /// Returns the validator's number of mandates (rounded down) at `power_per_seat`.
+        ///
+        /// It returns `u16` since it allows infallible conversion to `usize` and with [`u16::MAX`]
+        /// equalling 65_535 it should be sufficient to hold the number of mandates per validator.
+        ///
+        /// # Why `u16` should be sufficient
+        ///
+        /// As of October 2023, a [recommended lower bound] for the power required per mandate is
+        /// 25k $NEAR. At this price, the validator with highest power would have 1_888 mandates,
+        /// which is well below `u16::MAX`.
+        ///
+        /// From another point of view, with more than `u16::MAX` mandates for validators, sampling
+        /// mandates might become computationally too expensive. This might trigger an increase in
+        /// the required power per mandate, bringing down the number of mandates per validator.
+        ///
+        /// [recommended lower bound]: https://near.zulipchat.com/#narrow/stream/407237-pagoda.2Fcore.2Fstateless-validation/topic/validator.20seat.20assignment/near/393792901
+        ///
+        /// # Panics
+        ///
+        /// Panics if the number of mandates overflows `u16`.
+        pub fn num_mandates(&self, power_per_mandate: Power) -> u16 {
+            // Integer division in Rust returns the floor as described here
+            // https://doc.rust-lang.org/std/primitive.u64.html#method.div_euclid
+            u16::try_from(self.power() / power_per_mandate)
+                .expect("number of mandats should fit u16")
+        }
+
+        /// Returns the weight attributed to the validator's partial mandate.
+        ///
+        /// A validator has a partial mandate if its power cannot be divided evenly by
+        /// `power_per_mandate`. The remainder of that division is the weight of the partial
+        /// mandate.
+        ///
+        /// Due to this definintion a validator has exactly one partial mandate with `0 <= weight <
+        /// power_per_mandate`.
+        ///
+        /// # Example
+        ///
+        /// Let `V` be a validator with power of 12. If `power_per_mandate` equals 5 then the weight
+        /// of `V`'s partial mandate is `12 % 5 = 2`.
+        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Balance {
+            self.power() % power_per_mandate
+        }
     }
+
 }
 
 pub mod validator_frozen {
@@ -1016,49 +1061,7 @@ pub mod validator_power {
             }
         }
 
-        /// Returns the validator's number of mandates (rounded down) at `power_per_seat`.
-        ///
-        /// It returns `u16` since it allows infallible conversion to `usize` and with [`u16::MAX`]
-        /// equalling 65_535 it should be sufficient to hold the number of mandates per validator.
-        ///
-        /// # Why `u16` should be sufficient
-        ///
-        /// As of October 2023, a [recommended lower bound] for the power required per mandate is
-        /// 25k $NEAR. At this price, the validator with highest power would have 1_888 mandates,
-        /// which is well below `u16::MAX`.
-        ///
-        /// From another point of view, with more than `u16::MAX` mandates for validators, sampling
-        /// mandates might become computationally too expensive. This might trigger an increase in
-        /// the required power per mandate, bringing down the number of mandates per validator.
-        ///
-        /// [recommended lower bound]: https://near.zulipchat.com/#narrow/stream/407237-pagoda.2Fcore.2Fstateless-validation/topic/validator.20seat.20assignment/near/393792901
-        ///
-        /// # Panics
-        ///
-        /// Panics if the number of mandates overflows `u16`.
-        pub fn num_mandates(&self, power_per_mandate: Power) -> u16 {
-            // Integer division in Rust returns the floor as described here
-            // https://doc.rust-lang.org/std/primitive.u64.html#method.div_euclid
-            u16::try_from(self.power() / power_per_mandate)
-                .expect("number of mandats should fit u16")
-        }
 
-        /// Returns the weight attributed to the validator's partial mandate.
-        ///
-        /// A validator has a partial mandate if its power cannot be divided evenly by
-        /// `power_per_mandate`. The remainder of that division is the weight of the partial
-        /// mandate.
-        ///
-        /// Due to this definintion a validator has exactly one partial mandate with `0 <= weight <
-        /// power_per_mandate`.
-        ///
-        /// # Example
-        ///
-        /// Let `V` be a validator with power of 12. If `power_per_mandate` equals 5 then the weight
-        /// of `V`'s partial mandate is `12 % 5 = 2`.
-        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Balance {
-            self.power() % power_per_mandate
-        }
     }
 }
 /// Stores validator and its power with frozen.
@@ -1139,7 +1142,7 @@ pub mod chunk_extra {
 
     impl ChunkExtra {
         pub fn new_with_only_state_root(state_root: &StateRoot) -> Self {
-            Self::new(state_root, CryptoHash::default(), vec![], 0, 0, 0)
+            Self::new(state_root, CryptoHash::default(), vec![], vec![], 0, 0,0)
         }
 
         pub fn new(
@@ -1197,8 +1200,8 @@ pub mod chunk_extra {
         #[inline]
         pub fn validator_frozen_proposals(&self) -> ValidatorFrozenIter {
             match self {
-                Self::V1(v1) => ValidatorPowerIter::v1(&v1.validator_frozen_proposals),
-                Self::V2(v2) => ValidatorPowerIter::new(&v2.validator_frozen_proposals),
+                Self::V1(v1) => ValidatorFrozenIter::v1(&v1.validator_frozen_proposals),
+                Self::V2(v2) => ValidatorFrozenIter::new(&v2.validator_frozen_proposals),
             }
         }
 
@@ -1369,8 +1372,15 @@ pub enum ValidatorKickoutReason {
     NotEnoughPower {
         #[serde(with = "dec_format", rename = "power_u128")]
         power: Power,
-        #[serde(with = "dec_format", rename = "threshold_u128")]
+        #[serde(with = "dec_format", rename = "power_threshold_u128")]
         threshold: Power,
+    },
+    /// Validator power is now below threshold
+    NotEnoughFrozen {
+        #[serde(with = "dec_format", rename = "frozen_u128")]
+        frozen: Balance,
+        #[serde(with = "dec_format", rename = "frozen_threshold_u128")]
+        threshold: Balance,
     },
     /// Enough power but is not chosen because of seat limits.
     DidNotGetASeat,

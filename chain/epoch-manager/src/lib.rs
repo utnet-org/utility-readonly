@@ -13,6 +13,7 @@ use near_primitives::errors::EpochError;
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
 use near_primitives::types::validator_power::ValidatorPower;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 use near_primitives::types::{AccountId, ApprovalPower, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
@@ -100,10 +101,42 @@ impl EpochInfoProvider for EpochManagerHandle {
             .sum())
     }
 
-    fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    fn minimum_power(&self, _: &CryptoHash) -> Result<u128, EpochError> { todo!() }
+    fn validator_frozen(
+        &self,
+        epoch_id: &EpochId,
+        last_block_hash: &CryptoHash,
+        account_id: &AccountId,
+    ) -> Result<Option<Balance>, EpochError> {
+        let epoch_manager = self.read();
+        let last_block_info = epoch_manager.get_block_info(last_block_hash)?;
+        if last_block_info.slashed().contains_key(account_id) {
+            return Ok(None);
+        }
+        let epoch_info = epoch_manager.get_epoch_info(epoch_id)?;
+        Ok(epoch_info.get_validator_id(account_id).map(|id| epoch_info.validator_frozen(*id)))
+    }
+
+    fn validator_total_frozen(
+        &self,
+        epoch_id: &EpochId,
+        last_block_hash: &CryptoHash,
+    ) -> Result<Balance, EpochError> {
+        let epoch_manager = self.read();
+        let last_block_info = epoch_manager.get_block_info(last_block_hash)?;
+        let epoch_info = epoch_manager.get_epoch_info(epoch_id)?;
+        Ok(epoch_info
+            .validators_iter()
+            .filter(|info| !last_block_info.slashed().contains_key(info.account_id()))
+            .map(|info| info.frozen())
+            .sum())
+    }
+
+    fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         let epoch_manager = self.read();
         epoch_manager.minimum_stake(prev_block_hash)
     }
+
 }
 
 /// Tracks epoch information across different forks, such as validators.
@@ -210,7 +243,8 @@ impl EpochManager {
         config: AllEpochConfig,
         genesis_protocol_version: ProtocolVersion,
         reward_calculator: RewardCalculator,
-        validators: Vec<ValidatorPower>,
+        power_validators: Vec<ValidatorPower>,
+        frozen_validators: Vec<ValidatorFrozen>,
     ) -> Result<Self, EpochError> {
         let validator_reward =
             HashMap::from([(reward_calculator.protocol_treasury_account.clone(), 0u128)]);
@@ -246,7 +280,8 @@ impl EpochManager {
                 &genesis_epoch_config,
                 [0; 32],
                 &EpochInfo::default(),
-                validators,
+                power_validators,
+                frozen_validators,
                 HashMap::default(),
                 validator_reward,
                 0,
@@ -1519,7 +1554,7 @@ impl EpochManager {
 
     /// Get minimum stake allowed at current block. Attempts to stake with a lower stake will be
     /// rejected.
-    pub fn minimum_stake(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    pub fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         let next_epoch_id = self.get_next_epoch_id_from_prev_block(prev_block_hash)?;
         let (protocol_version, seat_price) = {
             let epoch_info = self.get_epoch_info(&next_epoch_id)?;

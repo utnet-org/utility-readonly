@@ -758,7 +758,6 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     account_id.clone(),
                                     challenge.challenge_key.clone().into(),
                                     power,
-                                    _account.locked().clone().into(),
                                 ));
                                 // attach power to account
                                 _account.set_power(power);

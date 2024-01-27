@@ -26,6 +26,8 @@ use near_store::test_utils::create_test_store;
 
 use near_primitives::shard_layout::ShardLayout;
 use {crate::reward_calculator::NUM_NS_IN_SECOND, crate::NUM_SECONDS_IN_A_YEAR};
+use near_primitives::types::validator_frozen::ValidatorFrozen;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 pub const DEFAULT_GAS_PRICE: u128 = 100;
 pub const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
@@ -96,11 +98,11 @@ pub fn epoch_info_with_num_seats(
     });
     let fishermen_to_index =
         fishermen.iter().enumerate().map(|(i, (s,_ , _))| (s.clone(), i as ValidatorId)).collect();
-    let account_to_validators = |accounts: Vec<(AccountId, Power, Balance)>| -> Vec<ValidatorPower> {
+    let account_to_validators = |accounts: Vec<(AccountId, Power, Balance)>| -> Vec<ValidatorPowerAndFrozen> {
         accounts
             .into_iter()
             .map(|(account_id, power,locked)| {
-                ValidatorPower::new(
+                ValidatorPowerAndFrozen::new(
                     account_id.clone(),
                     SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key(),
                     power,
@@ -194,9 +196,14 @@ pub fn epoch_config(
     )
 }
 
-pub fn do_power(account_id: AccountId, power: Power, frozen: Balance) -> ValidatorPower {
+pub fn do_power(account_id: AccountId, power: Power) -> ValidatorPower {
     let public_key = SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key();
-    ValidatorPower::new(account_id, public_key, power, frozen)
+    ValidatorPower::new(account_id, public_key, power)
+}
+
+pub fn frozen(account_id: AccountId, frozen: Balance) -> ValidatorFrozen {
+    let public_key = SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key();
+    ValidatorFrozen::new(account_id, public_key, frozen)
 }
 
 /// No-op reward calculator. Will produce no reward
@@ -218,7 +225,8 @@ pub fn reward(info: Vec<(AccountId, Balance)>) -> HashMap<AccountId, Balance> {
 }
 
 pub fn setup_epoch_manager(
-    validators: Vec<(AccountId, Power, Balance)>,
+    power_validators: Vec<(AccountId, Power)>,
+    frozen_validators: Vec<(AccountId, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -243,16 +251,21 @@ pub fn setup_epoch_manager(
         config,
         PROTOCOL_VERSION,
         reward_calculator,
-        validators
+        power_validators
             .iter()
-            .map(|(account_id, power, frozen)| do_power(account_id.clone(), *power, *frozen))
+            .map(|(account_id, power)| do_power(account_id.clone(), *power,))
+            .collect(),
+        frozen_validators
+            .iter()
+            .map(|(account_id, balance)| frozen(account_id.clone(), *balance))
             .collect(),
     )
     .unwrap()
 }
 
 pub fn setup_default_epoch_manager(
-    validators: Vec<(AccountId, Power, Balance)>,
+    power_validators: Vec<(AccountId, Power)>,
+    frozen_validators: Vec<(AccountId, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -261,7 +274,8 @@ pub fn setup_default_epoch_manager(
     chunk_producer_kickout_threshold: u8,
 ) -> EpochManager {
     setup_epoch_manager(
-        validators,
+        power_validators,
+        frozen_validators,
         epoch_length,
         num_shards,
         num_block_producer_seats,
@@ -285,21 +299,23 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
 ) -> EpochManager {
     let num_block_producers = block_producers.len() as u64;
     let block_producer_power = 1_000_000 as u128;
-    let block_producer_stake = 1_000_000 as u128;
-    let mut total_stake = 0;
+    let block_producer_frozen = 1_000_000 as u128;
+    let mut total_frozen = 0;
     let mut total_power = 0;
-    let mut validators = vec![];
+    let mut power_validators = vec![];
+    let mut frozen_validators = vec![];
     for block_producer in &block_producers {
-        validators.push((block_producer.clone(), block_producer_power, block_producer_stake));
-        total_stake += block_producer_stake;
+        power_validators.push((block_producer.clone(), block_producer_power));
+        frozen_validators.push((block_producer.clone(), block_producer_frozen));
+        total_frozen += block_producer_frozen;
         total_power += block_producer_power;
     }
     for chunk_only_producer in &chunk_only_producers {
-        let minimum_stake_to_ensure_election =
-            total_stake * 160 / 1_000_000 / num_shards as u128 + 1;
-        let stake = block_producer_stake - 1;
+        let minimum_frozen_to_ensure_election =
+            total_frozen * 160 / 1_000_000 / num_shards as u128 + 1;
+        let frozen = block_producer_frozen - 1;
         assert!(
-            stake >= minimum_stake_to_ensure_election,
+            frozen >= minimum_frozen_to_ensure_election,
             "Could not honor the specified list of producers"
         );
         let minimum_power_to_ensure_election =
@@ -309,8 +325,9 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
             power >= minimum_power_to_ensure_election,
             "Could not honor the specified list of producers"
         );
-        validators.push((chunk_only_producer.clone(), power, stake));
-        total_stake += stake;
+        power_validators.push((chunk_only_producer.clone(), power));
+        frozen_validators.push((chunk_only_producer.clone(), frozen));
+        total_frozen += frozen;
         total_power += power;
     }
     let config = epoch_config(epoch_length, num_shards, num_block_producers, 0, 0, 0, 0);
@@ -319,9 +336,13 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
         config,
         PROTOCOL_VERSION,
         default_reward_calculator(),
-        validators
+        power_validators
             .iter()
-            .map(|(account_id, power, frozen)| do_power(account_id.clone(), *power, *frozen))
+            .map(|(account_id, power)| do_power(account_id.clone(), *power))
+            .collect(),
+        frozen_validators
+            .iter()
+            .map(|(account_id, balance)| frozen(account_id.clone(), *balance))
             .collect(),
     )
     .unwrap();
@@ -352,7 +373,8 @@ pub fn record_block_with_final_block_hash(
                 height.saturating_sub(2),
                 last_final_block_hash,
                 prev_h,
-                proposals,
+                vec![],
+                vec![],
                 vec![],
                 vec![],
                 DEFAULT_TOTAL_SUPPLY,
@@ -371,7 +393,8 @@ pub fn record_block_with_slashes(
     prev_h: CryptoHash,
     cur_h: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
     slashed: Vec<SlashedValidator>,
 ) {
     epoch_manager
@@ -382,7 +405,8 @@ pub fn record_block_with_slashes(
                 height.saturating_sub(2),
                 prev_h,
                 prev_h,
-                proposals,
+                power_proposals,
+                frozen_proposals,
                 vec![],
                 slashed,
                 DEFAULT_TOTAL_SUPPLY,
@@ -401,9 +425,10 @@ pub fn record_block(
     prev_h: CryptoHash,
     cur_h: CryptoHash,
     height: BlockHeight,
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
 ) {
-    record_block_with_slashes(epoch_manager, prev_h, cur_h, height, proposals, vec![]);
+    record_block_with_slashes(epoch_manager, prev_h, cur_h, height, power_proposals, frozen_proposals, vec![]);
 }
 
 pub fn block_info(
@@ -424,7 +449,8 @@ pub fn block_info(
         prev_hash,
         epoch_first_block,
         epoch_id: Default::default(),
-        proposals: vec![],
+        power_proposals: vec![],
+        frozen_proposals: vec![],
         chunk_mask,
         latest_protocol_version: PROTOCOL_VERSION,
         slashed: Default::default(),
