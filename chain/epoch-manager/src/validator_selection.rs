@@ -109,11 +109,12 @@ pub fn proposals_to_epoch_info(
             if prev_epoch_info.account_is_validator(account_id)
                 || prev_epoch_info.account_is_fisherman(account_id)
             {
-                debug_assert!(power < threshold);
+            //    debug_assert!(*frozen < threshold);
                 let account_id = p.take_account_id();
+                let frozen_value = *frozen;
                 validator_kickout.insert(
                     account_id,
-                    ValidatorKickoutReason::NotEnoughPower { power, threshold },
+                    ValidatorKickoutReason::NotEnoughFrozen { frozen : frozen_value, threshold },
                 );
             }
         }

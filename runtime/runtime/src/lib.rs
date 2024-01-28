@@ -1027,7 +1027,7 @@ impl Runtime {
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
         for (account_id, max_of_power) in &validator_accounts_update.power_info {
-            let max_of_frozen = validator_accounts_update.frozen_info.get(&account_id.clone()).unwrap();
+            let max_of_frozen = validator_accounts_update.frozen_info.get(&account_id.clone()).unwrap_or(&0);
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
                     debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());

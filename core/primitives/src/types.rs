@@ -1387,7 +1387,7 @@ pub enum ValidatorKickoutReason {
     },
     /// Validator unfrozen themselves.
     Unfrozen,
-    /// Validator power is now below threshold
+    /// Validator frozen is now below threshold
     NotEnoughFrozen {
         #[serde(with = "dec_format", rename = "frozen_u128")]
         frozen: Balance,
