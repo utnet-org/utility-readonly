@@ -52,6 +52,7 @@ use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::debug;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 use near_primitives_core::types::Power;
 
 mod actions;
@@ -112,7 +113,8 @@ pub struct ApplyStats {
 pub struct ApplyResult {
     pub state_root: StateRoot,
     pub trie_changes: TrieChanges,
-    pub validator_proposals: Vec<ValidatorPower>,
+    pub validator_power_proposals: Vec<ValidatorPower>,
+    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
     pub outgoing_receipts: Vec<Receipt>,
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub state_changes: Vec<RawStateChangesWithTrieKey>,
@@ -132,7 +134,8 @@ pub struct ActionResult {
     pub result: Result<ReturnData, ActionError>,
     pub logs: Vec<LogEntry>,
     pub new_receipts: Vec<Receipt>,
-    pub validator_proposals: Vec<ValidatorPower>,
+    pub validator_power_proposals: Vec<ValidatorPower>,
+    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
     pub profile: Box<ProfileDataV3>,
 }
 
@@ -161,10 +164,12 @@ impl ActionResult {
         }
         if self.result.is_ok() {
             self.new_receipts.append(&mut next_result.new_receipts);
-            self.validator_proposals.append(&mut next_result.validator_proposals);
+            self.validator_power_proposals.append(&mut next_result.validator_power_proposals);
+            self.validator_frozen_proposals.append(&mut next_result.validator_frozen_proposals);
         } else {
             self.new_receipts.clear();
-            self.validator_proposals.clear();
+            self.validator_power_proposals.clear();
+            self.validator_frozen_proposals.clear();
         }
         Ok(())
     }
@@ -180,7 +185,8 @@ impl Default for ActionResult {
             result: Ok(ReturnData::None),
             logs: vec![],
             new_receipts: vec![],
-            validator_proposals: vec![],
+            validator_power_proposals: vec![],
+            validator_frozen_proposals: vec![],
             profile: Default::default(),
         }
     }
@@ -483,7 +489,8 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {
@@ -637,8 +644,8 @@ impl Runtime {
         stats.gas_deficit_amount = safe_add_balance(stats.gas_deficit_amount, gas_deficit_amount)?;
 
         // Moving validator proposals
-        validator_proposals.append(&mut result.validator_proposals);
-
+        validator_power_proposals.append(&mut result.validator_power_proposals);
+        validator_frozen_proposals.append(&mut result.validator_frozen_proposals);
         // Committing or rolling back state.
         match &result.result {
             Ok(_) => {
@@ -858,7 +865,8 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<Option<ExecutionOutcomeWithId>, RuntimeError> {
@@ -926,7 +934,8 @@ impl Runtime {
                                 apply_state,
                                 &ready_receipt,
                                 outgoing_receipts,
-                                validator_proposals,
+                                validator_power_proposals,
+                                validator_frozen_proposals,
                                 stats,
                                 epoch_info_provider,
                             )
@@ -980,7 +989,8 @@ impl Runtime {
                             apply_state,
                             receipt,
                             outgoing_receipts,
-                            validator_proposals,
+                            validator_power_proposals,
+                            validator_frozen_proposals,
                             stats,
                             epoch_info_provider,
                         )
@@ -1261,7 +1271,8 @@ impl Runtime {
             return Ok(ApplyResult {
                 state_root: trie_changes.new_root,
                 trie_changes,
-                validator_proposals: vec![],
+                validator_power_proposals: vec![],
+                validator_frozen_proposals: vec![],
                 outgoing_receipts: vec![],
                 outcomes: vec![],
                 state_changes,
@@ -1274,7 +1285,8 @@ impl Runtime {
         }
 
         let mut outgoing_receipts = Vec::new();
-        let mut validator_proposals = vec![];
+        let mut validator_power_proposals = vec![];
+        let mut validator_frozen_proposals = vec![];
         let mut local_receipts = vec![];
         let mut outcomes = vec![];
         let mut processed_delayed_receipts = vec![];
@@ -1338,7 +1350,8 @@ impl Runtime {
                 apply_state,
                 receipt,
                 &mut outgoing_receipts,
-                &mut validator_proposals,
+                &mut validator_power_proposals,
+                &mut validator_frozen_proposals,
                 &mut stats,
                 epoch_info_provider,
             );
@@ -1493,13 +1506,21 @@ impl Runtime {
 
         // Dedup proposals from the same account.
         // The order is deterministically changed.
-        let mut unique_proposals = vec![];
+        let mut unique_power_proposals = vec![];
+        let mut unique_frozen_proposals = vec![];
         let mut account_ids = HashSet::new();
-        for proposal in validator_proposals.into_iter().rev() {
-            let account_id = proposal.account_id();
+        for power_proposal in validator_power_proposals.into_iter().rev() {
+            let account_id = power_proposal.account_id();
             if !account_ids.contains(account_id) {
                 account_ids.insert(account_id.clone());
-                unique_proposals.push(proposal);
+                unique_power_proposals.push(power_proposal);
+            }
+        }
+        for frozen_proposal in validator_frozen_proposals.into_iter().rev() {
+            let account_id = frozen_proposal.account_id();
+            if !account_ids.contains(account_id) {
+                account_ids.insert(account_id.clone());
+                unique_frozen_proposals.push(frozen_proposal);
             }
         }
 
@@ -1508,7 +1529,8 @@ impl Runtime {
         Ok(ApplyResult {
             state_root,
             trie_changes,
-            validator_proposals: unique_proposals,
+            validator_power_proposals: unique_power_proposals,
+            validator_frozen_proposals: unique_frozen_proposals,
             outgoing_receipts,
             outcomes,
             state_changes,
@@ -2668,6 +2690,7 @@ pub mod estimator {
     use near_primitives::transaction::ExecutionOutcomeWithId;
     use near_primitives::types::validator_power::ValidatorPower;
     use near_primitives::types::EpochInfoProvider;
+    use near_primitives::types::validator_frozen::ValidatorFrozen;
     use near_store::TrieUpdate;
 
     use crate::ApplyStats;
@@ -2679,7 +2702,8 @@ pub mod estimator {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {
@@ -2688,7 +2712,8 @@ pub mod estimator {
             apply_state,
             receipt,
             outgoing_receipts,
-            validator_proposals,
+            validator_power_proposals,
+            validator_frozen_proposals,
             stats,
             epoch_info_provider,
         )

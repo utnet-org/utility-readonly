@@ -50,7 +50,6 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId,
     ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier,
 };
-use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView,
     FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView,
@@ -65,6 +64,7 @@ use std::hash::Hash;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
+use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Max number of queries that we keep.
 const QUERY_REQUEST_LIMIT: usize = 500;
@@ -792,7 +792,7 @@ impl Handler<WithSpanContext<GetValidatorInfo>> for ViewClientActor {
 }
 
 impl Handler<WithSpanContext<GetValidatorOrdered>> for ViewClientActor {
-    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
 
     #[perf]
     fn handle(

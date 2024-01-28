@@ -308,7 +308,8 @@ fn validate_chunk_state_witness(
             is_first_block_with_chunk_of_version: main_transition
                 .is_first_block_with_chunk_of_version,
             is_new_chunk: true,
-            last_validator_proposals: main_transition.chunk.prev_validator_proposals(),
+            last_validator_power_proposals: main_transition.chunk.prev_validator_power_proposals(),
+            last_validator_frozen_proposals: main_transition.chunk.prev_validator_frozen_proposals(),
             shard_id: main_transition.chunk.shard_id(),
         },
         ApplyChunkBlockContext::from_header(&main_transition.block, main_transition.gas_price),
@@ -347,7 +348,8 @@ fn validate_chunk_state_witness(
                 is_first_block_with_chunk_of_version: transition_params
                     .is_first_block_with_chunk_of_version,
                 is_new_chunk: false,
-                last_validator_proposals: transition_params.chunk.prev_validator_proposals(),
+                last_validator_power_proposals: transition_params.chunk.prev_validator_power_proposals(),
+                last_validator_frozen_proposals: transition_params.chunk.prev_validator_frozen_proposals(),
                 shard_id: transition_params.chunk.shard_id(),
             },
             ApplyChunkBlockContext::from_header(
@@ -397,7 +399,8 @@ fn apply_result_to_chunk_extra(
     ChunkExtra::new(
         &apply_result.new_root,
         outcome_root,
-        apply_result.validator_proposals,
+        apply_result.validator_power_proposals,
+        apply_result.validator_frozen_proposals,
         apply_result.total_gas_burnt,
         chunk.gas_limit(),
         apply_result.total_balance_burnt,

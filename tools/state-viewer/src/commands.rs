@@ -93,7 +93,8 @@ pub(crate) fn apply_block(
                 RuntimeStorageConfig::new(*chunk_inner.prev_state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_inner.prev_validator_proposals(),
+                    last_validator_power_proposals: chunk_inner.prev_validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_inner.prev_validator_frozen_proposals(),
                     gas_limit: chunk_inner.gas_limit(),
                     is_new_chunk: true,
                     is_first_block_with_chunk_of_version,
@@ -115,7 +116,8 @@ pub(crate) fn apply_block(
                 RuntimeStorageConfig::new(*chunk_extra.state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_extra.validator_proposals(),
+                    last_validator_power_proposals: chunk_extra.validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_extra.validator_frozen_proposals(),
                     gas_limit: chunk_extra.gas_limit(),
                     is_new_chunk: false,
                     is_first_block_with_chunk_of_version: false,
@@ -518,7 +520,8 @@ fn chunk_extras_equal(l: &ChunkExtra, r: &ChunkExtra) -> bool {
     if l.balance_burnt() != r.balance_burnt() {
         return false;
     }
-    l.validator_proposals().collect::<Vec<_>>() == r.validator_proposals().collect::<Vec<_>>()
+    l.validator_power_proposals().collect::<Vec<_>>() == r.validator_power_proposals().collect::<Vec<_>>()&&
+    l.validator_frozen_proposals().collect::<Vec<_>>() == r.validator_frozen_proposals().collect::<Vec<_>>()
 }
 
 pub(crate) fn check_apply_block_result(
@@ -717,7 +720,8 @@ pub(crate) fn resulting_chunk_extra(result: &ApplyChunkResult, gas_limit: Gas) -
     ChunkExtra::new(
         &result.new_root,
         outcome_root,
-        result.validator_proposals.clone(),
+        result.validator_power_proposals.clone(),
+        result.validator_frozen_proposals.clone(),
         result.total_gas_burnt,
         gas_limit,
         result.total_balance_burnt,

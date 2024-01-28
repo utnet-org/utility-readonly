@@ -460,6 +460,7 @@ impl Chain {
                             state_root,
                             CryptoHash::default(),
                             vec![],
+                            vec![],
                             0,
                             chain_genesis.gas_limit,
                             0,
@@ -1111,8 +1112,30 @@ impl Chain {
             .chunks()
             .iter()
             .filter(|chunk| block_height == chunk.height_included())
-            .flat_map(|chunk| chunk.prev_validator_proposals())
-            .zip_longest(block.header().prev_validator_proposals())
+            .flat_map(|chunk| chunk.prev_validator_power_proposals())
+            .zip_longest(block.header().prev_validator_power_proposals())
+        {
+            match pair {
+                itertools::EitherOrBoth::Both(cp, hp) => {
+                    if hp != cp {
+                        // Proposals differed!
+                        return Err(Error::InvalidValidatorProposals);
+                    }
+                }
+                _ => {
+                    // Can only occur if there were a different number of proposals in the header
+                    // and chunks
+                    return Err(Error::InvalidValidatorProposals);
+                }
+            }
+        }
+
+        for pair in block
+            .chunks()
+            .iter()
+            .filter(|chunk| block_height == chunk.height_included())
+            .flat_map(|chunk| chunk.prev_validator_frozen_proposals())
+            .zip_longest(block.header().prev_validator_frozen_proposals())
         {
             match pair {
                 itertools::EitherOrBoth::Both(cp, hp) => {
@@ -3718,7 +3741,8 @@ impl Chain {
                 current_chunk_extra = ChunkExtra::new(
                     &apply_result.new_root,
                     outcome_root,
-                    apply_result.validator_proposals,
+                    apply_result.validator_power_proposals,
+                    apply_result.validator_frozen_proposals,
                     apply_result.total_gas_burnt,
                     gas_limit,
                     apply_result.total_balance_burnt,

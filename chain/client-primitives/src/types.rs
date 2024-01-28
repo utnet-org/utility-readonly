@@ -10,7 +10,6 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockReference, EpochId, EpochReference, MaybeBlockId, ShardId,
     TransactionOrReceiptId,
 };
-use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView,
     GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView,
@@ -24,6 +23,7 @@ use std::sync::Arc;
 use tracing::debug_span;
 use yansi::Color::Magenta;
 use yansi::Style;
+use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Combines errors coming from chain, tx pool and block producer.
 #[derive(Debug, thiserror::Error)]
@@ -785,7 +785,7 @@ pub struct GetValidatorOrdered {
 }
 
 impl Message for GetValidatorOrdered {
-    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
 }
 
 #[derive(Debug)]

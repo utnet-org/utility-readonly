@@ -197,14 +197,14 @@ impl EpochManager {
             Self::new_all_epoch_config_with_test_overrides(genesis_config, test_overrides);
         let validators = genesis_config.validators();
         // Transforming ValidatorPowerAndFrozen to ValidatorPower
-        let power_validators: Vec<ValidatorPower> = validators.into_iter().map(|validator| {
+        let power_validators: Vec<ValidatorPower> = validators.clone().into_iter().map(|validator| {
             match validator {
                 ValidatorPowerAndFrozen::V1(v) => {
                     ValidatorPower::new_v1(v.account_id, v.public_key, v.power)
                 },
             }
         }).collect();
-        let frozen_validators: Vec<ValidatorFrozen> = validators.into_iter().map(|validator| {
+        let frozen_validators: Vec<ValidatorFrozen> = validators.clone().into_iter().map(|validator| {
             match validator {
                 ValidatorPowerAndFrozen::V1(v) => {
                     ValidatorFrozen::new_v1(v.account_id, v.public_key, v.frozen)
@@ -702,11 +702,11 @@ impl EpochManager {
             prev_validator_kickout,
         );
         validator_kickout.extend(kickout);
-        debug!(
-            target: "epoch_manager",
-            "All power proposals: {:?}, All frozen proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
-            all_power_proposals, all_frozen_proposals, validator_kickout, block_validator_tracker, chunk_validator_tracker
-        );
+        // debug!(
+        //     target: "epoch_manager",
+        //     "All power proposals: {:?}, All frozen proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
+        //     all_power_proposals.clone(), all_frozen_proposals.clone(), validator_kickout.clone(), block_validator_tracker.clone(), chunk_validator_tracker.clone()
+        // );
 
         Ok(EpochSummary {
             prev_epoch_last_block_hash,

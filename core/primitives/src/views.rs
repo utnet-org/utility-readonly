@@ -2308,7 +2308,7 @@ pub struct LightClientBlockView {
     pub next_block_inner_hash: CryptoHash,
     pub inner_lite: BlockHeaderInnerLiteView,
     pub inner_rest_hash: CryptoHash,
-    pub next_bps: Option<Vec<ValidatorPowerView>>,
+    pub next_bps: Option<Vec<ValidatorPowerAndFrozenView>>,
     pub approvals_after_next: Vec<Option<Box<Signature>>>,
 }
 

@@ -228,7 +228,8 @@ pub(crate) fn apply_new_chunk(
         storage_config,
         ApplyChunkShardContext {
             shard_id,
-            last_validator_proposals: chunk_inner.prev_validator_proposals(),
+            last_validator_power_proposals: chunk_inner.prev_validator_power_proposals(),
+            last_validator_frozen_proposals: chunk_inner.prev_validator_frozen_proposals(),
             gas_limit,
             is_new_chunk: true,
             is_first_block_with_chunk_of_version,
@@ -290,7 +291,8 @@ fn apply_old_chunk(
         storage_config,
         ApplyChunkShardContext {
             shard_id,
-            last_validator_proposals: prev_chunk_extra.validator_proposals(),
+            last_validator_power_proposals: prev_chunk_extra.validator_power_proposals(),
+            last_validator_frozen_proposals: prev_chunk_extra.validator_frozen_proposals(),
             gas_limit: prev_chunk_extra.gas_limit(),
             is_new_chunk: false,
             is_first_block_with_chunk_of_version: false,

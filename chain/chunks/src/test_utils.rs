@@ -144,6 +144,7 @@ impl ChunkTestFixture {
             0,
             Vec::new(),
             Vec::new(),
+            Vec::new(),
             &receipts,
             receipts_root,
             MerkleHash::default(),

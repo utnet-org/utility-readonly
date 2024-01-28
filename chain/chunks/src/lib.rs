@@ -128,6 +128,7 @@ use rand::Rng;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::{debug, debug_span, error, warn};
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 
 pub mod adapter;
 mod chunk_cache;
@@ -1870,7 +1871,8 @@ impl ShardsManager {
         prev_gas_used: Gas,
         gas_limit: Gas,
         prev_balance_burnt: Balance,
-        prev_validator_proposals: Vec<ValidatorPower>,
+        prev_validator_power_proposals: Vec<ValidatorPower>,
+        prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
         transactions: Vec<SignedTransaction>,
         prev_outgoing_receipts: &[Receipt],
         prev_outgoing_receipts_root: CryptoHash,
@@ -1890,7 +1892,8 @@ impl ShardsManager {
             gas_limit,
             prev_balance_burnt,
             tx_root,
-            prev_validator_proposals,
+            prev_validator_power_proposals,
+            prev_validator_frozen_proposals,
             transactions,
             prev_outgoing_receipts,
             prev_outgoing_receipts_root,

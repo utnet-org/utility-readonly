@@ -754,7 +754,7 @@ pub(crate) fn action_create_rsa2048_challenge(
                         match power_str.parse::<u128>() {
                             Ok(power) => {
                                 // push power to validator proposal
-                                result.validator_proposals.push(ValidatorPower::new(
+                                result.validator_power_proposals.push(ValidatorPower::new(
                                     account_id.clone(),
                                     challenge.challenge_key.clone().into(),
                                     power,

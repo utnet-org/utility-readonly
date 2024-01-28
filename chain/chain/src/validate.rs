@@ -145,10 +145,14 @@ pub fn validate_chunk_with_chunk_extra_and_receipts_root(
         return Err(Error::InvalidOutcomesProof);
     }
 
-    let chunk_extra_proposals = prev_chunk_extra.validator_proposals();
-    let chunk_header_proposals = chunk_header.prev_validator_proposals();
-    if chunk_header_proposals.len() != chunk_extra_proposals.len()
-        || !chunk_extra_proposals.eq(chunk_header_proposals)
+    let chunk_extra_power_proposals = prev_chunk_extra.validator_power_proposals();
+    let chunk_extra_frozen_proposals = prev_chunk_extra.validator_frozen_proposals();
+    let chunk_header_power_proposals = chunk_header.prev_validator_power_proposals();
+    let chunk_header_frozen_proposals = chunk_header.prev_validator_frozen_proposals();
+    if chunk_header_power_proposals.len() != chunk_extra_power_proposals.len()
+        || !chunk_extra_power_proposals.eq(chunk_header_power_proposals)
+        || chunk_header_frozen_proposals.len() != chunk_extra_frozen_proposals.len()
+        || !chunk_extra_frozen_proposals.eq(chunk_header_frozen_proposals)
     {
         return Err(Error::InvalidValidatorProposals);
     }

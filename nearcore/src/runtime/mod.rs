@@ -292,7 +292,8 @@ impl NightshadeRuntime {
         } = block;
         let ApplyChunkShardContext {
             shard_id,
-            last_validator_proposals,
+            last_validator_power_proposals,
+            last_validator_frozen_proposals,
             gas_limit,
             is_new_chunk,
             is_first_block_with_chunk_of_version,
@@ -340,10 +341,17 @@ impl NightshadeRuntime {
                         account_id_to_shard_id(account_id, &shard_layout) == shard_id
                     })
                     .collect();
-                let last_proposals = last_validator_proposals
+                let last_power_proposals = last_validator_power_proposals
                     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
                     .fold(HashMap::new(), |mut acc, v| {
                         let (account_id, stake) = v.account_and_power();
+                        acc.insert(account_id, stake);
+                        acc
+                    });
+                let last_frozen_proposals = last_validator_frozen_proposals
+                    .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
+                    .fold(HashMap::new(), |mut acc, v| {
+                        let (account_id, stake) = v.account_and_frozen();
                         acc.insert(account_id, stake);
                         acc
                     });
@@ -357,8 +365,10 @@ impl NightshadeRuntime {
                 slashing_info.extend(double_sign_slashing_info);
                 Some(ValidatorAccountsUpdate {
                     power_info,
+                    frozen_info,
                     validator_rewards,
-                    last_proposals,
+                    last_power_proposals,
+                    last_frozen_proposals,
                     protocol_treasury_account_id: Some(
                         self.genesis_config.protocol_treasury_account.clone(),
                     )
@@ -370,8 +380,10 @@ impl NightshadeRuntime {
             } else if !challenges_result.is_empty() {
                 Some(ValidatorAccountsUpdate {
                     power_info: Default::default(),
+                    frozen_info: Default::default(),
                     validator_rewards: Default::default(),
-                    last_proposals: Default::default(),
+                    last_power_proposals: Default::default(),
+                    last_frozen_proposals: Default::default(),
                     protocol_treasury_account_id: None,
                     slashing_info,
                 })
@@ -476,7 +488,8 @@ impl NightshadeRuntime {
             new_root: apply_result.state_root,
             outcomes: apply_result.outcomes,
             outgoing_receipts: apply_result.outgoing_receipts,
-            validator_proposals: apply_result.validator_proposals,
+            validator_power_proposals: apply_result.validator_power_proposals,
+            validator_frozen_proposals: apply_result.validator_frozen_proposals,
             total_gas_burnt,
             total_balance_burnt,
             proof: apply_result.proof,

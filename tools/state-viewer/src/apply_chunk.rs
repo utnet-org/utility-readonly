@@ -135,7 +135,8 @@ pub(crate) fn apply_chunk(
             RuntimeStorageConfig::new(prev_state_root, use_flat_storage),
             ApplyChunkShardContext {
                 shard_id,
-                last_validator_proposals: chunk_header.prev_validator_proposals(),
+                last_validator_power_proposals: chunk_header.prev_validator_power_proposals(),
+                last_validator_frozen_proposals: chunk_header.prev_validator_frozen_proposals(),
                 gas_limit: chunk_header.gas_limit(),
                 is_first_block_with_chunk_of_version,
                 is_new_chunk: true,

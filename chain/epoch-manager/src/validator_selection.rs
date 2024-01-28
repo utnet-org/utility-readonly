@@ -88,7 +88,7 @@ pub fn proposals_to_epoch_info(
     // since block producer proposals could become chunk producers, their actual stake threshold
     // is the smaller of the two thresholds
     let threshold = cmp::min(bp_stake_threshold, cp_stake_threshold);
-    let cp_frozen_map = create_frozen_map(cp_frozen_proposals);
+    let cp_frozen_map = create_frozen_map(&cp_frozen_proposals);
     // process remaining chunk_producer_proposals that were not selected for either role
     for OrderedValidatorPower(p) in cp_power_proposals {
         let power = p.power();
@@ -368,7 +368,7 @@ fn select_chunk_producers(
     )
 }
 #[allow(irrefutable_let_patterns)]
-fn create_frozen_map(heap: BinaryHeap<OrderedValidatorFrozen>) -> HashMap<AccountId, Balance> {
+fn create_frozen_map(heap: &BinaryHeap<OrderedValidatorFrozen>) -> HashMap<AccountId, Balance> {
     let mut frozen_map = HashMap::new();
 
     // Explicitly define cloned_heap as an owned BinaryHeap

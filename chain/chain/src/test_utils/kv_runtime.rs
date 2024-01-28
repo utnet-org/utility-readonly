@@ -29,7 +29,6 @@ use near_primitives::transaction::{
     Action, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus,
     SignedTransaction, TransferAction,
 };
-use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{
     AccountId, ApprovalPower, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards,
     ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier,
@@ -50,6 +49,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// Simple key value runtime for tests.
 ///
@@ -93,7 +93,7 @@ pub struct MockEpochManager {
     validators_by_valset: Vec<EpochValidatorSet>,
     /// Maps from account id to validator stake for all validators, both block producers and
     /// chunk producers
-    validators: HashMap<AccountId, ValidatorPower>,
+    validators: HashMap<AccountId, ValidatorPowerAndFrozen>,
 
     headers_cache: RwLock<HashMap<CryptoHash, BlockHeader>>,
     hash_to_epoch: RwLock<HashMap<CryptoHash, EpochId>>,
@@ -111,9 +111,9 @@ pub struct MockEpochManager {
 /// Each shard will have `block_producers.len() / validator_groups` of validators who are also block
 /// producers
 struct EpochValidatorSet {
-    block_producers: Vec<ValidatorPower>,
+    block_producers: Vec<ValidatorPowerAndFrozen>,
     /// index of this list is shard_id
-    chunk_producers: Vec<Vec<ValidatorPower>>,
+    chunk_producers: Vec<Vec<ValidatorPowerAndFrozen>>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Hash, PartialEq, Eq, Ord, PartialOrd, Clone, Debug)]
@@ -147,10 +147,10 @@ impl MockEpochManager {
             .block_producers
             .iter()
             .map(|account_ids| {
-                let block_producers: Vec<ValidatorPower> = account_ids
+                let block_producers: Vec<ValidatorPowerAndFrozen> = account_ids
                     .iter()
                     .map(|account_id| {
-                        let stake = ValidatorPower::new(
+                        let stake = ValidatorPowerAndFrozen::new(
                             account_id.clone(),
                             SecretKey::from_seed(KeyType::ED25519, account_id.as_ref())
                                 .public_key(),
@@ -165,7 +165,7 @@ impl MockEpochManager {
                 let validators_per_shard = block_producers.len() as ShardId / vs.validator_groups;
                 let coef = block_producers.len() as ShardId / vs.num_shards;
 
-                let chunk_producers: Vec<Vec<ValidatorPower>> = (0..vs.num_shards)
+                let chunk_producers: Vec<Vec<ValidatorPowerAndFrozen>> = (0..vs.num_shards)
                     .map(|shard_id| {
                         let offset = (shard_id * coef / validators_per_shard * validators_per_shard)
                             as usize;
@@ -183,7 +183,7 @@ impl MockEpochManager {
                 assert_eq!(epoch_cops.len() as u64, vs.num_shards);
                 for (shard_idx, shard_cops) in epoch_cops.into_iter().enumerate() {
                     for account_id in shard_cops {
-                        let stake = ValidatorPower::new(
+                        let stake = ValidatorPowerAndFrozen::new(
                             account_id.clone(),
                             SecretKey::from_seed(KeyType::ED25519, account_id.as_ref())
                                 .public_key(),
@@ -288,11 +288,11 @@ impl MockEpochManager {
         Ok((epoch, valset as usize % self.validators_by_valset.len(), next_epoch))
     }
 
-    fn get_block_producers(&self, valset: usize) -> &[ValidatorPower] {
+    fn get_block_producers(&self, valset: usize) -> &[ValidatorPowerAndFrozen] {
         &self.validators_by_valset[valset].block_producers
     }
 
-    fn get_chunk_producers(&self, valset: usize, shard_id: ShardId) -> Vec<ValidatorPower> {
+    fn get_chunk_producers(&self, valset: usize, shard_id: ShardId) -> Vec<ValidatorPowerAndFrozen> {
         self.validators_by_valset[valset].chunk_producers[shard_id as usize].clone()
     }
 
@@ -650,7 +650,7 @@ impl EpochManagerAdapter for MockEpochManager {
         &self,
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
-    ) -> Result<Vec<(ValidatorPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ValidatorPowerAndFrozen, bool)>, EpochError> {
         let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
         Ok(validators.iter().map(|x| (x.clone(), false)).collect())
     }
@@ -683,7 +683,7 @@ impl EpochManagerAdapter for MockEpochManager {
     fn get_epoch_chunk_producers(
         &self,
         _epoch_id: &EpochId,
-    ) -> Result<Vec<ValidatorPower>, EpochError> {
+    ) -> Result<Vec<ValidatorPowerAndFrozen>, EpochError> {
         tracing::warn!("not implemented, returning a dummy value");
         Ok(vec![])
     }
@@ -723,7 +723,7 @@ impl EpochManagerAdapter for MockEpochManager {
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         let validators = &self.validators_by_valset[self.get_valset_for_epoch(epoch_id)?];
         for validator_stake in validators.block_producers.iter() {
             if validator_stake.account_id() == account_id {
@@ -743,7 +743,7 @@ impl EpochManagerAdapter for MockEpochManager {
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         Err(EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
     }
 
@@ -756,7 +756,8 @@ impl EpochManagerAdapter for MockEpochManager {
             next_validators: vec![],
             current_fishermen: vec![],
             next_fishermen: vec![],
-            current_proposals: vec![],
+            current_power_proposals: vec![],
+            current_frozen_proposals: vec![],
             prev_epoch_kickout: vec![],
             epoch_start_height: 0,
             epoch_height: 1,
@@ -1196,7 +1197,8 @@ impl RuntimeAdapter for KeyValueRuntime {
             new_root: state_root,
             outcomes: tx_results,
             outgoing_receipts,
-            validator_proposals: vec![],
+            validator_power_proposals: vec![],
+            validator_frozen_proposals: vec![],
             total_gas_burnt: 0,
             total_balance_burnt: 0,
             proof: None,
