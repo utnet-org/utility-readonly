@@ -93,7 +93,7 @@ pub fn proposals_to_epoch_info(
     for OrderedValidatorPower(p) in cp_power_proposals {
         let power = p.power();
         let account_id = p.account_id();
-        let frozen = cp_frozen_map.get(&account_id.clone()).unwrap();
+        let frozen = cp_frozen_map.get(&account_id.clone()).unwrap_or(&0);
         let r_p = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
             account_id : account_id.clone(),
             public_key : p.public_key().clone(),
@@ -102,6 +102,8 @@ pub fn proposals_to_epoch_info(
         });
         if power >= epoch_config.fishermen_threshold && frozen > &0 {
             fishermen.push(r_p);
+        } else if frozen == &0{
+
         } else {
             *frozen_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)

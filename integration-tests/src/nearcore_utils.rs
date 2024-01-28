@@ -11,8 +11,8 @@ use near_primitives::block::Approval;
 use near_primitives::hash::CryptoHash;
 use near_primitives::merkle::PartialMerkleTree;
 use near_primitives::num_rational::{Ratio, Rational32};
-use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{BlockHeightDelta, EpochId};
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 use near_primitives::validator_signer::ValidatorSigner;
 use near_primitives::version::PROTOCOL_VERSION;
 use nearcore::config::{GenesisExt, TESTING_INIT_POWER, TESTING_INIT_STAKE};
@@ -47,7 +47,7 @@ pub fn add_blocks(
 
         let next_epoch_id = EpochId(*blocks[prev_epoch_last_block_height as usize].hash());
 
-        let next_bp_hash = CryptoHash::hash_borsh_iter([ValidatorPower::new(
+        let next_bp_hash = CryptoHash::hash_borsh_iter([ValidatorPowerAndFrozen::new(
             "other".parse().unwrap(),
             signer.public_key(),
             TESTING_INIT_POWER,
