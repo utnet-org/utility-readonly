@@ -37,6 +37,7 @@ use near_vm_runner::ContractCode;
 use near_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
 
 use std::sync::Arc;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 
 /// Returns `ContractCode` (if exists) for the given `account` or returns `StorageError`.
 /// For ETH-implicit accounts returns `Wallet Contract` implementation that it is a part
@@ -342,13 +343,12 @@ pub(crate) fn action_stake(
                 return Ok(());
             }
         }
-        // TO DO : get power args via rsa pub key
-        // let power = 5000000000000;
-        // result.validator_proposals.push(ValidatorPower::new(
-        //     account_id.clone(),
-        //     stake.public_key.clone(),
-        //     power,
-        // ));
+
+        result.validator_frozen_proposals.push(ValidatorFrozen::new(
+            account_id.clone(),
+            stake.public_key.clone(),
+            stake.stake,
+        ));
         if stake.stake > account.locked() {
             // We've checked above `account.amount >= increment`
             account.set_amount(account.amount() - increment);
