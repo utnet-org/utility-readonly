@@ -415,8 +415,8 @@ fn select_validators(
         let p_r = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
             account_id : p.account_id().clone(),
             public_key : p.public_key().clone(),
-            power : p_frozen.clone(),
-            frozen : power.clone(),
+            power : power.clone(),
+            frozen : p_frozen.clone(),
         });
         let total_frozen_with_p = total_frozen + p_frozen;
         if Ratio::new(p_frozen, total_frozen_with_p) > min_stake_ratio && power > &0 {

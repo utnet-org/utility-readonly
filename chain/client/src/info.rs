@@ -219,7 +219,7 @@ impl InfoHelper {
 
             let mut stake_sum = 0;
             for &id in epoch_info.block_producers_settlement() {
-                let stake = epoch_info.validator_power(id);
+                let stake = epoch_info.validator_frozen(id);
                 stake_per_bp.insert(id, stake);
                 stake_sum += stake;
             }
@@ -243,7 +243,7 @@ impl InfoHelper {
                 let mut stake_per_cp = HashMap::<ValidatorId, Balance>::new();
                 stake_sum = 0;
                 for &id in &epoch_info.chunk_producers_settlement()[shard_id as usize] {
-                    let stake = epoch_info.validator_power(id);
+                    let stake = epoch_info.validator_frozen(id);
                     stake_per_cp.insert(id, stake);
                     stake_sum += stake;
                 }

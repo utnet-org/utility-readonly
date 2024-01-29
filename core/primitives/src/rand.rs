@@ -83,11 +83,11 @@ impl WeightedIndex {
         result
     }
 
-    fn copy_16_bytes(arr: &[u8]) -> [u8; 16] {
-        let mut result = [0u8; 16];
-        result.clone_from_slice(arr);
-        result
-    }
+    // fn copy_16_bytes(arr: &[u8]) -> [u8; 16] {
+    //     let mut result = [0u8; 16];
+    //     result.clone_from_slice(arr);
+    //     result
+    // }
 }
 
 /// Sub-module to encapsulate helper struct for managing aliases

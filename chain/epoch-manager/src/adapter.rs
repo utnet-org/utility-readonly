@@ -13,10 +13,7 @@ use near_primitives::errors::EpochError;
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardLayoutError};
 use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
-use near_primitives::types::{
-    AccountId, ApprovalPower, Balance, BlockHeight, EpochHeight, EpochId, ShardId,
-    ValidatorInfoIdentifier,
-};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, ShardId, ValidatorInfoIdentifier};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::ProtocolVersion;
 use near_primitives::views::EpochValidatorInfo;
@@ -164,7 +161,7 @@ pub trait EpochManagerAdapter: Send + Sync {
     fn get_epoch_block_approvers_ordered(
         &self,
         parent_hash: &CryptoHash,
-    ) -> Result<Vec<(ApprovalPower, bool)>, EpochError>;
+    ) -> Result<Vec<(ApprovalFrozen, bool)>, EpochError>;
 
     /// Returns all the chunk producers for a given epoch.
     fn get_epoch_chunk_producers(
@@ -619,7 +616,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
     fn get_epoch_block_approvers_ordered(
         &self,
         parent_hash: &CryptoHash,
-    ) -> Result<Vec<(ApprovalPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ApprovalFrozen, bool)>, EpochError> {
         let epoch_manager = self.read();
         epoch_manager.get_all_block_approvers_ordered(parent_hash)
     }
@@ -945,11 +942,11 @@ impl EpochManagerAdapter for EpochManagerHandle {
                 }
             }
         }
-        let powers = info
+        let all_frozen = info
             .iter()
-            .map(|power| (power.power_this_epoch, power.power_next_epoch, false))
+            .map(|frozen| (frozen.frozen_this_epoch, frozen.frozen_next_epoch, false))
             .collect::<Vec<_>>();
-        if !can_approved_block_be_produced(approvals, &powers) {
+        if !can_approved_block_be_produced(approvals, &all_frozen) {
             Err(Error::NotEnoughApprovals)
         } else {
             Ok(())

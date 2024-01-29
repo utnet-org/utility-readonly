@@ -14,7 +14,7 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
 use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::{AccountId, ApprovalPower, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use near_primitives::views::{
@@ -77,7 +77,7 @@ impl EpochInfoProvider for EpochManagerHandle {
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<Option<Balance>, EpochError> {
+    ) -> Result<Option<Power>, EpochError> {
         let epoch_manager = self.read();
         let last_block_info = epoch_manager.get_block_info(last_block_hash)?;
         if last_block_info.slashed().contains_key(account_id) {
@@ -91,7 +91,7 @@ impl EpochInfoProvider for EpochManagerHandle {
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
-    ) -> Result<Balance, EpochError> {
+    ) -> Result<Power, EpochError> {
         let epoch_manager = self.read();
         let last_block_info = epoch_manager.get_block_info(last_block_hash)?;
         let epoch_info = epoch_manager.get_epoch_info(epoch_id)?;
@@ -102,7 +102,7 @@ impl EpochInfoProvider for EpochManagerHandle {
             .sum())
     }
 
-    fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<u128, EpochError> {
+    fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<u64, EpochError> {
         let epoch_manager = self.read();
         epoch_manager.minimum_power(prev_block_hash)
     }
@@ -473,7 +473,7 @@ impl EpochManager {
                 if !prev_validator_kickout.contains_key(account_id) {
                     exempted_stake += epoch_info
                         .get_validator_by_account(account_id)
-                        .map(|v| v.power())
+                        .map(|v| v.frozen())
                         .unwrap_or_default();
                     exempted_validators.insert(account_id.clone());
                 }
@@ -532,7 +532,7 @@ impl EpochManager {
                     chunk_stats.produced += stat.produced;
                 }
             }
-            total_stake += v.power();
+            total_stake += v.frozen();
             let is_already_kicked_out = prev_validator_kickout.contains_key(account_id);
             if (max_validator.is_none() || block_stats.produced > maximum_block_prod)
                 && !is_already_kicked_out
@@ -626,7 +626,7 @@ impl EpochManager {
         // Implements https://github.com/nearprotocol/NEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
         let mut versions = HashMap::new();
         for (validator_id, version) in version_tracker {
-            let stake = epoch_info.validator_power(validator_id);
+            let stake = epoch_info.validator_frozen(validator_id);
             *versions.entry(version).or_insert(0) += stake;
         }
         let total_block_producer_stake: u128 = epoch_info
@@ -635,7 +635,7 @@ impl EpochManager {
             .copied()
             .collect::<HashSet<_>>()
             .iter()
-            .map(|&id| epoch_info.validator_power(id))
+            .map(|&id| epoch_info.validator_frozen(id))
             .sum();
 
         let protocol_version =
@@ -733,7 +733,7 @@ impl EpochManager {
         let epoch_info = self.get_epoch_info(block_info.epoch_id())?;
         let epoch_protocol_version = epoch_info.protocol_version();
         let validator_stake =
-            epoch_info.validators_iter().map(|r| r.account_and_power()).collect::<HashMap<_, _>>();
+            epoch_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
         let next_epoch_id = self.get_next_epoch_id_from_info(block_info)?;
         let next_epoch_info = self.get_epoch_info(&next_epoch_id)?;
         self.save_epoch_validator_info(store_update, block_info.epoch_id(), &epoch_summary)?;
@@ -1016,7 +1016,7 @@ impl EpochManager {
     pub fn get_heuristic_block_approvers_ordered(
         &self,
         epoch_id: &EpochId,
-    ) -> Result<Vec<ApprovalPower>, EpochError> {
+    ) -> Result<Vec<ApprovalFrozen>, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         let mut result = vec![];
         let mut validators: HashSet<AccountId> = HashSet::new();
@@ -1024,7 +1024,7 @@ impl EpochManager {
             let validator_stake = epoch_info.get_validator(*validator_id);
             let account_id = validator_stake.account_id();
             if validators.insert(account_id.clone()) {
-                result.push(validator_stake.get_approval_power(false));
+                result.push(validator_stake.get_approval_frozen(false));
             }
         }
 
@@ -1034,7 +1034,7 @@ impl EpochManager {
     pub fn get_all_block_approvers_ordered(
         &self,
         parent_hash: &CryptoHash,
-    ) -> Result<Vec<(ApprovalPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ApprovalFrozen, bool)>, EpochError> {
         let current_epoch_id = self.get_epoch_id_from_prev_block(parent_hash)?;
         let next_epoch_id = self.get_next_epoch_id_from_prev_block(parent_hash)?;
 
@@ -1054,19 +1054,19 @@ impl EpochManager {
 
         let mut result = vec![];
         let mut validators: HashMap<AccountId, usize> = HashMap::default();
-        for (ord, (validator_power, is_slashed)) in settlement.into_iter().enumerate() {
-            let account_id = validator_power.account_id();
+        for (ord, (validator_frozen, is_slashed)) in settlement.into_iter().enumerate() {
+            let account_id = validator_frozen.account_id();
             match validators.get(account_id) {
                 None => {
                     validators.insert(account_id.clone(), result.len());
                     result.push((
-                        validator_power.get_approval_power(ord >= settlement_epoch_boundary),
+                        validator_frozen.get_approval_frozen(ord >= settlement_epoch_boundary),
                         is_slashed,
                     ));
                 }
                 Some(old_ord) => {
                     if ord >= settlement_epoch_boundary {
-                        result[*old_ord].0.power_next_epoch = validator_power.power();
+                        result[*old_ord].0.frozen_next_epoch = validator_frozen.frozen();
                     };
                 }
             };
@@ -1321,7 +1321,7 @@ impl EpochManager {
         let last_block_info = self.get_block_info(last_block_hash)?;
         let epoch_id = self.get_epoch_id(last_block_hash)?;
         let epoch_info = self.get_epoch_info(&epoch_id)?;
-        let total_stake: Balance = epoch_info.validators_iter().map(|v| v.power()).sum();
+        let total_stake: Balance = epoch_info.validators_iter().map(|v| v.frozen()).sum();
         let total_slashed_stake: Balance = last_block_info
             .slashed()
             .iter()
@@ -1329,7 +1329,7 @@ impl EpochManager {
                 SlashState::DoubleSign => Some(
                     epoch_info
                         .get_validator_id(account_id)
-                        .map_or(0, |id| epoch_info.validator_power(*id)),
+                        .map_or(0, |id| epoch_info.validator_frozen(*id)),
                 ),
                 _ => None,
             })
@@ -1339,7 +1339,7 @@ impl EpochManager {
         for (account_id, slash_state) in last_block_info.slashed() {
             if let SlashState::DoubleSign = slash_state {
                 if let Some(&idx) = epoch_info.get_validator_id(account_id) {
-                    let stake = epoch_info.validator_power(idx);
+                    let stake = epoch_info.validator_frozen(idx);
                     let slashed_stake = if is_totally_slashed {
                         stake
                     } else {
@@ -1612,7 +1612,7 @@ impl EpochManager {
     /// Get minimum power allowed at current block. Attempts to stake with a lower power will be
     /// rejected.
     pub fn minimum_power(&self,_prev_block_hash: &CryptoHash) -> Result<Power, EpochError> {
-    // TO DO, for now we assume 0 as min power
+        // To Do
         Ok(0)
     }
 }

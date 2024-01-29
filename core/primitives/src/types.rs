@@ -550,12 +550,12 @@ pub mod validator_power_and_frozen {
     use near_crypto::PublicKey;
     use near_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
-    use crate::types::ApprovalPower;
+    use crate::types::{ApprovalFrozen};
 
     pub use super::ValidatorPowerAndFrozenV1;
 
     /// Stores validator and its power with frozen.
-    #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq, PartialOrd)]
     #[serde(tag = "validator_power_and_frozen_struct_version")]
     pub enum ValidatorPowerAndFrozen {
         V1(ValidatorPowerAndFrozenV1),
@@ -644,6 +644,14 @@ pub mod validator_power_and_frozen {
             }
         }
 
+
+        #[inline]
+        pub fn account_and_frozen(self) -> (AccountId, Balance) {
+            match self {
+                Self::V1(v1) => (v1.account_id, v1.frozen),
+            }
+        }
+
         #[inline]
         pub fn account_and_power(self) -> (AccountId, Power) {
             match self {
@@ -707,16 +715,16 @@ pub mod validator_power_and_frozen {
             }
         }
 
-        pub fn get_approval_power(&self, is_next_epoch: bool) -> ApprovalPower {
-            ApprovalPower {
+        pub fn get_approval_frozen(&self, is_next_epoch: bool) -> ApprovalFrozen {
+            ApprovalFrozen {
                 account_id: self.account_id().clone(),
                 public_key: self.public_key().clone(),
-                power_this_epoch: if is_next_epoch { 0 } else { self.power() },
-                power_next_epoch: if is_next_epoch { self.power() } else { 0 },
+                frozen_this_epoch: if is_next_epoch { 0 } else { self.frozen() },
+                frozen_next_epoch: if is_next_epoch { self.frozen() } else { 0 },
             }
         }
 
-        /// Returns the validator's number of mandates (rounded down) at `power_per_seat`.
+        /// Returns the validator's number of mandates (rounded down) at `frozen_per_seat`.
         ///
         /// It returns `u16` since it allows infallible conversion to `usize` and with [`u16::MAX`]
         /// equalling 65_535 it should be sufficient to hold the number of mandates per validator.
@@ -736,17 +744,17 @@ pub mod validator_power_and_frozen {
         /// # Panics
         ///
         /// Panics if the number of mandates overflows `u16`.
-        pub fn num_mandates(&self, power_per_mandate: Power) -> u16 {
+        pub fn num_mandates(&self, frozen_per_mandate: Balance) -> u16 {
             // Integer division in Rust returns the floor as described here
             // https://doc.rust-lang.org/std/primitive.u64.html#method.div_euclid
-            u16::try_from(self.power() / power_per_mandate)
+            u16::try_from(self.frozen() / frozen_per_mandate)
                 .expect("number of mandats should fit u16")
         }
 
         /// Returns the weight attributed to the validator's partial mandate.
         ///
         /// A validator has a partial mandate if its power cannot be divided evenly by
-        /// `power_per_mandate`. The remainder of that division is the weight of the partial
+        /// `frozen_per_mandate`. The remainder of that division is the weight of the partial
         /// mandate.
         ///
         /// Due to this definintion a validator has exactly one partial mandate with `0 <= weight <
@@ -754,10 +762,10 @@ pub mod validator_power_and_frozen {
         ///
         /// # Example
         ///
-        /// Let `V` be a validator with power of 12. If `power_per_mandate` equals 5 then the weight
+        /// Let `V` be a validator with power of 12. If `frozen_per_mandate` equals 5 then the weight
         /// of `V`'s partial mandate is `12 % 5 = 2`.
-        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Power {
-            self.power() % power_per_mandate
+        pub fn partial_mandate_weight(&self, frozen_per_mandate: Balance) -> Balance {
+            self.frozen() % frozen_per_mandate
         }
     }
 
@@ -1075,7 +1083,7 @@ pub mod validator_power {
     }
 }
 /// Stores validator and its power with frozen.
-#[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
+#[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq, PartialOrd)]
 pub struct ValidatorPowerAndFrozenV1 {
     /// Account that has power.
     pub account_id: AccountId,

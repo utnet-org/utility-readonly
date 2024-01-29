@@ -7,6 +7,7 @@ use near_primitives::types::{
 };
 use near_primitives::utils::create_data_id;
 use near_primitives::version::ProtocolVersion;
+use near_primitives_core::types::Power;
 use near_store::{get_code, KeyLookupMode, TrieUpdate, TrieUpdateValuePtr};
 use near_vm_runner::logic::errors::{AnyError, VMLogicError};
 use near_vm_runner::logic::types::ReceiptIndex;
@@ -189,15 +190,27 @@ impl<'a> External for RuntimeExt<'a> {
         self.trie_update.trie().get_trie_nodes_count()
     }
 
-    fn validator_power(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
+    fn validator_power(&self, account_id: &AccountId) -> ExtResult<Option<Power>> {
         self.epoch_info_provider
             .validator_power(self.epoch_id, self.prev_block_hash, account_id)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
-    fn validator_total_power(&self) -> ExtResult<Balance> {
+    fn validator_frozen(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
+        self.epoch_info_provider
+            .validator_frozen(self.epoch_id, self.prev_block_hash, account_id)
+            .map_err(|e| ExternalError::ValidatorError(e).into())
+    }
+
+    fn validator_total_power(&self) -> ExtResult<Power> {
         self.epoch_info_provider
             .validator_total_power(self.epoch_id, self.prev_block_hash)
+            .map_err(|e| ExternalError::ValidatorError(e).into())
+    }
+
+    fn validator_total_frozen(&self) -> ExtResult<Balance> {
+        self.epoch_info_provider
+            .validator_total_frozen(self.epoch_id, self.prev_block_hash)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 

@@ -71,9 +71,9 @@ use near_primitives::sharding::{
 };
 use near_primitives::static_clock::StaticClock;
 use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::Gas;
+use near_primitives::types::{ApprovalFrozen, Gas};
 use near_primitives::types::StateRoot;
-use near_primitives::types::{AccountId, ApprovalPower, BlockHeight, EpochId, NumBlocks, ShardId};
+use near_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ShardId};
 use near_primitives::unwrap_or_return;
 use near_primitives::utils::MaybeValidated;
 use near_primitives::validator_signer::ValidatorSigner;
@@ -674,7 +674,7 @@ impl Client {
             .epoch_manager
             .get_epoch_block_approvers_ordered(&prev_hash)?
             .into_iter()
-            .map(|(ApprovalPower { account_id, .. }, is_slashed)| {
+            .map(|(ApprovalFrozen { account_id, .. }, is_slashed)| {
                 if is_slashed {
                     None
                 } else {

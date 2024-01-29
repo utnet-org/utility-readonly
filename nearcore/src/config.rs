@@ -512,7 +512,7 @@ impl Genesis {
                 &signer.public_key.clone(),
                 TESTING_INIT_BALANCE - if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
                 if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
-                if i < num_validator_seats { TESTING_INIT_POWER } else { 0 },
+                TESTING_INIT_POWER,
                 CryptoHash::default(),
             );
         }
@@ -750,7 +750,7 @@ fn add_account_with_key(
     public_key: &PublicKey,
     amount: u128,
     staked: u128,
-    power:  u128,
+    power:  u64,
     code_hash: CryptoHash,
 ) {
     records.push(StateRecord::Account {

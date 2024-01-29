@@ -332,7 +332,7 @@ pub(crate) fn action_stake(
         }
 
         if stake.stake > 0 {
-            let minimum_stake = epoch_info_provider.minimum_power(last_block_hash)?;
+            let minimum_stake = epoch_info_provider.minimum_frozen(last_block_hash)?;
             if stake.stake < minimum_stake {
                 result.result = Err(ActionErrorKind::InsufficientStake {
                     account_id: account_id.clone(),
@@ -751,7 +751,7 @@ pub(crate) fn action_create_rsa2048_challenge(
             if let Some(power_val) = parsed_args.get("power") {
                 match power_val.as_str() {
                     Some(power_str) => {
-                        match power_str.parse::<u128>() {
+                        match power_str.parse::<u64>() {
                             Ok(power) => {
                                 // push power to validator proposal
                                 result.validator_power_proposals.push(ValidatorPower::new(

@@ -298,7 +298,7 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
     epoch_length: BlockHeightDelta,
 ) -> EpochManager {
     let num_block_producers = block_producers.len() as u64;
-    let block_producer_power = 1_000_000 as u128;
+    let block_producer_power = 1_000_000 as u64;
     let block_producer_frozen = 1_000_000 as u128;
     let mut total_frozen = 0;
     let mut total_power = 0;
@@ -319,7 +319,7 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
             "Could not honor the specified list of producers"
         );
         let minimum_power_to_ensure_election =
-            total_power * 160 / 1_000_000 / num_shards as u128 + 1;
+            total_power * 160 / 1_000_000 / num_shards as u64 + 1;
         let power = block_producer_power - 1;
         assert!(
             power >= minimum_power_to_ensure_election,

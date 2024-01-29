@@ -174,14 +174,16 @@ wasm_read_cached_trie_node: 2_280_000_000
 wasm_promise_and_base: 1_465_013_400
 wasm_promise_and_per_promise: 5_452_176
 wasm_promise_return: 560_152_386
-wasm_validator_stake_base: 911_834_726_400
-wasm_validator_total_stake_base: 911_834_726_400
+wasm_validator_frozen_base: 911_834_726_400
+wasm_validator_total_frozen_base: 911_834_726_400
 wasm_alt_bn128_g1_multiexp_base: 713_000_000_000
 wasm_alt_bn128_g1_multiexp_element: 320_000_000_000
 wasm_alt_bn128_pairing_check_base: 9_686_000_000_000
 wasm_alt_bn128_pairing_check_element: 5_102_000_000_000
 wasm_alt_bn128_g1_sum_base: 3_000_000_000
 wasm_alt_bn128_g1_sum_element: 5_000_000_000
+wasm_validator_power_base: 3_000_000_000
+wasm_validator_total_power_base: 3_000_000_000
 
 # Smart contract limits
 max_gas_burnt: 200_000_000_000_000

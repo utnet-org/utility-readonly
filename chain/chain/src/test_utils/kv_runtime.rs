@@ -29,10 +29,7 @@ use near_primitives::transaction::{
     Action, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus,
     SignedTransaction, TransferAction,
 };
-use near_primitives::types::{
-    AccountId, ApprovalPower, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards,
-    ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier,
-};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards, ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
 use near_primitives::views::{
@@ -658,12 +655,12 @@ impl EpochManagerAdapter for MockEpochManager {
     fn get_epoch_block_approvers_ordered(
         &self,
         parent_hash: &CryptoHash,
-    ) -> Result<Vec<(ApprovalPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ApprovalFrozen, bool)>, EpochError> {
         let (_cur_epoch, cur_valset, next_epoch) = self.get_epoch_and_valset(*parent_hash)?;
         let mut validators = self
             .get_block_producers(cur_valset)
             .iter()
-            .map(|x| x.get_approval_power(false))
+            .map(|x| x.get_approval_frozen(false))
             .collect::<Vec<_>>();
         if *self.hash_to_next_epoch_approvals_req.write().unwrap().get(parent_hash).unwrap() {
             let validators_copy = validators.clone();
@@ -673,7 +670,7 @@ impl EpochManagerAdapter for MockEpochManager {
                     .filter(|x| {
                         !validators_copy.iter().any(|entry| &entry.account_id == x.account_id())
                     })
-                    .map(|x| x.get_approval_power(true)),
+                    .map(|x| x.get_approval_frozen(true)),
             );
         }
         let validators = validators.into_iter().map(|stake| (stake, false)).collect::<Vec<_>>();
@@ -906,8 +903,8 @@ impl EpochManagerAdapter for MockEpochManager {
                 }
             }
         }
-        let powers = validators.iter().map(|power| (power.power(), 0, false)).collect::<Vec<_>>();
-        if !can_approved_block_be_produced(approvals, &powers) {
+        let all_frozen = validators.iter().map(|frozen| (frozen.frozen(), 0, false)).collect::<Vec<_>>();
+        if !can_approved_block_be_produced(approvals, &all_frozen) {
             Err(Error::NotEnoughApprovals)
         } else {
             Ok(())
