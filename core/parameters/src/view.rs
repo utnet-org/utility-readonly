@@ -415,9 +415,11 @@ pub struct ExtCostsConfigView {
     // # Validator API #
     // ###############
     /// Cost of calling `validator_stake`.
-    pub validator_stake_base: Gas,
+    pub validator_frozen_base: Gas,
+    pub validator_power_base: Gas,
     /// Cost of calling `validator_total_stake`.
-    pub validator_total_stake_base: Gas,
+    pub validator_total_frozen_base: Gas,
+    pub validator_total_power_base: Gas,
 
     // Removed parameters, only here for keeping the output backward-compatible.
     pub contract_compile_base: Gas,
@@ -499,8 +501,10 @@ impl From<crate::ExtCostsConfig> for ExtCostsConfigView {
             promise_and_base: config.gas_cost(ExtCosts::promise_and_base),
             promise_and_per_promise: config.gas_cost(ExtCosts::promise_and_per_promise),
             promise_return: config.gas_cost(ExtCosts::promise_return),
-            validator_stake_base: config.gas_cost(ExtCosts::validator_stake_base),
-            validator_total_stake_base: config.gas_cost(ExtCosts::validator_total_stake_base),
+            validator_frozen_base: config.gas_cost(ExtCosts::validator_frozen_base),
+            validator_total_frozen_base: config.gas_cost(ExtCosts::validator_total_frozen_base),
+            validator_power_base: config.gas_cost(ExtCosts::validator_power_base),
+            validator_total_power_base: config.gas_cost(ExtCosts::validator_total_power_base),
             alt_bn128_g1_multiexp_base: config.gas_cost(ExtCosts::alt_bn128_g1_multiexp_base),
             alt_bn128_g1_multiexp_element: config.gas_cost(ExtCosts::alt_bn128_g1_multiexp_element),
             alt_bn128_g1_sum_base: config.gas_cost(ExtCosts::alt_bn128_g1_sum_base),
@@ -571,8 +575,10 @@ impl From<ExtCostsConfigView> for crate::ExtCostsConfig {
                 ExtCosts::promise_and_base => view.promise_and_base,
                 ExtCosts::promise_and_per_promise => view.promise_and_per_promise,
                 ExtCosts::promise_return => view.promise_return,
-                ExtCosts::validator_stake_base => view.validator_stake_base,
-                ExtCosts::validator_total_stake_base => view.validator_total_stake_base,
+                ExtCosts::validator_frozen_base => view.validator_frozen_base,
+                ExtCosts::validator_total_frozen_base => view.validator_total_frozen_base,
+                ExtCosts::validator_power_base => view.validator_power_base,
+                ExtCosts::validator_total_power_base => view.validator_total_power_base,
                 ExtCosts::alt_bn128_g1_multiexp_base => view.alt_bn128_g1_multiexp_base,
                 ExtCosts::alt_bn128_g1_multiexp_element => view.alt_bn128_g1_multiexp_element,
                 ExtCosts::alt_bn128_g1_sum_base => view.alt_bn128_g1_sum_base,

@@ -716,7 +716,7 @@ use crate::epoch_manager::ValidatorWeight;
             validator_mandates: ValidatorMandates,
         ) -> Self {
             if checked_feature!("stable", AliasValidatorSelectionAlgorithm, protocol_version) {
-                let stake_weights = |ids: &[ValidatorId]| -> WeightedIndex {
+                let power_weights = |ids: &[ValidatorId]| -> WeightedIndex {
                     WeightedIndex::new(
                         ids.iter()
                             .copied()
@@ -724,9 +724,9 @@ use crate::epoch_manager::ValidatorWeight;
                             .collect(),
                     )
                 };
-                let block_producers_sampler = stake_weights(&block_producers_settlement);
+                let block_producers_sampler = power_weights(&block_producers_settlement);
                 let chunk_producers_sampler =
-                    chunk_producers_settlement.iter().map(|vs| stake_weights(vs)).collect();
+                    chunk_producers_settlement.iter().map(|vs| power_weights(vs)).collect();
                 if checked_feature!("stable", ChunkValidation, protocol_version) {
                     Self::V4(EpochInfoV4 {
                         epoch_height,

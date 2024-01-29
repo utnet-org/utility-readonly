@@ -242,8 +242,10 @@ imports! {
     // ###############
     // # Validator API #
     // ###############
-    validator_stake<[account_id_len: u64, account_id_ptr: u64, stake_ptr: u64] -> []>,
-    validator_total_stake<[stake_ptr: u64] -> []>,
+    validator_frozen<[account_id_len: u64, account_id_ptr: u64, frozen_ptr: u64] -> []>,
+    validator_total_frozen<[frozen_ptr: u64] -> []>,
+    validator_power<[account_id_len: u64, account_id_ptr: u64, power_ptr: u64] -> []>,
+    validator_total_power<[power_ptr: u64] -> []>,
     // #############
     // # Alt BN128 #
     // #############

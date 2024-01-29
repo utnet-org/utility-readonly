@@ -490,11 +490,11 @@ impl Block {
 
 #[derive(Default)]
 pub struct MockEpochInfoProvider {
-    pub validators: HashMap<AccountId, Balance>,
+    pub validators: HashMap<AccountId, (Power,Balance)>,
 }
 
 impl MockEpochInfoProvider {
-    pub fn new(validators: impl Iterator<Item = (AccountId, Balance)>) -> Self {
+    pub fn new(validators: impl Iterator<Item = (AccountId, (Power,Balance))>) -> Self {
         MockEpochInfoProvider { validators: validators.collect() }
     }
 }
@@ -506,7 +506,12 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         _last_block_hash: &CryptoHash,
         account_id: &AccountId,
     ) -> Result<Option<Power>, EpochError> {
-        Ok(self.validators.get(account_id).cloned())
+
+        if let Some((power, _balance)) = self.validators.get(account_id) {
+            Ok(Some(power).cloned())
+        } else {
+            Ok(None)
+        }
     }
 
     fn validator_total_power(
@@ -514,10 +519,12 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
     ) -> Result<Power, EpochError> {
-        Ok(self.validators.values().sum())
+
+        let total_power: Power = self.validators.values().map(|(power, _)| power).sum();
+        Ok(total_power)
     }
 
-    fn minimum_power(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    fn minimum_power(&self, _prev_block_hash: &CryptoHash) -> Result<Power, EpochError> {
         Ok(0)
     }
 
@@ -527,7 +534,11 @@ impl EpochInfoProvider for MockEpochInfoProvider {
             _last_block_hash: &CryptoHash,
             account_id: &AccountId,
         ) -> Result<Option<Balance>, EpochError> {
-        Ok(self.validators.get(account_id).cloned())
+        if let Some((_power, balance)) = self.validators.get(account_id) {
+            Ok(Some(balance).cloned())
+        } else {
+            Ok(None)
+        }
     }
 
     fn validator_total_frozen(
@@ -535,7 +546,8 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
     ) -> Result<Balance, EpochError> {
-        Ok(0)
+        let total_frozen: Balance = self.validators.values().map(|(_, frozen)| frozen).sum();
+        Ok(total_frozen)
     }
 
     fn minimum_frozen(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {

@@ -623,7 +623,7 @@ pub mod validator_power_and_frozen {
         pub fn new_v1(
             account_id: AccountId,
             public_key: PublicKey,
-            power: Balance,
+            power: Power,
             frozen: Balance,
         ) -> Self {
             Self::V1(ValidatorPowerAndFrozenV1 { account_id, public_key, power, frozen })
@@ -632,7 +632,7 @@ pub mod validator_power_and_frozen {
         pub fn new(
             account_id: AccountId,
             public_key: PublicKey,
-            power: Balance,
+            power: Power,
             frozen: Balance,
         ) -> Self {
             Self::new_v1(account_id, public_key, power, frozen)
@@ -645,14 +645,14 @@ pub mod validator_power_and_frozen {
         }
 
         #[inline]
-        pub fn account_and_power(self) -> (AccountId, Balance) {
+        pub fn account_and_power(self) -> (AccountId, Power) {
             match self {
                 Self::V1(v1) => (v1.account_id, v1.power),
             }
         }
 
         #[inline]
-        pub fn destructure(self) -> (AccountId, PublicKey, Balance, Balance) {
+        pub fn destructure(self) -> (AccountId, PublicKey, Power, Balance) {
             match self {
                 Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.frozen),
             }
@@ -687,14 +687,14 @@ pub mod validator_power_and_frozen {
         }
 
         #[inline]
-        pub fn power(&self) -> Balance {
+        pub fn power(&self) -> Power {
             match self {
                 Self::V1(v1) => v1.power,
             }
         }
 
         #[inline]
-        pub fn power_mut(&mut self) -> &mut Balance {
+        pub fn power_mut(&mut self) -> &mut Power {
             match self {
                 Self::V1(v1) => &mut v1.power,
             }
@@ -756,7 +756,7 @@ pub mod validator_power_and_frozen {
         ///
         /// Let `V` be a validator with power of 12. If `power_per_mandate` equals 5 then the weight
         /// of `V`'s partial mandate is `12 % 5 = 2`.
-        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Balance {
+        pub fn partial_mandate_weight(&self, power_per_mandate: Power) -> Power {
             self.power() % power_per_mandate
         }
     }
@@ -923,7 +923,7 @@ pub mod validator_power {
     use crate::types::ApprovalPower;
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Balance, Power};
+    use near_primitives_core::types::{AccountId, Power};
     use serde::Serialize;
 
     pub use super::ValidatorPowerV1;
@@ -1056,7 +1056,7 @@ pub mod validator_power {
         }
 
         #[inline]
-        pub fn power_mut(&mut self) -> &mut Balance {
+        pub fn power_mut(&mut self) -> &mut Power {
             match self {
                 Self::V1(v1) => &mut v1.power,
             }

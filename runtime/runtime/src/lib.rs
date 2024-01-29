@@ -1027,21 +1027,7 @@ impl Runtime {
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
         for (account_id, max_of_power) in &validator_accounts_update.power_info {
-            let max_of_frozen = validator_accounts_update.frozen_info.get(&account_id.clone()).unwrap_or(&0);
             if let Some(mut account) = get_account(state_update, account_id)? {
-                if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
-                    account.set_locked(
-                        account
-                            .locked()
-                            .checked_add(*reward)
-                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                    );
-                }
-                debug!(target: "runtime",
-                       "account {} power {} max_of_power: {}",
-                       account_id, account.power(), max_of_power
-                );
                 if account.power() < *max_of_power {
                     return Err(StorageError::StorageInconsistentState(format!(
                         "FATAL: powering invariant does not hold. \
@@ -1062,6 +1048,40 @@ impl Runtime {
                         .checked_sub(return_power)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
+                ))
+                .into());
+            }
+        }
+
+        for (account_id, max_of_frozen) in &validator_accounts_update.frozen_info {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
+                    debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
+                    account.set_locked(
+                        account
+                            .locked()
+                            .checked_add(*reward)
+                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                    );
+                }
+                debug!(target: "runtime",
+                       "account {} locked {} max_of_frozen: {}",
+                       account_id, account.locked(), max_of_frozen
+                );
+                if account.locked() < *max_of_frozen {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: powering invariant does not hold. \
+                         Account power {} is less than maximum of locked {} in the past three epochs",
+                        account.locked(),
+                        max_of_frozen)).into());
+                }
                 let last_frozen_proposal =
                     *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
                 let return_frozen = account
@@ -1076,14 +1096,14 @@ impl Runtime {
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
                 set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_power > 0 {
+            } else if *max_of_frozen > 0 {
                 // if max_of_power > 0, it means that the account must have power
                 // and therefore must exist
                 return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of power {} is not found",
-                    account_id, max_of_power
+                    "Account {} with max of locked {} is not found",
+                    account_id, max_of_frozen
                 ))
-                .into());
+                    .into());
             }
         }
         // Slash only to the accounts that are in the current shard.

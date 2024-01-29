@@ -246,9 +246,11 @@ pub trait External {
 
     /// Returns the validator stake for given account in the current epoch.
     /// If the account is not a validator, returns `None`.
+    fn validator_frozen(&self, account_id: &AccountId) -> Result<Option<Balance>>;
     fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>>;
 
     /// Returns total stake of validators in the current epoch.
+    fn validator_total_frozen(&self) -> Result<Balance>;
     fn validator_total_power(&self) -> Result<Power>;
 
     /// Create a receipt which will be executed after all the receipts identified by

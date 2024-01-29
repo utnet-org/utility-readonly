@@ -201,8 +201,8 @@ impl Index<ExtCosts> for ProfileDataV2 {
             ExtCosts::promise_and_base => 57,
             ExtCosts::promise_and_per_promise => 58,
             ExtCosts::promise_return => 59,
-            ExtCosts::validator_stake_base => 60,
-            ExtCosts::validator_total_stake_base => 61,
+            ExtCosts::validator_frozen_base => 60,
+            ExtCosts::validator_total_frozen_base => 61,
             ExtCosts::read_cached_trie_node => 63,
             ExtCosts::alt_bn128_g1_multiexp_base => 64,
             ExtCosts::alt_bn128_g1_multiexp_element => 65,
@@ -210,6 +210,8 @@ impl Index<ExtCosts> for ProfileDataV2 {
             ExtCosts::alt_bn128_pairing_check_element => 67,
             ExtCosts::alt_bn128_g1_sum_base => 68,
             ExtCosts::alt_bn128_g1_sum_element => 69,
+            ExtCosts::validator_power_base => 60,
+            ExtCosts::validator_total_power_base => 61,
             // new costs added after profile v1 was deprecated don't have this entry
             #[allow(unreachable_patterns)]
             _ => return &0,

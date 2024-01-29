@@ -102,7 +102,10 @@ impl EpochInfoProvider for EpochManagerHandle {
             .sum())
     }
 
-    fn minimum_power(&self, _: &CryptoHash) -> Result<u128, EpochError> { todo!() }
+    fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<u128, EpochError> {
+        let epoch_manager = self.read();
+        epoch_manager.minimum_power(prev_block_hash)
+    }
     fn validator_frozen(
         &self,
         epoch_id: &EpochId,
@@ -1604,6 +1607,13 @@ impl EpochManager {
         let config = self.config.for_protocol_version(protocol_version);
         let stake_divisor = { config.minimum_stake_divisor as Balance };
         Ok(seat_price / stake_divisor)
+    }
+
+    /// Get minimum power allowed at current block. Attempts to stake with a lower power will be
+    /// rejected.
+    pub fn minimum_power(&self,_prev_block_hash: &CryptoHash) -> Result<Power, EpochError> {
+    // TO DO, for now we assume 0 as min power
+        Ok(0)
     }
 }
 
