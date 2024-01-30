@@ -100,10 +100,8 @@ pub fn proposals_to_epoch_info(
             power : power.clone(),
             frozen : frozen.clone(),
         });
-        if frozen >= epoch_config.fishermen_threshold && power > &0 {
+        if frozen >= epoch_config.fishermen_threshold {
             fishermen.push(r_p);
-        } else if power == &0 {
-            // nothing to do
         } else {
             *frozen_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)
@@ -392,6 +390,9 @@ fn create_power_map(heap: &BinaryHeap<OrderedValidatorPower>) -> HashMap<Account
 }
 
 
+// Use the function with the appropriate account_id and store
+
+
 
 // Takes the top N proposals (by stake), or fewer if there are not enough or the
 // next proposals is too small relative to the others. In the case where all N
@@ -419,7 +420,7 @@ fn select_validators(
             frozen : p_frozen.clone(),
         });
         let total_frozen_with_p = total_frozen + p_frozen;
-        if Ratio::new(p_frozen, total_frozen_with_p) > min_stake_ratio && power > &0 {
+        if Ratio::new(p_frozen, total_frozen_with_p) > min_stake_ratio {
             validators.push(p_r);
             total_frozen = total_frozen_with_p;
         } else {
