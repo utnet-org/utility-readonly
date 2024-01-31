@@ -731,8 +731,8 @@ pub mod validator_power_and_frozen {
         ///
         /// # Why `u16` should be sufficient
         ///
-        /// As of October 2023, a [recommended lower bound] for the power required per mandate is
-        /// 25k $NEAR. At this price, the validator with highest power would have 1_888 mandates,
+        /// As of October 2023, a [recommended lower bound] for the frozen required per mandate is
+        /// 25k $NEAR. At this price, the validator with highest frozen would have 1_888 mandates,
         /// which is well below `u16::MAX`.
         ///
         /// From another point of view, with more than `u16::MAX` mandates for validators, sampling

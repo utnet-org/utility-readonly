@@ -1026,39 +1026,39 @@ impl Runtime {
         validator_accounts_update: &ValidatorAccountsUpdate,
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        // for (account_id, max_of_power) in &validator_accounts_update.power_info {
-        //     if let Some(mut account) = get_account(state_update, account_id)? {
-        //         if account.power() < *max_of_power {
-        //             return Err(StorageError::StorageInconsistentState(format!(
-        //                 "FATAL: powering invariant does not hold. \
-        //                  Account power {} is less than maximum of power {} in the past three epochs",
-        //                 account.power(),
-        //                 max_of_power)).into());
-        //         }
-        //         let last_power_proposal =
-        //             *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
-        //         let return_power = account
-        //             .power()
-        //             .checked_sub(max(*max_of_power, last_power_proposal))
-        //             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-        //         debug!(target: "runtime", "account {} return power {}", account_id, return_power);
-        //         account.set_power(
-        //             account
-        //                 .power()
-        //                 .checked_sub(return_power)
-        //                 .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-        //         );
-        //         set_account(state_update, account_id.clone(), &account);
-        //     } else if *max_of_power > 0 {
-        //         // if max_of_power > 0, it means that the account must have power
-        //         // and therefore must exist
-        //         return Err(StorageError::StorageInconsistentState(format!(
-        //             "Account {} with max of power {} is not found",
-        //             account_id, max_of_power
-        //         ))
-        //         .into());
-        //     }
-        // }
+        for (account_id, max_of_power) in &validator_accounts_update.power_info {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                if account.power() < *max_of_power {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: powering invariant does not hold. \
+                         Account power {} is less than maximum of power {} in the past three epochs",
+                        account.power(),
+                        max_of_power)).into());
+                }
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
+                let return_power = account
+                    .power()
+                    .checked_sub(max(*max_of_power, last_power_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
+                account.set_power(
+                    account
+                        .power()
+                        .checked_sub(return_power)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
+                ))
+                .into());
+            }
+        }
 
         for (account_id, max_of_frozen) in &validator_accounts_update.frozen_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
