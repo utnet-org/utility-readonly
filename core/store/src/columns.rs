@@ -285,6 +285,8 @@ pub enum DBCol {
     /// - *Column type*: `EpochSyncInfo
     #[cfg(feature = "new_epoch_sync")]
     EpochSyncInfo,
+    /// Store all the providers in hashmap accountId => (Power, Frozen)
+    AllProviders,
 }
 
 /// Defines different logical parts of a db key.
@@ -430,7 +432,8 @@ impl DBCol {
             | DBCol::StateChangesForSplitStates
             | DBCol::StateHeaders
             | DBCol::TransactionResultForBlock
-            | DBCol::Transactions => true,
+            | DBCol::Transactions
+            | DBCol::AllProviders => true,
 
             // TODO
             DBCol::ChallengedBlocks => false,
@@ -551,6 +554,7 @@ impl DBCol {
             DBCol::FlatStorageStatus => &[DBKeyType::ShardUId],
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => &[DBKeyType::EpochId],
+            DBCol::AllProviders => &[DBKeyType::AccountId],
         }
     }
 }
