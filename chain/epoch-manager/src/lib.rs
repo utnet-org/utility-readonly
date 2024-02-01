@@ -858,7 +858,7 @@ impl EpochManager {
                                 .slashed_mut()
                                 .entry(account_id.clone())
                                 .or_insert(SlashState::AlreadySlashed);
-                        } else if epoch_info.power_change().contains_key(account_id) {
+                        } else if epoch_info.frozen_change().contains_key(account_id) {
                             block_info
                                 .slashed_mut()
                                 .entry(account_id.clone())
@@ -919,8 +919,23 @@ impl EpochManager {
     ) -> Result<ValidatorPowerAndFrozen, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         let validator_id = Self::block_producer_from_info(&epoch_info, height);
+
         Ok(epoch_info.get_validator(validator_id))
     }
+
+    // pub fn get_block_producer_by_hash(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     block_hash: &CryptoHash,
+    // ) -> Result<ValidatorPowerAndFrozen, EpochError> {
+    //     let epoch_info = self.get_epoch_info(epoch_id)?;
+    //     let block_info = self.get_block_info(block_hash)?;
+    //     let prev_block_info = self.get_block_info(block_info.prev_hash())?;
+    //     let random_value = prev_block_info.random_value();
+    //     let validator_id = Self::block_producer_from_info(&epoch_info, height);
+    //
+    //     Ok(epoch_info.get_validator(validator_id))
+    // }
 
     /// Returns settlement of all block producers in current epoch, with indicator on whether they are slashed or not.
     pub fn get_all_block_producers_settlement(
@@ -1565,6 +1580,7 @@ impl EpochManager {
             block_header_info.prev_hash,
             block_header_info.power_proposals,
             block_header_info.frozen_proposals,
+            block_header_info.random_value,
             block_header_info.chunk_mask,
             block_header_info.slashed_validators,
             block_header_info.total_supply,
@@ -1634,7 +1650,11 @@ impl EpochManager {
         }
         Ok(false)
     }
-
+    // #[inline]
+    // pub(crate) fn block_producer_from_info_vrf(
+    //     epoch_info: &EpochInfo,
+    //     random_value: &CryptoHash,
+    // ) -> ValidatorId { epoch_info.vrf_block_producer(random_value) }
     #[inline]
     pub(crate) fn block_producer_from_info(
         epoch_info: &EpochInfo,

@@ -186,6 +186,7 @@ impl ValidateEpochSyncInfoCmd {
                     *last_header.prev_hash(),
                     last_header.prev_validator_power_proposals().collect(),
                     last_header.prev_validator_frozen_proposals().collect(),
+                    *last_header.random_value(),
                     last_header.chunk_mask().to_vec(),
                     vec![],
                     last_header.total_supply(),

@@ -270,6 +270,7 @@ pub mod block_info {
             prev_hash: CryptoHash,
             power_proposals: Vec<ValidatorPower>,
             frozen_proposals: Vec<ValidatorFrozen>,
+            random_value: CryptoHash,
             validator_mask: Vec<bool>,
             slashed: Vec<SlashedValidator>,
             total_supply: Balance,
@@ -284,6 +285,7 @@ pub mod block_info {
                 prev_hash,
                 power_proposals,
                 frozen_proposals,
+                random_value,
                 chunk_mask: validator_mask,
                 latest_protocol_version,
                 slashed: slashed
@@ -317,6 +319,14 @@ pub mod block_info {
             match self {
                 Self::V1(v1) => ValidatorFrozenIter::v1(&v1.frozen_proposals),
                 Self::V2(v2) => ValidatorFrozenIter::new(&v2.frozen_proposals),
+            }
+        }
+
+        #[inline]
+        pub fn random_value(&self) -> &CryptoHash {
+            match self {
+                Self::V1(v1) => &v1.random_value,
+                Self::V2(v2) => &v2.random_value,
             }
         }
 
@@ -455,6 +465,7 @@ pub mod block_info {
         pub epoch_id: EpochId,
         pub power_proposals: Vec<ValidatorPower>,
         pub frozen_proposals: Vec<ValidatorFrozen>,
+        pub random_value: CryptoHash,
         pub chunk_mask: Vec<bool>,
         /// Latest protocol version this validator observes.
         pub latest_protocol_version: ProtocolVersion,
@@ -480,6 +491,7 @@ pub struct BlockInfoV1 {
     pub epoch_id: EpochId,
     pub power_proposals: Vec<ValidatorPowerV1>,
     pub frozen_proposals: Vec<ValidatorFrozenV1>,
+    pub random_value: CryptoHash,
     pub chunk_mask: Vec<bool>,
     /// Latest protocol version this validator observes.
     pub latest_protocol_version: ProtocolVersion,
@@ -499,6 +511,7 @@ impl BlockInfoV1 {
         prev_hash: CryptoHash,
         power_proposals: Vec<ValidatorPowerV1>,
         frozen_proposals: Vec<ValidatorFrozenV1>,
+        random_value: CryptoHash,
         validator_mask: Vec<bool>,
         slashed: Vec<SlashedValidator>,
         total_supply: Balance,
@@ -513,6 +526,7 @@ impl BlockInfoV1 {
             prev_hash,
             power_proposals,
             frozen_proposals,
+            random_value,
             chunk_mask: validator_mask,
             latest_protocol_version,
             slashed: slashed
@@ -1088,6 +1102,10 @@ use crate::epoch_manager::ValidatorWeight;
             }
         }
 
+        pub fn vrf_block_producer(&self, _random_value: &CryptoHash) -> ValidatorId {
+            return 0;
+        }
+
         pub fn sample_block_producer(&self, height: BlockHeight) -> ValidatorId {
             match &self {
                 Self::V1(v1) => {
@@ -1373,6 +1391,7 @@ pub mod epoch_sync {
                 *header.prev_hash(),
                 header.prev_validator_power_proposals().collect(),
                 header.prev_validator_frozen_proposals().collect(),
+                *header.random_value(),
                 header.chunk_mask().to_vec(),
                 vec![],
                 header.total_supply(),
