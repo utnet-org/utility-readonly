@@ -3,7 +3,7 @@ use crate::serialize::dec_format;
 use crate::types::{AccountId, Balance, EpochId, Gas, Nonce};
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_crypto::PublicKey;
-use near_primitives_core::types::ProtocolVersion;
+use near_primitives_core::types::{BlockHeight, ProtocolVersion};
 use near_rpc_error_macro::RpcError;
 use std::fmt::{Debug, Display};
 
@@ -843,7 +843,89 @@ impl Display for ActionErrorKind {
         }
     }
 }
+#[derive(Eq, PartialEq, Clone)]
+pub enum BlockError {
+    /// Error calculating threshold from given stakes for given number of seats.
+    /// Only should happened if calling code doesn't check for integer value of stake > number of seats.
+    ThresholdError {
+        stake_sum: Balance,
+        num_seats: u64,
+    },
+    /// Requesting validators for an epoch that wasn't computed yet.
+    BlockOutOfBounds(BlockHeight),
+    /// Missing block hash in the storage (means there is some structural issue).
+    MissingBlock(CryptoHash),
+    /// Error due to IO (DB read/write, serialization, etc.).
+    IOErr(String),
+    /// Given account ID is not a validator in the given block height.
+    NotAValidator(AccountId, BlockHeight),
+    /// Error getting information for a shard
+    ShardingError(String),
+    NotEnoughValidators {
+        num_validators: u64,
+        num_shards: u64,
+    },
+    /// Error selecting validators for a chunk.
+    ChunkValidatorSelectionError(String),
+}
 
+impl std::error::Error for crate::errors::BlockError {}
+
+impl Display for crate::errors::BlockError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            crate::errors::BlockError::ThresholdError { stake_sum, num_seats } => write!(
+                f,
+                "Total stake {} must be higher than the number of seats {}",
+                stake_sum, num_seats
+            ),
+            crate::errors::BlockError::BlockOutOfBounds(block_height) => {
+                write!(f, "Block {:?} is out of bounds", block_height)
+            }
+            crate::errors::BlockError::MissingBlock(hash) => write!(f, "Missing block {}", hash),
+            crate::errors::BlockError::IOErr(err) => write!(f, "IO: {}", err),
+            crate::errors::BlockError::NotAValidator(account_id, block_height) => {
+                write!(f, "{} is not a validator in epoch {:?}", account_id, block_height)
+            }
+            crate::errors::BlockError::ShardingError(err) => write!(f, "Sharding Error: {}", err),
+            crate::errors::BlockError::NotEnoughValidators { num_shards, num_validators } => {
+                write!(f, "There were not enough validator proposals to fill all shards. num_proposals: {}, num_shards: {}", num_validators, num_shards)
+            }
+            crate::errors::BlockError::ChunkValidatorSelectionError(err) => {
+                write!(f, "Error selecting validators for a chunk: {}", err)
+            }
+        }
+    }
+}
+
+impl Debug for crate::errors::BlockError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            crate::errors::BlockError::ThresholdError { stake_sum, num_seats } => {
+                write!(f, "ThresholdError({}, {})", stake_sum, num_seats)
+            }
+            crate::errors::BlockError::BlockOutOfBounds(block_height) => write!(f, "EpochOutOfBounds({:?})", block_height),
+            crate::errors::BlockError::MissingBlock(hash) => write!(f, "MissingBlock({})", hash),
+            crate::errors::BlockError::IOErr(err) => write!(f, "IOErr({})", err),
+            crate::errors::BlockError::NotAValidator(account_id, block_height) => {
+                write!(f, "NotAValidator({}, {:?})", account_id, block_height)
+            }
+            crate::errors::BlockError::ShardingError(err) => write!(f, "ShardingError({})", err),
+            crate::errors::BlockError::NotEnoughValidators { num_shards, num_validators } => {
+                write!(f, "NotEnoughValidators({}, {})", num_validators, num_shards)
+            }
+            crate::errors::BlockError::ChunkValidatorSelectionError(err) => {
+                write!(f, "ChunkValidatorSelectionError({})", err)
+            }
+        }
+    }
+}
+
+impl From<std::io::Error> for crate::errors::BlockError {
+    fn from(error: std::io::Error) -> Self {
+        crate::errors::BlockError::IOErr(error.to_string())
+    }
+}
 #[derive(Eq, PartialEq, Clone)]
 pub enum EpochError {
     /// Error calculating threshold from given stakes for given number of seats.

@@ -2,8 +2,11 @@ use std::collections::HashMap;
 
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{EpochConfig, RngSeed};
-use near_primitives::errors::EpochError;
+use near_primitives::epoch_manager::{BlockConfig, EpochConfig, RngSeed};
+use near_primitives::epoch_manager::block_info::BlockInfo;
+use near_primitives::epoch_manager::block_summary::BlockSummary;
+use near_primitives::errors::{BlockError, EpochError};
+use near_primitives::hash::CryptoHash;
 use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
 use near_primitives::types::{
@@ -36,7 +39,32 @@ pub(crate) fn find_threshold(
         right = mid;
     }
 }
-
+///
+pub fn proposals_to_block_summary(
+    epoch_config: &EpochConfig,
+    last_block_hash: &CryptoHash,
+    rng_seed: RngSeed,
+    prev_block_summary: &BlockSummary,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
+    validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
+    validator_reward: HashMap<AccountId, Balance>,
+    minted_amount: Balance,
+    next_version: ProtocolVersion,
+) -> Result<BlockSummary, BlockError> {
+    return crate::validator_selection::proposals_to_block_summary(
+        epoch_config,
+        last_block_hash,
+        rng_seed,
+        prev_block_summary,
+        power_proposals,
+        frozen_proposals,
+        validator_kickout,
+        validator_reward,
+        minted_amount,
+        next_version,
+    );
+}
 /// Calculates new seat assignments based on current seat assignments and proposals.
 pub fn proposals_to_epoch_info(
     epoch_config: &EpochConfig,

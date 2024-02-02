@@ -365,7 +365,6 @@ pub fn record_block_with_final_block_hash(
     height: BlockHeight,
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
-    random_value: CryptoHash,
 ) {
     epoch_manager
         .record_block_info(
@@ -377,7 +376,6 @@ pub fn record_block_with_final_block_hash(
                 prev_h,
                 power_proposals,
                 frozen_proposals,
-                random_value,
                 vec![],
                 vec![],
                 DEFAULT_TOTAL_SUPPLY,
@@ -398,7 +396,6 @@ pub fn record_block_with_slashes(
     height: BlockHeight,
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
-    random_value: CryptoHash,
     slashed: Vec<SlashedValidator>,
 ) {
     epoch_manager
@@ -411,7 +408,6 @@ pub fn record_block_with_slashes(
                 prev_h,
                 power_proposals,
                 frozen_proposals,
-                random_value,
                 vec![],
                 slashed,
                 DEFAULT_TOTAL_SUPPLY,
@@ -458,6 +454,7 @@ pub fn block_info(
         epoch_id: Default::default(),
         power_proposals: vec![],
         frozen_proposals: vec![],
+        providers: vec![],
         random_value,
         chunk_mask,
         latest_protocol_version: PROTOCOL_VERSION,

@@ -198,7 +198,7 @@ impl ShardTracker {
 mod tests {
     use super::{account_id_to_shard_id, ShardTracker};
     use crate::shard_tracker::TrackedConfig;
-    use crate::test_utils::hash_range;
+    use crate::test_utils::{frozen, hash_range};
     use crate::{EpochManager, EpochManagerAdapter, EpochManagerHandle, RewardCalculator};
     use near_crypto::{KeyType, PublicKey};
     use near_primitives::epoch_manager::block_info::BlockInfo;
@@ -213,6 +213,7 @@ mod tests {
     use num_rational::Ratio;
     use std::collections::HashSet;
     use std::sync::Arc;
+    use near_primitives::types::validator_frozen::ValidatorFrozen;
 
     const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
 
@@ -268,7 +269,8 @@ mod tests {
         prev_h: CryptoHash,
         cur_h: CryptoHash,
         height: BlockHeight,
-        proposals: Vec<ValidatorPower>,
+        power_proposals: Vec<ValidatorPower>,
+        frozen_proposals: Vec<ValidatorFrozen>,
         protocol_version: ProtocolVersion,
     ) {
         epoch_manager
@@ -279,7 +281,8 @@ mod tests {
                     0,
                     prev_h,
                     prev_h,
-                    proposals,
+                    power_proposals,
+                    frozen_proposals,
                     vec![],
                     vec![],
                     DEFAULT_TOTAL_SUPPLY,

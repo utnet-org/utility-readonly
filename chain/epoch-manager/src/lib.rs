@@ -1,15 +1,17 @@
 use crate::proposals::proposals_to_epoch_info;
+use crate::proposals::proposals_to_block_summary;
 use crate::types::EpochInfoAggregator;
 use near_cache::SyncLruCache;
 use near_chain_configs::GenesisConfig;
 use near_primitives::checked_feature;
+use near_primitives::epoch_manager::block_summary::BlockSummary;
 use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
 use near_primitives::epoch_manager::{
     AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig, ShardConfig, SlashState,
     AGGREGATOR_KEY,
 };
-use near_primitives::errors::EpochError;
+use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
 use near_primitives::types::validator_power::ValidatorPower;
@@ -25,9 +27,11 @@ use num_rational::Rational64;
 use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::hash::Hash;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tracing::{debug, warn};
 use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use near_store::DBCol::BlockSummary;
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -46,6 +50,7 @@ mod tests;
 pub mod types;
 mod validator_selection;
 
+const BLOCK_SUMMARY_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 50 };
 const EPOCH_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 50 };
 const BLOCK_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 5 } else { 1000 }; // TODO(#5080): fix this
 const AGGREGATOR_SAVE_PERIOD: u64 = 1000;
@@ -154,6 +159,8 @@ pub struct EpochManager {
     genesis_protocol_version: ProtocolVersion,
     genesis_num_block_producer_seats: NumSeats,
 
+    /// Cache of block summary.
+    block_summaries: SyncLruCache<BlockHeight, Arc<BlockSummary>>,
     /// Cache of epoch information.
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
     /// Cache of block information.
@@ -281,6 +288,7 @@ impl EpochManager {
             reward_calculator,
             genesis_protocol_version,
             genesis_num_block_producer_seats,
+            block_summaries: SyncLruCache::new(BLOCK_SUMMARY_CACHE_SIZE),
             epochs_info: SyncLruCache::new(EPOCH_CACHE_SIZE),
             blocks_info: SyncLruCache::new(BLOCK_CACHE_SIZE),
             epoch_id_to_start: SyncLruCache::new(EPOCH_CACHE_SIZE),
@@ -315,6 +323,18 @@ impl EpochManager {
             // If we view it as block in epoch -1 and height -1, it naturally extends the
             // EpochId formula using T-2 for T=1, and height field is unused.
             let block_info = Arc::new(BlockInfo::default());
+            let block_summary= proposals_to_block_summary(
+                &genesis_epoch_config,
+                &CryptoHash::default(),
+                [0; 32],
+                BlockSummary::default(),
+                vec![],
+                vec![],
+                HashMap::default(),
+                HashMap::default(),
+                0,
+                0,
+            );
             let mut store_update = epoch_manager.store.store_update();
             epoch_manager.save_epoch_info(
                 &mut store_update,
@@ -322,7 +342,9 @@ impl EpochManager {
                 Arc::new(epoch_info),
             )?;
             epoch_manager.save_block_info(&mut store_update, block_info)?;
+            epoch_manager.save_block_summary(&mut store_update, &block_info.height(), Arc::new(block_summary))?;
             store_update.commit()?;
+
         }
         Ok(epoch_manager)
     }
@@ -720,7 +742,77 @@ impl EpochManager {
             next_version,
         })
     }
+    /// Finalize block
+    fn finalize_block(
+        &mut self,
+        store_update: &mut StoreUpdate,
+        block_info: &BlockInfo,
+        last_block_hash: &CryptoHash,
+        rng_seed: RngSeed,
+    ) -> Result<(), BlockError> {
 
+        let last_block_summary = match last_block_hash {
+            CryptoHash::default() => BlockSummary::default(),
+            _ => {
+                    self.get_block_summary(&block_info.height() - 1u64)?
+                }
+        };
+
+        let validator_stake =
+            block_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
+
+        let BlockSummary {
+            all_power_proposals,
+            all_frozen_proposals,
+            validator_kickout,
+            validator_block_chunk_stats,
+            next_version,
+            ..
+        } = last_block_summary;
+
+        let (validator_reward, minted_amount) = {
+            let last_epoch_last_block_hash =
+                *self.get_block_info(block_info.epoch_first_block())?.prev_hash();
+            let last_block_in_last_epoch = self.get_block_info(&last_epoch_last_block_hash)?;
+            assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
+            let epoch_duration =
+                block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
+            self.reward_calculator.calculate_reward(
+                validator_block_chunk_stats,
+                &validator_stake,
+                *block_info.total_supply(),
+                0u32,
+                self.genesis_protocol_version,
+                epoch_duration,
+            )
+        };
+        let this_epoch_config = self.config.for_protocol_version(next_version);
+        let this_block_summary = match proposals_to_block_summary(
+            &this_epoch_config,
+            &last_block_hash,
+            rng_seed,
+            &last_block_summary,
+            all_power_proposals,
+            all_frozen_proposals,
+            validator_kickout,
+            validator_reward,
+            minted_amount,
+            next_version,
+        ) {
+            Ok(this_block_summary) => this_block_summary,
+            Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
+                warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+            }
+            Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
+                warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+            }
+            Err(err) => return Err(err),
+        };
+        // This epoch info is computed for the epoch after next (T+2),
+        // where epoch_id of it is the hash of last block in this epoch (T).
+        self.save_block_summary(store_update, &block_info.height(), Arc::new(this_block_summary))?;
+        Ok(())
+    }
     /// Finalizes epoch (T), where given last block hash is given, and returns next next epoch id (T + 2).
     fn finalize_epoch(
         &mut self,
@@ -809,7 +901,7 @@ impl EpochManager {
         mut block_info: BlockInfo,
         rng_seed: RngSeed,
     ) -> Result<StoreUpdate, EpochError> {
-        let current_hash = *block_info.hash();
+        let current_hash = *block_info.hash(&mut ());
         let mut store_update = self.store.store_update();
         // Check that we didn't record this block yet.
         if !self.has_block_info(&current_hash)? {
@@ -824,6 +916,8 @@ impl EpochManager {
                     &EpochId(current_hash),
                     genesis_epoch_info,
                 )?;
+                // James Customized start here, we need to save block_summary too
+
             } else {
                 let prev_block_info = self.get_block_info(block_info.prev_hash())?;
 
@@ -888,6 +982,7 @@ impl EpochManager {
                 let block_info = Arc::new(block_info);
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
+                //
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
 
@@ -1580,7 +1675,6 @@ impl EpochManager {
             block_header_info.prev_hash,
             block_header_info.power_proposals,
             block_header_info.frozen_proposals,
-            block_header_info.random_value,
             block_header_info.chunk_mask,
             block_header_info.slashed_validators,
             block_header_info.total_supply,
@@ -1767,6 +1861,26 @@ impl EpochManager {
     ) -> Result<(), EpochError> {
         store_update.set_ser(DBCol::EpochInfo, epoch_id.as_ref(), &epoch_info)?;
         self.epochs_info.put(epoch_id.clone(), epoch_info);
+        Ok(())
+    }
+
+    pub fn get_block_summary(&self, block_height: u64) -> Result<Arc<BlockSummary>, BlockError> {
+        self.block_summaries.get_or_try_put(block_height.clone(), |epoch_id| {
+            self.store
+                .get_ser(DBCol::BlockSummary, epoch_id.as_ref())?
+                .ok_or_else(|| BlockError::BlockOutOfBounds(block_height.clone()))
+        })
+    }
+
+    fn save_block_summary(
+        &self,
+        store_update: &mut StoreUpdate,
+        block_height: &BlockHeight,
+        block_summary: Arc<BlockSummary>,
+    ) -> Result<(), BlockError> {
+        store_update
+            .set_ser(DBCol::BlockSummary, block_height.as_ref(), &block_summary)?;
+        self.block_summaries.put(block_height.clone(), block_summary);
         Ok(())
     }
 

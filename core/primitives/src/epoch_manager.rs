@@ -1,7 +1,7 @@
 use crate::challenge::SlashedValidator;
 use crate::num_rational::Rational32;
 use crate::shard_layout::ShardLayout;
-use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozenV1;
+use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozenV1};
 use crate::types::validator_power::ValidatorPowerV1;
 use crate::types::validator_frozen::ValidatorFrozenV1;
 
@@ -21,6 +21,39 @@ pub type RngSeed = [u8; 32];
 
 pub const AGGREGATOR_KEY: &[u8] = b"AGGREGATOR";
 
+
+///
+///
+///
+#[derive(Clone, Eq, Debug, PartialEq)]
+pub struct BlockConfig {
+    /// Number of seats for block producers.
+    pub num_block_producer_seats: NumSeats,
+    /// Number of seats of block producers per each shard.
+    pub num_block_producer_seats_per_shard: Vec<NumSeats>,
+    /// Expected number of hidden validator seats per each shard.
+    pub avg_hidden_validator_seats_per_shard: Vec<NumSeats>,
+    /// Criterion for kicking out block producers.
+    pub block_producer_kickout_threshold: u8,
+    /// Criterion for kicking out chunk producers.
+    pub chunk_producer_kickout_threshold: u8,
+    /// Max ratio of validators that we can kick out in an epoch
+    pub validator_max_kickout_stake_perc: u8,
+    /// Online minimum threshold below which validator doesn't receive reward.
+    pub online_min_threshold: Rational32,
+    /// Online maximum threshold above which validator gets full reward.
+    pub online_max_threshold: Rational32,
+    /// Stake threshold for becoming a fisherman.
+    pub fishermen_threshold: Balance,
+    /// The minimum stake required for staking is last seat price divided by this number.
+    pub minimum_stake_divisor: u64,
+    /// Threshold of stake that needs to indicate that they ready for upgrade.
+    pub protocol_upgrade_stake_threshold: Rational32,
+    /// Shard layout of this epoch, may change from epoch to epoch
+    pub shard_layout: ShardLayout,
+    /// Additional config for validator selection algorithm
+    pub validator_selection_config: ValidatorSelectionConfig,
+}
 /// Epoch config, determines validator assignment for given epoch.
 /// Can change from epoch to epoch depending on the sharding and other parameters, etc.
 #[derive(Clone, Eq, Debug, PartialEq)]
@@ -235,7 +268,266 @@ pub struct ValidatorSelectionConfig {
     pub minimum_stake_ratio: Rational32,
 }
 
+pub mod block_summary {
+    use std::collections::{BTreeMap, HashMap};
+    use borsh::{BorshDeserialize, BorshSerialize};
+    use near_primitives_core::hash::CryptoHash;
+    use near_primitives_core::types::{Balance, BlockHeight, Power, ValidatorId};
+    use crate::types::{AccountId, ValidatorKickoutReason};
+    use crate::types::validator_frozen::ValidatorFrozen;
+    use crate::types::validator_power::ValidatorPower;
+    use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
+    use crate::validator_mandates::ValidatorMandates;
+
+    use super::SlashState;
+
+    #[derive(BorshSerialize, BorshDeserialize, Eq, PartialEq, Clone, Debug, serde::Serialize)]
+    pub enum BlockSummary {
+        V1(BlockSummaryV1),
+    }
+    #[derive(Default, Eq, PartialEq, BorshSerialize, Clone, Debug, BorshDeserialize, serde::Serialize)]
+    pub struct BlockSummaryV1 {
+        pub block_height: BlockHeight,
+        pub prev_block_hash: CryptoHash,
+        pub random_value: CryptoHash,
+        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validator_to_index: HashMap<AccountId,ValidatorId>,
+        pub block_producers_settlement: Vec<ValidatorId>,
+        pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
+        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
+        pub power_change: BTreeMap<AccountId, Power>,
+        pub frozen_change: BTreeMap<AccountId, Balance>,
+        pub validator_reward: HashMap<AccountId, Balance>,
+        pub seat_price: Balance,
+        pub minted_amount: Balance,
+        /// Power proposals from the block, only the latest one per account
+        pub all_power_proposals: Vec<ValidatorPower>,
+        /// Frozen proposals from the block, only the latest one per account
+        pub all_frozen_proposals: Vec<ValidatorFrozen>,
+        /// Kickout set, includes slashed
+        pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
+        /// Only for validators who met the threshold and didn't get slashed
+        pub validator_mandates: ValidatorMandates,
+    }
+    impl Default for BlockSummary {
+        fn default() -> Self {
+            Self::V1(BlockSummaryV1::default())
+        }
+    }
+    impl BlockSummary {
+
+        pub fn new(
+            block_height: BlockHeight,
+            prev_block_hash: CryptoHash,
+            random_value: CryptoHash,
+            validators: Vec<ValidatorPowerAndFrozen>,
+            validator_to_index: HashMap<AccountId,ValidatorId>,
+            block_producers_settlement: Vec<ValidatorId>,
+            chunk_producers_settlement: Vec<Vec<ValidatorId>>,
+            fishermen: Vec<ValidatorPowerAndFrozen>,
+            fishermen_to_index: HashMap<AccountId, ValidatorId>,
+            power_change: BTreeMap<AccountId, Power>,
+            frozen_change: BTreeMap<AccountId, Balance>,
+            validator_reward: HashMap<AccountId, Balance>,
+            seat_price: Balance,
+            minted_amount: Balance,
+            all_power_proposals: Vec<ValidatorPower>,
+            all_frozen_proposals: Vec<ValidatorFrozen>,
+            validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
+            validator_mandates: ValidatorMandates,
+        ) -> Self {
+            Self::V1(BlockSummaryV1 {
+                block_height,
+                prev_block_hash,
+                random_value,
+                validators,
+                validator_to_index,
+                block_producers_settlement,
+                chunk_producers_settlement,
+                fishermen,
+                fishermen_to_index,
+                power_change,
+                frozen_change,
+                validator_reward,
+                seat_price,
+                minted_amount,
+                all_power_proposals,
+                all_frozen_proposals,
+                validator_kickout,
+                validator_mandates,
+            })
+        }
+        #[inline]
+        pub fn random_value(&self) -> &CryptoHash {
+            match self {
+                Self::V1(v1) => &v1.random_value,
+            }
+        }
+
+        #[inline]
+        pub fn seat_price(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.seat_price,
+            }
+        }
+
+        #[inline]
+        pub fn minted_amount(&self) -> Balance {
+            match self {
+                Self::V1(v1) => v1.minted_amount,
+            }
+        }
+
+        #[inline]
+        pub fn block_producers_settlement(&self) -> &[ValidatorId] {
+            match self {
+                Self::V1(v1) => &v1.block_producers_settlement,
+            }
+        }
+
+        #[inline]
+        pub fn chunk_producers_settlement(&self) -> &[Vec<ValidatorId>] {
+            match self {
+                Self::V1(v1) => &v1.chunk_producers_settlement,
+            }
+        }
+
+        #[inline]
+        pub fn validator_kickout(&self) -> &HashMap<AccountId, ValidatorKickoutReason> {
+            match self {
+                Self::V1(v1) => &v1.validator_kickout,
+            }
+        }
+
+        #[inline]
+        pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
+            match self {
+                Self::V1(v1) => &v1.frozen_change,
+            }
+        }
+
+        #[inline]
+        pub fn power_change(&self) -> &BTreeMap<AccountId, Power> {
+            match self {
+                Self::V1(v1) => &v1.power_change,
+            }
+        }
+
+        #[inline]
+        pub fn validator_reward(&self) -> &HashMap<AccountId, Balance> {
+            match self {
+                Self::V1(v1) => &v1.validator_reward,
+            }
+        }
+
+        #[inline]
+        pub fn validators_iter(&self) -> ValidatorPowerAndFrozenIter {
+            match self {
+                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.validators),
+            }
+        }
+
+        #[inline]
+        pub fn fishermen_iter(&self) -> ValidatorPowerAndFrozenIter {
+            match self {
+                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.fishermen),
+            }
+        }
+
+        #[inline]
+        pub fn validator_power(&self, validator_id: u64) -> Power {
+            match self {
+                Self::V1(v1) => v1.validators[validator_id as usize].power(),
+            }
+        }
+
+        #[inline]
+        pub fn validator_frozen(&self, validator_id: u64) -> Balance {
+            match self {
+                Self::V1(v1) => v1.validators[validator_id as usize].frozen(),
+            }
+        }
+
+        #[inline]
+        pub fn validator_account_id(&self, validator_id: u64) -> &AccountId {
+            match self {
+                Self::V1(v1) => v1.validators[validator_id as usize].account_id(),
+            }
+        }
+
+        #[inline]
+        pub fn account_is_validator(&self, account_id: &AccountId) -> bool {
+            match self {
+                Self::V1(v1) => v1.validator_to_index.contains_key(account_id),
+            }
+        }
+
+        pub fn get_validator_id(&self, account_id: &AccountId) -> Option<&ValidatorId> {
+            match self {
+                Self::V1(v1) => v1.validator_to_index.get(account_id),
+            }
+        }
+
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+            match self {
+                Self::V1(v1) => v1
+                    .validator_to_index
+                    .get(account_id)
+                    .map(|validator_id| v1.validators[*validator_id as usize].clone()),
+            }
+        }
+
+        #[inline]
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndFrozen {
+            match self {
+                Self::V1(v1) => v1.validators[validator_id as usize].clone(),
+            }
+        }
+
+        #[inline]
+        pub fn account_is_fisherman(&self, account_id: &AccountId) -> bool {
+            match self {
+                Self::V1(v1) => v1.fishermen_to_index.contains_key(account_id),
+                Self::V2(v2) => v2.fishermen_to_index.contains_key(account_id),
+            }
+        }
+
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+            match self {
+                Self::V1(v1) => v1
+                    .fishermen_to_index
+                    .get(account_id)
+                    .map(|validator_id| v1.fishermen[*validator_id as usize].clone()),
+            }
+        }
+
+        #[inline]
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndFrozen {
+            match self {
+                Self::V1(v1) => v1.fishermen[fisherman_id as usize].clone(),
+            }
+        }
+
+        #[inline]
+        pub fn validators_len(&self) -> usize {
+            match self {
+                Self::V1(v1) => v1.validators.len(),
+            }
+        }
+
+        pub fn vrf_block_producer(&self, _random_value: &CryptoHash) -> ValidatorId {
+            return 0;
+        }
+
+
+    }
+
+
+}
 pub mod block_info {
+    use std::collections::HashMap;
+
     use super::SlashState;
     use crate::challenge::SlashedValidator;
     use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
@@ -243,9 +535,7 @@ pub mod block_info {
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
     use near_primitives_core::types::{AccountId, Balance, BlockHeight, ProtocolVersion};
-    use std::collections::HashMap;
     use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
-
     pub use super::BlockInfoV1;
 
     /// Information per each block.
@@ -270,7 +560,6 @@ pub mod block_info {
             prev_hash: CryptoHash,
             power_proposals: Vec<ValidatorPower>,
             frozen_proposals: Vec<ValidatorFrozen>,
-            random_value: CryptoHash,
             validator_mask: Vec<bool>,
             slashed: Vec<SlashedValidator>,
             total_supply: Balance,
@@ -285,7 +574,6 @@ pub mod block_info {
                 prev_hash,
                 power_proposals,
                 frozen_proposals,
-                random_value,
                 chunk_mask: validator_mask,
                 latest_protocol_version,
                 slashed: slashed
@@ -323,18 +611,18 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn random_value(&self) -> &CryptoHash {
+        pub fn slashed(&self) -> &HashMap<AccountId, SlashState> {
             match self {
-                Self::V1(v1) => &v1.random_value,
-                Self::V2(v2) => &v2.random_value,
+                Self::V1(v1) => &v1.slashed,
+                Self::V2(v2) => &v2.slashed,
             }
         }
 
         #[inline]
-        pub fn hash(&self) -> &CryptoHash {
+        pub fn slashed_mut(&mut self) -> &mut HashMap<AccountId, SlashState> {
             match self {
-                Self::V1(v1) => &v1.hash,
-                Self::V2(v2) => &v2.hash,
+                Self::V1(v1) => &mut v1.slashed,
+                Self::V2(v2) => &mut v2.slashed,
             }
         }
 
@@ -419,22 +707,6 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn slashed(&self) -> &HashMap<AccountId, SlashState> {
-            match self {
-                Self::V1(v1) => &v1.slashed,
-                Self::V2(v2) => &v2.slashed,
-            }
-        }
-
-        #[inline]
-        pub fn slashed_mut(&mut self) -> &mut HashMap<AccountId, SlashState> {
-            match self {
-                Self::V1(v1) => &mut v1.slashed,
-                Self::V2(v2) => &mut v2.slashed,
-            }
-        }
-
-        #[inline]
         pub fn total_supply(&self) -> &Balance {
             match self {
                 Self::V1(v1) => &v1.total_supply,
@@ -449,6 +721,7 @@ pub mod block_info {
                 Self::V2(v2) => &v2.timestamp_nanosec,
             }
         }
+
     }
 
     // V1 -> V2: Use versioned ValidatorStake structure in proposals
@@ -465,7 +738,6 @@ pub mod block_info {
         pub epoch_id: EpochId,
         pub power_proposals: Vec<ValidatorPower>,
         pub frozen_proposals: Vec<ValidatorFrozen>,
-        pub random_value: CryptoHash,
         pub chunk_mask: Vec<bool>,
         /// Latest protocol version this validator observes.
         pub latest_protocol_version: ProtocolVersion,
@@ -475,6 +747,8 @@ pub mod block_info {
         pub total_supply: Balance,
         pub timestamp_nanosec: u64,
     }
+
+
 }
 
 /// Information per each block.
@@ -491,7 +765,6 @@ pub struct BlockInfoV1 {
     pub epoch_id: EpochId,
     pub power_proposals: Vec<ValidatorPowerV1>,
     pub frozen_proposals: Vec<ValidatorFrozenV1>,
-    pub random_value: CryptoHash,
     pub chunk_mask: Vec<bool>,
     /// Latest protocol version this validator observes.
     pub latest_protocol_version: ProtocolVersion,
@@ -511,7 +784,6 @@ impl BlockInfoV1 {
         prev_hash: CryptoHash,
         power_proposals: Vec<ValidatorPowerV1>,
         frozen_proposals: Vec<ValidatorFrozenV1>,
-        random_value: CryptoHash,
         validator_mask: Vec<bool>,
         slashed: Vec<SlashedValidator>,
         total_supply: Balance,
@@ -526,7 +798,6 @@ impl BlockInfoV1 {
             prev_hash,
             power_proposals,
             frozen_proposals,
-            random_value,
             chunk_mask: validator_mask,
             latest_protocol_version,
             slashed: slashed
@@ -552,7 +823,7 @@ pub struct ValidatorWeight(ValidatorId, u64);
 
 pub mod epoch_info {
 use crate::epoch_manager::ValidatorWeight;
-    use crate::types::validator_power::{ValidatorPower};
+    use crate::types::validator_power::ValidatorPower;
     use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason, ValidatorPowerAndFrozenV1};
     use crate::validator_mandates::{ValidatorMandates, ValidatorMandatesAssignment};
     use crate::version::PROTOCOL_VERSION;
@@ -1391,7 +1662,6 @@ pub mod epoch_sync {
                 *header.prev_hash(),
                 header.prev_validator_power_proposals().collect(),
                 header.prev_validator_frozen_proposals().collect(),
-                *header.random_value(),
                 header.chunk_mask().to_vec(),
                 vec![],
                 header.total_supply(),
