@@ -609,7 +609,13 @@ pub mod block_info {
                 Self::V2(v2) => ValidatorFrozenIter::new(&v2.frozen_proposals),
             }
         }
-
+        #[inline]
+        pub fn hash(&self) -> &CryptoHash {
+            match self {
+                Self::V1(v1) => &v1.hash,
+                Self::V2(v2) => &v2.hash,
+            }
+        }
         #[inline]
         pub fn slashed(&self) -> &HashMap<AccountId, SlashState> {
             match self {

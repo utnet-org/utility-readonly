@@ -31,7 +31,6 @@ use std::hash::Hash;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tracing::{debug, warn};
 use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
-use near_store::DBCol::BlockSummary;
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -327,14 +326,14 @@ impl EpochManager {
                 &genesis_epoch_config,
                 &CryptoHash::default(),
                 [0; 32],
-                BlockSummary::default(),
+                &BlockSummary::default(),
                 vec![],
                 vec![],
                 HashMap::default(),
                 HashMap::default(),
                 0,
                 0,
-            );
+            )?;
             let mut store_update = epoch_manager.store.store_update();
             epoch_manager.save_epoch_info(
                 &mut store_update,
@@ -743,7 +742,7 @@ impl EpochManager {
         })
     }
     /// Finalize block
-    fn finalize_block(
+    fn finalize_block_summary(
         &mut self,
         store_update: &mut StoreUpdate,
         block_info: &BlockInfo,
@@ -901,7 +900,7 @@ impl EpochManager {
         mut block_info: BlockInfo,
         rng_seed: RngSeed,
     ) -> Result<StoreUpdate, EpochError> {
-        let current_hash = *block_info.hash(&mut ());
+        let current_hash = *block_info.hash();
         let mut store_update = self.store.store_update();
         // Check that we didn't record this block yet.
         if !self.has_block_info(&current_hash)? {
@@ -1000,6 +999,11 @@ impl EpochManager {
                 if self.is_next_block_in_next_epoch(&block_info)? {
                     self.finalize_epoch(&mut store_update, &block_info, &current_hash, rng_seed)?;
                 }
+
+                // James Savechives customized it, finalize block summary
+                self.finalize_block_summary(
+                    &mut store_update, &block_info, &current_hash, rng_seed
+                )?;
             }
         }
         Ok(store_update)

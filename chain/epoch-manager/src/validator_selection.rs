@@ -815,6 +815,7 @@ mod tests {
     use near_primitives::validator_mandates::{AssignmentWeight, ValidatorMandatesAssignment};
     use near_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
+    use crate::test_utils::frozen;
 
     #[test]
     fn test_validator_assignment_all_block_producers() {
@@ -825,12 +826,13 @@ mod tests {
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
         let power_proposals = create_power_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
-        let frozen_proposals = create_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
+        let frozen_proposals = create_frozen_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
             power_proposals.clone(),
+            frozen_proposals.clone(),
             Default::default(),
             Default::default(),
             0,
@@ -843,7 +845,7 @@ mod tests {
         assert_eq!(epoch_info.epoch_height(), prev_epoch_height + 1);
 
         // assign block producers in decreasing order of stake
-        let mut sorted_proposals = proposals;
+        let mut sorted_proposals = power_proposals;
         sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert_eq!(sorted_proposals, epoch_info.validators_iter().collect::<Vec<_>>());
 
@@ -887,7 +889,18 @@ mod tests {
             ],
             &[],
         );
-        let proposals = create_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
+        let frozen_proposals = create_frozen_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
+            (
+                format!("test{}", i),
+                2000u128 + (i as u128),
+                if i <= num_cp_seats {
+                    Proposal::ChunkOnlyProducer
+                } else {
+                    Proposal::BlockProducer
+                },
+            )
+        }));
+        let power_proposals = create_power_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
             (
                 format!("test{}", i),
                 2000u128 + (i as u128),
@@ -902,7 +915,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals.clone(),
+            power_proposals.clone(),
+            frozen_proposals.clone(),
             Default::default(),
             Default::default(),
             0,
@@ -914,7 +928,7 @@ mod tests {
         assert_eq!(epoch_info.epoch_height(), prev_epoch_height + 1);
 
         // the top stakes are the chosen block producers
-        let mut sorted_proposals = proposals;
+        let mut sorted_proposals = frozen_proposals;
         sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert!(sorted_proposals.iter().take(num_bp_seats as usize).cloned().eq(epoch_info
             .block_producers_settlement()
@@ -945,11 +959,11 @@ mod tests {
         assert_eq!(kickout.len(), 2);
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test1")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughPower { power: test1_stake, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughFrozen { frozen: test1_stake, threshold: 2011 },
         );
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test2")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughPower { power: 2002, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughFrozen { frozen: 2002, threshold: 2011 },
         );
     }
 
@@ -968,13 +982,15 @@ mod tests {
         );
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
-        let proposals = create_proposals(&[("test1", 1000), ("test2", 2000)]);
+        let power_proposals = create_power_proposals(&[("test1", 1000), ("test2", 2000)]);
+        let frozen_proposals = create_frozen_proposals(&[("test1", 1000), ("test2", 2000)]);
 
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1009,14 +1025,17 @@ mod tests {
         );
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
-        let proposals =
-            create_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
+        let power_proposals =
+            create_power_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
+        let frozen_proposals =
+            create_frozen_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
 
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1035,7 +1054,12 @@ mod tests {
         }
 
         // When there are multiple CPs they are chosen in proportion to stake.
-        let proposals = create_proposals((1..=num_shards).flat_map(|i| {
+        let power_proposals = create_power_proposals((1..=num_shards).flat_map(|i| {
+            // Each shard gets a pair of validators, one with twice as
+            // much stake as the other.
+            vec![(format!("test{}", i), 1000), (format!("test{}", 100 * i), 2000)].into_iter()
+        }));
+        let frozen_proposals = create_frozen_proposals((1..=num_shards).flat_map(|i| {
             // Each shard gets a pair of validators, one with twice as
             // much stake as the other.
             vec![(format!("test{}", i), 1000), (format!("test{}", 100 * i), 2000)].into_iter()
@@ -1044,7 +1068,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1094,7 +1119,15 @@ mod tests {
         //
         // Note that `proposals_to_epoch_info` will not include `test6` in the set of validators,
         // hence it will not hold a (partial) mandate
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1500),
+            ("test2", 1000),
+            ("test3", 1000),
+            ("test4", 260),
+            ("test5", 140),
+            ("test6", 50),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1500),
             ("test2", 1000),
             ("test3", 1000),
@@ -1107,7 +1140,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1167,7 +1201,15 @@ mod tests {
         let prev_epoch_height = 7;
         // test5 and test6 are going to get kicked out for not enough stake.
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test5", "test6"], &[]);
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -1179,7 +1221,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1210,7 +1253,16 @@ mod tests {
 
         let bp_threshold = epoch_info.seat_price();
         let num_validators = epoch_info.validators_iter().len();
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+            ("test7", bp_threshold),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -1223,7 +1275,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1234,7 +1287,16 @@ mod tests {
         #[cfg(feature = "protocol_feature_fix_staking_threshold")]
         assert_eq!(num_validators + 1, epoch_info.validators_iter().len());
 
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+            ("test7", bp_threshold - 1),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -1247,7 +1309,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -1275,6 +1338,7 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
+            Default::default(),
             Default::default(),
             kick_out,
             Default::default(),
@@ -1308,6 +1372,7 @@ mod tests {
             Default::default(),
             Default::default(),
             rewards_map,
+            Default::default(),
             0,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,
@@ -1370,10 +1435,17 @@ mod tests {
         EpochInfo::V3(result)
     }
 
-    fn to_map(vs: &[ValidatorPower]) -> HashMap<AccountId, ValidatorId> {
+    fn to_map(vs: &[ValidatorPowerAndFrozen]) -> HashMap<AccountId, ValidatorId> {
         vs.iter().enumerate().map(|(i, v)| (v.account_id().clone(), i as u64)).collect()
     }
 
+    fn create_proposals<I, T>(ps: I) -> Vec<ValidatorPowerAndFrozen>
+        where
+            T: IntoValidatorStake,
+            I: IntoIterator<Item = T>,
+    {
+        ps.into_iter().map(IntoValidatorStake::into_validator_stake).collect()
+    }
     fn create_power_proposals<I, T>(ps: I) -> Vec<ValidatorPower>
     where
         T: IntoValidatorStake,
@@ -1397,41 +1469,41 @@ mod tests {
     }
 
     trait IntoValidatorStake {
-        fn into_validator_stake(self) -> ValidatorPower;
+        fn into_validator_stake(self) -> ValidatorFrozen;
     }
 
     impl IntoValidatorStake for &str {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl<T: IntoValidatorStake + Copy> IntoValidatorStake for &T {
-        fn into_validator_stake(self) -> ValidatorPower {
+        fn into_validator_stake(self) -> ValidatorFrozen {
             (*self).into_validator_stake()
         }
     }
