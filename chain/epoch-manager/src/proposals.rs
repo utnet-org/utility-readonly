@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{BlockConfig, EpochConfig, RngSeed};
-use near_primitives::epoch_manager::block_info::BlockInfo;
+use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::epoch_manager::block_summary::BlockSummary;
 use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::hash::CryptoHash;

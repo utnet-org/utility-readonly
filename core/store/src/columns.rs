@@ -434,8 +434,7 @@ impl DBCol {
             | DBCol::StateChangesForSplitStates
             | DBCol::StateHeaders
             | DBCol::TransactionResultForBlock
-            | DBCol::Transactions
-            | DBCol::BlockSummary => true,
+            | DBCol::Transactions => true,
 
             // TODO
             DBCol::ChallengedBlocks => false,
@@ -456,6 +455,8 @@ impl DBCol {
             DBCol::ProcessedBlockHeights => false,
             // HeaderHashesByHeight is only needed for GC.
             DBCol::HeaderHashesByHeight => false,
+            //
+            DBCol::BlockSummary => false,
 
             // Columns that are not GC-ed need not be copied to the cold storage.
             DBCol::BlockHeader
@@ -556,7 +557,7 @@ impl DBCol {
             DBCol::FlatStorageStatus => &[DBKeyType::ShardUId],
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => &[DBKeyType::EpochId],
-            DBCol::BlockSummary => &[DBKeyType::AccountId],
+            DBCol::BlockSummary => &[DBKeyType::BlockHeight],
         }
     }
 }

@@ -926,6 +926,44 @@ impl From<std::io::Error> for crate::errors::BlockError {
         crate::errors::BlockError::IOErr(error.to_string())
     }
 }
+
+impl From<EpochError> for BlockError {
+    fn from(error: EpochError) -> Self {
+        match error {
+            EpochError::IOErr(..) => {
+                BlockError::IOErr(error.to_string())
+            },
+            EpochError::ChunkValidatorSelectionError(..) => {
+                BlockError::ChunkValidatorSelectionError(error.to_string())
+            },
+            EpochError::EpochOutOfBounds(..) => {
+                BlockError::BlockOutOfBounds(0)
+            },
+            EpochError::MissingBlock(block_hash) => {
+                BlockError::MissingBlock(block_hash)
+            },
+            EpochError::NotAValidator(account_id, _hash) => {
+                BlockError::NotAValidator(account_id, 0)
+            },
+            EpochError::NotEnoughValidators{ num_validators: x, num_shards: y } => {
+                BlockError::NotEnoughValidators{ num_validators: x, num_shards: y }
+            },
+            EpochError::ShardingError(..) => {
+                BlockError::ShardingError(error.to_string())
+            },
+            EpochError::ThresholdError{
+                stake_sum: stake,
+                num_seats: seats,
+            } => {
+                BlockError::ThresholdError{
+                    stake_sum: stake,
+                    num_seats: seats,
+                }
+            }
+        }
+
+    }
+}
 #[derive(Eq, PartialEq, Clone)]
 pub enum EpochError {
     /// Error calculating threshold from given stakes for given number of seats.
@@ -1007,6 +1045,44 @@ impl Debug for EpochError {
 impl From<std::io::Error> for EpochError {
     fn from(error: std::io::Error) -> Self {
         EpochError::IOErr(error.to_string())
+    }
+}
+
+impl From<BlockError> for EpochError {
+    fn from(error: BlockError) -> Self {
+        match error {
+            BlockError::IOErr(..) => {
+                EpochError::IOErr(error.to_string())
+            },
+            BlockError::ChunkValidatorSelectionError(..) => {
+                EpochError::ChunkValidatorSelectionError(error.to_string())
+            },
+            BlockError::BlockOutOfBounds(..) => {
+                EpochError::EpochOutOfBounds(EpochId::default())
+            },
+            BlockError::MissingBlock(block_hash) => {
+                EpochError::MissingBlock(block_hash)
+            },
+            BlockError::NotAValidator(account_id, _block_height) => {
+                EpochError::NotAValidator(account_id, EpochId::default())
+            },
+            BlockError::NotEnoughValidators{ num_validators: x, num_shards: y } => {
+                EpochError::NotEnoughValidators{ num_validators: x, num_shards: y }
+            },
+            BlockError::ShardingError(..) => {
+                EpochError::ShardingError(error.to_string())
+            },
+            BlockError::ThresholdError{
+                stake_sum: stake,
+                num_seats: seats,
+            } => {
+                EpochError::ThresholdError{
+                    stake_sum: stake,
+                    num_seats: seats,
+                }
+            }
+        }
+
     }
 }
 

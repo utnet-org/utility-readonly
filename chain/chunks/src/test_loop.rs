@@ -212,7 +212,6 @@ impl MockChainForShardsManager {
             height,
             vec![],
             vec![],
-            CryptoHash::default(),
         );
         self.tip = tip(self.epoch_manager.as_ref(), last);
         self.shards_manager.send(ShardsManagerRequestFromClient::UpdateChainHeads {

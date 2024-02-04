@@ -30,6 +30,7 @@ near-store.workspace = true
 near-chain-configs.workspace = true
 near-chain-primitives.workspace = true
 near-cache.workspace = true
+protobuf = "2.27.1"
 
 [features]
 expensive_tests = []

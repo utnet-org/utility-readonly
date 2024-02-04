@@ -279,8 +279,6 @@ pub mod block_summary {
     use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
     use crate::validator_mandates::ValidatorMandates;
 
-    use super::SlashState;
-
     #[derive(BorshSerialize, BorshDeserialize, Eq, PartialEq, Clone, Debug, serde::Serialize)]
     pub enum BlockSummary {
         V1(BlockSummaryV1),
@@ -357,6 +355,13 @@ pub mod block_summary {
                 validator_kickout,
                 validator_mandates,
             })
+        }
+
+        #[inline]
+        pub fn block_height(&self) -> BlockHeight {
+            match self {
+                Self::V1(v1) => v1.block_height,
+            }
         }
         #[inline]
         pub fn random_value(&self) -> &CryptoHash {
@@ -489,7 +494,6 @@ pub mod block_summary {
         pub fn account_is_fisherman(&self, account_id: &AccountId) -> bool {
             match self {
                 Self::V1(v1) => v1.fishermen_to_index.contains_key(account_id),
-                Self::V2(v2) => v2.fishermen_to_index.contains_key(account_id),
             }
         }
 

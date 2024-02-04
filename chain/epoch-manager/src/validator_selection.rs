@@ -1,7 +1,7 @@
 use crate::shard_assignment::assign_shards;
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{BlockConfig, EpochConfig, RngSeed};
+use near_primitives::epoch_manager::{EpochConfig, RngSeed};
 use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
@@ -10,7 +10,6 @@ use num_rational::Ratio;
 use std::cmp::{self, Ordering};
 use std::collections::hash_map;
 use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
-use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::block_summary::BlockSummary;
 use near_primitives::hash::CryptoHash;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
@@ -19,7 +18,7 @@ use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 pub fn proposals_to_block_summary(
     epoch_config: &EpochConfig,
     last_block_hash: &CryptoHash,
-    rng_seed: RngSeed,
+    _rng_seed: RngSeed,
     prev_block_summary: &BlockSummary,
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
@@ -69,8 +68,8 @@ pub fn proposals_to_block_summary(
     );
     let (cp_power_proposals,cp_frozen_proposals, chunk_producers, cp_stake_threshold) =
         if checked_feature!("stable", ChunkOnlyProducers, next_version) {
-            let mut cp_power_proposals = order_power_proposals(power_proposals.into_values());
-            let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.into_values());
+            let mut cp_power_proposals = order_power_proposals(power_proposals.clone().into_values());
+            let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.clone().into_values());
             let max_cp_selected = max_bp_selected
                 + (epoch_config.validator_selection_config.num_chunk_only_producer_seats as usize);
             let (chunk_producers, cp_stake_treshold) = select_chunk_producers(
@@ -141,7 +140,7 @@ pub fn proposals_to_block_summary(
             shard_ids.len() as NumShards,
             minimum_validators_per_shard,
         )
-            .map_err(|_| EpochError::NotEnoughValidators {
+            .map_err(|_| BlockError::NotEnoughValidators {
                 num_validators: num_chunk_producers as u64,
                 num_shards: shard_ids.len() as NumShards,
             })?;
@@ -220,8 +219,8 @@ pub fn proposals_to_block_summary(
         .enumerate()
         .map(|(index, s)| (s.account_id().clone(), index as ValidatorId))
         .collect::<HashMap<_, _>>();
-    let all_power_proposals= power_proposals.values().collect();
-    let all_frozen_proposals    = frozen_proposals.values().collect();
+    let all_power_proposals= power_proposals.values().cloned().collect();
+    let all_frozen_proposals    = frozen_proposals.values().cloned().collect();
     Ok(BlockSummary::new(
         prev_block_summary.block_height() + 1,
         *last_block_hash,

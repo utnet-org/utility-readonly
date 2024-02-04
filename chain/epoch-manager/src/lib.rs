@@ -4,7 +4,7 @@ use crate::types::EpochInfoAggregator;
 use near_cache::SyncLruCache;
 use near_chain_configs::GenesisConfig;
 use near_primitives::checked_feature;
-use near_primitives::epoch_manager::block_summary::BlockSummary;
+use near_primitives::epoch_manager::block_summary::{BlockSummary};
 use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
 use near_primitives::epoch_manager::{
@@ -27,7 +27,6 @@ use num_rational::Rational64;
 use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::hash::Hash;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tracing::{debug, warn};
 use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
@@ -340,7 +339,7 @@ impl EpochManager {
                 &genesis_epoch_id,
                 Arc::new(epoch_info),
             )?;
-            epoch_manager.save_block_info(&mut store_update, block_info)?;
+            epoch_manager.save_block_info(&mut store_update, block_info.clone())?;
             epoch_manager.save_block_summary(&mut store_update, &block_info.height(), Arc::new(block_summary))?;
             store_update.commit()?;
 
@@ -750,24 +749,25 @@ impl EpochManager {
         rng_seed: RngSeed,
     ) -> Result<(), BlockError> {
 
-        let last_block_summary = match last_block_hash {
-            CryptoHash::default() => BlockSummary::default(),
-            _ => {
-                    self.get_block_summary(&block_info.height() - 1u64)?
-                }
-        };
+        let last_block_summary = self.get_block_summary(&block_info.height() - 1u64)?;
 
         let validator_stake =
-            block_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
+            last_block_summary.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
 
-        let BlockSummary {
+        let (
             all_power_proposals,
             all_frozen_proposals,
-            validator_kickout,
-            validator_block_chunk_stats,
-            next_version,
-            ..
-        } = last_block_summary;
+            validator_kickout
+        ) = match last_block_summary.as_ref() { // Assuming last_block_summary is wrapped in an Arc
+            BlockSummary::V1(summary) => {
+                // Now you can access the fields of BlockSummaryV1 through `summary`
+                (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
+                // Add more fields as needed
+            },
+        };
+
+        let validator_block_chunk_stats = HashMap::default();
+        let next_version = 1u16 as ProtocolVersion;
 
         let (validator_reward, minted_amount) = {
             let last_epoch_last_block_hash =
@@ -791,9 +791,9 @@ impl EpochManager {
             &last_block_hash,
             rng_seed,
             &last_block_summary,
-            all_power_proposals,
-            all_frozen_proposals,
-            validator_kickout,
+            all_power_proposals.to_vec(),
+            all_frozen_proposals.to_vec(),
+            validator_kickout.clone(),
             validator_reward,
             minted_amount,
             next_version,
@@ -801,9 +801,11 @@ impl EpochManager {
             Ok(this_block_summary) => this_block_summary,
             Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
                 warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+                return Err(BlockError::ThresholdError { stake_sum, num_seats });
             }
             Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
                 warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+                return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
             }
             Err(err) => return Err(err),
         };
@@ -909,14 +911,15 @@ impl EpochManager {
                 assert_eq!(block_info.power_proposals_iter().len(), 0);
                 let pre_genesis_epoch_id = EpochId::default();
                 let genesis_epoch_info = self.get_epoch_info(&pre_genesis_epoch_id)?;
-                self.save_block_info(&mut store_update, Arc::new(block_info))?;
+                self.save_block_info(&mut store_update, Arc::new(block_info.clone()))?;
                 self.save_epoch_info(
                     &mut store_update,
                     &EpochId(current_hash),
                     genesis_epoch_info,
                 )?;
                 // James Customized start here, we need to save block_summary too
-
+                let block_summary = BlockSummary::default();
+                self.save_block_summary(&mut store_update, &block_info.height(), Arc::new(block_summary))?;
             } else {
                 let prev_block_info = self.get_block_info(block_info.prev_hash())?;
 
@@ -1869,9 +1872,9 @@ impl EpochManager {
     }
 
     pub fn get_block_summary(&self, block_height: u64) -> Result<Arc<BlockSummary>, BlockError> {
-        self.block_summaries.get_or_try_put(block_height.clone(), |epoch_id| {
+        self.block_summaries.get_or_try_put(block_height.clone(), |block_height| {
             self.store
-                .get_ser(DBCol::BlockSummary, epoch_id.as_ref())?
+                .get_ser(DBCol::BlockSummary, &block_height.to_le_bytes())?
                 .ok_or_else(|| BlockError::BlockOutOfBounds(block_height.clone()))
         })
     }
@@ -1883,7 +1886,7 @@ impl EpochManager {
         block_summary: Arc<BlockSummary>,
     ) -> Result<(), BlockError> {
         store_update
-            .set_ser(DBCol::BlockSummary, block_height.as_ref(), &block_summary)?;
+            .set_ser(DBCol::BlockSummary, &block_height.to_le_bytes(), &block_summary)?;
         self.block_summaries.put(block_height.clone(), block_summary);
         Ok(())
     }
