@@ -47,7 +47,10 @@ pub fn proposals_to_block_summary(
     let mut power_change = BTreeMap::new();
     let mut frozen_change = BTreeMap::new();
     let mut fishermen = vec![];
-    let (power_proposals, frozen_proposals) = proposals_with_rollover_block(
+    let (
+        power_proposals,
+        frozen_proposals
+        ) = proposals_with_rollover_block(
         power_proposals,
         frozen_proposals,
         prev_block_summary,
@@ -66,8 +69,12 @@ pub fn proposals_to_block_summary(
         min_stake_ratio,
         next_version,
     );
-    let (cp_power_proposals,cp_frozen_proposals, chunk_producers, cp_stake_threshold) =
-        if checked_feature!("stable", ChunkOnlyProducers, next_version) {
+    let (
+            cp_power_proposals,
+            cp_frozen_proposals,
+            chunk_producers,
+            cp_stake_threshold
+        ) = if checked_feature!("stable", ChunkOnlyProducers, next_version) {
             let mut cp_power_proposals = order_power_proposals(power_proposals.clone().into_values());
             let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.clone().into_values());
             let max_cp_selected = max_bp_selected

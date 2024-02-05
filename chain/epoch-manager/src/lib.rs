@@ -307,10 +307,10 @@ impl EpochManager {
                 &genesis_epoch_config,
                 [0; 32],
                 &EpochInfo::default(),
-                power_validators,
-                frozen_validators,
+                power_validators.clone(),
+                frozen_validators.clone(),
                 HashMap::default(),
-                validator_reward,
+                validator_reward.clone(),
                 0,
                 genesis_protocol_version,
                 genesis_protocol_version,
@@ -326,10 +326,10 @@ impl EpochManager {
                 &CryptoHash::default(),
                 [0; 32],
                 &BlockSummary::default(),
-                vec![],
-                vec![],
+                power_validators,
+                frozen_validators,
                 HashMap::default(),
-                HashMap::default(),
+                validator_reward,
                 0,
                 0,
             )?;
@@ -741,6 +741,7 @@ impl EpochManager {
         })
     }
     /// Finalize block
+    #[allow(dead_code)]
     fn finalize_block_summary(
         &mut self,
         store_update: &mut StoreUpdate,
@@ -1004,9 +1005,9 @@ impl EpochManager {
                 }
 
                 // James Savechives customized it, finalize block summary
-                self.finalize_block_summary(
-                    &mut store_update, &block_info, &current_hash, rng_seed
-                )?;
+                // self.finalize_block_summary(
+                //     &mut store_update, &block_info, &current_hash, rng_seed
+                // )?;
             }
         }
         Ok(store_update)
