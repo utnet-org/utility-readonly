@@ -272,7 +272,7 @@ pub mod block_summary {
     use std::collections::{BTreeMap, HashMap};
     use borsh::{BorshDeserialize, BorshSerialize};
     use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::{Balance, BlockHeight, Power, ValidatorId};
+    use near_primitives_core::types::{Balance, Power, ValidatorId};
     use crate::types::{AccountId, ValidatorKickoutReason};
     use crate::types::validator_frozen::ValidatorFrozen;
     use crate::types::validator_power::ValidatorPower;
@@ -285,7 +285,7 @@ pub mod block_summary {
     }
     #[derive(Default, Eq, PartialEq, BorshSerialize, Clone, Debug, BorshDeserialize, serde::Serialize)]
     pub struct BlockSummaryV1 {
-        pub block_height: BlockHeight,
+        pub this_block_hash: CryptoHash,
         pub prev_block_hash: CryptoHash,
         pub random_value: CryptoHash,
         pub validators: Vec<ValidatorPowerAndFrozen>,
@@ -316,7 +316,7 @@ pub mod block_summary {
     impl BlockSummary {
 
         pub fn new(
-            block_height: BlockHeight,
+            this_block_hash: CryptoHash,
             prev_block_hash: CryptoHash,
             random_value: CryptoHash,
             validators: Vec<ValidatorPowerAndFrozen>,
@@ -336,7 +336,7 @@ pub mod block_summary {
             validator_mandates: ValidatorMandates,
         ) -> Self {
             Self::V1(BlockSummaryV1 {
-                block_height,
+                this_block_hash,
                 prev_block_hash,
                 random_value,
                 validators,
@@ -358,9 +358,9 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn block_height(&self) -> BlockHeight {
+        pub fn block_hash(&self) -> CryptoHash {
             match self {
-                Self::V1(v1) => v1.block_height,
+                Self::V1(v1) => v1.this_block_hash,
             }
         }
         #[inline]

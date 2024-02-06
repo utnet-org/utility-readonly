@@ -852,7 +852,7 @@ pub enum BlockError {
         num_seats: u64,
     },
     /// Requesting validators for an epoch that wasn't computed yet.
-    BlockOutOfBounds(BlockHeight),
+    BlockOutOfBounds(CryptoHash),
     /// Missing block hash in the storage (means there is some structural issue).
     MissingBlock(CryptoHash),
     /// Error due to IO (DB read/write, serialization, etc.).
@@ -937,7 +937,7 @@ impl From<EpochError> for BlockError {
                 BlockError::ChunkValidatorSelectionError(error.to_string())
             },
             EpochError::EpochOutOfBounds(..) => {
-                BlockError::BlockOutOfBounds(0)
+                BlockError::BlockOutOfBounds(CryptoHash::default())
             },
             EpochError::MissingBlock(block_hash) => {
                 BlockError::MissingBlock(block_hash)

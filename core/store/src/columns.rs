@@ -557,7 +557,7 @@ impl DBCol {
             DBCol::FlatStorageStatus => &[DBKeyType::ShardUId],
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => &[DBKeyType::EpochId],
-            DBCol::BlockSummary => &[DBKeyType::BlockHeight],
+            DBCol::BlockSummary => &[DBKeyType::BlockHash],
         }
     }
 }

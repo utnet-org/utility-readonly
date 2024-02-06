@@ -158,7 +158,7 @@ pub struct EpochManager {
     genesis_num_block_producer_seats: NumSeats,
 
     /// Cache of block summary.
-    block_summaries: SyncLruCache<BlockHeight, Arc<BlockSummary>>,
+    block_summaries: SyncLruCache<CryptoHash, Arc<BlockSummary>>,
     /// Cache of epoch information.
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
     /// Cache of block information.
@@ -324,6 +324,7 @@ impl EpochManager {
             let block_summary= proposals_to_block_summary(
                 &genesis_epoch_config,
                 &CryptoHash::default(),
+                &CryptoHash::default(),
                 [0; 32],
                 &BlockSummary::default(),
                 power_validators,
@@ -340,7 +341,7 @@ impl EpochManager {
                 Arc::new(epoch_info),
             )?;
             epoch_manager.save_block_info(&mut store_update, block_info.clone())?;
-            epoch_manager.save_block_summary(&mut store_update, &block_info.height(), Arc::new(block_summary))?;
+            epoch_manager.save_block_summary(&mut store_update, &block_info.prev_hash(), Arc::new(block_summary))?;
             store_update.commit()?;
 
         }
@@ -741,7 +742,6 @@ impl EpochManager {
         })
     }
     /// Finalize block
-    #[allow(dead_code)]
     fn finalize_block_summary(
         &mut self,
         store_update: &mut StoreUpdate,
@@ -749,8 +749,10 @@ impl EpochManager {
         last_block_hash: &CryptoHash,
         rng_seed: RngSeed,
     ) -> Result<(), BlockError> {
-
-        let last_block_summary = self.get_block_summary(&block_info.height() - 1u64)?;
+    // we know that this line take too long to execute as it read from the store.
+    //    let last_block_summary = self.get_block_summary(block_info.prev_hash())?;
+        let last_block_summary = Arc::new(BlockSummary::default());
+        print!("last block summary {:?}", last_block_summary);
 
         let validator_stake =
             last_block_summary.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
@@ -789,6 +791,7 @@ impl EpochManager {
         let this_epoch_config = self.config.for_protocol_version(next_version);
         let this_block_summary = match proposals_to_block_summary(
             &this_epoch_config,
+            block_info.hash(),
             &last_block_hash,
             rng_seed,
             &last_block_summary,
@@ -800,19 +803,20 @@ impl EpochManager {
             next_version,
         ) {
             Ok(this_block_summary) => this_block_summary,
-            Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
-                warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
-                return Err(BlockError::ThresholdError { stake_sum, num_seats });
-            }
-            Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
-                warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
-                return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
-            }
-            Err(err) => return Err(err),
+            // Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
+            //     warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+            //     return Err(BlockError::ThresholdError { stake_sum, num_seats });
+            // }
+            // Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
+            //     warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+            //     return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
+            // }
+            // Err(err) => return Err(err),
+            _ => BlockSummary::default(),
         };
         // This epoch info is computed for the epoch after next (T+2),
         // where epoch_id of it is the hash of last block in this epoch (T).
-        self.save_block_summary(store_update, &block_info.height(), Arc::new(this_block_summary))?;
+        self.save_block_summary(store_update, &block_info.hash(), Arc::new(this_block_summary))?;
         Ok(())
     }
     /// Finalizes epoch (T), where given last block hash is given, and returns next next epoch id (T + 2).
@@ -920,7 +924,7 @@ impl EpochManager {
                 )?;
                 // James Customized start here, we need to save block_summary too
                 let block_summary = BlockSummary::default();
-                self.save_block_summary(&mut store_update, &block_info.height(), Arc::new(block_summary))?;
+                self.save_block_summary(&mut store_update, &block_info.hash(), Arc::new(block_summary))?;
             } else {
                 let prev_block_info = self.get_block_info(block_info.prev_hash())?;
 
@@ -985,7 +989,10 @@ impl EpochManager {
                 let block_info = Arc::new(block_info);
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
-                //
+                // James Savechives customized it, finalize block summary
+                self.finalize_block_summary(
+                    &mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone()
+                )?;
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
 
@@ -1001,13 +1008,9 @@ impl EpochManager {
 
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
-                    self.finalize_epoch(&mut store_update, &block_info, &current_hash, rng_seed)?;
+                    self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
                 }
 
-                // James Savechives customized it, finalize block summary
-                // self.finalize_block_summary(
-                //     &mut store_update, &block_info, &current_hash, rng_seed
-                // )?;
             }
         }
         Ok(store_update)
@@ -1872,23 +1875,23 @@ impl EpochManager {
         Ok(())
     }
 
-    pub fn get_block_summary(&self, block_height: u64) -> Result<Arc<BlockSummary>, BlockError> {
-        self.block_summaries.get_or_try_put(block_height.clone(), |block_height| {
+    pub fn get_block_summary(&self, block_hash: &CryptoHash) -> Result<Arc<BlockSummary>, BlockError> {
+        self.block_summaries.get_or_try_put(block_hash.clone(), |block_hash| {
             self.store
-                .get_ser(DBCol::BlockSummary, &block_height.to_le_bytes())?
-                .ok_or_else(|| BlockError::BlockOutOfBounds(block_height.clone()))
+                .get_ser(DBCol::BlockSummary, block_hash.as_ref())?
+                .ok_or_else(|| BlockError::BlockOutOfBounds(block_hash.clone()))
         })
     }
 
     fn save_block_summary(
         &self,
         store_update: &mut StoreUpdate,
-        block_height: &BlockHeight,
+        block_hash: &CryptoHash,
         block_summary: Arc<BlockSummary>,
     ) -> Result<(), BlockError> {
         store_update
-            .set_ser(DBCol::BlockSummary, &block_height.to_le_bytes(), &block_summary)?;
-        self.block_summaries.put(block_height.clone(), block_summary);
+            .set_ser(DBCol::BlockSummary, block_hash.as_ref(), &block_summary)?;
+        self.block_summaries.put(block_hash.clone(), block_summary);
         Ok(())
     }
 

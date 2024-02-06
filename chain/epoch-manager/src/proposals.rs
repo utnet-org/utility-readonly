@@ -41,6 +41,7 @@ pub(crate) fn find_threshold(
 ///
 pub fn proposals_to_block_summary(
     epoch_config: &EpochConfig,
+    this_block_hash: &CryptoHash,
     last_block_hash: &CryptoHash,
     rng_seed: RngSeed,
     prev_block_summary: &BlockSummary,
@@ -53,6 +54,7 @@ pub fn proposals_to_block_summary(
 ) -> Result<BlockSummary, BlockError> {
     return crate::validator_selection::proposals_to_block_summary(
         epoch_config,
+        this_block_hash,
         last_block_hash,
         rng_seed,
         prev_block_summary,

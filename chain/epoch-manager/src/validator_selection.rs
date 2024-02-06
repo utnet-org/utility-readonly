@@ -17,6 +17,7 @@ use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 /// Select providers for next block and generate block info
 pub fn proposals_to_block_summary(
     epoch_config: &EpochConfig,
+    this_block_hash: &CryptoHash,
     last_block_hash: &CryptoHash,
     _rng_seed: RngSeed,
     prev_block_summary: &BlockSummary,
@@ -229,7 +230,7 @@ pub fn proposals_to_block_summary(
     let all_power_proposals= power_proposals.values().cloned().collect();
     let all_frozen_proposals    = frozen_proposals.values().cloned().collect();
     Ok(BlockSummary::new(
-        prev_block_summary.block_height() + 1,
+        *this_block_hash,
         *last_block_hash,
         CryptoHash::default(),
         all_validators,
@@ -302,8 +303,12 @@ pub fn proposals_to_epoch_info(
         min_stake_ratio,
         last_version,
     );
-    let (cp_power_proposals,cp_frozen_proposals, chunk_producers, cp_stake_threshold) =
-        if checked_feature!("stable", ChunkOnlyProducers, next_version) {
+    let (
+        cp_power_proposals,
+        cp_frozen_proposals,
+        chunk_producers,
+        cp_stake_threshold
+        ) = if checked_feature!("stable", ChunkOnlyProducers, next_version) {
             let mut cp_power_proposals = order_power_proposals(power_proposals.into_values());
             let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.into_values());
             let max_cp_selected = max_bp_selected
@@ -775,17 +780,17 @@ fn select_validators(
 /// AccountId comes at the top.
 #[derive(Eq, PartialEq, Clone)]
 struct OrderedValidatorFrozen(ValidatorFrozen);
-impl crate::validator_selection::OrderedValidatorFrozen {
+impl OrderedValidatorFrozen {
     fn key(&self) -> impl Ord + '_ {
         (self.0.frozen(), std::cmp::Reverse(self.0.account_id()))
     }
 }
-impl PartialOrd for crate::validator_selection::OrderedValidatorFrozen {
+impl PartialOrd for OrderedValidatorFrozen {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-impl Ord for crate::validator_selection::OrderedValidatorFrozen {
+impl Ord for OrderedValidatorFrozen {
     fn cmp(&self, other: &Self) -> Ordering {
         self.key().cmp(&other.key())
     }
