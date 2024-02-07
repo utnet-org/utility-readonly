@@ -12,6 +12,7 @@ use near_store::{checkpoint_hot_storage_and_cleanup_columns, DBCol, NodeStorage}
 use nearcore::NightshadeRuntime;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 
 #[derive(clap::Parser)]
 pub struct EpochSyncCommand {
@@ -177,7 +178,24 @@ impl ValidateEpochSyncInfoCmd {
                 }
 
                 let first_block_hash = cur_hash;
-
+                let BlockSummary::V1(BlockSummaryV1{
+                                                                              random_value:_random_value,
+                                                                              validators,
+                                                                              validator_to_index,
+                                                                              block_producers_settlement,
+                                                                              chunk_producers_settlement,
+                                                                              fishermen,
+                                                                              fishermen_to_index,
+                                                                              power_change,
+                                                                              frozen_change,
+                                                                              validator_reward,
+                                                                              seat_price,
+                                                                              minted_amount,
+                                                                              all_power_proposals,
+                                                                              all_frozen_proposals,
+                                                                              validator_kickout,
+                                                                              validator_mandates, ..
+                                                                          }) =  BlockSummary::default();
                 let mut last_block_info = BlockInfo::new(
                     *last_header.hash(),
                     last_header.height(),
@@ -191,6 +209,24 @@ impl ValidateEpochSyncInfoCmd {
                     last_header.total_supply(),
                     last_header.latest_protocol_version(),
                     last_header.raw_timestamp(),
+                    // start customized by James Savechives
+                    *last_header.random_value(),
+                    validators,
+                    validator_to_index,
+                    block_producers_settlement,
+                    chunk_producers_settlement,
+                    fishermen,
+                    fishermen_to_index,
+                    power_change,
+                    frozen_change,
+                    validator_reward,
+                    seat_price,
+                    minted_amount,
+                    all_power_proposals,
+                    all_frozen_proposals,
+                    validator_kickout,
+                    validator_mandates
+                    // end customized by James Savechives
                 );
 
                 *last_block_info.epoch_id_mut() = last_header.epoch_id().clone();

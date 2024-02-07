@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
+use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::block_summary::BlockSummary;
 use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::hash::CryptoHash;
@@ -44,7 +45,7 @@ pub fn proposals_to_block_summary(
     this_block_hash: &CryptoHash,
     last_block_hash: &CryptoHash,
     rng_seed: RngSeed,
-    prev_block_summary: &BlockSummary,
+    prev_block_summary: &BlockInfo,
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
     validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,

@@ -4,7 +4,7 @@ use crate::types::EpochInfoAggregator;
 use near_cache::SyncLruCache;
 use near_chain_configs::GenesisConfig;
 use near_primitives::checked_feature;
-use near_primitives::epoch_manager::block_summary::{BlockSummary};
+use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
 use near_primitives::epoch_manager::{
@@ -326,7 +326,7 @@ impl EpochManager {
                 &CryptoHash::default(),
                 &CryptoHash::default(),
                 [0; 32],
-                &BlockSummary::default(),
+                &BlockInfo::default(),
                 power_validators,
                 frozen_validators,
                 HashMap::default(),
@@ -742,27 +742,27 @@ impl EpochManager {
         })
     }
     /// Finalize block
-    fn finalize_block_summary(
+    fn finalize_block_summary_for_block(
         &mut self,
-        store_update: &mut StoreUpdate,
         block_info: &BlockInfo,
         last_block_hash: &CryptoHash,
         rng_seed: RngSeed,
-    ) -> Result<(), BlockError> {
-    // we know that this line take too long to execute as it read from the store.
-       let last_block_summary = self.get_block_summary(block_info.prev_hash())?;
-    //     let last_block_summary = Arc::new(BlockSummary::default());
-        print!("last block summary {:?}", last_block_summary);
+    ) -> Result<BlockSummary, BlockError> {
 
         let validator_stake =
-            last_block_summary.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
+            block_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
 
         let (
             all_power_proposals,
             all_frozen_proposals,
             validator_kickout
-        ) = match last_block_summary.as_ref() { // Assuming last_block_summary is wrapped in an Arc
-            BlockSummary::V1(summary) => {
+        ) = match block_info { // Assuming last_block_summary is wrapped in an Arc
+            BlockInfo::V1(summary) => {
+                // Now you can access the fields of BlockSummaryV1 through `summary`
+                (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
+                // Add more fields as needed
+            },
+            BlockInfo::V2(summary) => {
                 // Now you can access the fields of BlockSummaryV1 through `summary`
                 (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
                 // Add more fields as needed
@@ -776,7 +776,7 @@ impl EpochManager {
             let last_epoch_last_block_hash =
                 *self.get_block_info(block_info.epoch_first_block())?.prev_hash();
             let last_block_in_last_epoch = self.get_block_info(&last_epoch_last_block_hash)?;
-            assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
+        //    assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
             let epoch_duration =
                 block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
             self.reward_calculator.calculate_reward(
@@ -794,7 +794,7 @@ impl EpochManager {
             block_info.hash(),
             &last_block_hash,
             rng_seed,
-            &last_block_summary,
+            &block_info,
             all_power_proposals.to_vec(),
             all_frozen_proposals.to_vec(),
             validator_kickout.clone(),
@@ -803,22 +803,99 @@ impl EpochManager {
             next_version,
         ) {
             Ok(this_block_summary) => this_block_summary,
-            Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
-                warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
-                return Err(BlockError::ThresholdError { stake_sum, num_seats });
-            }
-            Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
-                warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
-                return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
-            }
-            Err(err) => return Err(err),
-            // _ => BlockSummary::default(),
+            // Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
+            //     warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+            //     return Err(BlockError::ThresholdError { stake_sum, num_seats });
+            // }
+            // Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
+            //     warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+            //     return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
+            // }
+            // Err(err) => return Err(err),
+            _ => BlockSummary::default(),
         };
         // This epoch info is computed for the epoch after next (T+2),
         // where epoch_id of it is the hash of last block in this epoch (T).
-        self.save_block_summary(store_update, &block_info.hash(), Arc::new(this_block_summary))?;
-        Ok(())
+        // self.save_block_summary(store_update, &block_info.hash(), Arc::new(this_block_summary))?;
+        Ok(this_block_summary)
     }
+    // #[allow(dead_code)]
+    // fn finalize_block_summary(
+    //     &mut self,
+    //     block_info: &BlockInfo,
+    //     last_block_hash: &CryptoHash,
+    //     rng_seed: RngSeed,
+    // ) -> Result<BlockSummary, BlockError> {
+    // // we know that this line take too long to execute as it read from the store.
+    //    let last_block_summary = self.get_block_summary(block_info.prev_hash())?;
+    // //     let last_block_summary = Arc::new(BlockSummary::default());
+    //     print!("last block summary {:?}", last_block_summary);
+    //
+    //     let validator_stake =
+    //         last_block_summary.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
+    //
+    //     let (
+    //         all_power_proposals,
+    //         all_frozen_proposals,
+    //         validator_kickout
+    //     ) = match last_block_summary.as_ref() { // Assuming last_block_summary is wrapped in an Arc
+    //         BlockSummary::V1(summary) => {
+    //             // Now you can access the fields of BlockSummaryV1 through `summary`
+    //             (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
+    //             // Add more fields as needed
+    //         },
+    //     };
+    //
+    //     let validator_block_chunk_stats = HashMap::default();
+    //     let next_version = 1u16 as ProtocolVersion;
+    //
+    //     let (validator_reward, minted_amount) = {
+    //         let last_epoch_last_block_hash =
+    //             *self.get_block_info(block_info.epoch_first_block())?.prev_hash();
+    //         let last_block_in_last_epoch = self.get_block_info(&last_epoch_last_block_hash)?;
+    //         assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
+    //         let epoch_duration =
+    //             block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
+    //         self.reward_calculator.calculate_reward(
+    //             validator_block_chunk_stats,
+    //             &validator_stake,
+    //             *block_info.total_supply(),
+    //             0u32,
+    //             self.genesis_protocol_version,
+    //             epoch_duration,
+    //         )
+    //     };
+    //     let this_epoch_config = self.config.for_protocol_version(next_version);
+    //     let this_block_summary = match proposals_to_block_summary(
+    //         &this_epoch_config,
+    //         block_info.hash(),
+    //         &last_block_hash,
+    //         rng_seed,
+    //         &last_block_summary,
+    //         all_power_proposals.to_vec(),
+    //         all_frozen_proposals.to_vec(),
+    //         validator_kickout.clone(),
+    //         validator_reward,
+    //         minted_amount,
+    //         next_version,
+    //     ) {
+    //         Ok(this_block_summary) => this_block_summary,
+    //         Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
+    //             warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+    //             return Err(BlockError::ThresholdError { stake_sum, num_seats });
+    //         }
+    //         Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
+    //             warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+    //             return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
+    //         }
+    //         Err(err) => return Err(err),
+    //         // _ => BlockSummary::default(),
+    //     };
+    //     // This epoch info is computed for the epoch after next (T+2),
+    //     // where epoch_id of it is the hash of last block in this epoch (T).
+    //     // self.save_block_summary(store_update, &block_info.hash(), Arc::new(this_block_summary))?;
+    //     Ok(this_block_summary)
+    // }
     /// Finalizes epoch (T), where given last block hash is given, and returns next next epoch id (T + 2).
     fn finalize_epoch(
         &mut self,
@@ -990,6 +1067,10 @@ impl EpochManager {
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
 
+                // let block_summary = Arc::new(block_summary);
+                // // Save current block summary
+                // self.save_block_summary(&mut store_update, &block_info.hash().clone(), Arc::clone(&block_summary))?;
+
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
 
@@ -1006,12 +1087,7 @@ impl EpochManager {
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
                     self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
-                    // James Savechives customized it, finalize block summary
-                    self.finalize_block_summary(
-                        &mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone()
-                    )?;
                 }
-
 
             }
         }
@@ -1679,6 +1755,37 @@ impl EpochManager {
             power_proposals = ?block_header_info.power_proposals,
             frozen_proposals = ?block_header_info.frozen_proposals,
             "add_validator_proposals");
+        let rng_seed = block_header_info.random_value.0;
+        // start customized by James Savechives
+        let BlockSummary::V1(BlockSummaryV1{
+                                                                      random_value,
+                                                                      validators,
+                                                                      validator_to_index,
+                                                                      block_producers_settlement,
+                                                                      chunk_producers_settlement,
+                                                                      fishermen,
+                                                                      fishermen_to_index,
+                                                                      power_change,
+                                                                      frozen_change,
+                                                                      validator_reward,
+                                                                      seat_price,
+                                                                      minted_amount,
+                                                                      all_power_proposals,
+                                                                      all_frozen_proposals,
+                                                                      validator_kickout,
+                                                                      validator_mandates, ..
+                                                                  }) =
+            if block_header_info.hash ==  CryptoHash::default() {
+                BlockSummary::default()
+            } else {
+                self.finalize_block_summary_for_block(
+                    &*self.get_block_info(&block_header_info.prev_hash)?,
+                    &block_header_info.prev_hash,
+                    rng_seed.clone(),
+                )?
+            };
+
+        // end customized by James Savechives
         // Deal with validator proposals and epoch finishing.
         let block_info = BlockInfo::new(
             block_header_info.hash,
@@ -1693,8 +1800,29 @@ impl EpochManager {
             block_header_info.total_supply,
             block_header_info.latest_protocol_version,
             block_header_info.timestamp_nanosec,
+            // start customized by James Savechives
+            random_value,
+            validators,
+            validator_to_index,
+            block_producers_settlement,
+            chunk_producers_settlement,
+            fishermen,
+            fishermen_to_index,
+            power_change,
+            frozen_change,
+            validator_reward,
+            seat_price,
+            minted_amount,
+            all_power_proposals,
+            all_frozen_proposals,
+            validator_kickout,
+            validator_mandates
+            // end customized by James Savechives
         );
-        let rng_seed = block_header_info.random_value.0;
+
+        // James Savechives customized it, finalize block summary
+        // let block_summary = self.finalize_block_summary(&block_info.clone(), &block_header_info.prev_hash.clone(), rng_seed.clone()
+        // )?;
         self.record_block_info(block_info, rng_seed)
     }
 

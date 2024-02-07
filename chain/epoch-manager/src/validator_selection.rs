@@ -10,6 +10,7 @@ use num_rational::Ratio;
 use std::cmp::{self, Ordering};
 use std::collections::hash_map;
 use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
+use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::block_summary::BlockSummary;
 use near_primitives::hash::CryptoHash;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
@@ -20,7 +21,7 @@ pub fn proposals_to_block_summary(
     this_block_hash: &CryptoHash,
     last_block_hash: &CryptoHash,
     _rng_seed: RngSeed,
-    prev_block_summary: &BlockSummary,
+    prev_block_summary: &BlockInfo,
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
     mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
@@ -487,7 +488,7 @@ pub fn proposals_to_epoch_info(
 fn proposals_with_rollover_block(
     power_proposals: Vec<ValidatorPower>,
     frozen_proposals: Vec<ValidatorFrozen>,
-    prev_block_summary: &BlockSummary,
+    prev_block_summary: &BlockInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
     power_change: &mut BTreeMap<AccountId, Power>,
