@@ -750,8 +750,8 @@ impl EpochManager {
         rng_seed: RngSeed,
     ) -> Result<(), BlockError> {
     // we know that this line take too long to execute as it read from the store.
-    //    let last_block_summary = self.get_block_summary(block_info.prev_hash())?;
-        let last_block_summary = Arc::new(BlockSummary::default());
+       let last_block_summary = self.get_block_summary(block_info.prev_hash())?;
+    //     let last_block_summary = Arc::new(BlockSummary::default());
         print!("last block summary {:?}", last_block_summary);
 
         let validator_stake =
@@ -803,16 +803,16 @@ impl EpochManager {
             next_version,
         ) {
             Ok(this_block_summary) => this_block_summary,
-            // Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
-            //     warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
-            //     return Err(BlockError::ThresholdError { stake_sum, num_seats });
-            // }
-            // Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
-            //     warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
-            //     return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
-            // }
-            // Err(err) => return Err(err),
-            _ => BlockSummary::default(),
+            Err(BlockError::ThresholdError { stake_sum, num_seats }) => {
+                warn!(target: "epoch_manager", "Not enough stake for required number of seats (all validators tried to unstake?): amount = {} for {}", stake_sum, num_seats);
+                return Err(BlockError::ThresholdError { stake_sum, num_seats });
+            }
+            Err(BlockError::NotEnoughValidators { num_validators, num_shards }) => {
+                warn!(target: "epoch_manager", "Not enough validators for required number of shards (all validators tried to unstake?): num_validators={} num_shards={}", num_validators, num_shards);
+                return Err(BlockError::NotEnoughValidators { num_validators, num_shards });
+            }
+            Err(err) => return Err(err),
+            // _ => BlockSummary::default(),
         };
         // This epoch info is computed for the epoch after next (T+2),
         // where epoch_id of it is the hash of last block in this epoch (T).
@@ -989,10 +989,7 @@ impl EpochManager {
                 let block_info = Arc::new(block_info);
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
-                // James Savechives customized it, finalize block summary
-                self.finalize_block_summary(
-                    &mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone()
-                )?;
+
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
 
@@ -1009,7 +1006,12 @@ impl EpochManager {
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
                     self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
+                    // James Savechives customized it, finalize block summary
+                    self.finalize_block_summary(
+                        &mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone()
+                    )?;
                 }
+
 
             }
         }
