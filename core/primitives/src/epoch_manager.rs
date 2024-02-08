@@ -1976,24 +1976,24 @@ pub mod epoch_sync {
             };
             // start customized by James Savechives
 
-            let crate::epoch_manager::block_summary::BlockSummary::V1(BlockSummaryV1{
-                                                                          random_value:_random_value,
-                                                                          validators,
-                                                                          validator_to_index,
-                                                                          block_producers_settlement,
-                                                                          chunk_producers_settlement,
-                                                                          fishermen,
-                                                                          fishermen_to_index,
-                                                                          power_change,
-                                                                          frozen_change,
-                                                                          validator_reward,
-                                                                          seat_price,
-                                                                          minted_amount,
-                                                                          all_power_proposals,
-                                                                          all_frozen_proposals,
-                                                                          validator_kickout,
-                                                                          validator_mandates, ..
-                                                                      }) =  BlockSummary::default();
+            let BlockSummary::V1(BlockSummaryV1{
+                                     random_value:_random_value,
+                                     validators,
+                                     validator_to_index,
+                                     block_producers_settlement,
+                                     chunk_producers_settlement,
+                                     fishermen,
+                                     fishermen_to_index,
+                                     power_change,
+                                     frozen_change,
+                                     validator_reward,
+                                     seat_price,
+                                     minted_amount,
+                                     all_power_proposals,
+                                     all_frozen_proposals,
+                                     validator_kickout,
+                                     validator_mandates, ..
+                                 }) =  BlockSummary::default();
             // end customized by James Savechives
             let mut block_info = BlockInfo::new(
                 *header.hash(),

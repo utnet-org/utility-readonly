@@ -321,8 +321,65 @@ impl NightshadeRuntime {
                 .collect();
 
             if epoch_manager.is_next_block_epoch_start(prev_block_hash)? {
+                // let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
+                //     epoch_manager.compute_power_return_info(prev_block_hash)?;
+                // let power_info = power_info
+                //     .into_iter()
+                //     .filter(|(account_id, _)| {
+                //         account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                //     })
+                //     .collect();
+                // let frozen_info = frozen_info
+                //     .into_iter()
+                //     .filter(|(account_id, _)| {
+                //         account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                //     })
+                //     .collect();
+                // let validator_rewards = validator_reward
+                //     .into_iter()
+                //     .filter(|(account_id, _)| {
+                //         account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                //     })
+                //     .collect();
+                // let last_power_proposals = last_validator_power_proposals
+                //     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
+                //     .fold(HashMap::new(), |mut acc, v| {
+                //         let (account_id, stake) = v.account_and_power();
+                //         acc.insert(account_id, stake);
+                //         acc
+                //     });
+                // let last_frozen_proposals = last_validator_frozen_proposals
+                //     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
+                //     .fold(HashMap::new(), |mut acc, v| {
+                //         let (account_id, stake) = v.account_and_frozen();
+                //         acc.insert(account_id, stake);
+                //         acc
+                //     });
+                // let double_sign_slashing_info: HashMap<_, _> = double_sign_slashing_info
+                //     .into_iter()
+                //     .filter(|(account_id, _)| {
+                //         account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                //     })
+                //     .map(|(account_id, stake)| (account_id, Some(stake)))
+                //     .collect();
+                // slashing_info.extend(double_sign_slashing_info);
+                // Some(ValidatorAccountsUpdate {
+                //     power_info,
+                //     frozen_info,
+                //     validator_rewards,
+                //     last_power_proposals,
+                //     last_frozen_proposals,
+                //     protocol_treasury_account_id: Some(
+                //         self.genesis_config.protocol_treasury_account.clone(),
+                //     )
+                //     .filter(|account_id| {
+                //         account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                //     }),
+                //     slashing_info,
+                // })
+                // start customized by James Savechives
                 let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
-                    epoch_manager.compute_power_return_info(prev_block_hash)?;
+                    epoch_manager.compute_power_return_info_for_block(prev_block_hash)?;
                 let power_info = power_info
                     .into_iter()
                     .filter(|(account_id, _)| {
@@ -372,11 +429,12 @@ impl NightshadeRuntime {
                     protocol_treasury_account_id: Some(
                         self.genesis_config.protocol_treasury_account.clone(),
                     )
-                    .filter(|account_id| {
-                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
-                    }),
+                        .filter(|account_id| {
+                            account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                        }),
                     slashing_info,
                 })
+                // end customized by James Savechives
             } else if !challenges_result.is_empty() {
                 Some(ValidatorAccountsUpdate {
                     power_info: Default::default(),
@@ -388,7 +446,65 @@ impl NightshadeRuntime {
                     slashing_info,
                 })
             } else {
-                None
+            //    None
+                // start customized by James Savechives
+                let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
+                    epoch_manager.compute_power_return_info_for_block(prev_block_hash)?;
+                let power_info = power_info
+                    .into_iter()
+                    .filter(|(account_id, _)| {
+                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                    })
+                    .collect();
+                let frozen_info = frozen_info
+                    .into_iter()
+                    .filter(|(account_id, _)| {
+                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                    })
+                    .collect();
+                let validator_rewards = validator_reward
+                    .into_iter()
+                    .filter(|(account_id, _)| {
+                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                    })
+                    .collect();
+                let last_power_proposals = last_validator_power_proposals
+                    .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
+                    .fold(HashMap::new(), |mut acc, v| {
+                        let (account_id, stake) = v.account_and_power();
+                        acc.insert(account_id, stake);
+                        acc
+                    });
+                let last_frozen_proposals = last_validator_frozen_proposals
+                    .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
+                    .fold(HashMap::new(), |mut acc, v| {
+                        let (account_id, stake) = v.account_and_frozen();
+                        acc.insert(account_id, stake);
+                        acc
+                    });
+                let double_sign_slashing_info: HashMap<_, _> = double_sign_slashing_info
+                    .into_iter()
+                    .filter(|(account_id, _)| {
+                        account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                    })
+                    .map(|(account_id, stake)| (account_id, Some(stake)))
+                    .collect();
+                slashing_info.extend(double_sign_slashing_info);
+                Some(ValidatorAccountsUpdate {
+                    power_info,
+                    frozen_info,
+                    validator_rewards,
+                    last_power_proposals,
+                    last_frozen_proposals,
+                    protocol_treasury_account_id: Some(
+                        self.genesis_config.protocol_treasury_account.clone(),
+                    )
+                        .filter(|account_id| {
+                            account_id_to_shard_id(account_id, &shard_layout) == shard_id
+                        }),
+                    slashing_info,
+                })
+                // end customized by James Savechives
             }
         };
 

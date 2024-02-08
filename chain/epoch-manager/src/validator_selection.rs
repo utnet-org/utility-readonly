@@ -52,7 +52,7 @@ pub fn proposals_to_block_summary(
     let (
         power_proposals,
         frozen_proposals
-        ) = proposals_with_rollover_block(
+    )  = proposals_with_rollover_block(
         power_proposals,
         frozen_proposals,
         prev_block_summary,

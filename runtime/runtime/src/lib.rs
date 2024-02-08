@@ -1075,13 +1075,14 @@ impl Runtime {
                        "account {} locked {} max_of_frozen: {}",
                        account_id, account.locked(), max_of_frozen
                 );
-                if account.locked() < *max_of_frozen {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: powering invariant does not hold. \
-                         Account power {} is less than maximum of locked {} in the past three epochs",
-                        account.locked(),
-                        max_of_frozen)).into());
-                }
+                // customized by james savechives
+                // if account.locked() < *max_of_frozen {
+                //     return Err(StorageError::StorageInconsistentState(format!(
+                //         "FATAL: staking invariant does not hold. \
+                //          Account frozen {} is less than maximum of locked {} in the past three epochs",
+                //         account.locked(),
+                //         max_of_frozen)).into());
+                // }
                 let last_frozen_proposal =
                     *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
                 let return_frozen = account
@@ -1135,7 +1136,7 @@ impl Runtime {
                 .into());
             }
         }
-
+        // start customized by james savechives
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
             if !validator_accounts_update.power_info.contains_key(account_id) {
@@ -1163,6 +1164,7 @@ impl Runtime {
                 set_account(state_update, account_id.clone(), &account);
             }
         }
+        // end customized by James Savechives
         state_update.commit(StateChangeCause::ValidatorAccountsUpdate);
 
         Ok(())
@@ -1761,8 +1763,10 @@ mod tests {
 
         let validator_accounts_update = ValidatorAccountsUpdate {
             power_info: vec![(alice_account(), initial_power)].into_iter().collect(),
+            frozen_info: vec![(alice_account(), initial_locked)].into_iter().collect(),
             validator_rewards: vec![(alice_account(), reward)].into_iter().collect(),
-            last_proposals: Default::default(),
+            last_power_proposals: Default::default(),
+            last_frozen_proposals: Default::default(),
             protocol_treasury_account_id: None,
             slashing_info: HashMap::default(),
         };
