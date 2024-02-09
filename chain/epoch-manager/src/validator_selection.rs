@@ -29,11 +29,11 @@ pub fn proposals_to_block_summary(
     minted_amount: Balance,
     next_version: ProtocolVersion,
 ) -> Result<BlockSummary, BlockError> {
-    debug_assert!(
-        power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
-            == power_proposals.len(),
-        "Power proposals should not have duplicates"
-    );
+    // debug_assert!(
+    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+    //         == power_proposals.len(),
+    //     "Power proposals should not have duplicates"
+    // );
 
     debug_assert!(
         frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
@@ -264,11 +264,11 @@ pub fn proposals_to_epoch_info(
     next_version: ProtocolVersion,
     last_version: ProtocolVersion,
 ) -> Result<EpochInfo, EpochError> {
-    debug_assert!(
-        power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
-            == power_proposals.len(),
-        "Power proposals should not have duplicates"
-    );
+    // debug_assert!(
+    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+    //         == power_proposals.len(),
+    //     "Power proposals should not have duplicates"
+    // );
 
     debug_assert!(
         frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()

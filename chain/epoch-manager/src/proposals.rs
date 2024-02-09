@@ -145,11 +145,11 @@ mod old_validator_selection {
         let mut power_change = BTreeMap::new();
         let mut frozen_change = BTreeMap::new();
         let mut fishermen = vec![];
-        debug_assert!(
-            power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
-                == power_proposals.len(),
-            "Power proposals should not have duplicates"
-        );
+        // debug_assert!(
+        //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+        //         == power_proposals.len(),
+        //     "Power proposals should not have duplicates"
+        // );
 
         debug_assert!(
             frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()

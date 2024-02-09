@@ -1774,6 +1774,8 @@ impl EpochManager {
                                   validator_kickout,
                                   validator_mandates, ..
                                   }) = &*self.get_block_info(&block_header_info.prev_hash)? else { todo!() };
+                let all_power_proposals : Vec<_> = all_power_proposals.clone().into_iter().chain(block_header_info.power_proposals.clone().into_iter()).collect();
+                let all_frozen_proposals : Vec<_> = all_frozen_proposals.clone().into_iter().chain(block_header_info.frozen_proposals.clone().into_iter()).collect();
                 let block_info = BlockInfo::new(
                     block_header_info.hash,
                     block_header_info.height,
@@ -1829,7 +1831,7 @@ impl EpochManager {
             block_header_info.latest_protocol_version,
             block_header_info.timestamp_nanosec,
             // start customized by James Savechives
-            block_header_info.random_value,
+            block_header_info.random_value.clone(),
             validators.clone(),
             validator_to_index,
             block_producers_settlement,
@@ -1847,7 +1849,7 @@ impl EpochManager {
             validator_mandates
             // end customized by James Savechives
         );
-        println!("the frozen proposal value is : {:?}", block_header_info.frozen_proposals);
+        println!("the random value is : {:?}", block_header_info.random_value);
         println!("the validators value is : {:?}", validators);
         self.record_block_info(block_info, rng_seed)
 
