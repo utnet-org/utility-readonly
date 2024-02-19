@@ -23,6 +23,7 @@ enum JsonRpcRequest {
     GasPrice(types::gas_price::RpcGasPriceRequest),
     BroadcastTxAsync(RpcBroadcastTx),
     BroadcastTxCommit(RpcBroadcastTx),
+    Provider(types::provider::RpcProviderRequest),
 }
 
 #[derive(Debug, arbitrary::Arbitrary, serde::Serialize)]
@@ -80,6 +81,7 @@ impl JsonRpcRequest {
             JsonRpcRequest::GasPrice(request) => ("gas_price", json!(request)),
             JsonRpcRequest::BroadcastTxAsync(request) => ("broadcast_tx_async", json!(request)),
             JsonRpcRequest::BroadcastTxCommit(request) => ("broadcast_tx_commit", json!(request)),
+            JsonRpcRequest::Provider(request) => ("provider", json!(request)),
         }
     }
 }

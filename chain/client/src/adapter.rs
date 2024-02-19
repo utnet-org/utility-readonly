@@ -29,6 +29,18 @@ pub(crate) struct TxStatusRequest {
 #[rtype(result = "()")]
 pub(crate) struct TxStatusResponse(pub Box<FinalExecutionOutcomeView>);
 
+/// Request a provider.
+#[derive(actix::Message, Debug)]
+#[rtype(result = "Option<AccountId>")]
+pub(crate) struct ProviderRequest(pub CryptoHash);
+
+/// Provider response.
+#[derive(actix::Message, Debug)]
+#[rtype(result = "()")]
+pub struct ProviderResponse {
+    pub provider: AccountId,
+}
+
 /// Request a block.
 #[derive(actix::Message, Debug)]
 #[rtype(result = "Option<Box<Block>>")]

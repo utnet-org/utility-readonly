@@ -2,7 +2,7 @@ use crate::account::{AccessKey, Account};
 use crate::action::RegisterRsa2048KeysAction;
 use crate::challenge::ChallengesResult;
 use crate::errors::EpochError;
-use crate::hash::CryptoHash;
+pub use crate::hash::CryptoHash;
 use crate::receipt::Receipt;
 use crate::serialize::dec_format;
 use crate::trie_key::TrieKey;
@@ -560,7 +560,7 @@ pub mod validator_power_and_frozen {
     pub enum ValidatorPowerAndFrozen {
         V1(ValidatorPowerAndFrozenV1),
     }
-
+    #[derive(Clone)]
     pub struct ValidatorPowerAndFrozenIter<'a> {
         collection: ValidatorPowerAndFrozenIterSource<'a>,
         curr_index: usize,
@@ -613,7 +613,7 @@ pub mod validator_power_and_frozen {
             }
         }
     }
-
+    #[derive(Clone)]
     enum ValidatorPowerAndFrozenIterSource<'a> {
         V1(&'a [ValidatorPowerAndFrozenV1]),
         V2(&'a [ValidatorPowerAndFrozen]),
