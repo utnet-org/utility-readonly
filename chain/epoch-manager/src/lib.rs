@@ -25,8 +25,10 @@ use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
+// use num_bigint::{BigInt, ToBigInt};
+// use num_traits::Zero;
 use tracing::{debug, warn};
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen};
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -1039,16 +1041,50 @@ impl EpochManager {
 
     // pub fn get_block_producer_by_hash(
     //     &self,
-    //     epoch_id: &EpochId,
     //     block_hash: &CryptoHash,
-    // ) -> Result<ValidatorPowerAndFrozen, EpochError> {
-    //     let epoch_info = self.get_epoch_info(epoch_id)?;
+    //     height: BlockHeight,
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
     //     let block_info = self.get_block_info(block_hash)?;
-    //     let prev_block_info = self.get_block_info(block_info.prev_hash())?;
-    //     let random_value = prev_block_info.random_value();
-    //     let validator_id = Self::block_producer_from_info(&epoch_info, height);
+    //     let current_height = block_info.height();
+    //     if(current_height +1 != height) {
+    //         return Err(BlockError::BlockOutOfBounds(*block_hash));
+    //     }
+    //     let random_value = block_info.random_value();
+    //     let validators = block_info.validators_iter();
+    //     Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+    // }
+
+    // fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
+    //     BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
+    // }
     //
-    //     Ok(epoch_info.get_validator(validator_id))
+    // fn choose_validator_vrf(validators_iter: ValidatorPowerAndFrozenIter, random_value: BigInt) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let mut total_weight = Zero::zero();
+    //     for validator in validators_iter.clone() {
+    //         let validator_power = match validator {
+    //             ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+    //         };
+    //         total_weight += validator_power;
+    //     }
+    //
+    //     if total_weight.is_zero() {
+    //         return None;
+    //     }
+    //
+    //     let mut cumulative_weight = Zero::zero();
+    //     let target = random_value % &total_weight;
+    //
+    //     for validator in validators_iter {
+    //         let validator_power = match validator {
+    //             ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+    //         };
+    //         cumulative_weight += &validator_power;
+    //         if target < cumulative_weight {
+    //             return Ok(validator.clone());
+    //         }
+    //     }
+    //
+    //     None
     // }
 
     /// Returns settlement of all block producers in current epoch, with indicator on whether they are slashed or not.
@@ -1834,7 +1870,7 @@ impl EpochManager {
             block_header_info.random_value.clone(),
             validators.clone(),
             validator_to_index,
-            block_producers_settlement,
+            block_producers_settlement.clone(),
             chunk_producers_settlement,
             fishermen,
             fishermen_to_index,
@@ -1851,6 +1887,7 @@ impl EpochManager {
         );
         println!("the random value is : {:?}", block_header_info.random_value);
         println!("the validators value is : {:?}", validators);
+        println!("the block producers settlement is : {:?}",block_producers_settlement);
         self.record_block_info(block_info, rng_seed)
 
     }
