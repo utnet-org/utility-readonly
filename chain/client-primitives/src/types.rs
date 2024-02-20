@@ -404,8 +404,8 @@ impl From<near_chain_primitives::Error> for crate::types::GetProviderError {
 }
 
 impl From<EpochError> for GetProviderError {
-    fn from(_error: EpochError) -> Self {
-        todo!()
+    fn from(error: EpochError) -> Self {
+        Self::IOError { error_message: error.to_string() }
     }
 }
 

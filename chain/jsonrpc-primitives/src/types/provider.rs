@@ -14,13 +14,11 @@ pub enum RpcProviderError {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, arbitrary::Arbitrary, PartialEq, Eq)]
 pub struct RpcProviderRequest {
-    #[serde(flatten)]
     pub block_hash: near_primitives::hash::CryptoHash,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcProviderResponse {
-    #[serde(flatten)]
     pub provider_account: AccountId,
 }
 
