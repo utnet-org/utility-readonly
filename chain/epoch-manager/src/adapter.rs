@@ -176,6 +176,12 @@ pub trait EpochManagerAdapter: Send + Sync {
         height: BlockHeight,
     ) -> Result<AccountId, EpochError>;
 
+    /// Block producers for given prev block hash. Return BlockError if outside of known boundaries.
+    fn get_block_producer_by_hash(
+        &self,
+        block_hash: &CryptoHash,
+    ) -> Result<AccountId, EpochError>;
+
     /// Chunk producer for given height for given shard. Return EpochError if outside of known boundaries.
     fn get_chunk_producer(
         &self,
@@ -636,6 +642,11 @@ impl EpochManagerAdapter for EpochManagerHandle {
     ) -> Result<AccountId, EpochError> {
         let epoch_manager = self.read();
         Ok(epoch_manager.get_block_producer_info(epoch_id, height)?.take_account_id())
+    }
+
+    fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+        let epoch_manager = self.read();
+        Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
     }
 
     fn get_chunk_producer(

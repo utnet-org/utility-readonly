@@ -17,7 +17,7 @@ use near_client::{
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered, ProcessTxRequest,
     ProcessTxResponse, Query, Status, TxStatus, ViewClientActor,
 };
-use near_client_primitives::types::GetSplitStorageInfo;
+use near_client_primitives::types::{GetProvider, GetSplitStorageInfo};
 pub use near_jsonrpc_client as client;
 use near_jsonrpc_primitives::errors::RpcError;
 use near_jsonrpc_primitives::message::{Message, Request};
@@ -391,6 +391,9 @@ impl JsonRpcHandler {
             #[cfg(feature = "sandbox")]
             "sandbox_fast_forward" => {
                 process_method_call(request, |params| self.sandbox_fast_forward(params)).await
+            }
+            "provider" => {
+                process_method_call(request, |params | self.get_provider(params)).await
             }
             _ => return Err(request),
         })
@@ -845,6 +848,17 @@ impl JsonRpcHandler {
             .tx_status_fetch(request_data.transaction_info, request_data.wait_until, fetch_receipt)
             .await?;
         Ok(tx_status.rpc_into())
+    }
+
+    async fn get_provider(
+        &self,
+        request_data: near_jsonrpc_primitives::types::provider::RpcProviderRequest,
+    ) -> Result<
+        near_jsonrpc_primitives::types::provider::RpcProviderResponse,
+        near_jsonrpc_primitives::types::provider::RpcProviderError,
+    > {
+        let provider_account = self.view_client_send(GetProvider(request_data.block_hash)).await?;
+        Ok(near_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_account })
     }
 
     async fn block(

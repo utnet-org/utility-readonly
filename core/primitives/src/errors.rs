@@ -867,6 +867,10 @@ pub enum BlockError {
     },
     /// Error selecting validators for a chunk.
     ChunkValidatorSelectionError(String),
+    /// ValidatorTotalPowerError
+    ValidatorTotalPowerError(String),
+    /// NoAvailableValidator
+    NoAvailableValidator(String),
 }
 
 impl std::error::Error for crate::errors::BlockError {}
@@ -894,6 +898,12 @@ impl Display for crate::errors::BlockError {
             crate::errors::BlockError::ChunkValidatorSelectionError(err) => {
                 write!(f, "Error selecting validators for a chunk: {}", err)
             }
+            crate::errors::BlockError::ValidatorTotalPowerError(err) => {
+                write!(f, "Error when computing total power: {}", err)
+            }
+            crate::errors::BlockError::NoAvailableValidator(err) => {
+                write!(f, "Error selecting produce: {}", err)
+            }
         }
     }
 }
@@ -916,6 +926,12 @@ impl Debug for crate::errors::BlockError {
             }
             crate::errors::BlockError::ChunkValidatorSelectionError(err) => {
                 write!(f, "ChunkValidatorSelectionError({})", err)
+            }
+            crate::errors::BlockError::ValidatorTotalPowerError(err) => {
+                write!(f, "Error when computing total power: {}", err)
+            }
+            crate::errors::BlockError::NoAvailableValidator(err) => {
+                write!(f, "Error selecting produce: {}", err)
             }
         }
     }
@@ -1080,6 +1096,12 @@ impl From<BlockError> for EpochError {
                     stake_sum: stake,
                     num_seats: seats,
                 }
+            },
+            BlockError::ValidatorTotalPowerError(..) => {
+                EpochError::IOErr(error.to_string())
+            },
+            BlockError::NoAvailableValidator(..) => {
+                EpochError::IOErr(error.to_string())
             }
         }
 

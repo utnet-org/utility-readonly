@@ -25,10 +25,10 @@ use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
-// use num_bigint::{BigInt, ToBigInt};
-// use num_traits::Zero;
+use num_bigint::{BigInt, ToBigInt};
+use num_traits::Zero;
 use tracing::{debug, warn};
-use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen};
+use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -1039,53 +1039,53 @@ impl EpochManager {
         Ok(epoch_info.get_validator(validator_id))
     }
 
-    // pub fn get_block_producer_by_hash(
-    //     &self,
-    //     block_hash: &CryptoHash,
-    //     height: BlockHeight,
-    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-    //     let block_info = self.get_block_info(block_hash)?;
-    //     let current_height = block_info.height();
-    //     if(current_height +1 != height) {
-    //         return Err(BlockError::BlockOutOfBounds(*block_hash));
-    //     }
-    //     let random_value = block_info.random_value();
-    //     let validators = block_info.validators_iter();
-    //     Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
-    // }
+    pub fn get_block_producer_info_by_hash(
+        &self,
+        block_hash: &CryptoHash,
+        // height: BlockHeight,
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let block_info = self.get_block_info(block_hash)?;
+        // let current_height = block_info.height();
+        // if current_height +1 != height {
+        //     return Err(BlockError::BlockOutOfBounds(*block_hash));
+        // }
+        let random_value = block_info.random_value();
+        let validators = block_info.validators_iter();
+        Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+    }
 
-    // fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
-    //     BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
-    // }
-    //
-    // fn choose_validator_vrf(validators_iter: ValidatorPowerAndFrozenIter, random_value: BigInt) -> Result<ValidatorPowerAndFrozen, BlockError> {
-    //     let mut total_weight = Zero::zero();
-    //     for validator in validators_iter.clone() {
-    //         let validator_power = match validator {
-    //             ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
-    //         };
-    //         total_weight += validator_power;
-    //     }
-    //
-    //     if total_weight.is_zero() {
-    //         return None;
-    //     }
-    //
-    //     let mut cumulative_weight = Zero::zero();
-    //     let target = random_value % &total_weight;
-    //
-    //     for validator in validators_iter {
-    //         let validator_power = match validator {
-    //             ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
-    //         };
-    //         cumulative_weight += &validator_power;
-    //         if target < cumulative_weight {
-    //             return Ok(validator.clone());
-    //         }
-    //     }
-    //
-    //     None
-    // }
+    fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
+        BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
+    }
+
+    fn choose_validator_vrf(validators_iter: ValidatorPowerAndFrozenIter, random_value: BigInt) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let mut total_weight: BigInt = Zero::zero();
+        for validator in validators_iter.clone() {
+            let validator_power = match validator {
+                ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+            };
+            total_weight += validator_power;
+        }
+
+        if total_weight.is_zero() {
+            return Err(BlockError::ValidatorTotalPowerError(String::from("Total Power is zero")));
+        }
+
+        let mut cumulative_weight = Zero::zero();
+        let target = random_value % &total_weight;
+
+        for validator in validators_iter {
+            let validator_power = match validator {
+                ValidatorPowerAndFrozen::V1(ref v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+            };
+            cumulative_weight += &validator_power;
+            if target < cumulative_weight {
+                return Ok(validator.clone());
+            }
+        }
+
+        return Err(BlockError::NoAvailableValidator(String::from("Block Producer is not available")));
+    }
 
     /// Returns settlement of all block producers in current epoch, with indicator on whether they are slashed or not.
     pub fn get_all_block_producers_settlement(
