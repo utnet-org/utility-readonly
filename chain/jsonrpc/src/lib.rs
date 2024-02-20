@@ -857,8 +857,8 @@ impl JsonRpcHandler {
         near_jsonrpc_primitives::types::provider::RpcProviderResponse,
         near_jsonrpc_primitives::types::provider::RpcProviderError,
     > {
-        let provider_view = self.view_client_send(GetProvider(request_data.block_hash)).await?;
-        Ok(near_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_view })
+        let provider_account = self.view_client_send(GetProvider(request_data.block_hash)).await?;
+        Ok(near_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_account })
     }
 
     async fn block(

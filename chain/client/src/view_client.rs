@@ -622,10 +622,10 @@ impl Handler<WithSpanContext<GetProvider>> for ViewClientActor {
     fn handle(&mut self, msg: WithSpanContext<GetProvider>, _: &mut Self::Context) -> Self::Result {
         let (_span, msg) = handler_debug_span!(target: "client", msg);
         tracing::debug!(target: "client", ?msg);
-        let block = self.get_block_by_hash(&msg.0)?.ok_or(GetBlockError::NotSyncedYet)?;
+        let block = self.epoch_manager.get_block_info(&msg.0)?;
         let block_author = self
             .epoch_manager
-            .get_block_producer_info_by_hash(&block.hash())
+            .get_block_producer_by_hash(&block.hash())
             .into_chain_error()?;
         Ok(block_author)
     }

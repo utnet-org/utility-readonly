@@ -23,6 +23,7 @@ use std::sync::Arc;
 use tracing::debug_span;
 use yansi::Color::Magenta;
 use yansi::Style;
+use near_primitives::errors::EpochError;
 use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Combines errors coming from chain, tx pool and block producer.
@@ -402,9 +403,15 @@ impl From<near_chain_primitives::Error> for crate::types::GetProviderError {
     }
 }
 
+impl From<EpochError> for GetProviderError {
+    fn from(_error: EpochError) -> Self {
+        todo!()
+    }
+}
+
 
 impl Message for crate::types::GetProvider {
-    type Result = Result<ValidatorPowerAndFrozenView, crate::types::GetProviderError>;
+    type Result = Result<AccountId, crate::types::GetProviderError>;
 }
 
 /// Actor message requesting block by id, hash or sync state.

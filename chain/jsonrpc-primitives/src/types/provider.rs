@@ -1,4 +1,5 @@
 use serde_json::Value;
+use near_primitives::types::AccountId;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
@@ -6,7 +7,7 @@ pub enum RpcProviderError {
     #[error("Block not found")]
     UnknownBlock,
     #[error("Validator info unavailable")]
-    ValidatorInfoUnavailable,
+    ProviderInfoUnavailable,
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
 }
@@ -20,14 +21,14 @@ pub struct RpcProviderRequest {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcProviderResponse {
     #[serde(flatten)]
-    pub provider_view: near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView,
+    pub provider_account: AccountId,
 }
 
 impl From<RpcProviderError> for crate::errors::RpcError {
     fn from(error: RpcProviderError) -> Self {
         let error_data = match &error {
             RpcProviderError::UnknownBlock => Some(Value::String("Unknown Block".to_string())),
-            RpcProviderError::ValidatorInfoUnavailable => {
+            RpcProviderError::ProviderInfoUnavailable => {
                 Some(Value::String("Validator info unavailable".to_string()))
             }
             RpcProviderError::InternalError { .. } => Some(Value::String(error.to_string())),
