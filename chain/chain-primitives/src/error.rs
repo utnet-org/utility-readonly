@@ -5,7 +5,7 @@ use chrono::Utc;
 
 use near_primitives::block::BlockValidityError;
 use near_primitives::challenge::{ChunkProofs, ChunkState};
-use near_primitives::errors::{EpochError, StorageError};
+use near_primitives::errors::{BlockError, EpochError, StorageError};
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayoutError;
 use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
@@ -393,6 +393,14 @@ impl From<EpochError> for Error {
             EpochError::EpochOutOfBounds(epoch_id) => Error::EpochOutOfBounds(epoch_id),
             EpochError::MissingBlock(h) => Error::DBNotFoundErr(format!("epoch block: {h}")),
             EpochError::NotAValidator(_account_id, _epoch_id) => Error::NotAValidator,
+            err => Error::Other(err.to_string()),
+        }
+    }
+}
+
+impl From<BlockError> for Error {
+    fn from(error: BlockError) -> Self {
+        match error {
             err => Error::ValidatorError(err.to_string()),
         }
     }

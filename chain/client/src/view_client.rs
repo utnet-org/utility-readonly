@@ -644,7 +644,7 @@ impl Handler<WithSpanContext<GetBlock>> for ViewClientActor {
         let block = self.get_block_by_reference(&msg.0)?.ok_or(GetBlockError::NotSyncedYet)?;
         let block_author = self
             .epoch_manager
-            .get_block_producer(block.header().epoch_id(), block.header().height())
+            .get_block_producer_by_hash(block.header().prev_hash())
             .into_chain_error()?;
         Ok(BlockView::from_author_block(block_author, block))
     }

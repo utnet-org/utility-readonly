@@ -146,7 +146,7 @@ fn apply_block_from_range(
     let chunk_present: bool;
 
     let block_author = epoch_manager
-        .get_block_producer(block.header().epoch_id(), block.header().height())
+        .get_block_producer_by_hash(block.header().prev_hash())
         .unwrap();
 
     let apply_result = if *block.header().prev_hash() == CryptoHash::default() {

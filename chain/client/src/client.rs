@@ -596,7 +596,7 @@ impl Client {
 
         // Check that we are were called at the block that we are producer for.
         let epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(&prev_hash).unwrap();
-        let next_block_proposer = self.epoch_manager.get_block_producer(&epoch_id, height)?;
+        let next_block_proposer = self.epoch_manager.get_block_producer_by_hash(&prev_hash)?;
 
         let prev = self.chain.get_block_header(&prev_hash)?;
         let prev_height = prev.height();
@@ -1508,9 +1508,9 @@ impl Client {
         parent_hash: &CryptoHash,
         approval: Approval,
     ) -> Result<(), Error> {
-        let next_epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(parent_hash)?;
+        let _next_epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(parent_hash)?;
         let next_block_producer =
-            self.epoch_manager.get_block_producer(&next_epoch_id, approval.target_height)?;
+            self.epoch_manager.get_block_producer_by_hash(parent_hash)?;
         if Some(&next_block_producer) == self.validator_signer.as_ref().map(|x| x.validator_id()) {
             self.collect_block_approval(&approval, ApprovalType::SelfApproval);
         } else {
@@ -2004,7 +2004,7 @@ impl Client {
         }
 
         let is_block_producer =
-            match self.epoch_manager.get_block_producer(&next_block_epoch_id, *target_height) {
+            match self.epoch_manager.get_block_producer_by_hash(&parent_hash) {
                 Err(_) => false,
                 Ok(target_block_producer) => {
                     Some(&target_block_producer)

@@ -609,7 +609,7 @@ pub(crate) fn print_chain(
                         _ => {}
                     };
                     let block_producer = epoch_manager
-                        .get_block_producer(&epoch_id, header.height())
+                        .get_block_producer_by_hash(header.prev_hash())
                         .map(|account_id| account_id.to_string())
                         .ok()
                         .unwrap_or("error".to_owned());
@@ -669,9 +669,10 @@ pub(crate) fn print_chain(
                     println!("{height} MISSING {:?}", header.prev_hash());
                 }
             }
-        } else if let Some(epoch_id) = &cur_epoch_id {
+        } else if let Some(_epoch_id) = &cur_epoch_id {
+            let prev_block_hash = chain_store.get_block_hash_by_height(height-1).unwrap();
             let block_producer = epoch_manager
-                .get_block_producer(epoch_id, height)
+                .get_block_producer_by_hash(&prev_block_hash)
                 .map(|account_id| account_id.to_string())
                 .unwrap_or("error".to_owned());
             println!(

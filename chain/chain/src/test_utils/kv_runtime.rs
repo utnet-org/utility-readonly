@@ -685,14 +685,15 @@ impl EpochManagerAdapter for MockEpochManager {
         Ok(vec![])
     }
 
-    fn get_block_producer(
-        &self,
-        epoch_id: &EpochId,
-        height: BlockHeight,
-    ) -> Result<AccountId, EpochError> {
-        let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
-        Ok(validators[(height as usize) % validators.len()].account_id().clone())
-    }
+    // fn get_block_producer(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     height: BlockHeight,
+    // ) -> Result<AccountId, EpochError> {
+    //     let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
+    //     Ok(validators[(height as usize) % validators.len()].account_id().clone())
+    // }
+
 
     fn get_chunk_producer(
         &self,
@@ -815,8 +816,7 @@ impl EpochManagerAdapter for MockEpochManager {
 
     fn verify_block_vrf(
         &self,
-        _epoch_id: &EpochId,
-        _block_height: BlockHeight,
+         _block_hash: &CryptoHash,
         _prev_random_value: &CryptoHash,
         _vrf_value: &near_crypto::vrf::Value,
         _vrf_proof: &near_crypto::vrf::Proof,
@@ -847,7 +847,7 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
-        let validator = self.get_block_producer(&header.epoch_id(), header.height())?;
+        let validator = self.get_block_producer_by_hash(header.prev_hash())?;
         let validator_stake = &self.validators[&validator];
         Ok(header.verify_block_producer(validator_stake.public_key()))
     }

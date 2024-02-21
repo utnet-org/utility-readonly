@@ -1018,6 +1018,7 @@ impl EpochManager {
 
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
+                    print!("Finalize epoch : {:?}", &block_info);
                     self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
                 }
 
@@ -1028,16 +1029,16 @@ impl EpochManager {
 
     /// Given epoch id and height, returns validator information that suppose to produce
     /// the block at that height. We don't require caller to know about EpochIds.
-    pub fn get_block_producer_info(
-        &self,
-        epoch_id: &EpochId,
-        height: BlockHeight,
-    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
-        let epoch_info = self.get_epoch_info(epoch_id)?;
-        let validator_id = Self::block_producer_from_info(&epoch_info, height);
-
-        Ok(epoch_info.get_validator(validator_id))
-    }
+    // pub fn get_block_producer_info(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     height: BlockHeight,
+    // ) -> Result<ValidatorPowerAndFrozen, EpochError> {
+    //     let epoch_info = self.get_epoch_info(epoch_id)?;
+    //     let validator_id = Self::block_producer_from_info(&epoch_info, height);
+    //
+    //     Ok(epoch_info.get_validator(validator_id))
+    // }
 
     pub fn get_block_producer_info_by_hash(
         &self,
@@ -1989,7 +1990,8 @@ impl EpochManager {
             return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
         }
 
-        Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
+    //    Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
+        return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
     }
 
     /// Returns true, if given current block info, next block must include the approvals from the next

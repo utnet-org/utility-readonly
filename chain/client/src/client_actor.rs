@@ -56,7 +56,7 @@ use near_network::types::{
 use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
 use near_performance_metrics;
 use near_performance_metrics_macros::perf;
-use near_primitives::block::Tip;
+use near_primitives::block::{Tip};
 use near_primitives::block_header::ApprovalType;
 use near_primitives::epoch_manager::RngSeed;
 use near_primitives::hash::CryptoHash;
@@ -1045,8 +1045,24 @@ impl ClientActor {
 
         // For debug purpose, we record the approvals we have seen so far to the future blocks
         for height in latest_known.height + 1..=self.client.doomslug.get_largest_approval_height() {
+            let parent_hash = match self.client.chain.chain_store().get_all_block_hashes_by_height(height-1) {
+                        Ok(hashes) => {
+                            // If there is more than one block at the height, all of them will be
+                            // eligible to build the next block on, so we just pick one.
+                            let hash = hashes.values().flatten().next();
+                            match hash {
+                                Some(hash) => *hash,
+                                None => {
+                                    return Ok(());
+                                }
+                            }
+                        }
+                        Err(_e) => {
+                            return Ok(());
+                        }
+            };
             let next_block_producer_account =
-                self.client.epoch_manager.get_block_producer(&epoch_id, height)?;
+                self.client.epoch_manager.get_block_producer_by_hash(&parent_hash)?;
 
             if me == next_block_producer_account {
                 self.client.block_production_info.record_approvals(
@@ -1059,8 +1075,24 @@ impl ClientActor {
         for height in
             latest_known.height + 1..=self.client.doomslug.get_largest_height_crossing_threshold()
         {
+            let parent_hash = match self.client.chain.chain_store().get_all_block_hashes_by_height(height-1) {
+                Ok(hashes) => {
+                    // If there is more than one block at the height, all of them will be
+                    // eligible to build the next block on, so we just pick one.
+                    let hash = hashes.values().flatten().next();
+                    match hash {
+                        Some(hash) => *hash,
+                        None => {
+                            return Ok(());
+                        }
+                    }
+                }
+                Err(_e) => {
+                    return Ok(());
+                }
+            };
             let next_block_producer_account =
-                self.client.epoch_manager.get_block_producer(&epoch_id, height)?;
+                self.client.epoch_manager.get_block_producer_by_hash(&parent_hash)?;
 
             if me == next_block_producer_account {
                 let num_chunks = self
