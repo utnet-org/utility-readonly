@@ -471,7 +471,7 @@ impl ClientConfig {
                 Duration::from_millis(100),
                 Duration::from_millis(min_block_prod_time / 5),
             ),
-            doosmslug_step_period: Duration::from_millis(30000),
+            doosmslug_step_period: Duration::from_millis(100),
             block_header_fetch_horizon: 50,
             gc: GCConfig { gc_blocks_limit: 100, ..GCConfig::default() },
             tracked_accounts: vec![],
