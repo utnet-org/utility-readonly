@@ -19,7 +19,7 @@ threads-required = 4
 slow-timeout = { period = "120s", terminate-after = 5 }
 # Try a few times before failing the whole test suite on a potentially spurious tests.
 # The hope is that people will fix the spurious tests as they encounter them locally...
-retries = { backoff = "fixed", count = 3, delay = "30s" }
+retries = { backoff = "fixed", count = 3, delay = "1s" }
 failure-output = "final"
 fail-fast = false
 
