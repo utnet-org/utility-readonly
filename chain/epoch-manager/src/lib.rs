@@ -1989,9 +1989,9 @@ impl EpochManager {
             // https://github.com/nearprotocol/nearcore/issues/2522
             return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
         }
-        print!("block info height : {:?}",block_info.height());
-        print!("estimated next epoch start : {:?}",estimated_next_epoch_start);
-        print!("last finalized height : {:?}",block_info.last_finalized_height());
+        println!("block info height : {:?}",block_info.height());
+        println!("estimated next epoch start : {:?}",estimated_next_epoch_start);
+        println!("last finalized height : {:?}",block_info.last_finalized_height());
 
        // Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
         return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
