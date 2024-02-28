@@ -156,8 +156,9 @@ where
             initial_validators.push(AccountInfo {
                 account_id: row.account_id.clone(),
                 public_key: validator_key.clone(),
-                amount: row.validator_stake,
+                amount: row.amount,
                 power: row.validator_power,
+                locked: row.validator_stake,
             });
         }
 

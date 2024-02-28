@@ -37,6 +37,7 @@ use near_vm_runner::ContractCode;
 use near_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
 
 use std::sync::Arc;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 
 /// Returns `ContractCode` (if exists) for the given `account` or returns `StorageError`.
 /// For ETH-implicit accounts returns `Wallet Contract` implementation that it is a part
@@ -331,7 +332,7 @@ pub(crate) fn action_stake(
         }
 
         if stake.stake > 0 {
-            let minimum_stake = epoch_info_provider.minimum_power(last_block_hash)?;
+            let minimum_stake = epoch_info_provider.minimum_frozen(last_block_hash)?;
             if stake.stake < minimum_stake {
                 result.result = Err(ActionErrorKind::InsufficientStake {
                     account_id: account_id.clone(),
@@ -342,13 +343,12 @@ pub(crate) fn action_stake(
                 return Ok(());
             }
         }
-        // TO DO : get power args via rsa pub key
-        // let power = 5000000000000;
-        // result.validator_proposals.push(ValidatorPower::new(
-        //     account_id.clone(),
-        //     stake.public_key.clone(),
-        //     power,
-        // ));
+
+        result.validator_frozen_proposals.push(ValidatorFrozen::new(
+            account_id.clone(),
+            stake.public_key.clone(),
+            stake.stake,
+        ));
         if stake.stake > account.locked() {
             // We've checked above `account.amount >= increment`
             account.set_amount(account.amount() - increment);
@@ -751,12 +751,12 @@ pub(crate) fn action_create_rsa2048_challenge(
             if let Some(power_val) = parsed_args.get("power") {
                 match power_val.as_str() {
                     Some(power_str) => {
-                        match power_str.parse::<u128>() {
+                        match power_str.parse::<u64>() {
                             Ok(power) => {
                                 // push power to validator proposal
-                                result.validator_proposals.push(ValidatorPower::new(
+                                result.validator_power_proposals.push(ValidatorPower::new(
                                     account_id.clone(),
-                                    challenge.public_key.clone().into(),
+                                    challenge.challenge_key.clone().into(),
                                     power,
                                 ));
                                 // attach power to account
@@ -1248,7 +1248,7 @@ mod tests {
         storage_usage: u64,
         state_update: &mut TrieUpdate,
     ) -> ActionResult {
-        let mut account = Some(Account::new(100, 0, *code_hash, storage_usage));
+        let mut account = Some(Account::new(100, 0,0, *code_hash, storage_usage));
         let mut actor_id = account_id.clone();
         let mut action_result = ActionResult::default();
         let receipt = Receipt::new_balance_refund(&"alice.near".parse().unwrap(), 0);
@@ -1386,7 +1386,7 @@ mod tests {
         let tries = TestTriesBuilder::new().build();
         let mut state_update =
             tries.new_trie_update(ShardUId::single_shard(), CryptoHash::default());
-        let account = Account::new(100, 0, CryptoHash::default(), 100);
+        let account = Account::new(100, 0, 0, CryptoHash::default(), 100);
         set_account(&mut state_update, account_id.clone(), &account);
         set_access_key(&mut state_update, account_id.clone(), public_key.clone(), access_key);
 

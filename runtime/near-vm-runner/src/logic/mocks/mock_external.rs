@@ -67,7 +67,7 @@ pub enum MockAction {
 /// Emulates the trie and the mock handling code.
 pub struct MockedExternal {
     pub fake_trie: HashMap<Vec<u8>, Vec<u8>>,
-    pub validators: HashMap<AccountId, Balance>,
+    pub validators: HashMap<AccountId, (Power, Balance)>,
     pub action_log: Vec<MockAction>,
     data_count: u64,
 }
@@ -142,12 +142,30 @@ impl External for MockedExternal {
         TrieNodesCount { db_reads: 0, mem_reads: 0 }
     }
 
+    fn validator_frozen(&self, account_id: &AccountId) -> Result<Option<Balance>> {
+        if let Some((_power, balance)) = self.validators.get(account_id) {
+            Ok(Some(balance).cloned())
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn validator_total_frozen(&self) -> Result<Balance> {
+        let total_frozen: Balance = self.validators.values().map(|(_, frozen)| frozen).sum();
+        Ok(total_frozen)
+    }
+
     fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>> {
-        Ok(self.validators.get(account_id).cloned())
+        if let Some((power, _balance)) = self.validators.get(account_id) {
+            Ok(Some(power).cloned())
+        } else {
+            Ok(None)
+        }
     }
 
     fn validator_total_power(&self) -> Result<Power> {
-        Ok(self.validators.values().sum())
+        let total_power: Power = self.validators.values().map(|(power, _)| power).sum();
+        Ok(total_power)
     }
 
     fn create_receipt(

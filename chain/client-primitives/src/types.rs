@@ -10,7 +10,6 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockReference, EpochId, EpochReference, MaybeBlockId, ShardId,
     TransactionOrReceiptId,
 };
-use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView,
     GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView,
@@ -24,6 +23,8 @@ use std::sync::Arc;
 use tracing::debug_span;
 use yansi::Color::Magenta;
 use yansi::Style;
+use near_primitives::errors::EpochError;
+use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Combines errors coming from chain, tx pool and block producer.
 #[derive(Debug, thiserror::Error)]
@@ -366,6 +367,51 @@ impl From<SyncStatus> for SyncStatusView {
             }
         }
     }
+}
+
+/// Actor message requesting block provider by block hash.
+#[derive(Debug)]
+pub struct GetProvider(pub CryptoHash);
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetProviderError {
+    #[error("IO Error: {error_message}")]
+    IOError { error_message: String },
+    #[error("Block either has never been observed on the node or has been garbage collected: {error_message}")]
+    UnknownBlock { error_message: String },
+    #[error("There are no fully synchronized blocks yet")]
+    NotSyncedYet,
+    // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
+    // expected cases, we cannot statically guarantee that no other errors will be returned
+    // in the future.
+    // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    Unreachable { error_message: String },
+}
+
+impl From<near_chain_primitives::Error> for crate::types::GetProviderError {
+    fn from(error: near_chain_primitives::Error) -> Self {
+        match error {
+            near_chain_primitives::Error::IOErr(error) => {
+                Self::IOError { error_message: error.to_string() }
+            }
+            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+                Self::UnknownBlock { error_message }
+            }
+            _ => Self::Unreachable { error_message: error.to_string() },
+        }
+    }
+}
+
+impl From<EpochError> for GetProviderError {
+    fn from(error: EpochError) -> Self {
+        Self::IOError { error_message: error.to_string() }
+    }
+}
+
+
+impl Message for crate::types::GetProvider {
+    type Result = Result<AccountId, crate::types::GetProviderError>;
 }
 
 /// Actor message requesting block by id, hash or sync state.
@@ -752,6 +798,33 @@ impl Message for GetValidatorInfo {
     type Result = Result<EpochValidatorInfo, GetValidatorInfoError>;
 }
 
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetProviderInfoError {
+    #[error("IO Error: {0}")]
+    IOError(String),
+    #[error("Unknown block")]
+    UnknownBlock,
+    #[error("Provider info unavailable")]
+    ProviderInfoUnavailable,
+    // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
+    // expected cases, we cannot statically guarantee that no other errors will be returned
+    // in the future.
+    // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    Unreachable(String),
+}
+
+impl From<near_chain_primitives::Error> for crate::types::GetProviderInfoError {
+    fn from(error: near_chain_primitives::Error) -> Self {
+        match error {
+            near_chain_primitives::Error::DBNotFoundErr(_)
+            | near_chain_primitives::Error::BlockOutOfBounds(_) => Self::UnknownBlock,
+            near_chain_primitives::Error::IOErr(s) => Self::IOError(s.to_string()),
+            _ => Self::Unreachable(error.to_string()),
+        }
+    }
+}
 #[derive(thiserror::Error, Debug)]
 pub enum GetValidatorInfoError {
     #[error("IO Error: {0}")]
@@ -785,7 +858,7 @@ pub struct GetValidatorOrdered {
 }
 
 impl Message for GetValidatorOrdered {
-    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
 }
 
 #[derive(Debug)]

@@ -93,7 +93,8 @@ pub(crate) fn apply_block(
                 RuntimeStorageConfig::new(*chunk_inner.prev_state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_inner.prev_validator_proposals(),
+                    last_validator_power_proposals: chunk_inner.prev_validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_inner.prev_validator_frozen_proposals(),
                     gas_limit: chunk_inner.gas_limit(),
                     is_new_chunk: true,
                     is_first_block_with_chunk_of_version,
@@ -115,7 +116,8 @@ pub(crate) fn apply_block(
                 RuntimeStorageConfig::new(*chunk_extra.state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_extra.validator_proposals(),
+                    last_validator_power_proposals: chunk_extra.validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_extra.validator_frozen_proposals(),
                     gas_limit: chunk_extra.gas_limit(),
                     is_new_chunk: false,
                     is_first_block_with_chunk_of_version: false,
@@ -518,7 +520,8 @@ fn chunk_extras_equal(l: &ChunkExtra, r: &ChunkExtra) -> bool {
     if l.balance_burnt() != r.balance_burnt() {
         return false;
     }
-    l.validator_proposals().collect::<Vec<_>>() == r.validator_proposals().collect::<Vec<_>>()
+    l.validator_power_proposals().collect::<Vec<_>>() == r.validator_power_proposals().collect::<Vec<_>>()&&
+    l.validator_frozen_proposals().collect::<Vec<_>>() == r.validator_frozen_proposals().collect::<Vec<_>>()
 }
 
 pub(crate) fn check_apply_block_result(
@@ -606,7 +609,7 @@ pub(crate) fn print_chain(
                         _ => {}
                     };
                     let block_producer = epoch_manager
-                        .get_block_producer(&epoch_id, header.height())
+                        .get_block_producer_by_hash(header.prev_hash())
                         .map(|account_id| account_id.to_string())
                         .ok()
                         .unwrap_or("error".to_owned());
@@ -666,9 +669,10 @@ pub(crate) fn print_chain(
                     println!("{height} MISSING {:?}", header.prev_hash());
                 }
             }
-        } else if let Some(epoch_id) = &cur_epoch_id {
+        } else if let Some(_epoch_id) = &cur_epoch_id {
+            let prev_block_hash = chain_store.get_block_hash_by_height(height-1).unwrap();
             let block_producer = epoch_manager
-                .get_block_producer(epoch_id, height)
+                .get_block_producer_by_hash(&prev_block_hash)
                 .map(|account_id| account_id.to_string())
                 .unwrap_or("error".to_owned());
             println!(
@@ -717,7 +721,8 @@ pub(crate) fn resulting_chunk_extra(result: &ApplyChunkResult, gas_limit: Gas) -
     ChunkExtra::new(
         &result.new_root,
         outcome_root,
-        result.validator_proposals.clone(),
+        result.validator_power_proposals.clone(),
+        result.validator_frozen_proposals.clone(),
         result.total_gas_burnt,
         gas_limit,
         result.total_balance_burnt,

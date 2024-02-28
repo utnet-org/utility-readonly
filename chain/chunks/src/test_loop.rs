@@ -211,6 +211,7 @@ impl MockChainForShardsManager {
             last,
             height,
             vec![],
+            vec![],
         );
         self.tip = tip(self.epoch_manager.as_ref(), last);
         self.shards_manager.send(ShardsManagerRequestFromClient::UpdateChainHeads {
@@ -277,6 +278,7 @@ impl MockChainForShardsManager {
             0,
             1000,
             0,
+            Vec::new(),
             Vec::new(),
             Vec::new(),
             &receipts,

@@ -10,7 +10,6 @@ use near_config_utils::ValidationError;
 use near_parameters::{RuntimeConfig, RuntimeConfigView};
 use near_primitives::epoch_manager::EpochConfig;
 use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::StateRoot;
 use near_primitives::{
     hash::CryptoHash,
@@ -33,6 +32,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 use tracing::warn;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 const MAX_GAS_PRICE: Balance = 10_000_000_000_000_000_000_000;
 
@@ -327,14 +327,15 @@ impl GenesisConfig {
     }
 
     /// Get validators from genesis config
-    pub fn validators(&self) -> Vec<ValidatorPower> {
+    pub fn validators(&self) -> Vec<ValidatorPowerAndFrozen> {
         self.validators
             .iter()
             .map(|account_info| {
-                ValidatorPower::new(
+                ValidatorPowerAndFrozen::new(
                     account_info.account_id.clone(),
                     account_info.public_key.clone(),
                     account_info.power,
+                    account_info.locked,
                 )
             })
             .collect()

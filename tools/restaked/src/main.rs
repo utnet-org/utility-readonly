@@ -93,7 +93,7 @@ fn main() {
         //  - don't already have a proposal
         //  - too many missing blocks in current validators
         //  - missing in next validators
-        if validators.current_proposals.iter().any(|proposal| proposal.account_id() == &account_id)
+        if validators.current_frozen_proposals.iter().any(|proposal| proposal.account_id() == &account_id)
         {
             continue;
         }
@@ -104,7 +104,7 @@ fn main() {
             .filter(|validator_info| validator_info.account_id == account_id)
             .last()
             .map(|validator_info| {
-                last_stake_amount = validator_info.stake;
+                last_stake_amount = validator_info.frozen;
                 if maybe_kicked_out(validator_info) {
                     restake = true;
                 }

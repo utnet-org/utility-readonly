@@ -1,44 +1,35 @@
 use serde_json::Value;
-
-pub type RpcValidatorsOrderedResponse =
-    Vec<near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView>;
+use near_primitives::types::AccountId;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum RpcValidatorError {
-    #[error("Epoch not found")]
-    UnknownEpoch,
+pub enum RpcProviderError {
+    #[error("Block not found")]
+    UnknownBlock,
     #[error("Validator info unavailable")]
-    ValidatorInfoUnavailable,
+    ProviderInfoUnavailable,
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, arbitrary::Arbitrary, PartialEq, Eq)]
-pub struct RpcValidatorRequest {
-    #[serde(flatten)]
-    pub epoch_reference: near_primitives::types::EpochReference,
+pub struct RpcProviderRequest {
+    pub block_hash: near_primitives::hash::CryptoHash,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct RpcValidatorsOrderedRequest {
-    pub block_id: near_primitives::types::MaybeBlockId,
+pub struct RpcProviderResponse {
+    pub provider_account: AccountId,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct RpcValidatorResponse {
-    #[serde(flatten)]
-    pub validator_info: near_primitives::views::EpochValidatorInfo,
-}
-
-impl From<RpcValidatorError> for crate::errors::RpcError {
-    fn from(error: RpcValidatorError) -> Self {
+impl From<RpcProviderError> for crate::errors::RpcError {
+    fn from(error: RpcProviderError) -> Self {
         let error_data = match &error {
-            RpcValidatorError::UnknownEpoch => Some(Value::String("Unknown Epoch".to_string())),
-            RpcValidatorError::ValidatorInfoUnavailable => {
+            RpcProviderError::UnknownBlock => Some(Value::String("Unknown Block".to_string())),
+            RpcProviderError::ProviderInfoUnavailable => {
                 Some(Value::String("Validator info unavailable".to_string()))
             }
-            RpcValidatorError::InternalError { .. } => Some(Value::String(error.to_string())),
+            RpcProviderError::InternalError { .. } => Some(Value::String(error.to_string())),
         };
 
         let error_data_value = match serde_json::to_value(error) {

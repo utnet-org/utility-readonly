@@ -460,6 +460,7 @@ impl Chain {
                             state_root,
                             CryptoHash::default(),
                             vec![],
+                            vec![],
                             0,
                             chain_genesis.gas_limit,
                             0,
@@ -752,7 +753,7 @@ impl Chain {
     /// Same as verify_header_signature except it does not verify that block producer hasn't been slashed
     fn partial_verify_orphan_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
         let block_producer =
-            self.epoch_manager.get_block_producer(header.epoch_id(), header.height())?;
+            self.epoch_manager.get_block_producer_by_hash(header.prev_hash())?;
         // DEVNOTE: we pass head which is not necessarily on block's chain, but it's only used for
         // slashing info which we will ignore
         let head = self.head()?;
@@ -923,7 +924,7 @@ impl Chain {
                 .epoch_manager
                 .get_epoch_block_approvers_ordered(header.prev_hash())?
                 .iter()
-                .map(|(x, is_slashed)| (x.power_this_epoch, x.power_next_epoch, *is_slashed))
+                .map(|(x, is_slashed)| (x.frozen_this_epoch, x.frozen_next_epoch, *is_slashed))
                 .collect::<Vec<_>>();
             if !Doomslug::can_approved_block_be_produced(
                 self.doomslug_threshold_mode,
@@ -1111,8 +1112,30 @@ impl Chain {
             .chunks()
             .iter()
             .filter(|chunk| block_height == chunk.height_included())
-            .flat_map(|chunk| chunk.prev_validator_proposals())
-            .zip_longest(block.header().prev_validator_proposals())
+            .flat_map(|chunk| chunk.prev_validator_power_proposals())
+            .zip_longest(block.header().prev_validator_power_proposals())
+        {
+            match pair {
+                itertools::EitherOrBoth::Both(cp, hp) => {
+                    if hp != cp {
+                        // Proposals differed!
+                        return Err(Error::InvalidValidatorProposals);
+                    }
+                }
+                _ => {
+                    // Can only occur if there were a different number of proposals in the header
+                    // and chunks
+                    return Err(Error::InvalidValidatorProposals);
+                }
+            }
+        }
+
+        for pair in block
+            .chunks()
+            .iter()
+            .filter(|chunk| block_height == chunk.height_included())
+            .flat_map(|chunk| chunk.prev_validator_frozen_proposals())
+            .zip_longest(block.header().prev_validator_frozen_proposals())
         {
             match pair {
                 itertools::EitherOrBoth::Both(cp, hp) => {
@@ -1825,7 +1848,7 @@ impl Chain {
             let mut count = 0;
             let mut stake = 0;
             if let Ok(producers) = self.epoch_manager.get_epoch_chunk_producers(&tip.epoch_id) {
-                stake += producers.iter().map(|info| info.power()).sum::<Balance>();
+                stake += producers.iter().map(|info| info.frozen()).sum::<Balance>();
                 count += producers.len();
             }
 
@@ -1914,7 +1937,7 @@ impl Chain {
             // A heuristic to prevent block height to jump too fast towards BlockHeight::max and cause
             // overflow-related problems
             let block_height = header.height();
-            if block_height > head.height + self.epoch_length * 20 {
+            if block_height > head.height + self.epoch_length * 2000 {
                 return Err(Error::InvalidBlockHeight(block_height));
             }
         }
@@ -1967,8 +1990,7 @@ impl Chain {
         self.validate_header(header, provenance, challenges)?;
 
         self.epoch_manager.verify_block_vrf(
-            header.epoch_id(),
-            header.height(),
+            header.prev_hash(),
             &prev_random_value,
             block.vrf_value(),
             block.vrf_proof(),
@@ -3718,7 +3740,8 @@ impl Chain {
                 current_chunk_extra = ChunkExtra::new(
                     &apply_result.new_root,
                     outcome_root,
-                    apply_result.validator_proposals,
+                    apply_result.validator_power_proposals,
+                    apply_result.validator_frozen_proposals,
                     apply_result.total_gas_burnt,
                     gas_limit,
                     apply_result.total_balance_burnt,

@@ -29,11 +29,7 @@ use near_primitives::transaction::{
     Action, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus,
     SignedTransaction, TransferAction,
 };
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{
-    AccountId, ApprovalPower, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards,
-    ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier,
-};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards, ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
 use near_primitives::views::{
@@ -50,6 +46,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// Simple key value runtime for tests.
 ///
@@ -93,7 +90,7 @@ pub struct MockEpochManager {
     validators_by_valset: Vec<EpochValidatorSet>,
     /// Maps from account id to validator stake for all validators, both block producers and
     /// chunk producers
-    validators: HashMap<AccountId, ValidatorPower>,
+    validators: HashMap<AccountId, ValidatorPowerAndFrozen>,
 
     headers_cache: RwLock<HashMap<CryptoHash, BlockHeader>>,
     hash_to_epoch: RwLock<HashMap<CryptoHash, EpochId>>,
@@ -111,9 +108,9 @@ pub struct MockEpochManager {
 /// Each shard will have `block_producers.len() / validator_groups` of validators who are also block
 /// producers
 struct EpochValidatorSet {
-    block_producers: Vec<ValidatorPower>,
+    block_producers: Vec<ValidatorPowerAndFrozen>,
     /// index of this list is shard_id
-    chunk_producers: Vec<Vec<ValidatorPower>>,
+    chunk_producers: Vec<Vec<ValidatorPowerAndFrozen>>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Hash, PartialEq, Eq, Ord, PartialOrd, Clone, Debug)]
@@ -147,13 +144,14 @@ impl MockEpochManager {
             .block_producers
             .iter()
             .map(|account_ids| {
-                let block_producers: Vec<ValidatorPower> = account_ids
+                let block_producers: Vec<ValidatorPowerAndFrozen> = account_ids
                     .iter()
                     .map(|account_id| {
-                        let stake = ValidatorPower::new(
+                        let stake = ValidatorPowerAndFrozen::new(
                             account_id.clone(),
                             SecretKey::from_seed(KeyType::ED25519, account_id.as_ref())
                                 .public_key(),
+                            1_000_000,
                             1_000_000,
                         );
                         validators.insert(account_id.clone(), stake.clone());
@@ -164,7 +162,7 @@ impl MockEpochManager {
                 let validators_per_shard = block_producers.len() as ShardId / vs.validator_groups;
                 let coef = block_producers.len() as ShardId / vs.num_shards;
 
-                let chunk_producers: Vec<Vec<ValidatorPower>> = (0..vs.num_shards)
+                let chunk_producers: Vec<Vec<ValidatorPowerAndFrozen>> = (0..vs.num_shards)
                     .map(|shard_id| {
                         let offset = (shard_id * coef / validators_per_shard * validators_per_shard)
                             as usize;
@@ -182,10 +180,11 @@ impl MockEpochManager {
                 assert_eq!(epoch_cops.len() as u64, vs.num_shards);
                 for (shard_idx, shard_cops) in epoch_cops.into_iter().enumerate() {
                     for account_id in shard_cops {
-                        let stake = ValidatorPower::new(
+                        let stake = ValidatorPowerAndFrozen::new(
                             account_id.clone(),
                             SecretKey::from_seed(KeyType::ED25519, account_id.as_ref())
                                 .public_key(),
+                            1_000_000,
                             1_000_000,
                         );
                         let prev = validators.insert(account_id, stake.clone());
@@ -286,11 +285,11 @@ impl MockEpochManager {
         Ok((epoch, valset as usize % self.validators_by_valset.len(), next_epoch))
     }
 
-    fn get_block_producers(&self, valset: usize) -> &[ValidatorPower] {
+    fn get_block_producers(&self, valset: usize) -> &[ValidatorPowerAndFrozen] {
         &self.validators_by_valset[valset].block_producers
     }
 
-    fn get_chunk_producers(&self, valset: usize, shard_id: ShardId) -> Vec<ValidatorPower> {
+    fn get_chunk_producers(&self, valset: usize, shard_id: ShardId) -> Vec<ValidatorPowerAndFrozen> {
         self.validators_by_valset[valset].chunk_producers[shard_id as usize].clone()
     }
 
@@ -518,6 +517,7 @@ impl EpochManagerAdapter for MockEpochManager {
             vec![],
             HashMap::new(),
             BTreeMap::new(),
+            BTreeMap::new(),
             HashMap::new(),
             HashMap::new(),
             1,
@@ -647,7 +647,7 @@ impl EpochManagerAdapter for MockEpochManager {
         &self,
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
-    ) -> Result<Vec<(ValidatorPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ValidatorPowerAndFrozen, bool)>, EpochError> {
         let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
         Ok(validators.iter().map(|x| (x.clone(), false)).collect())
     }
@@ -655,12 +655,12 @@ impl EpochManagerAdapter for MockEpochManager {
     fn get_epoch_block_approvers_ordered(
         &self,
         parent_hash: &CryptoHash,
-    ) -> Result<Vec<(ApprovalPower, bool)>, EpochError> {
+    ) -> Result<Vec<(ApprovalFrozen, bool)>, EpochError> {
         let (_cur_epoch, cur_valset, next_epoch) = self.get_epoch_and_valset(*parent_hash)?;
         let mut validators = self
             .get_block_producers(cur_valset)
             .iter()
-            .map(|x| x.get_approval_power(false))
+            .map(|x| x.get_approval_frozen(false))
             .collect::<Vec<_>>();
         if *self.hash_to_next_epoch_approvals_req.write().unwrap().get(parent_hash).unwrap() {
             let validators_copy = validators.clone();
@@ -670,7 +670,7 @@ impl EpochManagerAdapter for MockEpochManager {
                     .filter(|x| {
                         !validators_copy.iter().any(|entry| &entry.account_id == x.account_id())
                     })
-                    .map(|x| x.get_approval_power(true)),
+                    .map(|x| x.get_approval_frozen(true)),
             );
         }
         let validators = validators.into_iter().map(|stake| (stake, false)).collect::<Vec<_>>();
@@ -680,19 +680,20 @@ impl EpochManagerAdapter for MockEpochManager {
     fn get_epoch_chunk_producers(
         &self,
         _epoch_id: &EpochId,
-    ) -> Result<Vec<ValidatorPower>, EpochError> {
+    ) -> Result<Vec<ValidatorPowerAndFrozen>, EpochError> {
         tracing::warn!("not implemented, returning a dummy value");
         Ok(vec![])
     }
 
-    fn get_block_producer(
-        &self,
-        epoch_id: &EpochId,
-        height: BlockHeight,
-    ) -> Result<AccountId, EpochError> {
-        let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
-        Ok(validators[(height as usize) % validators.len()].account_id().clone())
-    }
+    // fn get_block_producer(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     height: BlockHeight,
+    // ) -> Result<AccountId, EpochError> {
+    //     let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
+    //     Ok(validators[(height as usize) % validators.len()].account_id().clone())
+    // }
+
 
     fn get_chunk_producer(
         &self,
@@ -720,7 +721,7 @@ impl EpochManagerAdapter for MockEpochManager {
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         let validators = &self.validators_by_valset[self.get_valset_for_epoch(epoch_id)?];
         for validator_stake in validators.block_producers.iter() {
             if validator_stake.account_id() == account_id {
@@ -740,7 +741,7 @@ impl EpochManagerAdapter for MockEpochManager {
         epoch_id: &EpochId,
         _last_known_block_hash: &CryptoHash,
         account_id: &AccountId,
-    ) -> Result<(ValidatorPower, bool), EpochError> {
+    ) -> Result<(ValidatorPowerAndFrozen, bool), EpochError> {
         Err(EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
     }
 
@@ -753,7 +754,8 @@ impl EpochManagerAdapter for MockEpochManager {
             next_validators: vec![],
             current_fishermen: vec![],
             next_fishermen: vec![],
-            current_proposals: vec![],
+            current_power_proposals: vec![],
+            current_frozen_proposals: vec![],
             prev_epoch_kickout: vec![],
             epoch_start_height: 0,
             epoch_height: 1,
@@ -814,8 +816,7 @@ impl EpochManagerAdapter for MockEpochManager {
 
     fn verify_block_vrf(
         &self,
-        _epoch_id: &EpochId,
-        _block_height: BlockHeight,
+         _block_hash: &CryptoHash,
         _prev_random_value: &CryptoHash,
         _vrf_value: &near_crypto::vrf::Value,
         _vrf_proof: &near_crypto::vrf::Proof,
@@ -846,7 +847,7 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
-        let validator = self.get_block_producer(&header.epoch_id(), header.height())?;
+        let validator = self.get_block_producer_by_hash(header.prev_hash())?;
         let validator_stake = &self.validators[&validator];
         Ok(header.verify_block_producer(validator_stake.public_key()))
     }
@@ -902,8 +903,8 @@ impl EpochManagerAdapter for MockEpochManager {
                 }
             }
         }
-        let powers = validators.iter().map(|power| (power.power(), 0, false)).collect::<Vec<_>>();
-        if !can_approved_block_be_produced(approvals, &powers) {
+        let all_frozen = validators.iter().map(|frozen| (frozen.frozen(), 0, false)).collect::<Vec<_>>();
+        if !can_approved_block_be_produced(approvals, &all_frozen) {
             Err(Error::NotEnoughApprovals)
         } else {
             Ok(())
@@ -969,6 +970,10 @@ impl EpochManagerAdapter for MockEpochManager {
 
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
+    #[allow(unconditional_recursion)]
+    fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+        return self.get_block_producer_by_hash(block_hash);
+    }
 }
 
 impl RuntimeAdapter for KeyValueRuntime {
@@ -1193,7 +1198,8 @@ impl RuntimeAdapter for KeyValueRuntime {
             new_root: state_root,
             outcomes: tx_results,
             outgoing_receipts,
-            validator_proposals: vec![],
+            validator_power_proposals: vec![],
+            validator_frozen_proposals: vec![],
             total_gas_burnt: 0,
             total_balance_burnt: 0,
             proof: None,

@@ -119,6 +119,8 @@ struct Validator {
     amount: Option<Balance>,
     #[serde(with = "dec_format")]
     power: Option<Power>,
+    #[serde(with = "dec_format")]
+    frozen: Option<Balance>,
 }
 
 type MakeSingleShardStorageMutatorFn =
@@ -744,6 +746,7 @@ impl ForkNetworkCommand {
                 account_id: validator.account_id,
                 amount: validator.amount.unwrap_or(50_000 * NEAR_BASE),
                 power: validator.power.unwrap_or(5),
+                locked: validator.frozen.unwrap_or(5),
                 public_key: validator.public_key,
             };
             new_validator_accounts.push(validator_account.clone());

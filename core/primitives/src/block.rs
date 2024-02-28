@@ -123,6 +123,7 @@ pub fn genesis_chunks(
                 CryptoHash::default(),
                 vec![],
                 vec![],
+                vec![],
                 &[],
                 CryptoHash::default(),
                 &EmptyValidatorSigner::default(),
@@ -243,7 +244,8 @@ impl Block {
         timestamp_override: Option<DateTime<chrono::Utc>>,
     ) -> Self {
         // Collect aggregate of validators and gas usage/limits from chunks.
-        let mut prev_validator_proposals = vec![];
+        let mut prev_validator_power_proposals = vec![];
+        let mut prev_validator_frozen_proposals = vec![];
         let mut gas_used = 0;
         // This computation of chunk_mask relies on the fact that chunks are ordered by shard_id.
         let mut chunk_mask = vec![];
@@ -251,7 +253,8 @@ impl Block {
         let mut gas_limit = 0;
         for chunk in chunks.iter() {
             if chunk.height_included() == height {
-                prev_validator_proposals.extend(chunk.prev_validator_proposals());
+                prev_validator_power_proposals.extend(chunk.prev_validator_power_proposals());
+                prev_validator_frozen_proposals.extend(chunk.prev_validator_frozen_proposals());
                 gas_used += chunk.prev_gas_used();
                 gas_limit += chunk.gas_limit();
                 balance_burnt += chunk.prev_balance_burnt();
@@ -312,7 +315,8 @@ impl Block {
             time,
             Block::compute_challenges_root(&body.challenges),
             random_value,
-            prev_validator_proposals,
+            prev_validator_power_proposals,
+            prev_validator_frozen_proposals,
             chunk_mask,
             block_ordinal,
             epoch_id,

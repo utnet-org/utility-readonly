@@ -252,6 +252,7 @@ impl GenesisBuilder {
                     state_root,
                     CryptoHash::default(),
                     vec![],
+                    vec![],
                     0,
                     self.genesis.config.gas_limit,
                     0,

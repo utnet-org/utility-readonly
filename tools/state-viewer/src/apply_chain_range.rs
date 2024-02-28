@@ -146,7 +146,7 @@ fn apply_block_from_range(
     let chunk_present: bool;
 
     let block_author = epoch_manager
-        .get_block_producer(block.header().epoch_id(), block.header().height())
+        .get_block_producer_by_hash(block.header().prev_hash())
         .unwrap();
 
     let apply_result = if *block.header().prev_hash() == CryptoHash::default() {
@@ -234,7 +234,8 @@ fn apply_block_from_range(
                 RuntimeStorageConfig::new(*chunk_inner.prev_state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_inner.prev_validator_proposals(),
+                    last_validator_power_proposals: chunk_inner.prev_validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_inner.prev_validator_frozen_proposals(),
                     gas_limit: chunk_inner.gas_limit(),
                     is_new_chunk: true,
                     is_first_block_with_chunk_of_version,
@@ -258,7 +259,8 @@ fn apply_block_from_range(
                 RuntimeStorageConfig::new(*chunk_extra.state_root(), use_flat_storage),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals: chunk_extra.validator_proposals(),
+                    last_validator_power_proposals: chunk_extra.validator_power_proposals(),
+                    last_validator_frozen_proposals: chunk_extra.validator_frozen_proposals(),
                     gas_limit: chunk_extra.gas_limit(),
                     is_new_chunk: false,
                     is_first_block_with_chunk_of_version: false,
@@ -277,7 +279,8 @@ fn apply_block_from_range(
     let chunk_extra = ChunkExtra::new(
         &apply_result.new_root,
         outcome_root,
-        apply_result.validator_proposals,
+        apply_result.validator_power_proposals,
+        apply_result.validator_frozen_proposals,
         apply_result.total_gas_burnt,
         genesis.config.gas_limit,
         apply_result.total_balance_burnt,
@@ -430,8 +433,21 @@ fn smart_equals(extra1: &ChunkExtra, extra2: &ChunkExtra) -> bool {
     {
         return false;
     }
-    let mut proposals1 = extra1.validator_proposals();
-    let mut proposals2 = extra2.validator_proposals();
+    let mut proposals1 = extra1.validator_power_proposals();
+    let mut proposals2 = extra2.validator_power_proposals();
+    if proposals1.len() != proposals2.len() {
+        return false;
+    }
+    for _ in 0..proposals1.len() {
+        let p1 = proposals1.next().unwrap();
+        let p2 = proposals2.next().unwrap();
+
+        if p1.into_v1() != p2.into_v1() {
+            return false;
+        }
+    }
+    let mut proposals1 = extra1.validator_frozen_proposals();
+    let mut proposals2 = extra2.validator_frozen_proposals();
     if proposals1.len() != proposals2.len() {
         return false;
     }

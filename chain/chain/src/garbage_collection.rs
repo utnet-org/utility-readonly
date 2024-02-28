@@ -1001,6 +1001,7 @@ impl<'a> ChainStoreUpdate<'a> {
             | DBCol::FlatStateDeltaMetadata
             | DBCol::FlatStorageStatus
             | DBCol::Misc
+            | DBCol::BlockSummary
             => unreachable!(),
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => unreachable!(),

@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
-use crate::types::{validator_power::ValidatorPower, ValidatorId};
+use crate::types::{ValidatorId};
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_primitives_core::types::Balance;
 use rand::{seq::SliceRandom, Rng};
+use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// Represents the configuration of [`ValidatorMandates`]. Its parameters are expected to remain
 /// valid for one epoch.
@@ -73,7 +74,7 @@ impl ValidatorMandates {
     ///
     /// Only full mandates are assigned, partial mandates are dropped. For example, when the stake
     /// required for a mandate is 5 and a validator has staked 12, then it will obtain 2 mandates.
-    pub fn new(config: ValidatorMandatesConfig, validators: &[ValidatorPower]) -> Self {
+    pub fn new(config: ValidatorMandatesConfig, validators: &[ValidatorPowerAndFrozen]) -> Self {
         let num_mandates_per_validator: Vec<u16> =
             validators.iter().map(|v| v.num_mandates(config.stake_per_mandate)).collect();
         let num_total_mandates =

@@ -1,23 +1,23 @@
-use crate::types::Balance;
 use aliases::Aliases;
 use borsh::{BorshDeserialize, BorshSerialize};
+use near_primitives_core::types::Power;
 
 #[derive(
     Default, BorshSerialize, BorshDeserialize, serde::Serialize, Clone, Debug, PartialEq, Eq,
 )]
 pub struct WeightedIndex {
-    weight_sum: Balance,
+    weight_sum: Power,
     aliases: Vec<u64>,
-    no_alias_odds: Vec<Balance>,
+    no_alias_odds: Vec<Power>,
 }
 
 impl WeightedIndex {
-    pub fn new(weights: Vec<Balance>) -> Self {
-        let n = Balance::from(weights.len() as u64);
+    pub fn new(weights: Vec<Power>) -> Self {
+        let n = Power::from(weights.len() as u64);
         let mut aliases = Aliases::new(weights.len());
 
         let mut no_alias_odds = weights;
-        let mut weight_sum: Balance = 0;
+        let mut weight_sum: Power = 0;
         for w in no_alias_odds.iter_mut() {
             weight_sum += *w;
             *w *= n;
@@ -58,9 +58,9 @@ impl WeightedIndex {
 
     pub fn sample(&self, seed: [u8; 32]) -> usize {
         let usize_seed = Self::copy_8_bytes(&seed[0..8]);
-        let balance_seed = Self::copy_16_bytes(&seed[8..24]);
+        let power_seed = Self::copy_8_bytes(&seed[8..16]);
         let uniform_index = usize::from_le_bytes(usize_seed) % self.aliases.len();
-        let uniform_weight = Balance::from_le_bytes(balance_seed) % self.weight_sum;
+        let uniform_weight = Power::from_le_bytes(power_seed) % self.weight_sum;
 
         if uniform_weight < self.no_alias_odds[uniform_index] {
             uniform_index
@@ -73,7 +73,7 @@ impl WeightedIndex {
         &self.aliases
     }
 
-    pub fn get_no_alias_odds(&self) -> &[Balance] {
+    pub fn get_no_alias_odds(&self) -> &[Power] {
         &self.no_alias_odds
     }
 
@@ -83,11 +83,11 @@ impl WeightedIndex {
         result
     }
 
-    fn copy_16_bytes(arr: &[u8]) -> [u8; 16] {
-        let mut result = [0u8; 16];
-        result.clone_from_slice(arr);
-        result
-    }
+    // fn copy_16_bytes(arr: &[u8]) -> [u8; 16] {
+    //     let mut result = [0u8; 16];
+    //     result.clone_from_slice(arr);
+    //     result
+    // }
 }
 
 /// Sub-module to encapsulate helper struct for managing aliases

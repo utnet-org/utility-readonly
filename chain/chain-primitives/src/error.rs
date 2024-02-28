@@ -5,7 +5,8 @@ use chrono::Utc;
 
 use near_primitives::block::BlockValidityError;
 use near_primitives::challenge::{ChunkProofs, ChunkState};
-use near_primitives::errors::{EpochError, StorageError};
+use near_primitives::errors::{BlockError, EpochError, StorageError};
+use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayoutError;
 use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
 use near_primitives::types::{BlockHeight, EpochId, ShardId};
@@ -204,6 +205,9 @@ pub enum Error {
     /// Validator error.
     #[error("Validator Error: {0}")]
     ValidatorError(String),
+    /// Block out of bounds. Usually if received block is too far in the future or alternative fork.
+    #[error("Epoch Out Of Bounds: {:?}", _0)]
+    BlockOutOfBounds(CryptoHash),
     /// Epoch out of bounds. Usually if received block is too far in the future or alternative fork.
     #[error("Epoch Out Of Bounds: {:?}", _0)]
     EpochOutOfBounds(EpochId),
@@ -303,7 +307,8 @@ impl Error {
             | Error::InvalidProtocolVersion
             | Error::NotAValidator
             | Error::NotAChunkValidator
-            | Error::InvalidChallengeRoot => true,
+            | Error::InvalidChallengeRoot
+            | _ => true,
         }
     }
 
@@ -377,6 +382,7 @@ impl Error {
             Error::NotAValidator => "not_a_validator",
             Error::NotAChunkValidator => "not_a_chunk_validator",
             Error::InvalidChallengeRoot => "invalid_challenge_root",
+            _ => "",
         }
     }
 }
@@ -387,6 +393,14 @@ impl From<EpochError> for Error {
             EpochError::EpochOutOfBounds(epoch_id) => Error::EpochOutOfBounds(epoch_id),
             EpochError::MissingBlock(h) => Error::DBNotFoundErr(format!("epoch block: {h}")),
             EpochError::NotAValidator(_account_id, _epoch_id) => Error::NotAValidator,
+            err => Error::Other(err.to_string()),
+        }
+    }
+}
+
+impl From<BlockError> for Error {
+    fn from(error: BlockError) -> Self {
+        match error {
             err => Error::ValidatorError(err.to_string()),
         }
     }

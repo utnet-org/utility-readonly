@@ -2,33 +2,278 @@ use crate::shard_assignment::assign_shards;
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::epoch_info::EpochInfo;
 use near_primitives::epoch_manager::{EpochConfig, RngSeed};
-use near_primitives::errors::EpochError;
+use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{
-    AccountId, Balance, NumShards, ProtocolVersion, ValidatorId, ValidatorKickoutReason,
-};
+use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
 use near_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
 use num_rational::Ratio;
 use std::cmp::{self, Ordering};
 use std::collections::hash_map;
 use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
+use near_primitives::epoch_manager::block_info::BlockInfo;
+use near_primitives::epoch_manager::block_summary::BlockSummary;
+use near_primitives::hash::CryptoHash;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+/// Select providers for next block and generate block info
+pub fn proposals_to_block_summary(
+    epoch_config: &EpochConfig,
+    this_block_hash: &CryptoHash,
+    last_block_hash: &CryptoHash,
+    _rng_seed: RngSeed,
+    prev_block_summary: &BlockInfo,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
+    mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
+    validator_reward: HashMap<AccountId, Balance>,
+    minted_amount: Balance,
+    next_version: ProtocolVersion,
+) -> Result<BlockSummary, BlockError> {
+    // debug_assert!(
+    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+    //         == power_proposals.len(),
+    //     "Power proposals should not have duplicates"
+    // );
 
+    debug_assert!(
+        frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
+            == frozen_proposals.len(),
+        "Frozen proposals should not have duplicates"
+    );
+    let shard_ids: Vec<_> = epoch_config.shard_layout.shard_ids().collect();
+    let min_stake_ratio = {
+        let rational = epoch_config.validator_selection_config.minimum_stake_ratio;
+        Ratio::new(*rational.numer() as u128, *rational.denom() as u128)
+    };
+    let max_bp_selected = epoch_config.num_block_producer_seats as usize;
+    let mut power_change = BTreeMap::new();
+    let mut frozen_change = BTreeMap::new();
+    let mut fishermen = vec![];
+    let (
+        power_proposals,
+        frozen_proposals
+    )  = proposals_with_rollover_block(
+        power_proposals,
+        frozen_proposals,
+        prev_block_summary,
+        &validator_reward,
+        &validator_kickout,
+        &mut power_change,
+        &mut frozen_change,
+        &mut fishermen,
+    );
+    let mut bp_power_proposals = order_power_proposals(power_proposals.values().cloned());
+    let mut bp_frozen_proposals = order_frozen_proposals(frozen_proposals.values().cloned());
+    let (block_producers, bp_stake_threshold) = select_block_producers(
+        &mut bp_power_proposals,
+        &mut bp_frozen_proposals,
+        max_bp_selected,
+        min_stake_ratio,
+        next_version,
+    );
+    let (
+            cp_power_proposals,
+            cp_frozen_proposals,
+            chunk_producers,
+            cp_stake_threshold
+        ) = if checked_feature!("stable", ChunkOnlyProducers, next_version) {
+            let mut cp_power_proposals = order_power_proposals(power_proposals.clone().into_values());
+            let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.clone().into_values());
+            let max_cp_selected = max_bp_selected
+                + (epoch_config.validator_selection_config.num_chunk_only_producer_seats as usize);
+            let (chunk_producers, cp_stake_treshold) = select_chunk_producers(
+                &mut cp_power_proposals,
+                &mut cp_frozen_proposals,
+                max_cp_selected,
+                min_stake_ratio,
+                shard_ids.len() as NumShards,
+                next_version,
+            );
+            (cp_power_proposals, cp_frozen_proposals, chunk_producers, cp_stake_treshold)
+        } else {
+            (bp_power_proposals, bp_frozen_proposals, block_producers.clone(), bp_stake_threshold)
+        };
+
+    // since block producer proposals could become chunk producers, their actual stake threshold
+    // is the smaller of the two thresholds
+    let threshold = cmp::min(bp_stake_threshold, cp_stake_threshold);
+    let cp_power_map = create_power_map(&cp_power_proposals);
+    // process remaining chunk_producer_proposals that were not selected for either role
+    for OrderedValidatorFrozen(p) in cp_frozen_proposals {
+        let frozen = p.frozen();
+        let account_id = p.account_id();
+        let power = cp_power_map.get(&account_id.clone()).unwrap_or(&0);
+        let r_p = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+            account_id : account_id.clone(),
+            public_key : p.public_key().clone(),
+            power : power.clone(),
+            frozen : frozen.clone(),
+        });
+        if frozen >= epoch_config.fishermen_threshold {
+            fishermen.push(r_p);
+        } else {
+            *frozen_change.get_mut(account_id).unwrap() = 0;
+            if prev_block_summary.account_is_validator(account_id)
+                || prev_block_summary.account_is_fisherman(account_id)
+            {
+                debug_assert!(frozen < threshold);
+                let account_id = p.take_account_id();
+                let frozen_value = frozen;
+                validator_kickout.insert(
+                    account_id,
+                    ValidatorKickoutReason::NotEnoughFrozen { frozen : frozen_value, threshold },
+                );
+            }
+        }
+    }
+
+    let num_chunk_producers = chunk_producers.len();
+    // Constructing `all_validators` such that a validators position corresponds to its `ValidatorId`.
+    let mut all_validators: Vec<ValidatorPowerAndFrozen> = Vec::with_capacity(num_chunk_producers);
+    let mut validator_to_index = HashMap::new();
+    let mut block_producers_settlement = Vec::with_capacity(block_producers.len());
+
+    for (i, bp) in block_producers.into_iter().enumerate() {
+        let id = i as ValidatorId;
+        validator_to_index.insert(bp.account_id().clone(), id);
+        block_producers_settlement.push(id);
+        all_validators.push(bp);
+    }
+
+    let chunk_producers_settlement = if checked_feature!("stable", ChunkOnlyProducers, next_version)
+    {
+        let minimum_validators_per_shard =
+            epoch_config.validator_selection_config.minimum_validators_per_shard as usize;
+        let shard_assignment = assign_shards(
+            chunk_producers,
+            shard_ids.len() as NumShards,
+            minimum_validators_per_shard,
+        )
+            .map_err(|_| BlockError::NotEnoughValidators {
+                num_validators: num_chunk_producers as u64,
+                num_shards: shard_ids.len() as NumShards,
+            })?;
+
+        let mut chunk_producers_settlement: Vec<Vec<ValidatorId>> =
+            shard_assignment.iter().map(|vs| Vec::with_capacity(vs.len())).collect();
+        let mut i = all_validators.len();
+        // Here we assign validator ids to all chunk only validators
+        for (shard_validators, shard_validator_ids) in
+        shard_assignment.into_iter().zip(chunk_producers_settlement.iter_mut())
+        {
+            for validator in shard_validators {
+                debug_assert_eq!(i, all_validators.len());
+                match validator_to_index.entry(validator.account_id().clone()) {
+                    hash_map::Entry::Vacant(entry) => {
+                        let validator_id = i as ValidatorId;
+                        entry.insert(validator_id);
+                        shard_validator_ids.push(validator_id);
+                        all_validators.push(validator);
+                        i += 1;
+                    }
+                    // Validators which have an entry in the validator_to_index map
+                    // have already been inserted into `all_validators`.
+                    hash_map::Entry::Occupied(entry) => {
+                        let validator_id = *entry.get();
+                        shard_validator_ids.push(validator_id);
+                    }
+                }
+            }
+        }
+        chunk_producers_settlement
+    } else {
+        if chunk_producers.is_empty() {
+            // All validators tried to unstake?
+            return Err(BlockError::NotEnoughValidators {
+                num_validators: 0u64,
+                num_shards: shard_ids.len() as NumShards,
+            });
+        }
+        let mut id = 0usize;
+        // Here we assign validators to chunks (we try to keep number of shards assigned for
+        // each validator as even as possible). Note that in prod configuration number of seats
+        // per shard is the same as maximal number of block producers, so normally all
+        // validators would be assigned to all chunks
+        shard_ids
+            .iter()
+            .map(|&shard_id| shard_id as usize)
+            .map(|shard_id| {
+                (0..epoch_config.num_block_producer_seats_per_shard[shard_id]
+                    .min(block_producers_settlement.len() as u64))
+                    .map(|_| {
+                        let res = block_producers_settlement[id];
+                        id = (id + 1) % block_producers_settlement.len();
+                        res
+                    })
+                    .collect()
+            })
+            .collect()
+    };
+
+    let validator_mandates = if checked_feature!("stable", ChunkValidation, next_version) {
+        // TODO(#10014) determine required stake per mandate instead of reusing seat price.
+        // TODO(#10014) determine `min_mandates_per_shard`
+        let min_mandates_per_shard = 0;
+        let validator_mandates_config =
+            ValidatorMandatesConfig::new(threshold, min_mandates_per_shard, shard_ids.len());
+        // We can use `all_validators` to construct mandates Since a validator's position in
+        // `all_validators` corresponds to its `ValidatorId`
+        ValidatorMandates::new(validator_mandates_config, &all_validators)
+    } else {
+        ValidatorMandates::default()
+    };
+
+    let fishermen_to_index = fishermen
+        .iter()
+        .enumerate()
+        .map(|(index, s)| (s.account_id().clone(), index as ValidatorId))
+        .collect::<HashMap<_, _>>();
+    let all_power_proposals= power_proposals.values().cloned().collect();
+    let all_frozen_proposals    = frozen_proposals.values().cloned().collect();
+    Ok(BlockSummary::new(
+        *this_block_hash,
+        *last_block_hash,
+        CryptoHash::default(),
+        all_validators,
+        validator_to_index,
+        block_producers_settlement,
+        chunk_producers_settlement,
+        fishermen,
+        fishermen_to_index,
+        power_change,
+        frozen_change,
+        validator_reward,
+        threshold,
+        minted_amount,
+        all_power_proposals,
+        all_frozen_proposals,
+        validator_kickout,
+        validator_mandates,
+    ))
+}
 /// Select validators for next epoch and generate epoch info
 pub fn proposals_to_epoch_info(
     epoch_config: &EpochConfig,
     rng_seed: RngSeed,
     prev_epoch_info: &EpochInfo,
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
     mut validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
     next_version: ProtocolVersion,
     last_version: ProtocolVersion,
 ) -> Result<EpochInfo, EpochError> {
+    // debug_assert!(
+    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+    //         == power_proposals.len(),
+    //     "Power proposals should not have duplicates"
+    // );
+
     debug_assert!(
-        proposals.iter().map(|stake| stake.account_id()).collect::<HashSet<_>>().len()
-            == proposals.len(),
-        "Proposals should not have duplicates"
+        frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
+            == frozen_proposals.len(),
+        "Frozen proposals should not have duplicates"
     );
 
     let shard_ids: Vec<_> = epoch_config.shard_layout.shard_ids().collect();
@@ -37,60 +282,79 @@ pub fn proposals_to_epoch_info(
         Ratio::new(*rational.numer() as u128, *rational.denom() as u128)
     };
     let max_bp_selected = epoch_config.num_block_producer_seats as usize;
-    let mut stake_change = BTreeMap::new();
+    let mut power_change = BTreeMap::new();
+    let mut frozen_change = BTreeMap::new();
     let mut fishermen = vec![];
-    let proposals = proposals_with_rollover(
-        proposals,
+    let (power_proposals, frozen_proposals) = proposals_with_rollover(
+        power_proposals,
+        frozen_proposals,
         prev_epoch_info,
         &validator_reward,
         &validator_kickout,
-        &mut stake_change,
+        &mut power_change,
+        &mut frozen_change,
         &mut fishermen,
     );
-    let mut block_producer_proposals = order_proposals(proposals.values().cloned());
+    let mut bp_power_proposals = order_power_proposals(power_proposals.values().cloned());
+    let mut bp_frozen_proposals = order_frozen_proposals(frozen_proposals.values().cloned());
     let (block_producers, bp_stake_threshold) = select_block_producers(
-        &mut block_producer_proposals,
+        &mut bp_power_proposals,
+        &mut bp_frozen_proposals,
         max_bp_selected,
         min_stake_ratio,
         last_version,
     );
-    let (chunk_producer_proposals, chunk_producers, cp_stake_threshold) =
-        if checked_feature!("stable", ChunkOnlyProducers, next_version) {
-            let mut chunk_producer_proposals = order_proposals(proposals.into_values());
+    let (
+        cp_power_proposals,
+        cp_frozen_proposals,
+        chunk_producers,
+        cp_stake_threshold
+        ) = if checked_feature!("stable", ChunkOnlyProducers, next_version) {
+            let mut cp_power_proposals = order_power_proposals(power_proposals.into_values());
+            let mut cp_frozen_proposals = order_frozen_proposals(frozen_proposals.into_values());
             let max_cp_selected = max_bp_selected
                 + (epoch_config.validator_selection_config.num_chunk_only_producer_seats as usize);
             let (chunk_producers, cp_stake_treshold) = select_chunk_producers(
-                &mut chunk_producer_proposals,
+                &mut cp_power_proposals,
+                &mut cp_frozen_proposals,
                 max_cp_selected,
                 min_stake_ratio,
                 shard_ids.len() as NumShards,
                 last_version,
             );
-            (chunk_producer_proposals, chunk_producers, cp_stake_treshold)
+            (cp_power_proposals, cp_frozen_proposals, chunk_producers, cp_stake_treshold)
         } else {
-            (block_producer_proposals, block_producers.clone(), bp_stake_threshold)
+            (bp_power_proposals, bp_frozen_proposals, block_producers.clone(), bp_stake_threshold)
         };
 
     // since block producer proposals could become chunk producers, their actual stake threshold
     // is the smaller of the two thresholds
     let threshold = cmp::min(bp_stake_threshold, cp_stake_threshold);
-
+    let cp_power_map = create_power_map(&cp_power_proposals);
     // process remaining chunk_producer_proposals that were not selected for either role
-    for OrderedValidatorStake(p) in chunk_producer_proposals {
-        let power = p.power();
+    for OrderedValidatorFrozen(p) in cp_frozen_proposals {
+        let frozen = p.frozen();
         let account_id = p.account_id();
-        if power >= epoch_config.fishermen_threshold {
-            fishermen.push(p);
+        let power = cp_power_map.get(&account_id.clone()).unwrap_or(&0);
+        let r_p = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+            account_id : account_id.clone(),
+            public_key : p.public_key().clone(),
+            power : power.clone(),
+            frozen : frozen.clone(),
+        });
+        if frozen >= epoch_config.fishermen_threshold {
+            fishermen.push(r_p);
         } else {
-            *stake_change.get_mut(account_id).unwrap() = 0;
+            *frozen_change.get_mut(account_id).unwrap() = 0;
             if prev_epoch_info.account_is_validator(account_id)
                 || prev_epoch_info.account_is_fisherman(account_id)
             {
-                debug_assert!(power < threshold);
+                debug_assert!(frozen < threshold);
                 let account_id = p.take_account_id();
+                let frozen_value = frozen;
                 validator_kickout.insert(
                     account_id,
-                    ValidatorKickoutReason::NotEnoughPower { power, threshold },
+                    ValidatorKickoutReason::NotEnoughFrozen { frozen : frozen_value, threshold },
                 );
             }
         }
@@ -98,7 +362,7 @@ pub fn proposals_to_epoch_info(
 
     let num_chunk_producers = chunk_producers.len();
     // Constructing `all_validators` such that a validators position corresponds to its `ValidatorId`.
-    let mut all_validators: Vec<ValidatorPower> = Vec::with_capacity(num_chunk_producers);
+    let mut all_validators: Vec<ValidatorPowerAndFrozen> = Vec::with_capacity(num_chunk_producers);
     let mut validator_to_index = HashMap::new();
     let mut block_producers_settlement = Vec::with_capacity(block_producers.len());
 
@@ -207,7 +471,8 @@ pub fn proposals_to_epoch_info(
         vec![],
         fishermen,
         fishermen_to_index,
-        stake_change,
+        power_change,
+        frozen_change,
         validator_reward,
         validator_kickout,
         minted_amount,
@@ -217,7 +482,87 @@ pub fn proposals_to_epoch_info(
         validator_mandates,
     ))
 }
+/// Copy from proposals_with_rollover
+///
+///
+fn proposals_with_rollover_block(
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
+    prev_block_summary: &BlockInfo,
+    validator_reward: &HashMap<AccountId, Balance>,
+    validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
+    power_change: &mut BTreeMap<AccountId, Power>,
+    frozen_change: &mut BTreeMap<AccountId, Balance>,
+    fishermen: &mut Vec<ValidatorPowerAndFrozen>,
+) -> (
+    HashMap<AccountId, ValidatorPower>,
+    HashMap<AccountId, ValidatorFrozen>,
+){
+    let mut power_proposals_by_account = HashMap::new();
+    for p in power_proposals {
+        let account_id = p.account_id();
+        power_change.insert(account_id.clone(), p.power());
+        power_proposals_by_account.insert(account_id.clone(), p);
+    }
 
+    let mut frozen_proposals_by_account = HashMap::new();
+    for f in frozen_proposals {
+        let account_id = f.account_id();
+        if validator_kickout.contains_key(account_id) {
+            let account_id = f.take_account_id();
+            frozen_change.insert(account_id, 0);
+        } else {
+            frozen_change.insert(account_id.clone(), f.frozen());
+            frozen_proposals_by_account.insert(account_id.clone(), f);
+        }
+    }
+
+    for r in prev_block_summary.validators_iter() {
+        let account_id = r.account_id().clone();
+        if validator_kickout.contains_key(&account_id) {
+            frozen_change.insert(account_id, 0);
+            continue;
+        }
+        let r_f = ValidatorFrozen::V1(ValidatorFrozenV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            frozen : r.frozen().clone(),
+        });
+        let r_p = ValidatorPower::V1(ValidatorPowerV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            power : r.power().clone(),
+        });
+        // The reward will given to the validator in the next epoch,
+        //  so we need to add it to the stake but not power.
+        let f = frozen_proposals_by_account.entry(account_id.clone()).or_insert(r_f);
+        if let Some(reward) = validator_reward.get(f.account_id()) {
+            *f.frozen_mut() += *reward;
+        }
+        frozen_change.insert(f.account_id().clone(), f.frozen());
+
+        let p = power_proposals_by_account.entry(account_id).or_insert(r_p);
+        power_change.insert(p.account_id().clone(), p.power());
+
+    }
+
+    for r in prev_block_summary.fishermen_iter() {
+        let account_id = r.account_id();
+        if validator_kickout.contains_key(account_id) {
+            frozen_change.insert(account_id.clone(), 0);
+            continue;
+        }
+        if !frozen_proposals_by_account.contains_key(account_id) {
+            // safe to do this here because fishermen from previous epoch is guaranteed to have no
+            // duplicates.
+            power_change.insert(account_id.clone(), r.power());
+            frozen_change.insert(account_id.clone(), r.frozen());
+            fishermen.push(r);
+        }
+    }
+
+    (power_proposals_by_account, frozen_proposals_by_account)
+}
 /// Generates proposals based on new proposals, last epoch validators/fishermen and validator
 /// kickouts
 /// For each account that was validator or fisherman in last epoch or made stake action last epoch
@@ -230,115 +575,186 @@ pub fn proposals_to_epoch_info(
 ///        as last epoch, adjusted by rewards from last epoch, if any
 /// 4. If account was fisherman last epoch, it is included in fishermen
 fn proposals_with_rollover(
-    proposals: Vec<ValidatorPower>,
+    power_proposals: Vec<ValidatorPower>,
+    frozen_proposals: Vec<ValidatorFrozen>,
     prev_epoch_info: &EpochInfo,
     validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
-    power_change: &mut BTreeMap<AccountId, Balance>,
-    fishermen: &mut Vec<ValidatorPower>,
-) -> HashMap<AccountId, ValidatorPower> {
-    let mut proposals_by_account = HashMap::new();
-    for p in proposals {
+    power_change: &mut BTreeMap<AccountId, Power>,
+    frozen_change: &mut BTreeMap<AccountId, Balance>,
+    fishermen: &mut Vec<ValidatorPowerAndFrozen>,
+) -> (
+        HashMap<AccountId, ValidatorPower>,
+        HashMap<AccountId, ValidatorFrozen>,
+){
+    let mut power_proposals_by_account = HashMap::new();
+    for p in power_proposals {
         let account_id = p.account_id();
+        power_change.insert(account_id.clone(), p.power());
+        power_proposals_by_account.insert(account_id.clone(), p);
+    }
+
+    let mut frozen_proposals_by_account = HashMap::new();
+    for f in frozen_proposals {
+        let account_id = f.account_id();
         if validator_kickout.contains_key(account_id) {
-            let account_id = p.take_account_id();
-            power_change.insert(account_id, 0);
+            let account_id = f.take_account_id();
+            frozen_change.insert(account_id, 0);
         } else {
-            power_change.insert(account_id.clone(), p.power());
-            proposals_by_account.insert(account_id.clone(), p);
+            frozen_change.insert(account_id.clone(), f.frozen());
+            frozen_proposals_by_account.insert(account_id.clone(), f);
         }
     }
 
     for r in prev_epoch_info.validators_iter() {
         let account_id = r.account_id().clone();
         if validator_kickout.contains_key(&account_id) {
-            power_change.insert(account_id, 0);
+            frozen_change.insert(account_id, 0);
             continue;
         }
-        let p = proposals_by_account.entry(account_id).or_insert(r);
-        if let Some(reward) = validator_reward.get(p.account_id()) {
-            *p.power_mut() += *reward;
+        let r_f = ValidatorFrozen::V1(ValidatorFrozenV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            frozen : r.frozen().clone(),
+        });
+        let r_p = ValidatorPower::V1(ValidatorPowerV1{
+            account_id : account_id.clone(),
+            public_key : r.public_key().clone(),
+            power : r.power().clone(),
+        });
+        // The reward will given to the validator in the next epoch, 
+        //  so we need to add it to the stake but not power.
+        let f = frozen_proposals_by_account.entry(account_id.clone()).or_insert(r_f);
+        if let Some(reward) = validator_reward.get(f.account_id()) {
+            *f.frozen_mut() += *reward;
         }
+        frozen_change.insert(f.account_id().clone(), f.frozen());
+
+        let p = power_proposals_by_account.entry(account_id).or_insert(r_p);
         power_change.insert(p.account_id().clone(), p.power());
+
     }
 
     for r in prev_epoch_info.fishermen_iter() {
         let account_id = r.account_id();
         if validator_kickout.contains_key(account_id) {
-            power_change.insert(account_id.clone(), 0);
+            frozen_change.insert(account_id.clone(), 0);
             continue;
         }
-        if !proposals_by_account.contains_key(account_id) {
+        if !frozen_proposals_by_account.contains_key(account_id) {
             // safe to do this here because fishermen from previous epoch is guaranteed to have no
             // duplicates.
             power_change.insert(account_id.clone(), r.power());
+            frozen_change.insert(account_id.clone(), r.frozen());
             fishermen.push(r);
         }
     }
 
-    proposals_by_account
+    (power_proposals_by_account, frozen_proposals_by_account)
 }
 
-fn order_proposals<I: IntoIterator<Item = ValidatorPower>>(
+fn order_power_proposals<I: IntoIterator<Item = ValidatorPower>>(
     proposals: I,
-) -> BinaryHeap<OrderedValidatorStake> {
-    proposals.into_iter().map(OrderedValidatorStake).collect()
+) -> BinaryHeap<OrderedValidatorPower> {
+    proposals.into_iter().map(OrderedValidatorPower).collect()
 }
 
+fn order_frozen_proposals<I:  IntoIterator<Item = ValidatorFrozen>>(
+    proposals: I,
+) -> BinaryHeap<OrderedValidatorFrozen> {
+    proposals.into_iter().map(OrderedValidatorFrozen).collect()
+}
 fn select_block_producers(
-    block_producer_proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    bp_power_proposals: &mut BinaryHeap<OrderedValidatorPower>,
+    bp_frozen_proposals: &mut BinaryHeap<OrderedValidatorFrozen>,
     max_num_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorPower>, Balance) {
-    select_validators(block_producer_proposals, max_num_selected, min_stake_ratio, protocol_version)
+) -> (Vec<ValidatorPowerAndFrozen>, Balance) {
+    select_validators(bp_power_proposals, bp_frozen_proposals, max_num_selected, min_stake_ratio, protocol_version)
 }
 
 fn select_chunk_producers(
-    all_proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    all_power_proposals: &mut BinaryHeap<OrderedValidatorPower>,
+    all_frozen_proposals: &mut BinaryHeap<OrderedValidatorFrozen>,
     max_num_selected: usize,
     min_stake_ratio: Ratio<u128>,
     num_shards: u64,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorPower>, Balance) {
+) -> (Vec<ValidatorPowerAndFrozen>, Balance) {
     select_validators(
-        all_proposals,
+        all_power_proposals,
+        all_frozen_proposals,
         max_num_selected,
         min_stake_ratio * Ratio::new(1, num_shards as u128),
         protocol_version,
     )
 }
 
+#[allow(irrefutable_let_patterns)]
+fn create_power_map(heap: &BinaryHeap<OrderedValidatorPower>) -> HashMap<AccountId, Power> {
+    let mut power_map = HashMap::new();
+
+    // Explicitly define cloned_heap as an owned BinaryHeap
+    let cloned_heap: BinaryHeap<OrderedValidatorPower> = heap.clone();
+
+    // Now we can call into_sorted_vec() on this owned BinaryHeap
+    let vec = cloned_heap.into_sorted_vec();
+
+    // Iterate through the vector and populate the hash map
+    for ordered_validator in vec {
+        if let ValidatorPower::V1(ref v1) = ordered_validator.0 {
+            power_map.insert(v1.account_id.clone(), v1.power);
+        }
+    }
+
+    power_map
+}
+
+
+// Use the function with the appropriate account_id and store
+
+
+
 // Takes the top N proposals (by stake), or fewer if there are not enough or the
 // next proposals is too small relative to the others. In the case where all N
 // slots are filled, or the stake ratio falls too low, the threshold stake to be included
 // is also returned.
 fn select_validators(
-    proposals: &mut BinaryHeap<OrderedValidatorStake>,
+    power_proposals: &mut BinaryHeap<OrderedValidatorPower>,
+    frozen_proposals: &mut BinaryHeap<OrderedValidatorFrozen>,
     max_number_selected: usize,
     min_stake_ratio: Ratio<u128>,
     protocol_version: ProtocolVersion,
-) -> (Vec<ValidatorPower>, Balance) {
-    let mut total_power = 0;
-    let n = cmp::min(max_number_selected, proposals.len());
+) -> (Vec<ValidatorPowerAndFrozen>, Balance) {
+    let mut total_frozen = 0;
+    let n = cmp::min(max_number_selected, frozen_proposals.len());
     let mut validators = Vec::with_capacity(n);
+    let power_map = create_power_map(power_proposals);
     for _ in 0..n {
-        let p = proposals.pop().unwrap().0;
-        let p_power = p.power();
-        let total_power_with_p = total_power + p_power;
-        if Ratio::new(p_power, total_power_with_p) > min_stake_ratio {
-            validators.push(p);
-            total_power = total_power_with_p;
+        let p = frozen_proposals.pop().unwrap().0;
+        let p_frozen = p.frozen();
+        let power = power_map.get(&p.account_id().clone()).unwrap_or(&0);
+        let p_r = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+            account_id : p.account_id().clone(),
+            public_key : p.public_key().clone(),
+            power : power.clone(),
+            frozen : p_frozen.clone(),
+        });
+        let total_frozen_with_p = total_frozen + p_frozen;
+        if Ratio::new(p_frozen, total_frozen_with_p) > min_stake_ratio {
+            validators.push(p_r);
+            total_frozen = total_frozen_with_p;
         } else {
             // p was not included, return it to the list of proposals
-            proposals.push(OrderedValidatorStake(p));
+            frozen_proposals.push(OrderedValidatorFrozen(p));
             break;
         }
     }
     if validators.len() == max_number_selected {
         // all slots were filled, so the threshold stake is 1 more than the current
         // smallest stake
-        let threshold = validators.last().unwrap().power() + 1;
+        let threshold = validators.last().unwrap().frozen() + 1;
         (validators, threshold)
     } else {
         // the stake ratio condition prevented all slots from being filled,
@@ -349,12 +765,12 @@ fn select_validators(
             FixStakingThreshold,
             protocol_version
         ) {
-            (min_stake_ratio * Ratio::from_integer(total_power)
+            (min_stake_ratio * Ratio::from_integer(total_frozen)
                 / (Ratio::from_integer(1u128) - min_stake_ratio))
                 .ceil()
                 .to_integer()
         } else {
-            (min_stake_ratio * Ratio::new(total_power, 1)).ceil().to_integer()
+            (min_stake_ratio * Ratio::new(total_frozen, 1)).ceil().to_integer()
         };
         (validators, threshold)
     }
@@ -363,19 +779,36 @@ fn select_validators(
 /// We store stakes in max heap and want to order them such that the validator
 /// with the largest state and (in case of a tie) lexicographically smallest
 /// AccountId comes at the top.
-#[derive(Eq, PartialEq)]
-struct OrderedValidatorStake(ValidatorPower);
-impl OrderedValidatorStake {
+#[derive(Eq, PartialEq, Clone)]
+struct OrderedValidatorFrozen(ValidatorFrozen);
+impl OrderedValidatorFrozen {
     fn key(&self) -> impl Ord + '_ {
-        (self.0.power(), std::cmp::Reverse(self.0.account_id()))
+        (self.0.frozen(), std::cmp::Reverse(self.0.account_id()))
     }
 }
-impl PartialOrd for OrderedValidatorStake {
+impl PartialOrd for OrderedValidatorFrozen {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-impl Ord for OrderedValidatorStake {
+impl Ord for OrderedValidatorFrozen {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.key().cmp(&other.key())
+    }
+}
+#[derive(Eq, PartialEq, Clone)]
+struct OrderedValidatorPower(ValidatorPower);
+impl OrderedValidatorPower {
+    fn key(&self) -> impl Ord + '_ {
+        (self.0.power(), std::cmp::Reverse(self.0.account_id()))
+    }
+}
+impl PartialOrd for OrderedValidatorPower {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for OrderedValidatorPower {
     fn cmp(&self, other: &Self) -> Ordering {
         self.key().cmp(&other.key())
     }
@@ -394,6 +827,7 @@ mod tests {
     use near_primitives::validator_mandates::{AssignmentWeight, ValidatorMandatesAssignment};
     use near_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
+    use crate::test_utils::frozen;
 
     #[test]
     fn test_validator_assignment_all_block_producers() {
@@ -403,12 +837,14 @@ mod tests {
         let epoch_config = create_epoch_config(2, 100, 0, Default::default());
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
-        let proposals = create_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
+        let power_proposals = create_power_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
+        let frozen_proposals = create_frozen_proposals(&[("test1", 1000), ("test2", 2000), ("test3", 300)]);
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals.clone(),
+            power_proposals.clone(),
+            frozen_proposals.clone(),
             Default::default(),
             Default::default(),
             0,
@@ -421,7 +857,7 @@ mod tests {
         assert_eq!(epoch_info.epoch_height(), prev_epoch_height + 1);
 
         // assign block producers in decreasing order of stake
-        let mut sorted_proposals = proposals;
+        let mut sorted_proposals = power_proposals;
         sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert_eq!(sorted_proposals, epoch_info.validators_iter().collect::<Vec<_>>());
 
@@ -465,7 +901,18 @@ mod tests {
             ],
             &[],
         );
-        let proposals = create_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
+        let frozen_proposals = create_frozen_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
+            (
+                format!("test{}", i),
+                2000u128 + (i as u128),
+                if i <= num_cp_seats {
+                    Proposal::ChunkOnlyProducer
+                } else {
+                    Proposal::BlockProducer
+                },
+            )
+        }));
+        let power_proposals = create_power_proposals((2..(2 * num_bp_seats + num_cp_seats)).map(|i| {
             (
                 format!("test{}", i),
                 2000u128 + (i as u128),
@@ -480,7 +927,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals.clone(),
+            power_proposals.clone(),
+            frozen_proposals.clone(),
             Default::default(),
             Default::default(),
             0,
@@ -492,7 +940,7 @@ mod tests {
         assert_eq!(epoch_info.epoch_height(), prev_epoch_height + 1);
 
         // the top stakes are the chosen block producers
-        let mut sorted_proposals = proposals;
+        let mut sorted_proposals = frozen_proposals;
         sorted_proposals.sort_unstable_by(|a, b| b.power().cmp(&a.power()));
         assert!(sorted_proposals.iter().take(num_bp_seats as usize).cloned().eq(epoch_info
             .block_producers_settlement()
@@ -523,11 +971,11 @@ mod tests {
         assert_eq!(kickout.len(), 2);
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test1")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughPower { power: test1_stake, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughFrozen { frozen: test1_stake, threshold: 2011 },
         );
         assert_eq!(
             kickout.get(AccountIdRef::new_or_panic("test2")).unwrap(),
-            &ValidatorKickoutReason::NotEnoughPower { power: 2002, threshold: 2011 },
+            &ValidatorKickoutReason::NotEnoughFrozen { frozen: 2002, threshold: 2011 },
         );
     }
 
@@ -546,13 +994,15 @@ mod tests {
         );
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
-        let proposals = create_proposals(&[("test1", 1000), ("test2", 2000)]);
+        let power_proposals = create_power_proposals(&[("test1", 1000), ("test2", 2000)]);
+        let frozen_proposals = create_frozen_proposals(&[("test1", 1000), ("test2", 2000)]);
 
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -587,14 +1037,17 @@ mod tests {
         );
         let prev_epoch_height = 7;
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test1", "test2"], &[]);
-        let proposals =
-            create_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
+        let power_proposals =
+            create_power_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
+        let frozen_proposals =
+            create_frozen_proposals(&[("test1", 1000), ("test2", 1000), ("test3", 1000), ("test4", 1000)]);
 
         let epoch_info = proposals_to_epoch_info(
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -613,7 +1066,12 @@ mod tests {
         }
 
         // When there are multiple CPs they are chosen in proportion to stake.
-        let proposals = create_proposals((1..=num_shards).flat_map(|i| {
+        let power_proposals = create_power_proposals((1..=num_shards).flat_map(|i| {
+            // Each shard gets a pair of validators, one with twice as
+            // much stake as the other.
+            vec![(format!("test{}", i), 1000), (format!("test{}", 100 * i), 2000)].into_iter()
+        }));
+        let frozen_proposals = create_frozen_proposals((1..=num_shards).flat_map(|i| {
             // Each shard gets a pair of validators, one with twice as
             // much stake as the other.
             vec![(format!("test{}", i), 1000), (format!("test{}", 100 * i), 2000)].into_iter()
@@ -622,7 +1080,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -672,7 +1131,15 @@ mod tests {
         //
         // Note that `proposals_to_epoch_info` will not include `test6` in the set of validators,
         // hence it will not hold a (partial) mandate
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1500),
+            ("test2", 1000),
+            ("test3", 1000),
+            ("test4", 260),
+            ("test5", 140),
+            ("test6", 50),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1500),
             ("test2", 1000),
             ("test3", 1000),
@@ -685,7 +1152,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -745,7 +1213,15 @@ mod tests {
         let prev_epoch_height = 7;
         // test5 and test6 are going to get kicked out for not enough stake.
         let prev_epoch_info = create_prev_epoch_info(prev_epoch_height, &["test5", "test6"], &[]);
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -757,7 +1233,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -788,7 +1265,16 @@ mod tests {
 
         let bp_threshold = epoch_info.seat_price();
         let num_validators = epoch_info.validators_iter().len();
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+            ("test7", bp_threshold),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -801,7 +1287,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -812,7 +1299,16 @@ mod tests {
         #[cfg(feature = "protocol_feature_fix_staking_threshold")]
         assert_eq!(num_validators + 1, epoch_info.validators_iter().len());
 
-        let proposals = create_proposals(&[
+        let power_proposals = create_power_proposals(&[
+            ("test1", 1000),
+            ("test2", 1000),
+            ("test3", 1000), // the total up to this point is 3000
+            ("test4", 200),  // 200 is < 1/10 of 3000, so not validator, but can be fisherman
+            ("test5", 100),  // 100 is even too small to be a fisherman, cannot get any role
+            ("test6", 50),
+            ("test7", bp_threshold - 1),
+        ]);
+        let frozen_proposals = create_frozen_proposals(&[
             ("test1", 1000),
             ("test2", 1000),
             ("test3", 1000), // the total up to this point is 3000
@@ -825,7 +1321,8 @@ mod tests {
             &epoch_config,
             [0; 32],
             &epoch_info,
-            proposals,
+            power_proposals,
+            frozen_proposals,
             Default::default(),
             Default::default(),
             0,
@@ -853,6 +1350,7 @@ mod tests {
             &epoch_config,
             [0; 32],
             &prev_epoch_info,
+            Default::default(),
             Default::default(),
             kick_out,
             Default::default(),
@@ -886,6 +1384,7 @@ mod tests {
             Default::default(),
             Default::default(),
             rewards_map,
+            Default::default(),
             0,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,
@@ -948,14 +1447,29 @@ mod tests {
         EpochInfo::V3(result)
     }
 
-    fn to_map(vs: &[ValidatorPower]) -> HashMap<AccountId, ValidatorId> {
+    fn to_map(vs: &[ValidatorPowerAndFrozen]) -> HashMap<AccountId, ValidatorId> {
         vs.iter().enumerate().map(|(i, v)| (v.account_id().clone(), i as u64)).collect()
     }
 
-    fn create_proposals<I, T>(ps: I) -> Vec<ValidatorPower>
+    fn create_proposals<I, T>(ps: I) -> Vec<ValidatorPowerAndFrozen>
+        where
+            T: IntoValidatorStake,
+            I: IntoIterator<Item = T>,
+    {
+        ps.into_iter().map(IntoValidatorStake::into_validator_stake).collect()
+    }
+    fn create_power_proposals<I, T>(ps: I) -> Vec<ValidatorPower>
     where
         T: IntoValidatorStake,
         I: IntoIterator<Item = T>,
+    {
+        ps.into_iter().map(IntoValidatorStake::into_validator_stake).collect()
+    }
+
+    fn create_frozen_proposals<I, T>(ps: I) -> Vec<ValidatorFrozen>
+        where
+            T: IntoValidatorStake,
+            I: IntoIterator<Item = T>,
     {
         ps.into_iter().map(IntoValidatorStake::into_validator_stake).collect()
     }
@@ -967,41 +1481,41 @@ mod tests {
     }
 
     trait IntoValidatorStake {
-        fn into_validator_stake(self) -> ValidatorPower;
+        fn into_validator_stake(self) -> ValidatorFrozen;
     }
 
     impl IntoValidatorStake for &str {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (&str, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl IntoValidatorStake for (String, Balance, Proposal) {
-        fn into_validator_stake(self) -> ValidatorPower {
-            ValidatorPower::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
+        fn into_validator_stake(self) -> ValidatorFrozen {
+            ValidatorFrozen::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
     impl<T: IntoValidatorStake + Copy> IntoValidatorStake for &T {
-        fn into_validator_stake(self) -> ValidatorPower {
+        fn into_validator_stake(self) -> ValidatorFrozen {
             (*self).into_validator_stake()
         }
     }

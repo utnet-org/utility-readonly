@@ -71,9 +71,9 @@ use near_primitives::sharding::{
 };
 use near_primitives::static_clock::StaticClock;
 use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::Gas;
+use near_primitives::types::{ApprovalFrozen, Gas};
 use near_primitives::types::StateRoot;
-use near_primitives::types::{AccountId, ApprovalPower, BlockHeight, EpochId, NumBlocks, ShardId};
+use near_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ShardId};
 use near_primitives::unwrap_or_return;
 use near_primitives::utils::MaybeValidated;
 use near_primitives::validator_signer::ValidatorSigner;
@@ -596,7 +596,7 @@ impl Client {
 
         // Check that we are were called at the block that we are producer for.
         let epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(&prev_hash).unwrap();
-        let next_block_proposer = self.epoch_manager.get_block_producer(&epoch_id, height)?;
+        let next_block_proposer = self.epoch_manager.get_block_producer_by_hash(&prev_hash)?;
 
         let prev = self.chain.get_block_header(&prev_hash)?;
         let prev_height = prev.height();
@@ -674,7 +674,7 @@ impl Client {
             .epoch_manager
             .get_epoch_block_approvers_ordered(&prev_hash)?
             .into_iter()
-            .map(|(ApprovalPower { account_id, .. }, is_slashed)| {
+            .map(|(ApprovalFrozen { account_id, .. }, is_slashed)| {
                 if is_slashed {
                     None
                 } else {
@@ -887,7 +887,8 @@ impl Client {
             gas_used,
             chunk_extra.gas_limit(),
             chunk_extra.balance_burnt(),
-            chunk_extra.validator_proposals().collect(),
+            chunk_extra.validator_power_proposals().collect(),
+            chunk_extra.validator_frozen_proposals().collect(),
             transactions,
             &outgoing_receipts,
             outgoing_receipts_root,
@@ -1507,9 +1508,9 @@ impl Client {
         parent_hash: &CryptoHash,
         approval: Approval,
     ) -> Result<(), Error> {
-        let next_epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(parent_hash)?;
+        let _next_epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(parent_hash)?;
         let next_block_producer =
-            self.epoch_manager.get_block_producer(&next_epoch_id, approval.target_height)?;
+            self.epoch_manager.get_block_producer_by_hash(parent_hash)?;
         if Some(&next_block_producer) == self.validator_signer.as_ref().map(|x| x.validator_id()) {
             self.collect_block_approval(&approval, ApprovalType::SelfApproval);
         } else {
@@ -2003,7 +2004,7 @@ impl Client {
         }
 
         let is_block_producer =
-            match self.epoch_manager.get_block_producer(&next_block_epoch_id, *target_height) {
+            match self.epoch_manager.get_block_producer_by_hash(&parent_hash) {
                 Err(_) => false,
                 Ok(target_block_producer) => {
                     Some(&target_block_producer)

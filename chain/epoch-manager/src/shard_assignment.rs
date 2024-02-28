@@ -1,5 +1,7 @@
 use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{Balance, NumShards, ShardId};
+use near_primitives::types::{Balance, NumShards, Power, ShardId};
+use near_primitives::types::validator_frozen::ValidatorFrozen;
+use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 use near_primitives::utils::min_heap::{MinHeap, PeekMut};
 
 /// Assign chunk producers (a.k.a. validators) to shards.  The i-th element
@@ -16,14 +18,14 @@ use near_primitives::utils::min_heap::{MinHeap, PeekMut};
 ///
 /// Panics if chunk_producers vector is not sorted in descending order by
 /// producer’s stake.
-pub fn assign_shards<T: HasStake + Eq + Clone>(
+pub fn assign_shards<T: HasStake<Balance> + Eq + Clone + PartialOrd>(
     chunk_producers: Vec<T>,
     num_shards: NumShards,
     min_validators_per_shard: usize,
-) -> Result<Vec<Vec<T>>, NotEnoughValidators> {
+) -> Result<Vec<Vec<T>>, NotEnoughValidators>  {
     for (idx, pair) in chunk_producers.windows(2).enumerate() {
         assert!(
-            pair[0].get_stake() >= pair[1].get_stake(),
+            pair[0].get_value() >= pair[1].get_value(),
             "chunk_producers isn’t sorted; first discrepancy at {}",
             idx
         );
@@ -67,7 +69,8 @@ pub fn assign_shards<T: HasStake + Eq + Clone>(
         for (_, cp) in chunk_producers.take(remaining_producers) {
             let (least_stake, least_validator_count, shard_id) =
                 shard_index.pop().expect("shard_index should never be empty");
-            shard_index.push((least_stake + cp.get_stake(), least_validator_count + 1, shard_id));
+            let get_value : Balance = cp.get_value();
+            shard_index.push((least_stake + get_value, least_validator_count + 1, shard_id));
             result[usize::try_from(shard_id).unwrap()].push(cp);
         }
     }
@@ -75,7 +78,7 @@ pub fn assign_shards<T: HasStake + Eq + Clone>(
     Ok(result)
 }
 
-fn assign_with_possible_repeats<T: HasStake + Eq, I: Iterator<Item = (usize, T)>>(
+fn assign_with_possible_repeats<T: HasStake<Balance> + Eq, I: Iterator<Item = (usize, T)>>(
     shard_index: &mut MinHeap<(usize, Balance, ShardId)>,
     result: &mut Vec<Vec<T>>,
     cp_iter: &mut I,
@@ -116,7 +119,7 @@ fn assign_with_possible_repeats<T: HasStake + Eq, I: Iterator<Item = (usize, T)>
                     // shard still needs more producers.  Assign `cp` to it and
                     // move to next one.
                     top.0 += 1;
-                    top.1 += cp.get_stake();
+                    top.1 += cp.get_value();
                     result[usize::try_from(top.2).unwrap()].push(cp);
                     break;
                 }
@@ -140,13 +143,25 @@ fn assign_with_possible_repeats<T: HasStake + Eq, I: Iterator<Item = (usize, T)>
 #[derive(Debug)]
 pub struct NotEnoughValidators;
 
-pub trait HasStake {
-    fn get_stake(&self) -> Balance;
+pub trait HasStake<T> {
+    fn get_value(&self) -> T;
 }
 
-impl HasStake for ValidatorPower {
-    fn get_stake(&self) -> Balance {
+impl HasStake<Power> for ValidatorPower {
+    fn get_value(&self) -> Power {
         self.power()
+    }
+}
+
+impl HasStake<Balance> for ValidatorFrozen {
+    fn get_value(&self) -> Balance {
+        self.frozen()
+    }
+}
+
+impl HasStake<Balance> for ValidatorPowerAndFrozen {
+    fn get_value(&self) -> Balance {
+        self.frozen()
     }
 }
 

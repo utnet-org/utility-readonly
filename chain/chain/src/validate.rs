@@ -145,10 +145,14 @@ pub fn validate_chunk_with_chunk_extra_and_receipts_root(
         return Err(Error::InvalidOutcomesProof);
     }
 
-    let chunk_extra_proposals = prev_chunk_extra.validator_proposals();
-    let chunk_header_proposals = chunk_header.prev_validator_proposals();
-    if chunk_header_proposals.len() != chunk_extra_proposals.len()
-        || !chunk_extra_proposals.eq(chunk_header_proposals)
+    let chunk_extra_power_proposals = prev_chunk_extra.validator_power_proposals();
+    let chunk_extra_frozen_proposals = prev_chunk_extra.validator_frozen_proposals();
+    let chunk_header_power_proposals = chunk_header.prev_validator_power_proposals();
+    let chunk_header_frozen_proposals = chunk_header.prev_validator_frozen_proposals();
+    if chunk_header_power_proposals.len() != chunk_extra_power_proposals.len()
+        || !chunk_extra_power_proposals.eq(chunk_header_power_proposals)
+        || chunk_header_frozen_proposals.len() != chunk_extra_frozen_proposals.len()
+        || !chunk_extra_frozen_proposals.eq(chunk_header_frozen_proposals)
     {
         return Err(Error::InvalidValidatorProposals);
     }
@@ -188,7 +192,7 @@ fn validate_double_sign(
     let left_block_header = BlockHeader::try_from_slice(&block_double_sign.left_block_header)?;
     let right_block_header = BlockHeader::try_from_slice(&block_double_sign.right_block_header)?;
     let block_producer = epoch_manager
-        .get_block_producer(left_block_header.epoch_id(), left_block_header.height())?;
+        .get_block_producer_by_hash(left_block_header.prev_hash())?;
     if left_block_header.hash() != right_block_header.hash()
         && left_block_header.height() == right_block_header.height()
         && epoch_manager.verify_validator_signature(

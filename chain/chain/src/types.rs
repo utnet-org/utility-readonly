@@ -37,6 +37,7 @@ use near_store::{PartialStorage, ShardTries, Store, Trie, WrappedTrieChanges};
 
 pub use near_epoch_manager::EpochManagerAdapter;
 pub use near_primitives::block::{Block, BlockHeader, Tip};
+use near_primitives::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum BlockStatus {
@@ -105,7 +106,8 @@ pub struct ApplyChunkResult {
     pub new_root: StateRoot,
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub outgoing_receipts: Vec<Receipt>,
-    pub validator_proposals: Vec<ValidatorPower>,
+    pub validator_power_proposals: Vec<ValidatorPower>,
+    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
     pub total_gas_burnt: Gas,
     pub total_balance_burnt: Balance,
     pub proof: Option<PartialStorage>,
@@ -305,7 +307,8 @@ impl ApplyChunkBlockContext {
 
 pub struct ApplyChunkShardContext<'a> {
     pub shard_id: ShardId,
-    pub last_validator_proposals: ValidatorPowerIter<'a>,
+    pub last_validator_power_proposals: ValidatorPowerIter<'a>,
+    pub last_validator_frozen_proposals: ValidatorFrozenIter<'a>,
     pub gas_limit: Gas,
     pub is_new_chunk: bool,
     pub is_first_block_with_chunk_of_version: bool,

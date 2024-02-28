@@ -388,7 +388,7 @@ impl ClientActor {
 
         let mut blocks: HashMap<CryptoHash, DebugBlockStatus> = HashMap::new();
         let mut missed_heights: Vec<MissedHeightInfo> = Vec::new();
-        let mut last_epoch_id = head.epoch_id;
+        let mut _last_epoch_id = head.epoch_id;
         let initial_gas_price = self.client.chain.genesis_block().header().next_gas_price();
 
         let mut height_to_fetch = starting_height.unwrap_or(header_head.height);
@@ -405,12 +405,15 @@ impl ClientActor {
                     .into_iter()
                     .collect();
                 if block_hashes.is_empty() {
+                    // get pre_hash with height_to_fetch
+                    let the_block = self.client.chain.get_block_by_height(height_to_fetch-1)?;
+                    let pre_hash = the_block.hash();
                     missed_heights.push(MissedHeightInfo {
                         block_height: height_to_fetch,
                         block_producer: self
                             .client
                             .epoch_manager
-                            .get_block_producer(&last_epoch_id, height_to_fetch)
+                            .get_block_producer_by_hash(pre_hash)
                             .ok(),
                     });
                 }
@@ -444,7 +447,7 @@ impl ClientActor {
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer(block_header.epoch_id(), block_header.height())
+                    .get_block_producer_by_hash(block_header.prev_hash())
                     .ok();
 
                 let chunks = match &block {
@@ -492,7 +495,7 @@ impl ClientActor {
                 );
                 // TODO(robin): using last epoch id when iterating in reverse height direction is
                 // not a good idea for calculating producer of missing heights. Revisit this.
-                last_epoch_id = block_header.epoch_id().clone();
+                _last_epoch_id = block_header.epoch_id().clone();
                 if let Some(prev_height) = block_header.prev_height() {
                     if block_header.height() != prev_height + 1 {
                         // This block was produced using a Skip approval; make sure to fetch the
@@ -549,10 +552,12 @@ impl ClientActor {
                 }
 
                 // And if we are the block (or chunk) producer for this height - collect some timing info.
+                let prev_header = self.client.chain.get_block_header_by_height(height-1)?;
+                let prev_hash = prev_header.hash();
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer(&epoch_id, height)
+                    .get_block_producer_by_hash(prev_hash)
                     .map(|f| f.to_string())
                     .unwrap_or_default();
 
@@ -611,7 +616,7 @@ impl ClientActor {
                         .map(|validator| {
                             (
                                 validator.0.account_id.clone(),
-                                (validator.0.power_this_epoch / 10u128.pow(12)) as u64,
+                                (validator.0.frozen_this_epoch / 10u128.pow(12)) as u64,
                             )
                         })
                         .collect::<Vec<(AccountId, u64)>>()

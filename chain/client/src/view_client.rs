@@ -1,10 +1,7 @@
 //! Readonly view of the chain and state of the database.
 //! Useful for querying from RPC.
 
-use crate::adapter::{
-    AnnounceAccountRequest, BlockHeadersRequest, BlockRequest, StateRequestHeader,
-    StateRequestPart, StateResponse, TxStatusRequest, TxStatusResponse,
-};
+use crate::adapter::{AnnounceAccountRequest, BlockHeadersRequest, BlockRequest, ProviderRequest, StateRequestHeader, StateRequestPart, StateResponse, TxStatusRequest, TxStatusResponse};
 use crate::{
     metrics, sync, GetChunk, GetExecutionOutcomeResponse, GetNextLightClientBlock, GetStateChanges,
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered,
@@ -17,16 +14,7 @@ use near_chain::{
 };
 use near_chain_configs::{ClientConfig, ProtocolConfigView};
 use near_chain_primitives::error::EpochErrorResultToChainError;
-use near_client_primitives::types::{
-    Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse,
-    GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError,
-    GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows,
-    GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig,
-    GetProtocolConfigError, GetReceipt, GetReceiptError, GetSplitStorageInfo,
-    GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock,
-    GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError,
-    TxStatus, TxStatusError,
-};
+use near_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
 use near_epoch_manager::shard_tracker::ShardTracker;
 use near_epoch_manager::EpochManagerAdapter;
 use near_network::types::{
@@ -50,7 +38,6 @@ use near_primitives::types::{
     AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId,
     ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier,
 };
-use near_primitives::views::validator_power_view::ValidatorPowerView;
 use near_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView,
     FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView,
@@ -65,6 +52,7 @@ use std::hash::Hash;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
+use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Max number of queries that we keep.
 const QUERY_REQUEST_LIMIT: usize = 500;
@@ -627,6 +615,22 @@ impl Handler<WithSpanContext<Query>> for ViewClientActor {
     }
 }
 
+/// Handles retrieving block provider from the chain.
+impl Handler<WithSpanContext<GetProvider>> for ViewClientActor {
+    type Result = Result<AccountId, GetProviderError>;
+    #[perf]
+    fn handle(&mut self, msg: WithSpanContext<GetProvider>, _: &mut Self::Context) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        tracing::debug!(target: "client", ?msg);
+        let block = self.epoch_manager.get_block_info(&msg.0)?;
+        let block_author = self
+            .epoch_manager
+            .get_block_producer_by_hash(&block.hash())
+            .into_chain_error()?;
+        Ok(block_author)
+    }
+}
+
 /// Handles retrieving block from the chain.
 impl Handler<WithSpanContext<GetBlock>> for ViewClientActor {
     type Result = Result<BlockView, GetBlockError>;
@@ -640,7 +644,7 @@ impl Handler<WithSpanContext<GetBlock>> for ViewClientActor {
         let block = self.get_block_by_reference(&msg.0)?.ok_or(GetBlockError::NotSyncedYet)?;
         let block_author = self
             .epoch_manager
-            .get_block_producer(block.header().epoch_id(), block.header().height())
+            .get_block_producer_by_hash(block.header().prev_hash())
             .into_chain_error()?;
         Ok(BlockView::from_author_block(block_author, block))
     }
@@ -792,7 +796,7 @@ impl Handler<WithSpanContext<GetValidatorInfo>> for ViewClientActor {
 }
 
 impl Handler<WithSpanContext<GetValidatorOrdered>> for ViewClientActor {
-    type Result = Result<Vec<ValidatorPowerView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
 
     #[perf]
     fn handle(
@@ -1270,6 +1274,29 @@ impl Handler<WithSpanContext<BlockRequest>> for ViewClientActor {
         let BlockRequest(hash) = msg;
         if let Ok(block) = self.chain.get_block(&hash) {
             Some(Box::new(block))
+        } else {
+            None
+        }
+    }
+}
+
+
+impl Handler<WithSpanContext<ProviderRequest>> for ViewClientActor {
+    type Result = Option<AccountId>;
+
+    #[perf]
+    fn handle(
+        &mut self,
+        msg: WithSpanContext<ProviderRequest>,
+        _ctx: &mut Self::Context,
+    ) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        tracing::debug!(target: "client", ?msg);
+        let _timer =
+            metrics::VIEW_CLIENT_MESSAGE_TIME.with_label_values(&["ProviderRequest"]).start_timer();
+        let ProviderRequest(hash) = msg;
+        if let Ok(producer) = self.epoch_manager.get_block_producer_by_hash(&hash) {
+            Some(producer)
         } else {
             None
         }

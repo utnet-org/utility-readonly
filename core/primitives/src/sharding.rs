@@ -3,7 +3,7 @@ use crate::merkle::{combine_hash, merklize, verify_path, MerklePath};
 use crate::receipt::Receipt;
 use crate::transaction::SignedTransaction;
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
-use crate::types::{Balance, BlockHeight, Gas, MerkleHash, ShardId, StateRoot};
+use crate::types::{Balance, BlockHeight, Gas, MerkleHash, ShardId, StateRoot, ValidatorFrozenV1};
 use crate::validator_signer::ValidatorSigner;
 use crate::version::{ProtocolFeature, ProtocolVersion, SHARD_CHUNK_HEADER_UPGRADE_VERSION};
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -71,6 +71,7 @@ pub mod shard_chunk_header_inner;
 pub use shard_chunk_header_inner::{
     ShardChunkHeaderInner, ShardChunkHeaderInnerV1, ShardChunkHeaderInnerV2,
 };
+use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]
 #[borsh(init=init)]
@@ -125,7 +126,8 @@ impl ShardChunkHeaderV2 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorPowerV1>,
+        prev_validator_power_proposals: Vec<ValidatorPowerV1>,
+        prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInnerV1 {
@@ -141,7 +143,8 @@ impl ShardChunkHeaderV2 {
             prev_balance_burnt,
             prev_outgoing_receipts_root,
             tx_root,
-            prev_validator_proposals,
+            prev_validator_power_proposals,
+            prev_validator_frozen_proposals,
         };
         let hash = Self::compute_hash(&inner);
         let signature = signer.sign_chunk_hash(&hash);
@@ -189,7 +192,8 @@ impl ShardChunkHeaderV3 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorPower>,
+        prev_validator_power_proposals: Vec<ValidatorPower>,
+        prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInner::V2(ShardChunkHeaderInnerV2 {
@@ -205,7 +209,8 @@ impl ShardChunkHeaderV3 {
             prev_balance_burnt,
             prev_outgoing_receipts_root,
             tx_root,
-            prev_validator_proposals,
+            prev_validator_power_proposals,
+            prev_validator_frozen_proposals,
         });
         Self::from_inner(inner, signer)
     }
@@ -284,11 +289,20 @@ impl ShardChunkHeader {
     }
 
     #[inline]
-    pub fn prev_validator_proposals(&self) -> ValidatorPowerIter {
+    pub fn prev_validator_power_proposals(&self) -> ValidatorPowerIter {
         match self {
-            Self::V1(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_proposals),
-            Self::V2(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_proposals),
-            Self::V3(header) => header.inner.prev_validator_proposals(),
+            Self::V1(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_power_proposals),
+            Self::V2(header) => ValidatorPowerIter::v1(&header.inner.prev_validator_power_proposals),
+            Self::V3(header) => header.inner.prev_validator_power_proposals(),
+        }
+    }
+
+    #[inline]
+    pub fn prev_validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+        match self {
+            Self::V1(header) => ValidatorFrozenIter::v1(&header.inner.prev_validator_frozen_proposals),
+            Self::V2(header) => ValidatorFrozenIter::v1(&header.inner.prev_validator_frozen_proposals),
+            Self::V3(header) => header.inner.prev_validator_frozen_proposals(),
         }
     }
 
@@ -454,7 +468,8 @@ impl ShardChunkHeaderV1 {
         prev_balance_burnt: Balance,
         prev_outgoing_receipts_root: CryptoHash,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorPowerV1>,
+        prev_validator_power_proposals: Vec<ValidatorPowerV1>,
+        prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
         signer: &dyn ValidatorSigner,
     ) -> Self {
         let inner = ShardChunkHeaderInnerV1 {
@@ -470,7 +485,8 @@ impl ShardChunkHeaderV1 {
             prev_balance_burnt,
             prev_outgoing_receipts_root,
             tx_root,
-            prev_validator_proposals,
+            prev_validator_power_proposals,
+            prev_validator_frozen_proposals,
         };
         let hash = Self::compute_hash(&inner);
         let signature = signer.sign_chunk_hash(&hash);
@@ -1036,7 +1052,8 @@ impl EncodedShardChunk {
         gas_limit: Gas,
         prev_balance_burnt: Balance,
         tx_root: CryptoHash,
-        prev_validator_proposals: Vec<ValidatorPower>,
+        prev_validator_power_proposals: Vec<ValidatorPower>,
+        prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
         transactions: Vec<SignedTransaction>,
         prev_outgoing_receipts: &[Receipt],
         prev_outgoing_receipts_root: CryptoHash,
@@ -1053,8 +1070,10 @@ impl EncodedShardChunk {
         let block_header_v3_version = Some(ProtocolFeature::BlockHeaderV3.protocol_version());
 
         if protocol_version < SHARD_CHUNK_HEADER_UPGRADE_VERSION {
-            let prev_validator_proposals =
-                prev_validator_proposals.into_iter().map(|v| v.into_v1()).collect();
+            let prev_validator_power_proposals =
+                prev_validator_power_proposals.into_iter().map(|v| v.into_v1()).collect();
+            let prev_validator_frozen_proposals =
+                prev_validator_frozen_proposals.into_iter().map(|v| v.into_v1()).collect();
             let header = ShardChunkHeaderV1::new(
                 prev_block_hash,
                 prev_state_root,
@@ -1068,7 +1087,8 @@ impl EncodedShardChunk {
                 prev_balance_burnt,
                 prev_outgoing_receipts_root,
                 tx_root,
-                prev_validator_proposals,
+                prev_validator_power_proposals,
+                prev_validator_frozen_proposals,
                 signer,
             );
             let chunk = EncodedShardChunkV1 { header, content };
@@ -1076,8 +1096,10 @@ impl EncodedShardChunk {
         } else if block_header_v3_version.is_none()
             || protocol_version < block_header_v3_version.unwrap()
         {
-            let validator_proposals =
-                prev_validator_proposals.into_iter().map(|v| v.into_v1()).collect();
+            let validator_power_proposals =
+                prev_validator_power_proposals.into_iter().map(|v| v.into_v1()).collect();
+            let validator_frozen_proposals =
+                prev_validator_frozen_proposals.into_iter().map(|v| v.into_v1()).collect();
             let header = ShardChunkHeaderV2::new(
                 prev_block_hash,
                 prev_state_root,
@@ -1091,7 +1113,8 @@ impl EncodedShardChunk {
                 prev_balance_burnt,
                 prev_outgoing_receipts_root,
                 tx_root,
-                validator_proposals,
+                validator_power_proposals,
+                validator_frozen_proposals,
                 signer,
             );
             let chunk = EncodedShardChunkV2 { header: ShardChunkHeader::V2(header), content };
@@ -1110,7 +1133,8 @@ impl EncodedShardChunk {
                 prev_balance_burnt,
                 prev_outgoing_receipts_root,
                 tx_root,
-                prev_validator_proposals,
+                prev_validator_power_proposals,
+                prev_validator_frozen_proposals,
                 signer,
             );
             let chunk = EncodedShardChunkV2 { header: ShardChunkHeader::V3(header), content };

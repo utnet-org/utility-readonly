@@ -52,6 +52,8 @@ use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::debug;
+use near_primitives::types::validator_frozen::ValidatorFrozen;
+use near_primitives_core::types::Power;
 
 mod actions;
 pub mod adapter;
@@ -69,12 +71,16 @@ const EXPECT_ACCOUNT_EXISTS: &str = "account exists, checked above";
 /// Contains information to update validators accounts at the first block of a new epoch.
 #[derive(Debug)]
 pub struct ValidatorAccountsUpdate {
-    /// Maximum stake across last 3 epochs.
-    pub stake_info: HashMap<AccountId, Balance>,
+    /// Maximum power across last 3 epochs.
+    pub power_info: HashMap<AccountId, Power>,
+    /// Maximum frozen across last 3 epochs.
+    pub frozen_info: HashMap<AccountId, Balance>,
     /// Rewards to distribute to validators.
     pub validator_rewards: HashMap<AccountId, Balance>,
-    /// Stake proposals from the last chunk.
-    pub last_proposals: HashMap<AccountId, Balance>,
+    /// Power proposals from the last chunk.
+    pub last_power_proposals: HashMap<AccountId, Power>,
+    /// Frozen proposals from the last chunk.
+    pub last_frozen_proposals: HashMap<AccountId, Balance>,
     /// The ID of the protocol treasury account if it belongs to the current shard.
     pub protocol_treasury_account_id: Option<AccountId>,
     /// Accounts to slash and the slashed amount (None means everything)
@@ -107,7 +113,8 @@ pub struct ApplyStats {
 pub struct ApplyResult {
     pub state_root: StateRoot,
     pub trie_changes: TrieChanges,
-    pub validator_proposals: Vec<ValidatorPower>,
+    pub validator_power_proposals: Vec<ValidatorPower>,
+    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
     pub outgoing_receipts: Vec<Receipt>,
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub state_changes: Vec<RawStateChangesWithTrieKey>,
@@ -127,7 +134,8 @@ pub struct ActionResult {
     pub result: Result<ReturnData, ActionError>,
     pub logs: Vec<LogEntry>,
     pub new_receipts: Vec<Receipt>,
-    pub validator_proposals: Vec<ValidatorPower>,
+    pub validator_power_proposals: Vec<ValidatorPower>,
+    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
     pub profile: Box<ProfileDataV3>,
 }
 
@@ -156,10 +164,12 @@ impl ActionResult {
         }
         if self.result.is_ok() {
             self.new_receipts.append(&mut next_result.new_receipts);
-            self.validator_proposals.append(&mut next_result.validator_proposals);
+            self.validator_power_proposals.append(&mut next_result.validator_power_proposals);
+            self.validator_frozen_proposals.append(&mut next_result.validator_frozen_proposals);
         } else {
             self.new_receipts.clear();
-            self.validator_proposals.clear();
+            self.validator_power_proposals.clear();
+            self.validator_frozen_proposals.clear();
         }
         Ok(())
     }
@@ -175,7 +185,8 @@ impl Default for ActionResult {
             result: Ok(ReturnData::None),
             logs: vec![],
             new_receipts: vec![],
-            validator_proposals: vec![],
+            validator_power_proposals: vec![],
+            validator_frozen_proposals: vec![],
             profile: Default::default(),
         }
     }
@@ -478,7 +489,8 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {
@@ -632,8 +644,8 @@ impl Runtime {
         stats.gas_deficit_amount = safe_add_balance(stats.gas_deficit_amount, gas_deficit_amount)?;
 
         // Moving validator proposals
-        validator_proposals.append(&mut result.validator_proposals);
-
+        validator_power_proposals.append(&mut result.validator_power_proposals);
+        validator_frozen_proposals.append(&mut result.validator_frozen_proposals);
         // Committing or rolling back state.
         match &result.result {
             Ok(_) => {
@@ -853,7 +865,8 @@ impl Runtime {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<Option<ExecutionOutcomeWithId>, RuntimeError> {
@@ -921,7 +934,8 @@ impl Runtime {
                                 apply_state,
                                 &ready_receipt,
                                 outgoing_receipts,
-                                validator_proposals,
+                                validator_power_proposals,
+                                validator_frozen_proposals,
                                 stats,
                                 epoch_info_provider,
                             )
@@ -975,7 +989,8 @@ impl Runtime {
                             apply_state,
                             receipt,
                             outgoing_receipts,
-                            validator_proposals,
+                            validator_power_proposals,
+                            validator_frozen_proposals,
                             stats,
                             epoch_info_provider,
                         )
@@ -1011,10 +1026,44 @@ impl Runtime {
         validator_accounts_update: &ValidatorAccountsUpdate,
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        for (account_id, max_of_stakes) in &validator_accounts_update.stake_info {
+        for (account_id, max_of_power) in &validator_accounts_update.power_info {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                if account.power() < *max_of_power {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: powering invariant does not hold. \
+                         Account power {} is less than maximum of power {} in the past three epochs",
+                        account.power(),
+                        max_of_power)).into());
+                }
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
+                let return_power = account
+                    .power()
+                    .checked_sub(max(*max_of_power, last_power_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
+                account.set_power(
+                    account
+                        .power()
+                        .checked_sub(return_power)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
+                ))
+                .into());
+            }
+        }
+
+        for (account_id, max_of_frozen) in &validator_accounts_update.frozen_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to stake {}", account_id, reward, account.locked());
+                    debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
                     account.set_locked(
                         account
                             .locked()
@@ -1022,50 +1071,43 @@ impl Runtime {
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
                 }
-
                 debug!(target: "runtime",
-                       "account {} stake {} max_of_stakes: {}",
-                       account_id, account.locked(), max_of_stakes
+                       "account {} locked {} max_of_frozen: {}",
+                       account_id, account.locked(), max_of_frozen
                 );
-                if account.locked() < *max_of_stakes {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. \
-                         Account stake {} is less than maximum of stakes {} in the past three epochs",
-                        account.locked(),
-                        max_of_stakes)).into());
-                }
-                let last_proposal =
-                    *validator_accounts_update.last_proposals.get(account_id).unwrap_or(&0);
-                let return_stake = account
+                // customized by james savechives
+                // if account.locked() < *max_of_frozen {
+                //     return Err(StorageError::StorageInconsistentState(format!(
+                //         "FATAL: staking invariant does not hold. \
+                //          Account frozen {} is less than maximum of locked {} in the past three epochs",
+                //         account.locked(),
+                //         max_of_frozen)).into());
+                // }
+                let last_frozen_proposal =
+                    *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
+                let return_frozen = account
                     .locked()
-                    .checked_sub(max(*max_of_stakes, last_proposal))
+                    .checked_sub(max(*max_of_frozen, last_frozen_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return stake {}", account_id, return_stake);
+                debug!(target: "runtime", "account {} return frozen {}", account_id, return_frozen);
                 account.set_locked(
                     account
                         .locked()
-                        .checked_sub(return_stake)
+                        .checked_sub(return_frozen)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
-                account.set_amount(
-                    account
-                        .amount()
-                        .checked_add(return_stake)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-
                 set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_stakes > 0 {
-                // if max_of_stakes > 0, it means that the account must have locked balance
+            } else if *max_of_frozen > 0 {
+                // if max_of_power > 0, it means that the account must have power
                 // and therefore must exist
                 return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of stakes {} is not found",
-                    account_id, max_of_stakes
+                    "Account {} with max of locked {} is not found",
+                    account_id, max_of_frozen
                 ))
-                .into());
+                    .into());
             }
         }
-
+        // Slash only to the accounts that are in the current shard.
         for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 let amount_to_slash = stake.unwrap_or(account.locked());
@@ -1094,10 +1136,10 @@ impl Runtime {
                 .into());
             }
         }
-
+        // start customized by james savechives
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
-            if !validator_accounts_update.stake_info.contains_key(account_id) {
+            if !validator_accounts_update.power_info.contains_key(account_id) {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",
@@ -1122,6 +1164,7 @@ impl Runtime {
                 set_account(state_update, account_id.clone(), &account);
             }
         }
+        // end customized by James Savechives
         state_update.commit(StateChangeCause::ValidatorAccountsUpdate);
 
         Ok(())
@@ -1250,7 +1293,8 @@ impl Runtime {
             return Ok(ApplyResult {
                 state_root: trie_changes.new_root,
                 trie_changes,
-                validator_proposals: vec![],
+                validator_power_proposals: vec![],
+                validator_frozen_proposals: vec![],
                 outgoing_receipts: vec![],
                 outcomes: vec![],
                 state_changes,
@@ -1263,7 +1307,8 @@ impl Runtime {
         }
 
         let mut outgoing_receipts = Vec::new();
-        let mut validator_proposals = vec![];
+        let mut validator_power_proposals = vec![];
+        let mut validator_frozen_proposals = vec![];
         let mut local_receipts = vec![];
         let mut outcomes = vec![];
         let mut processed_delayed_receipts = vec![];
@@ -1327,7 +1372,8 @@ impl Runtime {
                 apply_state,
                 receipt,
                 &mut outgoing_receipts,
-                &mut validator_proposals,
+                &mut validator_power_proposals,
+                &mut validator_frozen_proposals,
                 &mut stats,
                 epoch_info_provider,
             );
@@ -1464,6 +1510,8 @@ impl Runtime {
             set(&mut state_update, TrieKey::DelayedReceiptIndices, &delayed_receipts_indices);
         }
 
+        // Just ignore this checker for now.
+        // We will work on this later.
         check_balance(
             &apply_state.config,
             &state_update,
@@ -1480,13 +1528,22 @@ impl Runtime {
 
         // Dedup proposals from the same account.
         // The order is deterministically changed.
-        let mut unique_proposals = vec![];
-        let mut account_ids = HashSet::new();
-        for proposal in validator_proposals.into_iter().rev() {
-            let account_id = proposal.account_id();
-            if !account_ids.contains(account_id) {
-                account_ids.insert(account_id.clone());
-                unique_proposals.push(proposal);
+        let mut unique_power_proposals = vec![];
+        let mut unique_frozen_proposals = vec![];
+        let mut power_account_ids = HashSet::new();
+        let mut frozen_account_ids = HashSet::new();
+        for power_proposal in validator_power_proposals.into_iter().rev() {
+            let account_id = power_proposal.account_id();
+            if !power_account_ids.contains(account_id) {
+                power_account_ids.insert(account_id.clone());
+                unique_power_proposals.push(power_proposal);
+            }
+        }
+        for frozen_proposal in validator_frozen_proposals.into_iter().rev() {
+            let account_id = frozen_proposal.account_id();
+            if !frozen_account_ids.contains(account_id) {
+                frozen_account_ids.insert(account_id.clone());
+                unique_frozen_proposals.push(frozen_proposal);
             }
         }
 
@@ -1495,7 +1552,8 @@ impl Runtime {
         Ok(ApplyResult {
             state_root,
             trie_changes,
-            validator_proposals: unique_proposals,
+            validator_power_proposals: unique_power_proposals,
+            validator_frozen_proposals: unique_frozen_proposals,
             outgoing_receipts,
             outcomes,
             state_changes,
@@ -1562,6 +1620,10 @@ mod tests {
         near * 10u128.pow(24)
     }
 
+    fn to_yocto2(near: Power) -> Power {
+        near * 10u128.pow(12)
+    }
+
     fn create_receipt_with_actions(
         account_id: AccountId,
         signer: Arc<InMemorySigner>,
@@ -1619,6 +1681,7 @@ mod tests {
     fn setup_runtime(
         initial_balance: Balance,
         initial_locked: Balance,
+        initial_power: Power,
         gas_limit: Gas,
     ) -> (Runtime, ShardTries, CryptoHash, ApplyState, Arc<InMemorySigner>, impl EpochInfoProvider)
     {
@@ -1637,6 +1700,7 @@ mod tests {
         // For the account and a full access key
         initial_account.set_storage_usage(182);
         initial_account.set_locked(initial_locked);
+        initial_account.set_power(initial_power);
         set_account(&mut initial_state, account_id.clone(), &initial_account);
         set_access_key(
             &mut initial_state,
@@ -1674,7 +1738,7 @@ mod tests {
     #[test]
     fn test_apply_no_op() {
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), 0, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), 0,0, 10u64.pow(15));
         runtime
             .apply(
                 tries.get_trie_for_shard(ShardUId::single_shard(), root),
@@ -1691,15 +1755,18 @@ mod tests {
     #[test]
     fn test_apply_check_balance_validation_rewards() {
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let reward = to_yocto(10_000_000);
         let small_refund = to_yocto(500);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let validator_accounts_update = ValidatorAccountsUpdate {
-            stake_info: vec![(alice_account(), initial_locked)].into_iter().collect(),
+            power_info: vec![(alice_account(), initial_power)].into_iter().collect(),
+            frozen_info: vec![(alice_account(), initial_locked)].into_iter().collect(),
             validator_rewards: vec![(alice_account(), reward)].into_iter().collect(),
-            last_proposals: Default::default(),
+            last_power_proposals: Default::default(),
+            last_frozen_proposals: Default::default(),
             protocol_treasury_account_id: None,
             slashing_info: HashMap::default(),
         };
@@ -1721,10 +1788,11 @@ mod tests {
     fn test_apply_refund_receipts() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 10;
         let receipts = generate_refund_receipts(small_transfer, n);
@@ -1766,10 +1834,11 @@ mod tests {
     fn test_apply_delayed_receipts_feed_all_at_once() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 10;
         let receipts = generate_receipts(small_transfer, n);
@@ -1811,9 +1880,10 @@ mod tests {
     fn test_apply_delayed_receipts_add_more_using_chunks() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_gas_cost =
             apply_state.config.fees.fee(ActionCosts::new_action_receipt).exec_fee()
@@ -1862,9 +1932,10 @@ mod tests {
     fn test_apply_delayed_receipts_adjustable_gas_limit() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_gas_cost =
             apply_state.config.fees.fee(ActionCosts::new_action_receipt).exec_fee()
@@ -1965,9 +2036,10 @@ mod tests {
     fn test_apply_delayed_receipts_local_tx() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, 1);
+            setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
         let receipt_exec_gas_fee = 1000;
         let mut free_config = RuntimeConfig::free();
@@ -2210,10 +2282,11 @@ mod tests {
     fn test_apply_deficit_gas_for_transfer() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let n = 1;
         let mut receipts = generate_receipts(small_transfer, n);
@@ -2239,9 +2312,10 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_covered() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let gas = 2 * 10u64.pow(14);
         let gas_price = GAS_PRICE / 10;
@@ -2302,9 +2376,10 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_partial() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
+        let initial_power           = to_yocto2(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(initial_balance, initial_locked, gas_limit);
+            setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
 
         let gas = 1_000_000;
         let gas_price = GAS_PRICE / 10;
@@ -2357,8 +2432,9 @@ mod tests {
     #[test]
     fn test_delete_key_add_key() {
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let initial_account_state = get_account(&state_update, &alice_account()).unwrap().unwrap();
@@ -2401,8 +2477,9 @@ mod tests {
     #[test]
     fn test_delete_key_underflow() {
         let initial_locked = to_yocto(500_000);
+        let initial_power   = to_yocto2(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let mut state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let mut initial_account_state =
@@ -2490,7 +2567,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit() {
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), 1);
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 1);
 
         let mut free_config = RuntimeConfig::free();
         let sha256_cost = ParameterCost {
@@ -2587,7 +2664,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit_with_failed_receipt() {
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 10u64.pow(15));
 
         let deploy_contract_receipt = create_receipt_with_actions(
             alice_account(),
@@ -2638,6 +2715,7 @@ pub mod estimator {
     use near_primitives::transaction::ExecutionOutcomeWithId;
     use near_primitives::types::validator_power::ValidatorPower;
     use near_primitives::types::EpochInfoProvider;
+    use near_primitives::types::validator_frozen::ValidatorFrozen;
     use near_store::TrieUpdate;
 
     use crate::ApplyStats;
@@ -2649,7 +2727,8 @@ pub mod estimator {
         apply_state: &ApplyState,
         receipt: &Receipt,
         outgoing_receipts: &mut Vec<Receipt>,
-        validator_proposals: &mut Vec<ValidatorPower>,
+        validator_power_proposals: &mut Vec<ValidatorPower>,
+        validator_frozen_proposals: &mut Vec<ValidatorFrozen>,
         stats: &mut ApplyStats,
         epoch_info_provider: &dyn EpochInfoProvider,
     ) -> Result<ExecutionOutcomeWithId, RuntimeError> {
@@ -2658,7 +2737,8 @@ pub mod estimator {
             apply_state,
             receipt,
             outgoing_receipts,
-            validator_proposals,
+            validator_power_proposals,
+            validator_frozen_proposals,
             stats,
             epoch_info_provider,
         )

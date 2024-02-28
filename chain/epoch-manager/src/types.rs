@@ -11,6 +11,7 @@ use near_primitives::types::{
 use near_primitives::version::ProtocolVersion;
 use std::collections::{BTreeMap, HashMap};
 use tracing::{debug, debug_span};
+use near_primitives::types::validator_frozen::ValidatorFrozen;
 
 use crate::EpochManager;
 
@@ -26,7 +27,8 @@ pub struct BlockHeaderInfo {
     pub random_value: CryptoHash,
     pub last_finalized_height: BlockHeight,
     pub last_finalized_block_hash: CryptoHash,
-    pub proposals: Vec<ValidatorPower>,
+    pub power_proposals: Vec<ValidatorPower>,
+    pub frozen_proposals: Vec<ValidatorFrozen>,
     pub slashed_validators: Vec<SlashedValidator>,
     pub chunk_mask: Vec<bool>,
     pub total_supply: Balance,
@@ -43,7 +45,8 @@ impl BlockHeaderInfo {
             random_value: *header.random_value(),
             last_finalized_height,
             last_finalized_block_hash: *header.last_final_block(),
-            proposals: header.prev_validator_proposals().collect(),
+            power_proposals: header.prev_validator_power_proposals().collect(),
+            frozen_proposals: header.prev_validator_frozen_proposals().collect(),
             slashed_validators: vec![],
             chunk_mask: header.chunk_mask().to_vec(),
             total_supply: header.total_supply(),
@@ -62,8 +65,10 @@ pub struct EpochInfoAggregator {
     pub shard_tracker: HashMap<ShardId, HashMap<ValidatorId, ValidatorStats>>,
     /// Latest protocol version that each validator supports.
     pub version_tracker: HashMap<ValidatorId, ProtocolVersion>,
-    /// All proposals in this epoch up to this block.
-    pub all_proposals: BTreeMap<AccountId, ValidatorPower>,
+    /// All power proposals in this epoch up to this block.
+    pub all_power_proposals: BTreeMap<AccountId, ValidatorPower>,
+    /// All frozen proposals in this epoch up to this block.
+    pub all_frozen_proposals: BTreeMap<AccountId, ValidatorFrozen>,
     /// Id of the epoch that this aggregator is in.
     pub epoch_id: EpochId,
     /// Last block hash recorded.
@@ -76,7 +81,8 @@ impl EpochInfoAggregator {
             block_tracker: Default::default(),
             shard_tracker: Default::default(),
             version_tracker: Default::default(),
-            all_proposals: BTreeMap::default(),
+            all_power_proposals: BTreeMap::default(),
+            all_frozen_proposals: BTreeMap::default(),
             epoch_id,
             last_block_hash,
         }
@@ -166,8 +172,12 @@ impl EpochInfoAggregator {
             .or_insert_with(|| *block_info.latest_protocol_version());
 
         // Step 4: update proposals
-        for proposal in block_info.proposals_iter() {
-            self.all_proposals.entry(proposal.account_id().clone()).or_insert(proposal);
+        for proposal in block_info.power_proposals_iter() {
+            self.all_power_proposals.entry(proposal.account_id().clone()).or_insert(proposal);
+        }
+
+        for proposal in block_info.frozen_proposals_iter() {
+            self.all_frozen_proposals.entry(proposal.account_id().clone()).or_insert(proposal);
         }
     }
 
@@ -195,7 +205,9 @@ impl EpochInfoAggregator {
         // merge version tracker
         self.version_tracker.extend(other.version_tracker);
         // merge proposals
-        self.all_proposals.extend(other.all_proposals);
+        self.all_power_proposals.extend(other.all_power_proposals);
+
+        self.all_frozen_proposals.extend(other.all_frozen_proposals);
 
         self.last_block_hash = other.last_block_hash;
     }
@@ -233,8 +245,12 @@ impl EpochInfoAggregator {
 
         // merge proposals
         // TODO(mina86): Use try_insert once map_try_insert is stabilised.
-        for (k, v) in other.all_proposals.iter() {
-            self.all_proposals.entry(k.clone()).or_insert_with(|| v.clone());
+        for (k, v) in other.all_power_proposals.iter() {
+            self.all_power_proposals.entry(k.clone()).or_insert_with(|| v.clone());
+        }
+
+        for (k, v) in other.all_frozen_proposals.iter() {
+            self.all_frozen_proposals.entry(k.clone()).or_insert_with(|| v.clone());
         }
     }
 

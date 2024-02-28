@@ -53,9 +53,9 @@ impl AccountRecords {
         ret
     }
 
-    fn new_validator(stake: Balance, power: Power, num_bytes_account: u64) -> Self {
+    fn new_validator(amount: Balance, power: Power, frozen: Balance, num_bytes_account: u64) -> Self {
         let mut ret = Self::default();
-        ret.set_account(0, stake, power, num_bytes_account);
+        ret.set_account(amount, frozen, power, num_bytes_account);
         ret.amount_needed = true;
         ret
     }
@@ -141,8 +141,8 @@ fn validator_records(
     num_bytes_account: u64,
 ) -> anyhow::Result<HashMap<AccountId, AccountRecords>> {
     let mut records = HashMap::new();
-    for AccountInfo { account_id, public_key, amount, power } in validators.iter() {
-        let mut r = AccountRecords::new_validator(*amount,  *power, num_bytes_account);
+    for AccountInfo { account_id, public_key, amount, power, locked } in validators.iter() {
+        let mut r = AccountRecords::new_validator(*amount,  *power, *locked, num_bytes_account);
         r.keys.insert(public_key.clone(), AccessKey::full_access());
         if records.insert(account_id.clone(), r).is_some() {
             anyhow::bail!("validator {} specified twice", account_id);
