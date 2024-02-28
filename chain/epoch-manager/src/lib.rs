@@ -1018,7 +1018,6 @@ impl EpochManager {
 
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
-                    print!("Finalize epoch : {:?}", &block_info);
                     self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
                 }
 
@@ -1886,9 +1885,9 @@ impl EpochManager {
             validator_mandates
             // end customized by James Savechives
         );
-        println!("the random value is : {:?}", block_header_info.random_value);
-        println!("the validators value is : {:?}", validators);
-        println!("the block producers settlement is : {:?}",block_producers_settlement);
+        // println!("the random value is : {:?}", block_header_info.random_value);
+        // println!("the validators value is : {:?}", validators);
+        // println!("the block producers settlement is : {:?}",block_producers_settlement);
         self.record_block_info(block_info, rng_seed)
 
     }
@@ -1989,12 +1988,12 @@ impl EpochManager {
             // https://github.com/nearprotocol/nearcore/issues/2522
             return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
         }
-        println!("block info height : {:?}",block_info.height());
-        println!("estimated next epoch start : {:?}",estimated_next_epoch_start);
-        println!("last finalized height : {:?}",block_info.last_finalized_height());
+        // println!("block info height : {:?}",block_info.height());
+        // println!("estimated next epoch start : {:?}",estimated_next_epoch_start);
+        // println!("last finalized height : {:?}",block_info.last_finalized_height());
 
-       // Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
-        return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
+        Ok(block_info.last_finalized_height() + 4 >= estimated_next_epoch_start)
+       // return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
     }
 
     /// Returns true, if given current block info, next block must include the approvals from the next
