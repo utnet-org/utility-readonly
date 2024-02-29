@@ -24,11 +24,14 @@ use num_rational::Rational64;
 use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::io;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use num_bigint::{BigInt, ToBigInt};
 use num_traits::Zero;
 use tracing::{debug, warn};
+use near_chain_primitives::Error;
 use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
+use near_primitives::utils::{height_to_bytes};
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -49,7 +52,12 @@ mod validator_selection;
 
 const EPOCH_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 50 };
 const BLOCK_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 5 } else { 1000 }; // TODO(#5080): fix this
+
+const HASH_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 2 };
 const AGGREGATOR_SAVE_PERIOD: u64 = 1000;
+
+
+// In epoch_manager or a common module
 
 /// In the current architecture, various components have access to the same
 /// shared mutable instance of [`EpochManager`]. This handle manages locking
@@ -159,6 +167,8 @@ pub struct EpochManager {
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
     /// Cache of block information.
     blocks_info: SyncLruCache<CryptoHash, Arc<BlockInfo>>,
+    /// Cache of block hash.
+    block_height_hash: SyncLruCache<BlockHeight, Arc<CryptoHash>>,
     /// Cache of epoch id to epoch start height
     epoch_id_to_start: SyncLruCache<EpochId, BlockHeight>,
     /// Epoch validators ordered by `block_producer_settlement`.
@@ -284,6 +294,7 @@ impl EpochManager {
             genesis_num_block_producer_seats,
             epochs_info: SyncLruCache::new(EPOCH_CACHE_SIZE),
             blocks_info: SyncLruCache::new(BLOCK_CACHE_SIZE),
+            block_height_hash: SyncLruCache::new(HASH_CACHE_SIZE),
             epoch_id_to_start: SyncLruCache::new(EPOCH_CACHE_SIZE),
             epoch_validators_ordered: SyncLruCache::new(EPOCH_CACHE_SIZE),
             epoch_validators_ordered_unique: SyncLruCache::new(EPOCH_CACHE_SIZE),
@@ -934,6 +945,9 @@ impl EpochManager {
                     &EpochId(current_hash),
                     genesis_epoch_info,
                 )?;
+                // Save block hash height info
+                let block_hash = Arc::new(*block_info.hash());
+                self.block_height_hash.put(block_info.height(),Arc::clone(&block_hash));
             } else {
                 let prev_block_info = self.get_block_info(block_info.prev_hash())?;
 
@@ -998,10 +1012,9 @@ impl EpochManager {
                 let block_info = Arc::new(block_info);
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
-
-                // let block_summary = Arc::new(block_summary);
-                // // Save current block summary
-                // self.save_block_summary(&mut store_update, &block_info.hash().clone(), Arc::clone(&block_summary))?;
+                // Save block hash height info
+                let block_hash = Arc::new(*block_info.clone().hash());
+                self.block_height_hash.put(block_info.height(),Arc::clone(&block_hash));
 
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
@@ -1022,6 +1035,7 @@ impl EpochManager {
                 }
 
             }
+
         }
         Ok(store_update)
     }
@@ -1045,7 +1059,22 @@ impl EpochManager {
         // height: BlockHeight,
     ) -> Result<ValidatorPowerAndFrozen, BlockError> {
         let block_info = self.get_block_info(block_hash)?;
-        // let current_height = block_info.height();
+        let current_height = block_info.height();
+        println!("current height : {:?}", current_height);
+        if current_height>5 {
+
+            match self.get_block_hash_by_height(current_height - 5) {
+                Ok(block_hash) => {
+                    // Use block_hash here
+                    println!("5 previous hash : {:?}", block_hash);
+                },
+                Err(e) => {
+                    println!("Error retrieving block hash: {:?}", e);
+                    // Handle error, e.g., by returning early or using a default value
+                },
+            }
+        }
+
         // if current_height +1 != height {
         //     return Err(BlockError::BlockOutOfBounds(*block_hash));
         // }
@@ -1933,7 +1962,17 @@ impl EpochManager {
         Ok(0)
     }
 }
-
+#[allow(dead_code)]
+fn option_to_not_found<T, F>(res: io::Result<Option<T>>, field_name: F) -> Result<T, Error>
+    where
+        F: std::string::ToString,
+{
+    match res {
+        Ok(Some(o)) => Ok(o),
+        Ok(None) => Err(Error::DBNotFoundErr(field_name.to_string())),
+        Err(e) => Err(e.into()),
+    }
+}
 /// Private utilities for EpochManager.
 impl EpochManager {
     fn cares_about_shard_in_epoch(
@@ -2103,6 +2142,17 @@ impl EpochManager {
         }
     }
 
+    /// Get Block Hash by Block height
+    ///
+    pub fn get_block_hash_by_height(&self, height: u64) -> Result<Arc<CryptoHash>, EpochError> {
+        self.block_height_hash.get_or_try_put(height, |height| {
+
+                self.store.get_ser(DBCol::BlockHeight, &height_to_bytes(*height))?
+                    .ok_or_else(|| EpochError::IOErr(height.to_string()))
+                    .map(Arc::new)
+
+        })
+    }
     /// Get BlockInfo for a block
     /// # Errors
     /// EpochError::IOErr if storage returned an error

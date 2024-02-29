@@ -2436,6 +2436,7 @@ impl<'a> ChainStoreUpdate<'a> {
         }
         for (height, hash) in self.chain_store_cache_update.height_to_hashes.iter() {
             if let Some(hash) = hash {
+
                 store_update.set_ser(DBCol::BlockHeight, &index_to_bytes(*height), hash)?;
             } else {
                 store_update.delete(DBCol::BlockHeight, &index_to_bytes(*height));
