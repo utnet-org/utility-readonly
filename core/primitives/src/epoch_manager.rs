@@ -180,16 +180,8 @@ impl AllEpochConfig {
         config
     }
 
-    fn config_nightshade(config: &mut EpochConfig, protocol_version: ProtocolVersion) {
-        if checked_feature!("stable", SimpleNightshadeV2, protocol_version) {
-            Self::config_nightshade_impl(config, ShardLayout::get_simple_nightshade_layout_v2());
-            return;
-        }
-
-        if checked_feature!("stable", SimpleNightshade, protocol_version) {
-            Self::config_nightshade_impl(config, ShardLayout::get_simple_nightshade_layout());
-            return;
-        }
+    fn config_nightshade(config: &mut EpochConfig, _protocol_version: ProtocolVersion) {
+        Self::config_nightshade_impl(config, ShardLayout::v0_single_shard());
     }
 
     fn config_nightshade_impl(config: &mut EpochConfig, shard_layout: ShardLayout) {

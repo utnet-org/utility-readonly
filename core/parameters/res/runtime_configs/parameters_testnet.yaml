@@ -103,6 +103,18 @@ action_delegate: {
   execution: 2_319_861_500_000,
 }
 
+action_register_rsa2048_keys: {
+  send_sir: 101765125000,
+  send_not_sir: 101765125000,
+  execution: 101765125000,
+}
+
+action_create_rsa2048_challenge: {
+  send_sir: 101765125000,
+  send_not_sir: 101765125000,
+  execution: 101765125000,
+}
+
 # Smart contract dynamic gas costs
 wasm_regular_op_cost: 3_856_371
 wasm_grow_mem_cost: 1

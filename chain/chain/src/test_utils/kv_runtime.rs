@@ -970,9 +970,9 @@ impl EpochManagerAdapter for MockEpochManager {
 
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
-    #[allow(unconditional_recursion)]
-    fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
-        return self.get_block_producer_by_hash(block_hash);
+    
+    fn get_block_producer_by_hash(&self, _block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+        panic!("get_block_producer_by_hash not implemented for KeyValueRuntime");
     }
 }
 

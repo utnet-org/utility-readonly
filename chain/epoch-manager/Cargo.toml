@@ -30,9 +30,9 @@ near-store.workspace = true
 near-chain-configs.workspace = true
 near-chain-primitives.workspace = true
 near-cache.workspace = true
-protobuf = "2.27.1"
-num-bigint = "0.4.3"
-num-traits = "0.2.15"
+protobuf.workspace = true
+num-bigint.workspace = true
+num-traits.workspace = true
 
 [features]
 expensive_tests = []

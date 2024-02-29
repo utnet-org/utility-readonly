@@ -483,7 +483,20 @@ impl FromStr for SecretKey {
                 Self::SECP256K1(sk)
             },
             KeyType::RSA2048 => {
-                let sk = rsa::RsaPrivateKey::from_pkcs8_der(&decode_bs58::<1218>(key_data)?)
+                let mut buffer = vec![0u8; 2048];
+                decode_bs58_rsa(&mut buffer[..], key_data)?;
+                //buffer.truncate(1218);
+                if let Some(last_non_zero_index) = buffer.iter().rposition(|&x| x != 0) {
+                    // 截断到最后一个非零元素的下一个位置
+                    buffer.truncate(last_non_zero_index + 1);
+                } else {
+                    // 如果全部都是0，清空Vec
+                    buffer.clear();
+                }
+
+                // 尝试减少容量以匹配新的长度
+                buffer.shrink_to_fit();
+                let sk = rsa::RsaPrivateKey::from_pkcs8_der(&buffer)
                     .map_err(|err| Self::Err::InvalidData { error_message: err.to_string() })?;
                 Self::RSA(sk)
             }
@@ -848,7 +861,7 @@ struct Bs58<'a>(&'a [u8]);
 
 impl<'a> core::fmt::Display for Bs58<'a> {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        debug_assert!(self.0.len() <= 1218);
+        debug_assert!(self.0.len() <= 2048);
         // The largest buffer we’re ever encoding is 65-byte long.  Base58
         // increases size of the value by less than 40%.  96-byte buffer is
         // therefore enough to fit the largest value we’re ever encoding.
@@ -876,6 +889,17 @@ fn decode_bs58_impl(dst: &mut [u8], encoded: &str) -> Result<(), DecodeBs58Error
     match bs58::decode(encoded).into(dst) {
         Ok(received) if received == expected => Ok(()),
         Ok(received) => Err(DecodeBs58Error::BadLength { expected, received }),
+        Err(bs58::decode::Error::BufferTooSmall) => {
+            Err(DecodeBs58Error::BadLength { expected, received: expected.saturating_add(1) })
+        }
+        Err(err) => Err(DecodeBs58Error::BadData(err.to_string())),
+    }
+}
+
+fn decode_bs58_rsa(dst: &mut [u8], encoded: &str) -> Result<(), DecodeBs58Error> {
+    let expected = dst.len();
+    match bs58::decode(encoded).into(dst) {
+        Ok(_received)  => Ok(()),
         Err(bs58::decode::Error::BufferTooSmall) => {
             Err(DecodeBs58Error::BadLength { expected, received: expected.saturating_add(1) })
         }

@@ -307,8 +307,8 @@ impl Error {
             | Error::InvalidProtocolVersion
             | Error::NotAValidator
             | Error::NotAChunkValidator
-            | Error::InvalidChallengeRoot
-            | _ => true,
+	        | Error::BlockOutOfBounds(_)
+            | Error::InvalidChallengeRoot => true,
         }
     }
 
@@ -382,7 +382,7 @@ impl Error {
             Error::NotAValidator => "not_a_validator",
             Error::NotAChunkValidator => "not_a_chunk_validator",
             Error::InvalidChallengeRoot => "invalid_challenge_root",
-            _ => "",
+            Error::BlockOutOfBounds(_)=> "block_out_of_bounds"
         }
     }
 }

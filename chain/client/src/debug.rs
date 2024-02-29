@@ -616,7 +616,7 @@ impl ClientActor {
                         .map(|validator| {
                             (
                                 validator.0.account_id.clone(),
-                                (validator.0.frozen_this_epoch / 10u128.pow(12)) as u64,
+                                (validator.0.frozen_this_epoch / 10u128.pow(24)) as u64,
                             )
                         })
                         .collect::<Vec<(AccountId, u64)>>()

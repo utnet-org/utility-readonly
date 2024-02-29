@@ -161,7 +161,7 @@ impl PerfContext {
 
 fn generate_state_requests(store: Store, samples: usize) -> Vec<(ShardUId, ValueRef)> {
     eprintln!("Generate {samples} requests to State");
-    let shard_uids = ShardLayout::get_simple_nightshade_layout().shard_uids().collect::<Vec<_>>();
+    let shard_uids = ShardLayout::v0_single_shard().shard_uids().collect::<Vec<_>>();
     let num_shards = shard_uids.len();
     let mut ret = Vec::new();
     let progress = ProgressBar::new(samples as u64);

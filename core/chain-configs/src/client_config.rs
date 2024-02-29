@@ -212,7 +212,7 @@ impl Default for ReshardingConfig {
             // The snapshot typically is available within a minute from the
             // epoch start. Set the default higher in case we need to wait for
             // state sync.
-            max_poll_time: Duration::from_secs(60 * 60 * 60), // 2 hours
+            max_poll_time: Duration::from_secs(2 * 60 * 60), // 2 hours
         }
     }
 }

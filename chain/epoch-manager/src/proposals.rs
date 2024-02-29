@@ -53,7 +53,7 @@ pub fn proposals_to_block_summary(
     minted_amount: Balance,
     next_version: ProtocolVersion,
 ) -> Result<BlockSummary, BlockError> {
-    return crate::validator_selection::proposals_to_block_summary(
+    crate::validator_selection::proposals_to_block_summary(
         epoch_config,
         this_block_hash,
         last_block_hash,
@@ -65,7 +65,7 @@ pub fn proposals_to_block_summary(
         validator_reward,
         minted_amount,
         next_version,
-    );
+    )
 }
 /// Calculates new seat assignments based on current seat assignments and proposals.
 pub fn proposals_to_epoch_info(

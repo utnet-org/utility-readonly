@@ -1035,7 +1035,7 @@ pub(crate) fn contract_accounts(
         // TODO: This assumes simple nightshade layout, it will need an update when we reshard.
         let shard_uid = ShardUId::from_shard_id_and_layout(
             shard_id as u64,
-            &ShardLayout::get_simple_nightshade_layout(),
+            &ShardLayout::v0_single_shard(),
         );
         // Use simple non-caching storage, we don't expect many duplicate lookups while iterating.
         let storage = TrieDBStorage::new(store.clone(), shard_uid);

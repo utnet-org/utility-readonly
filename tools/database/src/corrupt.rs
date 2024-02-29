@@ -20,8 +20,8 @@ impl CorruptStateSnapshotCommand {
         // TODO(resharding) automatically detect the shard version
         let shard_layout = match self.shard_layout_version {
             0 => ShardLayout::v0(1, 0),
-            1 => ShardLayout::get_simple_nightshade_layout(),
-            2 => ShardLayout::get_simple_nightshade_layout_v2(),
+            1 => ShardLayout::v0(1, 0),
+            2 => ShardLayout::v0(1, 0),
             _ => {
                 return Err(anyhow!(
                     "Unsupported shard layout version! {}",

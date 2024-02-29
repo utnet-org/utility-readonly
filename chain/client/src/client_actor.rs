@@ -56,7 +56,7 @@ use near_network::types::{
 use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
 use near_performance_metrics;
 use near_performance_metrics_macros::perf;
-use near_primitives::block::{Tip};
+use near_primitives::block::Tip;
 use near_primitives::block_header::ApprovalType;
 use near_primitives::epoch_manager::RngSeed;
 use near_primitives::hash::CryptoHash;
