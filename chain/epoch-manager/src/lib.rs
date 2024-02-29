@@ -13,7 +13,7 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
 use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats};
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use near_primitives::views::{
@@ -30,6 +30,7 @@ use num_bigint::{BigInt, ToBigInt};
 use num_traits::Zero;
 use tracing::{debug, warn};
 use near_chain_primitives::Error;
+use near_crypto::PublicKey;
 use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 use near_primitives::utils::{height_to_bytes};
 use types::BlockHeaderInfo;
@@ -1053,38 +1054,55 @@ impl EpochManager {
     //     Ok(epoch_info.get_validator(validator_id))
     // }
 
-    pub fn get_block_producer_info_by_hash(
-        &self,
-        block_hash: &CryptoHash,
-        // height: BlockHeight,
-    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let block_info = self.get_block_info(block_hash)?;
-        let current_height = block_info.height();
-        println!("current height : {:?}", current_height);
-        if current_height>5 {
-
-            match self.get_block_hash_by_height(current_height - 5) {
-                Ok(block_hash) => {
-                    // Use block_hash here
-                    println!("5 previous hash : {:?}", block_hash);
-                },
-                Err(e) => {
-                    println!("Error retrieving block hash: {:?}", e);
-                    // Handle error, e.g., by returning early or using a default value
-                },
-            }
-        }
-
-        // if current_height +1 != height {
-        //     return Err(BlockError::BlockOutOfBounds(*block_hash));
-        // }
-        let random_value = block_info.random_value();
-        let validators = block_info.validators_iter();
-        Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
-    }
-
+    // pub fn get_block_producer_info_by_hash(
+    //     &self,
+    //     block_hash: &CryptoHash,
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let block_info = self.get_block_info(block_hash)?;
+    //
+    //     let random_value = block_info.random_value();
+    //     let validators = block_info.validators_iter();
+    //     Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+    // }
+    //
     fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
         BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
+    }
+
+    pub fn get_block_producer_info_by_height(
+        &self,
+        height: BlockHeight
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let producer = if height>10 {
+             match self.get_block_hash_by_height(height - 10) {
+                Ok(block_hash) => {
+                    let block_info = self.get_block_info(&block_hash)?;
+
+                    let random_value = block_info.random_value();
+                    let validators = block_info.validators_iter();
+                    Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+                },
+                Err(e) => {
+                    println!("Get block hash by height error {:?} at height {:?}",e,height-10);
+                    Self::get_default_validator()
+                },
+            }
+        }  else {
+            Self::get_default_validator()
+        };
+        producer
+    }
+
+    fn get_default_validator() -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let root_id_result = "jamesavechives".parse::<AccountId>();
+        let pkey = "ed25519:3mda2kgqvbybK9sHEEuoDWjeeZodJe9Fo64GRYCGBiZF".parse::<PublicKey>();
+        let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1{
+            account_id:  root_id_result.unwrap(),
+            public_key: pkey.unwrap(),
+            power: 5000000000000,
+            frozen: 11000000000000000000000000000000,
+        });
+        Ok(validator)
     }
 
     fn choose_validator_vrf(validators_iter: ValidatorPowerAndFrozenIter, random_value: BigInt) -> Result<ValidatorPowerAndFrozen, BlockError> {
@@ -1962,6 +1980,7 @@ impl EpochManager {
         Ok(0)
     }
 }
+
 #[allow(dead_code)]
 fn option_to_not_found<T, F>(res: io::Result<Option<T>>, field_name: F) -> Result<T, Error>
     where

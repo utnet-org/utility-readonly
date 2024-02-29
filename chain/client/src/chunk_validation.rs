@@ -84,7 +84,7 @@ impl ChunkValidator {
         )?;
 
         let block_producer =
-            self.epoch_manager.get_block_producer_by_hash(chunk_header.prev_block_hash())?;
+            self.epoch_manager.get_block_producer_by_height(chunk_header.height_created())?;
 
         let network_sender = self.network_sender.clone();
         let signer = self.my_signer.clone().unwrap();

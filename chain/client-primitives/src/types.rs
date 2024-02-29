@@ -371,7 +371,7 @@ impl From<SyncStatus> for SyncStatusView {
 
 /// Actor message requesting block provider by block hash.
 #[derive(Debug)]
-pub struct GetProvider(pub CryptoHash);
+pub struct GetProvider(pub BlockHeight);
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetProviderError {

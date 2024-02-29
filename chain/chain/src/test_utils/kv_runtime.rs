@@ -847,7 +847,7 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
-        let validator = self.get_block_producer_by_hash(header.prev_hash())?;
+        let validator = self.get_block_producer_by_height(header.height())?;
         let validator_stake = &self.validators[&validator];
         Ok(header.verify_block_producer(validator_stake.public_key()))
     }
@@ -971,8 +971,8 @@ impl EpochManagerAdapter for MockEpochManager {
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
     #[allow(unconditional_recursion)]
-    fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
-        return self.get_block_producer_by_hash(block_hash);
+    fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError> {
+        return self.get_block_producer_by_height(block_height);
     }
 }
 

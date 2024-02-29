@@ -177,10 +177,10 @@ pub trait EpochManagerAdapter: Send + Sync {
     // ) -> Result<AccountId, EpochError>;
 
     /// Block producers for given prev block hash. Return BlockError if outside of known boundaries.
-    fn get_block_producer_by_hash(
-        &self,
-        block_hash: &CryptoHash,
-    ) -> Result<AccountId, EpochError>;
+    // fn get_block_producer_by_hash(
+    //     &self,
+    //     block_hash: &CryptoHash,
+    // ) -> Result<AccountId, EpochError>;
 
     /// Chunk producer for given height for given shard. Return EpochError if outside of known boundaries.
     fn get_chunk_producer(
@@ -409,6 +409,11 @@ pub trait EpochManagerAdapter: Send + Sync {
 
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, epoch_id: &EpochId, hash: &CryptoHash);
+    // fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+    //     let epoch_manager = self.read();
+    //     Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
+    // }
+    fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError>;
 }
 
 impl EpochManagerAdapter for EpochManagerHandle {
@@ -643,9 +648,13 @@ impl EpochManagerAdapter for EpochManagerHandle {
     //     Ok(epoch_manager.get_block_producer_info(epoch_id, height)?.take_account_id())
     // }
 
-    fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+    // fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+    //     let epoch_manager = self.read();
+    //     Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
+    // }
+    fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError> {
         let epoch_manager = self.read();
-        Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
+        Ok(epoch_manager.get_block_producer_info_by_height(block_height)?.take_account_id())
     }
 
     fn get_chunk_producer(
@@ -790,7 +799,8 @@ impl EpochManagerAdapter for EpochManagerHandle {
         vrf_proof: &near_crypto::vrf::Proof,
     ) -> Result<(), Error> {
         let epoch_manager = self.read();
-        let validator = epoch_manager.get_block_producer_info_by_hash(prev_block_hash)?;
+        let height = epoch_manager.get_block_info(prev_block_hash)?.height();
+        let validator = epoch_manager.get_block_producer_info_by_height(height+1)?;
         let public_key = near_crypto::key_conversion::convert_public_key(
             validator.public_key().unwrap_as_ed25519(),
         )
@@ -852,7 +862,7 @@ impl EpochManagerAdapter for EpochManagerHandle {
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
         let epoch_manager = self.read();
         let block_producer =
-            epoch_manager.get_block_producer_info_by_hash(header.prev_hash())?;
+            epoch_manager.get_block_producer_info_by_height(header.height())?;
         match epoch_manager.get_block_info(header.prev_hash()) {
             Ok(block_info) => {
                 if block_info.slashed().contains_key(block_producer.account_id()) {
@@ -1011,4 +1021,5 @@ impl EpochManagerAdapter for EpochManagerHandle {
         let mut epoch_manager = self.write();
         epoch_manager.epoch_info_aggregator = EpochInfoAggregator::new(epoch_id.clone(), *hash);
     }
+
 }

@@ -622,10 +622,10 @@ impl Handler<WithSpanContext<GetProvider>> for ViewClientActor {
     fn handle(&mut self, msg: WithSpanContext<GetProvider>, _: &mut Self::Context) -> Self::Result {
         let (_span, msg) = handler_debug_span!(target: "client", msg);
         tracing::debug!(target: "client", ?msg);
-        let block = self.epoch_manager.get_block_info(&msg.0)?;
+        let height = msg.0;
         let block_author = self
             .epoch_manager
-            .get_block_producer_by_hash(&block.hash())
+            .get_block_producer_by_height(height)
             .into_chain_error()?;
         Ok(block_author)
     }
@@ -644,7 +644,7 @@ impl Handler<WithSpanContext<GetBlock>> for ViewClientActor {
         let block = self.get_block_by_reference(&msg.0)?.ok_or(GetBlockError::NotSyncedYet)?;
         let block_author = self
             .epoch_manager
-            .get_block_producer_by_hash(block.header().prev_hash())
+            .get_block_producer_by_height(block.header().height())
             .into_chain_error()?;
         Ok(BlockView::from_author_block(block_author, block))
     }
@@ -1294,8 +1294,8 @@ impl Handler<WithSpanContext<ProviderRequest>> for ViewClientActor {
         tracing::debug!(target: "client", ?msg);
         let _timer =
             metrics::VIEW_CLIENT_MESSAGE_TIME.with_label_values(&["ProviderRequest"]).start_timer();
-        let ProviderRequest(hash) = msg;
-        if let Ok(producer) = self.epoch_manager.get_block_producer_by_hash(&hash) {
+        let ProviderRequest(height) = msg;
+        if let Ok(producer) = self.epoch_manager.get_block_producer_by_height(height) {
             Some(producer)
         } else {
             None
