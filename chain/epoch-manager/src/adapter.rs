@@ -414,6 +414,7 @@ pub trait EpochManagerAdapter: Send + Sync {
     //     Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
     // }
     fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError>;
+    fn add_bad_validator(&self, height: BlockHeight, validator: AccountId) -> Result<(), EpochError>;
 }
 
 impl EpochManagerAdapter for EpochManagerHandle {
@@ -717,6 +718,17 @@ impl EpochManagerAdapter for EpochManagerHandle {
     ) -> Result<StoreUpdate, EpochError> {
         let mut epoch_manager = self.write();
         epoch_manager.add_validator_proposals(block_header_info)
+    }
+
+    fn add_bad_validator(
+        &self,
+        height: BlockHeight,
+        bad_validator: AccountId,
+    ) -> Result<(), EpochError> {
+
+        let epoch_manager = self.read();
+        let mut store_update = epoch_manager.store.store_update();
+        epoch_manager.add_bad_validator(&mut store_update,height,bad_validator)
     }
 
     fn get_epoch_minted_amount(&self, epoch_id: &EpochId) -> Result<Balance, EpochError> {

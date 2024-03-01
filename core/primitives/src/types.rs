@@ -560,12 +560,48 @@ pub mod validator_power_and_frozen {
     pub enum ValidatorPowerAndFrozen {
         V1(ValidatorPowerAndFrozenV1),
     }
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct ValidatorPowerAndFrozenIter<'a> {
         collection: ValidatorPowerAndFrozenIterSource<'a>,
         curr_index: usize,
         len: usize,
     }
+
+    impl<'a> ValidatorPowerAndFrozenIter<'a> {
+        pub fn filter_bad_validators(
+            original: &'a ValidatorPowerAndFrozenIter,
+            bad_validators: &'a Vec<AccountId>,
+        ) -> Self {
+            let filtered: Vec<ValidatorPowerAndFrozen> = match &original.collection {
+                ValidatorPowerAndFrozenIterSource::V1(collection) => {
+                    collection.iter()
+                        .filter(|&validator| !bad_validators.contains(&validator.account_id))
+                        .map(|v1| ValidatorPowerAndFrozen::V1(v1.clone())) // Convert each V1 to ValidatorPowerAndFrozen::V1
+                        .collect()
+                },
+                ValidatorPowerAndFrozenIterSource::V2(collection) => {
+                    collection.iter()
+                        .filter(|validator| {
+                            match validator {
+                                ValidatorPowerAndFrozen::V1(v1) => !bad_validators.contains(&v1.account_id),
+                                // Handle other variants as they are added
+                            }
+                        })
+                        .cloned() // No need to map since they are already the correct type
+                        .collect()
+                },
+            };
+
+            ValidatorPowerAndFrozenIter {
+                collection: ValidatorPowerAndFrozenIterSource::V2(Box::leak(filtered.clone().into_boxed_slice())), // Adjust as needed
+                curr_index: 0,
+                len: filtered.len(),
+            }
+        }
+    }
+
+
+
 
     impl<'a> ValidatorPowerAndFrozenIter<'a> {
         pub fn empty() -> Self {
@@ -613,7 +649,7 @@ pub mod validator_power_and_frozen {
             }
         }
     }
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     enum ValidatorPowerAndFrozenIterSource<'a> {
         V1(&'a [ValidatorPowerAndFrozenV1]),
         V2(&'a [ValidatorPowerAndFrozen]),

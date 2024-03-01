@@ -127,6 +127,9 @@ pub struct Client {
     #[cfg(feature = "sandbox")]
     pub(crate) accrued_fastforward_delta: near_primitives::types::BlockHeightDelta,
 
+    /// count for not producing block times
+    pub last_know_height: BlockHeight,
+    pub same_height_count: u16,
     pub config: ClientConfig,
     pub sync_status: SyncStatus,
     pub state_sync_adapter: Arc<RwLock<SyncAdapter>>,
@@ -338,6 +341,8 @@ impl Client {
             network_adapter.clone().into_sender(),
             runtime_adapter.clone(),
         );
+        let last_know_height = 0;
+        let same_height_count = 0;
         Ok(Self {
             #[cfg(feature = "test_features")]
             adv_produce_blocks: None,
@@ -347,6 +352,8 @@ impl Client {
             produce_invalid_tx_in_chunks: false,
             #[cfg(feature = "sandbox")]
             accrued_fastforward_delta: 0,
+            last_know_height,
+            same_height_count,
             config,
             sync_status,
             state_sync_adapter,

@@ -974,6 +974,10 @@ impl EpochManagerAdapter for MockEpochManager {
     fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError> {
         return self.get_block_producer_by_height(block_height);
     }
+    #[allow(unconditional_recursion)]
+    fn add_bad_validator(&self,_height: BlockHeight, _validator: AccountId) -> Result<(), EpochError> {
+        todo!()
+    }
 }
 
 impl RuntimeAdapter for KeyValueRuntime {
