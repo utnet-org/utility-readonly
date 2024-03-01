@@ -84,7 +84,7 @@ name = "store"
 harness = false
 
 [features]
-default = ["json_rpc", "rosetta_rpc"]
+default = ["json_rpc", "calimero_zero_storage"]
 
 performance_stats = [
   "near-performance-metrics/performance_stats",
