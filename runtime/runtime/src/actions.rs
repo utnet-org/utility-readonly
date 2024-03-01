@@ -1218,7 +1218,7 @@ mod tests {
     #[test]
     fn test_create_account_invalid_short_top_level() {
         let account_id = "bob".parse::<AccountId>().unwrap();
-        let predecessor_id = "unc".parse::<AccountId>().unwrap();
+        let predecessor_id = "near".parse::<AccountId>().unwrap();
         let action_result =
             test_action_create_account(account_id.clone(), predecessor_id.clone(), 11);
         assert_eq!(
