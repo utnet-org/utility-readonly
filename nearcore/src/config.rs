@@ -124,7 +124,7 @@ pub const INITIAL_GAS_LIMIT: Gas = 1_000_000_000_000_000;
 pub const MIN_GAS_PRICE: Balance = 100_000_000;
 
 /// Protocol treasury account
-pub const PROTOCOL_TREASURY_ACCOUNT: &str = "near";
+pub const PROTOCOL_TREASURY_ACCOUNT: &str = "unc";
 
 /// Fishermen stake threshold.
 pub const FISHERMEN_THRESHOLD: Balance = 10 * NEAR_BASE;
@@ -1291,7 +1291,7 @@ pub fn get_records_url(chain_id: &str) -> String {
 
 pub fn get_config_url(chain_id: &str) -> String {
     format!(
-        "https://near-s3.jongun2038.win/{}/config.json",
+        "https://near-s3.jongun2038.win/{}/config.json.xz",
         chain_id,
     )
 }

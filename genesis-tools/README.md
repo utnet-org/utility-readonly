@@ -36,5 +36,5 @@ cargo run --package neard --bin neard -- run --boot-nodes=
 ## `keypair-generator`
 
 ```bash
-cargo run --package keypair-generator --bin keypair-generator -- --home=./  --account-id=miner.near --generate-config  signer-keys --key-type=2 --num-keys=3
+cargo run --package keypair-generator --bin keypair-generator -- --home=./  --account-id=miner --generate-config  signer-keys --key-type=2 --num-keys=3
 ```

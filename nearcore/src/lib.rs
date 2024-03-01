@@ -58,7 +58,7 @@ pub fn get_default_home() -> PathBuf {
     }
 
     if let Some(mut home) = dirs::home_dir() {
-        home.push(".near");
+        home.push(".unc");
         return home;
     }
 
