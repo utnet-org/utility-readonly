@@ -483,19 +483,7 @@ impl FromStr for SecretKey {
                 Self::SECP256K1(sk)
             },
             KeyType::RSA2048 => {
-                let mut buffer = vec![0u8; 2048];
-                decode_bs58_rsa(&mut buffer[..], key_data)?;
-                //buffer.truncate(1218);
-                if let Some(last_non_zero_index) = buffer.iter().rposition(|&x| x != 0) {
-                    // 截断到最后一个非零元素的下一个位置
-                    buffer.truncate(last_non_zero_index + 1);
-                } else {
-                    // 如果全部都是0，清空Vec
-                    buffer.clear();
-                }
-
-                // 尝试减少容量以匹配新的长度
-                buffer.shrink_to_fit();
+                let buffer = parse_bs58_data(2048, key_data)?;
                 let sk = rsa::RsaPrivateKey::from_pkcs8_der(&buffer)
                     .map_err(|err| Self::Err::InvalidData { error_message: err.to_string() })?;
                 Self::RSA(sk)
@@ -896,10 +884,16 @@ fn decode_bs58_impl(dst: &mut [u8], encoded: &str) -> Result<(), DecodeBs58Error
     }
 }
 
-fn decode_bs58_rsa(dst: &mut [u8], encoded: &str) -> Result<(), DecodeBs58Error> {
-    let expected = dst.len();
-    match bs58::decode(encoded).into(dst) {
-        Ok(_received)  => Ok(()),
+fn parse_bs58_data(max_len: usize, encoded: &str) -> Result<Vec<u8>, DecodeBs58Error> {
+    // N-byte encoded base58 string decodes to at most N bytes so there’s no
+    // need to allocate full max_len output buffer if encoded length is shorter.
+    let mut data = vec![0u8; max_len.min(encoded.len())];
+    let expected = data.len();
+    match bs58::decode(encoded.as_bytes()).into(data.as_mut_slice()) {
+        Ok(len)  => {
+            data.truncate(len);
+            Ok(data)
+        }
         Err(bs58::decode::Error::BufferTooSmall) => {
             Err(DecodeBs58Error::BadLength { expected, received: expected.saturating_add(1) })
         }
