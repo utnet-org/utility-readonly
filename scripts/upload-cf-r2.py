@@ -22,10 +22,7 @@ s3 = boto3.client(
     region_name="auto",  # Must be one of: wnam, enam, weur, eeur, apac, auto
 )
 
-run_neard_command(["/opt/tools/neard", "--home=/opt/archival-node", "database", "make-snapshot", "--destination=/opt/snapshot"])
-run_neard_command(["/opt/tools/neard", "--home=/opt/snapshot", "database", "compact-database"])
+#run_neard_command(["/Users/es/utility/target/debug/neard", "--home=/Users/es/.unc", "database", "make-snapshot", "--destination=/Users/es/snapshot"])
+#run_neard_command(["/Users/es/utility/target/debug/neard", "--home=/Users/es/snapshot", "database", "compact-database"])
 
-s3.upload_file('/home/ubuntu/genesis.json.xz', 'near', 'testnet/genesis.json.xz')
-s3.upload_file('/home/ubuntu/config.json.xz', 'near', 'testnet/config.json.xz')
-
-upload_directory('/opt/snapshot', 'near', s3)
+upload_directory('/Users/es/snapshot', 'near', s3)
