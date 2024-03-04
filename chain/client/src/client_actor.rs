@@ -1004,7 +1004,6 @@ impl ClientActor {
             debug!(target:"client", sync_status=format!("{:#?}", self.client.sync_status), "Syncing - block production disabled");
             return Ok(());
         }
-
         let _ = self.client.check_and_update_doomslug_tip();
 
         self.pre_block_production()?;
@@ -1042,28 +1041,32 @@ impl ClientActor {
         } else {
             return Ok(());
         };
-
+        //println!("Lastest know height from cache: {}",self.client.last_know_height);
+        //println!("same count from cache : {}",self.client.same_height_count);
+        if self.client.last_know_height == latest_known.height {
+            self.client.same_height_count += 1;
+        }  else {
+            self.client.same_height_count =0;
+            self.client.last_know_height = latest_known.height;
+        }
+        let loop1_max = self.client.doomslug.get_largest_approval_height();
+        let loop2_max = self.client.doomslug.get_largest_height_crossing_threshold();
+        if self.client.same_height_count > 15 {
+            // loop1_max = latest_known.height + 10;
+            // loop2_max = latest_known.height + 10;
+            // println!("latest know height : {}", latest_known.height);
+            // println!("larget height crossing : {}", self.client.doomslug.get_largest_height_crossing_threshold());
+            let bad_account =
+                self.client.epoch_manager.get_block_producer_by_height(latest_known.height + 1)?;
+                //let new_epoch_manager:  Arc<dyn EpochManagerAdapter> = self.client.epoch_manager.clone().into();
+            println!("save bad account : {:?}", bad_account);
+                self.client.epoch_manager.add_bad_validator(latest_known.height + 1, bad_account).expect("TODO: panic message");
+        }
         // For debug purpose, we record the approvals we have seen so far to the future blocks
-        for height in latest_known.height + 1..=self.client.doomslug.get_largest_approval_height() {
-            let parent_hash = match self.client.chain.chain_store().get_all_block_hashes_by_height(height-1) {
-                        Ok(hashes) => {
-                            // If there is more than one block at the height, all of them will be
-                            // eligible to build the next block on, so we just pick one.
-                            let hash = hashes.values().flatten().next();
-                            match hash {
-                                Some(hash) => *hash,
-                                None => {
-                                    return Ok(());
-                                }
-                            }
-                        }
-                        Err(_e) => {
-                            return Ok(());
-                        }
-            };
-            let next_block_producer_account =
-                self.client.epoch_manager.get_block_producer_by_hash(&parent_hash)?;
+        for height in latest_known.height + 1..=loop1_max {
 
+            let next_block_producer_account =
+                self.client.epoch_manager.get_block_producer_by_height(height)?;
             if me == next_block_producer_account {
                 self.client.block_production_info.record_approvals(
                     height,
@@ -1073,27 +1076,14 @@ impl ClientActor {
         }
 
         for height in
-            latest_known.height + 1..=self.client.doomslug.get_largest_height_crossing_threshold()
+            latest_known.height + 1..=loop2_max
         {
-            let parent_hash = match self.client.chain.chain_store().get_all_block_hashes_by_height(height-1) {
-                Ok(hashes) => {
-                    // If there is more than one block at the height, all of them will be
-                    // eligible to build the next block on, so we just pick one.
-                    let hash = hashes.values().flatten().next();
-                    match hash {
-                        Some(hash) => *hash,
-                        None => {
-                            return Ok(());
-                        }
-                    }
-                }
-                Err(_e) => {
-                    return Ok(());
-                }
-            };
-            let next_block_producer_account =
-                self.client.epoch_manager.get_block_producer_by_hash(&parent_hash)?;
 
+            let next_block_producer_account =
+                self.client.epoch_manager.get_block_producer_by_height(height)?;
+            println!("height is : {}",height);
+            println!("me is : {:?}",me);
+            println!("next bp is : {:?}", next_block_producer_account);
             if me == next_block_producer_account {
                 let num_chunks = self
                     .client

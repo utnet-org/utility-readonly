@@ -1001,10 +1001,10 @@ impl<'a> ChainStoreUpdate<'a> {
             | DBCol::FlatStateDeltaMetadata
             | DBCol::FlatStorageStatus
             | DBCol::Misc
+            | DBCol::BadValidator
             => unreachable!(),
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => unreachable!(),
-            DBCol::BlockSummary => unreachable!(),
         }
         self.merge(store_update);
     }

@@ -842,7 +842,7 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
-        let validator = self.get_block_producer_by_hash(header.prev_hash())?;
+        let validator = self.get_block_producer_by_height(header.height())?;
         let validator_stake = &self.validators[&validator];
         Ok(header.verify_block_producer(validator_stake.public_key()))
     }
@@ -966,8 +966,11 @@ impl EpochManagerAdapter for MockEpochManager {
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
     
-    fn get_block_producer_by_hash(&self, _block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+    fn get_block_producer_by_height(&self, _block_height: BlockHeight) -> Result<AccountId, EpochError> {
         panic!("get_block_producer_by_hash not implemented for KeyValueRuntime");
+    }
+    fn add_bad_validator(&self,_height: BlockHeight, _validator: AccountId) -> Result<(), EpochError> {
+        todo!()
     }
 }
 

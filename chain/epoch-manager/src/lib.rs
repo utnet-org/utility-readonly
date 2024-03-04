@@ -1,34 +1,47 @@
-use crate::proposals::proposals_to_epoch_info;
 use crate::proposals::proposals_to_block_summary;
+use crate::proposals::proposals_to_epoch_info;
 use crate::types::EpochInfoAggregator;
 use near_cache::SyncLruCache;
 use near_chain_configs::GenesisConfig;
+use near_chain_primitives::Error;
+use near_crypto::PublicKey;
 use near_primitives::checked_feature;
-use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 use near_primitives::epoch_manager::block_info::{BlockInfo, BlockInfoV2};
+use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
-use near_primitives::epoch_manager::{AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig, ShardConfig, SlashState, AGGREGATOR_KEY};
+use near_primitives::epoch_manager::{
+    AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig, ShardConfig, SlashState,
+    AGGREGATOR_KEY,
+};
 use near_primitives::errors::{BlockError, EpochError};
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
+use near_primitives::types::validator_power::ValidatorPower;
+use near_primitives::types::validator_power_and_frozen::{
+    ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter,
+};
+use near_primitives::types::{
+    AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
+    EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier,
+    ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats,
+};
+use near_primitives::utils::height_to_bytes;
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use near_primitives::views::{
     CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView,
 };
 use near_store::{DBCol, Store, StoreUpdate};
+use num_bigint::{BigInt, ToBigInt};
 use num_rational::Rational64;
+use num_traits::Zero;
 use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::io;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use num_bigint::{BigInt, ToBigInt};
-use num_traits::Zero;
 use tracing::{debug, warn};
-use near_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -49,7 +62,11 @@ mod validator_selection;
 
 const EPOCH_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 50 };
 const BLOCK_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 5 } else { 1000 }; // TODO(#5080): fix this
+
+const HASH_CACHE_SIZE: usize = if cfg!(feature = "no_cache") { 1 } else { 2 };
 const AGGREGATOR_SAVE_PERIOD: u64 = 1000;
+
+// In epoch_manager or a common module
 
 /// In the current architecture, various components have access to the same
 /// shared mutable instance of [`EpochManager`]. This handle manages locking
@@ -141,7 +158,6 @@ impl EpochInfoProvider for EpochManagerHandle {
         let epoch_manager = self.read();
         epoch_manager.minimum_frozen(prev_block_hash)
     }
-
 }
 
 /// Tracks epoch information across different forks, such as validators.
@@ -158,6 +174,8 @@ pub struct EpochManager {
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
     /// Cache of block information.
     blocks_info: SyncLruCache<CryptoHash, Arc<BlockInfo>>,
+    /// Cache of block hash.
+    block_height_hash: SyncLruCache<BlockHeight, Arc<CryptoHash>>,
     /// Cache of epoch id to epoch start height
     epoch_id_to_start: SyncLruCache<EpochId, BlockHeight>,
     /// Epoch validators ordered by `block_producer_settlement`.
@@ -200,20 +218,24 @@ impl EpochManager {
             Self::new_all_epoch_config_with_test_overrides(genesis_config, test_overrides);
         let validators = genesis_config.validators();
         // Transforming ValidatorPowerAndFrozen to ValidatorPower
-        let power_validators: Vec<ValidatorPower> = validators.clone().into_iter().map(|validator| {
-            match validator {
+        let power_validators: Vec<ValidatorPower> = validators
+            .clone()
+            .into_iter()
+            .map(|validator| match validator {
                 ValidatorPowerAndFrozen::V1(v) => {
                     ValidatorPower::new_v1(v.account_id, v.public_key, v.power)
-                },
-            }
-        }).collect();
-        let frozen_validators: Vec<ValidatorFrozen> = validators.clone().into_iter().map(|validator| {
-            match validator {
+                }
+            })
+            .collect();
+        let frozen_validators: Vec<ValidatorFrozen> = validators
+            .clone()
+            .into_iter()
+            .map(|validator| match validator {
                 ValidatorPowerAndFrozen::V1(v) => {
                     ValidatorFrozen::new_v1(v.account_id, v.public_key, v.frozen)
-                },
-            }
-        }).collect();
+                }
+            })
+            .collect();
         Self::new(
             store,
             all_epoch_config,
@@ -244,7 +266,6 @@ impl EpochManager {
         )
     }
 
-
     fn new_all_epoch_config_with_test_overrides(
         genesis_config: &GenesisConfig,
         test_overrides: Option<AllEpochConfigTestOverrides>,
@@ -273,7 +294,6 @@ impl EpochManager {
             .get_ser(DBCol::EpochInfo, AGGREGATOR_KEY)
             .map_err(EpochError::from)?
             .unwrap_or_default();
-
         let mut epoch_manager = EpochManager {
             store,
             config,
@@ -281,6 +301,7 @@ impl EpochManager {
             genesis_protocol_version,
             epochs_info: SyncLruCache::new(EPOCH_CACHE_SIZE),
             blocks_info: SyncLruCache::new(BLOCK_CACHE_SIZE),
+            block_height_hash: SyncLruCache::new(HASH_CACHE_SIZE),
             epoch_id_to_start: SyncLruCache::new(EPOCH_CACHE_SIZE),
             epoch_validators_ordered: SyncLruCache::new(EPOCH_CACHE_SIZE),
             epoch_validators_ordered_unique: SyncLruCache::new(EPOCH_CACHE_SIZE),
@@ -341,7 +362,7 @@ impl EpochManager {
                 power_validators,
                 frozen_validators,
                 Default::default(),
-                Default::default()
+                Default::default(),
             );
             let block_info = Arc::new(the_block_info);
             let mut store_update = epoch_manager.store.store_update();
@@ -352,7 +373,6 @@ impl EpochManager {
             )?;
             epoch_manager.save_block_info(&mut store_update, block_info.clone())?;
             store_update.commit()?;
-
         }
         Ok(epoch_manager)
     }
@@ -757,25 +777,29 @@ impl EpochManager {
         last_block_hash: &CryptoHash,
         rng_seed: RngSeed,
     ) -> Result<BlockSummary, BlockError> {
-
         let validator_stake =
             block_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
 
-        let (
-            all_power_proposals,
-            all_frozen_proposals,
-            validator_kickout
-        ) = match block_info { // Assuming last_block_summary is wrapped in an Arc
+        let (all_power_proposals, all_frozen_proposals, validator_kickout) = match block_info {
+            // Assuming last_block_summary is wrapped in an Arc
             BlockInfo::V1(summary) => {
                 // Now you can access the fields of BlockSummaryV1 through `summary`
-                (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
+                (
+                    &summary.all_power_proposals,
+                    &summary.all_frozen_proposals,
+                    &summary.validator_kickout,
+                )
                 // Add more fields as needed
-            },
+            }
             BlockInfo::V2(summary) => {
                 // Now you can access the fields of BlockSummaryV1 through `summary`
-                (&summary.all_power_proposals,&summary.all_frozen_proposals,&summary.validator_kickout)
+                (
+                    &summary.all_power_proposals,
+                    &summary.all_frozen_proposals,
+                    &summary.validator_kickout,
+                )
                 // Add more fields as needed
-            },
+            }
         };
 
         let validator_block_chunk_stats = HashMap::default();
@@ -785,7 +809,7 @@ impl EpochManager {
             let last_epoch_last_block_hash =
                 *self.get_block_info(block_info.epoch_first_block())?.prev_hash();
             let last_block_in_last_epoch = self.get_block_info(&last_epoch_last_block_hash)?;
-        //    assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
+            //    assert!(block_info.timestamp_nanosec() > last_block_in_last_epoch.timestamp_nanosec());
             let epoch_duration =
                 block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
             self.reward_calculator.calculate_reward(
@@ -931,6 +955,9 @@ impl EpochManager {
                     &EpochId(current_hash),
                     genesis_epoch_info,
                 )?;
+                // Save block hash height info
+                let block_hash = Arc::new(*block_info.hash());
+                self.block_height_hash.put(block_info.height(), Arc::clone(&block_hash));
             } else {
                 let prev_block_info = self.get_block_info(block_info.prev_hash())?;
 
@@ -995,10 +1022,9 @@ impl EpochManager {
                 let block_info = Arc::new(block_info);
                 // Save current block info.
                 self.save_block_info(&mut store_update, Arc::clone(&block_info))?;
-
-                // let block_summary = Arc::new(block_summary);
-                // // Save current block summary
-                // self.save_block_summary(&mut store_update, &block_info.hash().clone(), Arc::clone(&block_summary))?;
+                // Save block hash height info
+                let block_hash = Arc::new(*block_info.clone().hash());
+                self.block_height_hash.put(block_info.height(), Arc::clone(&block_hash));
 
                 if block_info.last_finalized_height() > self.largest_final_height {
                     self.largest_final_height = block_info.last_finalized_height();
@@ -1015,9 +1041,13 @@ impl EpochManager {
 
                 // If this is the last block in the epoch, finalize this epoch.
                 if self.is_next_block_in_next_epoch(&block_info)? {
-                    self.finalize_epoch(&mut store_update, &block_info.clone(), &current_hash.clone(), rng_seed.clone())?;
+                    self.finalize_epoch(
+                        &mut store_update,
+                        &block_info.clone(),
+                        &current_hash.clone(),
+                        rng_seed.clone(),
+                    )?;
                 }
-
             }
         }
         Ok(store_update)
@@ -1036,26 +1066,97 @@ impl EpochManager {
     //     Ok(epoch_info.get_validator(validator_id))
     // }
 
-    pub fn get_block_producer_info_by_hash(
-        &self,
-        block_hash: &CryptoHash,
-        // height: BlockHeight,
-    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let block_info = self.get_block_info(block_hash)?;
-        // let current_height = block_info.height();
-        // if current_height +1 != height {
-        //     return Err(BlockError::BlockOutOfBounds(*block_hash));
-        // }
-        let random_value = block_info.random_value();
-        let validators = block_info.validators_iter();
-        Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
-    }
-
+    // pub fn get_block_producer_info_by_hash(
+    //     &self,
+    //     block_hash: &CryptoHash,
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let block_info = self.get_block_info(block_hash)?;
+    //
+    //     let random_value = block_info.random_value();
+    //     let validators = block_info.validators_iter();
+    //     Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+    // }
+    //
     fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
         BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
     }
 
-    fn choose_validator_vrf(validators_iter: ValidatorPowerAndFrozenIter, random_value: BigInt) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    pub fn get_block_producer_info_by_height(
+        &self,
+        height: BlockHeight,
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let producer = if height > 10 {
+            match self.get_block_hash_by_height(height - 10) {
+                Ok(block_hash) => {
+                    let block_info = self.get_block_info(&block_hash)?;
+
+                    let random_value = block_info.random_value();
+                    let original_iter = block_info.validators_iter();
+                    let bad_validators = self.get_bad_validator(height)?;
+                    //println!("bad validators are : {:?}", bad_validators);
+                    let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
+                        &original_iter,
+                        &bad_validators,
+                    );
+                    //println!("filtered validators are : {:?}", filtered_iter);
+                    Self::choose_validator_vrf(filtered_iter, Self::hash_to_bigint(random_value))
+                }
+                Err(e) => {
+                    println!("Get block hash by height error {:?} at height {:?}", e, height - 10);
+                    Self::get_default_validator(&self)
+                }
+            }
+        } else {
+            Self::get_default_validator(&self)
+        };
+        producer
+    }
+
+    // pub fn kickout_block_producer_by_height(
+    //     &self,
+    //     height: BlockHeight,
+    //     validator: ValidatorPowerAndFrozen,
+    // )  {
+    //     // unstake the validator, so it will not be included in the future blocks
+    //
+    //     // update the lastest 10 history blocks' validators to exclude the bad validator
+    //     if height < 10 {
+    //         return;
+    //     }
+    //     for h in height-10..=height {
+    //         match self.get_block_hash_by_height(h) {
+    //             Ok(block_hash) => {
+    //                 let block_info = self.get_block_info(&block_hash)?;
+    //
+    //                 let random_value = block_info.random_value();
+    //                 let validators = block_info.validators_iter();
+    //                 Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
+    //             },
+    //             Err(e) => {
+    //                 println!("Get block hash by height error {:?} at height {:?}",e,height-10);
+    //                 Self::get_default_validator(&self)
+    //             },
+    //         }
+    //     }
+    // }
+
+    fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let root_id_result: Result<AccountId, near_primitives::account::id::ParseAccountError> = "miner".parse::<AccountId>();
+        let pkey = "ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv".parse::<PublicKey>();
+        let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
+            account_id: root_id_result.unwrap(),
+            public_key: pkey.unwrap(),
+            power: 5000000000000,
+            frozen: 50000000000000000000000000000000,
+        });
+        // let validator = self.get_validator_by_account_id(root_id_result)?;
+        Ok(validator)
+    }
+
+    fn choose_validator_vrf(
+        validators_iter: ValidatorPowerAndFrozenIter,
+        random_value: BigInt,
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
         let mut total_weight: BigInt = Zero::zero();
         for validator in validators_iter.clone() {
             let validator_power = match validator {
@@ -1073,7 +1174,9 @@ impl EpochManager {
 
         for validator in validators_iter {
             let validator_power = match validator {
-                ValidatorPowerAndFrozen::V1(ref v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+                ValidatorPowerAndFrozen::V1(ref v) => {
+                    v.power.to_bigint().unwrap_or_else(Zero::zero)
+                }
             };
             cumulative_weight += &validator_power;
             if target < cumulative_weight {
@@ -1081,7 +1184,9 @@ impl EpochManager {
             }
         }
 
-        return Err(BlockError::NoAvailableValidator(String::from("Block Producer is not available")));
+        return Err(BlockError::NoAvailableValidator(String::from(
+            "Block Producer is not available",
+        )));
     }
 
     /// Returns settlement of all block producers in current epoch, with indicator on whether they are slashed or not.
@@ -1398,7 +1503,12 @@ impl EpochManager {
         &self,
         last_block_hash: &CryptoHash,
     ) -> Result<
-        (HashMap<AccountId, Power>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
+        (
+            HashMap<AccountId, Power>,
+            HashMap<AccountId, Balance>,
+            HashMap<AccountId, Balance>,
+            HashMap<AccountId, Balance>,
+        ),
         EpochError,
     > {
         let last_block_info = self.get_block_info(last_block_hash)?;
@@ -1411,7 +1521,7 @@ impl EpochManager {
         // Power changes are similar like stake changes
         let power_change = last_block_info.power_change().clone();
 
-        let all_power_changes =power_change.iter();
+        let all_power_changes = power_change.iter();
         let all_power_keys: HashSet<&AccountId> = all_power_changes.map(|(key, _)| key).collect();
 
         let mut power_info = HashMap::new();
@@ -1426,8 +1536,7 @@ impl EpochManager {
         let mut frozen_info = HashMap::new();
         for account_id in all_frozen_keys {
             if last_block_info.slashed().contains_key(account_id) {
-                if  !frozen_change.contains_key(account_id)
-                {
+                if !frozen_change.contains_key(account_id) {
                     // slashed in prev_prev epoch so it is safe to return the remaining stake in case of
                     // a double sign without violating the staking invariant.
                 } else {
@@ -1447,7 +1556,12 @@ impl EpochManager {
         &self,
         last_block_hash: &CryptoHash,
     ) -> Result<
-        (HashMap<AccountId, Power>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>, HashMap<AccountId, Balance>),
+        (
+            HashMap<AccountId, Power>,
+            HashMap<AccountId, Balance>,
+            HashMap<AccountId, Balance>,
+            HashMap<AccountId, Balance>,
+        ),
         EpochError,
     > {
         let next_next_epoch_id = EpochId(*last_block_hash);
@@ -1491,10 +1605,8 @@ impl EpochManager {
             power_info.insert(account_id.clone(), max_of_power);
         }
 
-        let all_frozen_changes = prev_prev_frozen_change
-            .iter()
-            .chain(&prev_frozen_change)
-            .chain(&frozen_change);
+        let all_frozen_changes =
+            prev_prev_frozen_change.iter().chain(&prev_frozen_change).chain(&frozen_change);
         let all_frozen_keys: HashSet<&AccountId> = all_frozen_changes.map(|(key, _)| key).collect();
 
         let mut frozen_info = HashMap::new();
@@ -1517,7 +1629,7 @@ impl EpochManager {
                 vec![prev_prev_frozen, prev_frozen, new_frozen].into_iter().max().unwrap();
             frozen_info.insert(account_id.clone(), max_of_frozen);
         }
-        
+
         let slashing_info = self.compute_double_sign_slashing_info(last_block_hash)?;
         debug!(target: "epoch_manager", "stake_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
         Ok((power_info, frozen_info, validator_reward, slashing_info))
@@ -1595,115 +1707,126 @@ impl EpochManager {
         // This ugly code arises because of the incompatible types between `block_tracker` in `EpochInfoAggregator`
         // and `validator_block_chunk_stats` in `EpochSummary`. Rust currently has no support for Either type
         // in std.
-        let (current_validators, next_epoch_id, all_power_proposals, all_frozen_proposals) = match &epoch_identifier {
-            ValidatorInfoIdentifier::EpochId(id) => {
-                let epoch_summary = self.get_epoch_validator_info(id)?;
-                let cur_validators = cur_epoch_info
-                    .validators_iter()
-                    .enumerate()
-                    .map(|(validator_id, info)| {
-                        let validator_stats = epoch_summary
-                            .validator_block_chunk_stats
-                            .get(info.account_id())
-                            .unwrap_or(&BlockChunkValidatorStats {
-                                block_stats: ValidatorStats { produced: 0, expected: 0 },
-                                chunk_stats: ValidatorStats { produced: 0, expected: 0 },
-                            });
-                        let mut shards = validator_to_shard[validator_id]
-                            .iter()
-                            .cloned()
-                            .collect::<Vec<ShardId>>();
-                        shards.sort();
-                        let (account_id, public_key, power, frozen) = info.destructure();
-                        Ok(CurrentEpochValidatorInfo {
-                            is_slashed: false, // currently there is no slashing
-                            account_id,
-                            public_key,
-                            power,
-                            frozen,
-                            // TODO: Maybe fill in the per shard info about the chunk produced for requests coming from RPC.
-                            num_produced_chunks_per_shard: vec![0; shards.len()],
-                            num_expected_chunks_per_shard: vec![0; shards.len()],
-                            shards,
-                            num_produced_blocks: validator_stats.block_stats.produced,
-                            num_expected_blocks: validator_stats.block_stats.expected,
-                            num_produced_chunks: validator_stats.chunk_stats.produced,
-                            num_expected_chunks: validator_stats.chunk_stats.expected,
+        let (current_validators, next_epoch_id, all_power_proposals, all_frozen_proposals) =
+            match &epoch_identifier {
+                ValidatorInfoIdentifier::EpochId(id) => {
+                    let epoch_summary = self.get_epoch_validator_info(id)?;
+                    let cur_validators = cur_epoch_info
+                        .validators_iter()
+                        .enumerate()
+                        .map(|(validator_id, info)| {
+                            let validator_stats = epoch_summary
+                                .validator_block_chunk_stats
+                                .get(info.account_id())
+                                .unwrap_or(&BlockChunkValidatorStats {
+                                    block_stats: ValidatorStats { produced: 0, expected: 0 },
+                                    chunk_stats: ValidatorStats { produced: 0, expected: 0 },
+                                });
+                            let mut shards = validator_to_shard[validator_id]
+                                .iter()
+                                .cloned()
+                                .collect::<Vec<ShardId>>();
+                            shards.sort();
+                            let (account_id, public_key, power, frozen) = info.destructure();
+                            Ok(CurrentEpochValidatorInfo {
+                                is_slashed: false, // currently there is no slashing
+                                account_id,
+                                public_key,
+                                power,
+                                frozen,
+                                // TODO: Maybe fill in the per shard info about the chunk produced for requests coming from RPC.
+                                num_produced_chunks_per_shard: vec![0; shards.len()],
+                                num_expected_chunks_per_shard: vec![0; shards.len()],
+                                shards,
+                                num_produced_blocks: validator_stats.block_stats.produced,
+                                num_expected_blocks: validator_stats.block_stats.expected,
+                                num_produced_chunks: validator_stats.chunk_stats.produced,
+                                num_expected_chunks: validator_stats.chunk_stats.expected,
+                            })
                         })
-                    })
-                    .collect::<Result<Vec<CurrentEpochValidatorInfo>, EpochError>>()?;
-                (
-                    cur_validators,
-                    EpochId(epoch_summary.prev_epoch_last_block_hash),
-                    epoch_summary.all_power_proposals.into_iter().map(Into::into).collect(),
-                    epoch_summary.all_frozen_proposals.into_iter().map(Into::into).collect(),
-                )
-            }
-            ValidatorInfoIdentifier::BlockHash(ref h) => {
-                // If we are here, `h` is hash of the latest block of the
-                // current epoch.
-                let aggregator = self.get_epoch_info_aggregator_upto_last(h)?;
-                let cur_validators = cur_epoch_info
-                    .validators_iter()
-                    .enumerate()
-                    .map(|(validator_id, info)| {
-                        let block_stats = aggregator
-                            .block_tracker
-                            .get(&(validator_id as u64))
-                            .unwrap_or_else(|| &ValidatorStats { produced: 0, expected: 0 })
-                            .clone();
+                        .collect::<Result<Vec<CurrentEpochValidatorInfo>, EpochError>>()?;
+                    (
+                        cur_validators,
+                        EpochId(epoch_summary.prev_epoch_last_block_hash),
+                        epoch_summary.all_power_proposals.into_iter().map(Into::into).collect(),
+                        epoch_summary.all_frozen_proposals.into_iter().map(Into::into).collect(),
+                    )
+                }
+                ValidatorInfoIdentifier::BlockHash(ref h) => {
+                    // If we are here, `h` is hash of the latest block of the
+                    // current epoch.
+                    let aggregator = self.get_epoch_info_aggregator_upto_last(h)?;
+                    let cur_validators = cur_epoch_info
+                        .validators_iter()
+                        .enumerate()
+                        .map(|(validator_id, info)| {
+                            let block_stats = aggregator
+                                .block_tracker
+                                .get(&(validator_id as u64))
+                                .unwrap_or_else(|| &ValidatorStats { produced: 0, expected: 0 })
+                                .clone();
 
-                        let mut chunks_produced_by_shard: HashMap<ShardId, NumBlocks> =
-                            HashMap::new();
-                        let mut chunks_expected_by_shard: HashMap<ShardId, NumBlocks> =
-                            HashMap::new();
-                        let mut chunk_stats = ValidatorStats { produced: 0, expected: 0 };
-                        for (shard, tracker) in aggregator.shard_tracker.iter() {
-                            if let Some(stats) = tracker.get(&(validator_id as u64)) {
-                                chunk_stats.produced += stats.produced;
-                                chunk_stats.expected += stats.expected;
-                                *chunks_produced_by_shard.entry(*shard).or_insert(0) +=
-                                    stats.produced;
-                                *chunks_expected_by_shard.entry(*shard).or_insert(0) +=
-                                    stats.expected;
+                            let mut chunks_produced_by_shard: HashMap<ShardId, NumBlocks> =
+                                HashMap::new();
+                            let mut chunks_expected_by_shard: HashMap<ShardId, NumBlocks> =
+                                HashMap::new();
+                            let mut chunk_stats = ValidatorStats { produced: 0, expected: 0 };
+                            for (shard, tracker) in aggregator.shard_tracker.iter() {
+                                if let Some(stats) = tracker.get(&(validator_id as u64)) {
+                                    chunk_stats.produced += stats.produced;
+                                    chunk_stats.expected += stats.expected;
+                                    *chunks_produced_by_shard.entry(*shard).or_insert(0) +=
+                                        stats.produced;
+                                    *chunks_expected_by_shard.entry(*shard).or_insert(0) +=
+                                        stats.expected;
+                                }
                             }
-                        }
-                        let mut shards = validator_to_shard[validator_id]
-                            .clone()
-                            .into_iter()
-                            .collect::<Vec<ShardId>>();
-                        shards.sort();
-                        let (account_id, public_key, power, frozen) = info.destructure();
-                        Ok(CurrentEpochValidatorInfo {
-                            is_slashed: false, // currently there is no slashing
-                            account_id,
-                            public_key,
-                            power,
-                            frozen,
-                            shards: shards.clone(),
-                            num_produced_blocks: block_stats.produced,
-                            num_expected_blocks: block_stats.expected,
-                            num_produced_chunks: chunk_stats.produced,
-                            num_expected_chunks: chunk_stats.expected,
-                            num_produced_chunks_per_shard: shards
-                                .iter()
-                                .map(|shard| *chunks_produced_by_shard.entry(*shard).or_default())
-                                .collect(),
-                            num_expected_chunks_per_shard: shards
-                                .iter()
-                                .map(|shard| *chunks_expected_by_shard.entry(*shard).or_default())
-                                .collect(),
+                            let mut shards = validator_to_shard[validator_id]
+                                .clone()
+                                .into_iter()
+                                .collect::<Vec<ShardId>>();
+                            shards.sort();
+                            let (account_id, public_key, power, frozen) = info.destructure();
+                            Ok(CurrentEpochValidatorInfo {
+                                is_slashed: false, // currently there is no slashing
+                                account_id,
+                                public_key,
+                                power,
+                                frozen,
+                                shards: shards.clone(),
+                                num_produced_blocks: block_stats.produced,
+                                num_expected_blocks: block_stats.expected,
+                                num_produced_chunks: chunk_stats.produced,
+                                num_expected_chunks: chunk_stats.expected,
+                                num_produced_chunks_per_shard: shards
+                                    .iter()
+                                    .map(|shard| {
+                                        *chunks_produced_by_shard.entry(*shard).or_default()
+                                    })
+                                    .collect(),
+                                num_expected_chunks_per_shard: shards
+                                    .iter()
+                                    .map(|shard| {
+                                        *chunks_expected_by_shard.entry(*shard).or_default()
+                                    })
+                                    .collect(),
+                            })
                         })
-                    })
-                    .collect::<Result<Vec<CurrentEpochValidatorInfo>, EpochError>>()?;
-                let all_power_proposals =
-                    aggregator.all_power_proposals.iter().map(|(_, p)| p.clone().into()).collect();
-                let all_frozen_proposals =
-                    aggregator.all_frozen_proposals.iter().map(|(_, p)| p.clone().into()).collect();
-                let next_epoch_id = self.get_next_epoch_id(h)?;
-                (cur_validators, next_epoch_id, all_power_proposals, all_frozen_proposals)
-            }
-        };
+                        .collect::<Result<Vec<CurrentEpochValidatorInfo>, EpochError>>()?;
+                    let all_power_proposals = aggregator
+                        .all_power_proposals
+                        .iter()
+                        .map(|(_, p)| p.clone().into())
+                        .collect();
+                    let all_frozen_proposals = aggregator
+                        .all_frozen_proposals
+                        .iter()
+                        .map(|(_, p)| p.clone().into())
+                        .collect();
+                    let next_epoch_id = self.get_next_epoch_id(h)?;
+                    (cur_validators, next_epoch_id, all_power_proposals, all_frozen_proposals)
+                }
+            };
 
         let next_epoch_info = self.get_epoch_info(&next_epoch_id)?;
         let mut next_validator_to_shard = (0..next_epoch_info.validators_len())
@@ -1769,84 +1892,115 @@ impl EpochManager {
             "add_validator_proposals");
         let rng_seed = block_header_info.random_value.0;
         // start customized by James Savechives
-        let BlockSummary::V1(BlockSummaryV1{
-                                 random_value : _random_value,
-                                 validators,
-                                 validator_to_index,
-                                 block_producers_settlement,
-                                 chunk_producers_settlement,
-                                 fishermen,
-                                 fishermen_to_index,
-                                 power_change,
-                                 frozen_change,
-                                 validator_reward,
-                                 seat_price,
-                                 minted_amount,
-                                 all_power_proposals,
-                                 all_frozen_proposals,
-                                 validator_kickout,
-                                 validator_mandates, ..
-                             }) =
-            if block_header_info.hash ==  CryptoHash::default() {
-                BlockSummary::default()
-            } else {
-                let BlockInfo::V2(BlockInfoV2{
-                                  validators,
-                                  validator_to_index,
-                                  block_producers_settlement,
-                                  chunk_producers_settlement,
-                                  fishermen,
-                                  fishermen_to_index,
-                                  power_change,
-                                  frozen_change,
-                                  validator_reward,
-                                  seat_price,
-                                  minted_amount,
-                                  all_power_proposals,
-                                  all_frozen_proposals,
-                                  validator_kickout,
-                                  validator_mandates, ..
-                                  }) = &*self.get_block_info(&block_header_info.prev_hash)? else { todo!() };
-                let all_power_proposals : Vec<_> = all_power_proposals.clone().into_iter().chain(block_header_info.power_proposals.clone().into_iter()).collect();
-                let all_frozen_proposals : Vec<_> = all_frozen_proposals.clone().into_iter().chain(block_header_info.frozen_proposals.clone().into_iter()).collect();
-                let block_info = BlockInfo::new(
-                    block_header_info.hash,
-                    block_header_info.height,
-                    block_header_info.last_finalized_height,
-                    block_header_info.last_finalized_block_hash,
-                    block_header_info.prev_hash,
-                    block_header_info.power_proposals.clone(),
-                    block_header_info.frozen_proposals.clone(),
-                    block_header_info.chunk_mask.clone(),
-                    block_header_info.slashed_validators.clone(),
-                    block_header_info.total_supply,
-                    block_header_info.latest_protocol_version,
-                    block_header_info.timestamp_nanosec,
-                    // start customized by James Savechives
-                    block_header_info.random_value,
-                    validators.clone(),
-                    validator_to_index.clone(),
-                    block_producers_settlement.clone(),
-                    chunk_producers_settlement.clone(),
-                    fishermen.clone(),
-                    fishermen_to_index.clone(),
-                    power_change.clone(),
-                    frozen_change.clone(),
-                    validator_reward.clone(),
-                    seat_price.clone(),
-                    minted_amount.clone(),
-                    all_power_proposals.clone(),
-                    all_frozen_proposals.clone(),
-                    validator_kickout.clone(),
-                    validator_mandates.clone(),
-                    // end customized by James Savechives
-                );
-                self.finalize_block_summary_for_block(
-                    &block_info,
-                    &block_header_info.prev_hash,
-                    rng_seed.clone(),
-                )?
+        let BlockSummary::V1(BlockSummaryV1 {
+            random_value: _random_value,
+            validators,
+            validator_to_index,
+            block_producers_settlement,
+            chunk_producers_settlement,
+            fishermen,
+            fishermen_to_index,
+            power_change,
+            frozen_change,
+            validator_reward,
+            seat_price,
+            minted_amount,
+            all_power_proposals,
+            all_frozen_proposals,
+            validator_kickout,
+            validator_mandates,
+            ..
+        }) = if block_header_info.hash == CryptoHash::default() {
+            BlockSummary::default()
+        } else {
+            let BlockInfo::V2(BlockInfoV2 {
+                validators,
+                validator_to_index,
+                block_producers_settlement,
+                chunk_producers_settlement,
+                fishermen,
+                fishermen_to_index,
+                power_change,
+                frozen_change,
+                validator_reward,
+                seat_price,
+                minted_amount,
+                all_power_proposals,
+                all_frozen_proposals,
+                validator_kickout,
+                validator_mandates,
+                ..
+            }) = &*self.get_block_info(&block_header_info.prev_hash)?
+            else {
+                todo!()
             };
+            let all_power_proposals: Vec<_> = all_power_proposals
+                .clone()
+                .into_iter()
+                .chain(block_header_info.power_proposals.clone().into_iter())
+                .collect();
+            let mut tmp_frozen_proposals: Vec<_> = block_header_info.frozen_proposals.clone()
+                .into_iter().collect();
+            // let all_frozen_proposals: Vec<_> = all_frozen_proposals
+            //     .clone()
+            //     .into_iter()
+            //     .chain(block_header_info.frozen_proposals.clone().into_iter())
+            //     .collect();
+            // Process new proposals, ensuring bad validators are assigned frozen = 0
+            for proposal in all_frozen_proposals
+                .iter()
+            {
+                if self.get_bad_validator(block_header_info.height)?.contains(&proposal.account_id()) {
+                    // For bad validators, set frozen to 0 in a new proposal
+                    tmp_frozen_proposals.push(ValidatorFrozen::new(
+                        proposal.account_id().clone(),
+                        proposal.public_key().clone(),
+                        0, // Set frozen to 0
+                    ));
+                } else {
+                    // For all others, maintain existing proposal behavior
+                    tmp_frozen_proposals.push(proposal.clone());
+                }
+            }
+            let all_frozen_proposals = tmp_frozen_proposals;
+            let block_info = BlockInfo::new(
+                block_header_info.hash,
+                block_header_info.height,
+                block_header_info.last_finalized_height,
+                block_header_info.last_finalized_block_hash,
+                block_header_info.prev_hash,
+                block_header_info.power_proposals.clone(),
+                block_header_info.frozen_proposals.clone(),
+                block_header_info.chunk_mask.clone(),
+                block_header_info.slashed_validators.clone(),
+                block_header_info.total_supply,
+                block_header_info.latest_protocol_version,
+                block_header_info.timestamp_nanosec,
+                // start customized by James Savechives
+                block_header_info.random_value,
+                validators.clone(),
+                validator_to_index.clone(),
+                block_producers_settlement.clone(),
+                chunk_producers_settlement.clone(),
+                fishermen.clone(),
+                fishermen_to_index.clone(),
+                power_change.clone(),
+                frozen_change.clone(),
+                validator_reward.clone(),
+                seat_price.clone(),
+                minted_amount.clone(),
+                all_power_proposals.clone(),
+                all_frozen_proposals.clone(),
+                validator_kickout.clone(),
+                validator_mandates.clone(),
+                // end customized by James Savechives
+            );
+            self.finalize_block_summary_for_block(
+                &block_info,
+                &block_header_info.prev_hash,
+                rng_seed.clone(),
+            )?
+        };
 
         // end customized by James Savechives
         // Deal with validator proposals and epoch finishing.
@@ -1879,14 +2033,12 @@ impl EpochManager {
             all_power_proposals,
             all_frozen_proposals,
             validator_kickout,
-            validator_mandates
-            // end customized by James Savechives
+            validator_mandates, // end customized by James Savechives
         );
-        // println!("the random value is : {:?}", block_header_info.random_value);
-        // println!("the validators value is : {:?}", validators);
-        // println!("the block producers settlement is : {:?}",block_producers_settlement);
+        println!("the random value is : {:?}", block_header_info.random_value);
+        println!("the validators value is : {:?}", validators);
+        println!("the block producers settlement is : {:?}",block_producers_settlement);
         self.record_block_info(block_info, rng_seed)
-
     }
 
     /// Compare two epoch ids based on their start height. This works because finality gadget
@@ -1925,12 +2077,23 @@ impl EpochManager {
 
     /// Get minimum power allowed at current block. Attempts to stake with a lower power will be
     /// rejected.
-    pub fn minimum_power(&self,_prev_block_hash: &CryptoHash) -> Result<Power, EpochError> {
+    pub fn minimum_power(&self, _prev_block_hash: &CryptoHash) -> Result<Power, EpochError> {
         // To Do
         Ok(0)
     }
 }
 
+#[allow(dead_code)]
+fn option_to_not_found<T, F>(res: io::Result<Option<T>>, field_name: F) -> Result<T, Error>
+where
+    F: std::string::ToString,
+{
+    match res {
+        Ok(Some(o)) => Ok(o),
+        Ok(None) => Err(Error::DBNotFoundErr(field_name.to_string())),
+        Err(e) => Err(e.into()),
+    }
+}
 /// Private utilities for EpochManager.
 impl EpochManager {
     fn cares_about_shard_in_epoch(
@@ -1990,7 +2153,7 @@ impl EpochManager {
         // println!("last finalized height : {:?}",block_info.last_finalized_height());
 
         Ok(block_info.last_finalized_height() + 4 >= estimated_next_epoch_start)
-       // return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
+        // return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
     }
 
     /// Returns true, if given current block info, next block must include the approvals from the next
@@ -2100,6 +2263,53 @@ impl EpochManager {
         }
     }
 
+    pub fn get_bad_validator(&self, height: u64) -> Result<Arc<Vec<AccountId>>, EpochError> {
+        match self.store.get_ser::<Vec<AccountId>>(DBCol::BadValidator, &height_to_bytes(height))? {
+            Some(bad_validators) => {
+
+                Ok(Arc::new(bad_validators))
+            },
+            None => {
+                //println!("get nothing from db");
+                let test_account = "node4-validator".parse::<AccountId>().unwrap();
+                let mut vec = Vec::new();
+                vec.push(test_account);
+                Ok(Arc::new(vec))
+            }, // Return an empty Vec if no record is found
+        }
+    }
+
+    #[allow(unused_mut)]
+    pub fn add_bad_validator(&self,
+                             store_update: &mut StoreUpdate,
+                             height: u64,
+                             validator: AccountId
+    ) -> Result<(), EpochError> {
+        let the_height = if height > 1 {
+            height - 1
+        } else {
+            1
+        };
+
+        let vec = self.get_bad_validator(the_height)?;
+        let mut new_vec = vec.clone().to_vec();
+        new_vec.push(validator);
+        println!("new vec : {:?}",new_vec);
+        store_update
+            .set_ser(DBCol::BadValidator, &height_to_bytes(height), &new_vec)
+            .map_err(EpochError::from)?;
+        Ok(())
+    }
+    /// Get Block Hash by Block height
+    ///
+    pub fn get_block_hash_by_height(&self, height: u64) -> Result<Arc<CryptoHash>, EpochError> {
+        self.block_height_hash.get_or_try_put(height, |height| {
+            self.store
+                .get_ser(DBCol::BlockHeight, &height_to_bytes(*height))?
+                .ok_or_else(|| EpochError::IOErr(height.to_string()))
+                .map(Arc::new)
+        })
+    }
     /// Get BlockInfo for a block
     /// # Errors
     /// EpochError::IOErr if storage returned an error
@@ -2125,6 +2335,8 @@ impl EpochManager {
         self.blocks_info.put(block_hash, block_info);
         Ok(())
     }
+
+
 
     fn save_epoch_start(
         &mut self,

@@ -405,15 +405,12 @@ impl ClientActor {
                     .into_iter()
                     .collect();
                 if block_hashes.is_empty() {
-                    // get pre_hash with height_to_fetch
-                    let the_block = self.client.chain.get_block_by_height(height_to_fetch-1)?;
-                    let pre_hash = the_block.hash();
                     missed_heights.push(MissedHeightInfo {
                         block_height: height_to_fetch,
                         block_producer: self
                             .client
                             .epoch_manager
-                            .get_block_producer_by_hash(pre_hash)
+                            .get_block_producer_by_height(height_to_fetch)
                             .ok(),
                     });
                 }
@@ -447,7 +444,7 @@ impl ClientActor {
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer_by_hash(block_header.prev_hash())
+                    .get_block_producer_by_height(block_header.height())
                     .ok();
 
                 let chunks = match &block {
@@ -552,12 +549,10 @@ impl ClientActor {
                 }
 
                 // And if we are the block (or chunk) producer for this height - collect some timing info.
-                let prev_header = self.client.chain.get_block_header_by_height(height-1)?;
-                let prev_hash = prev_header.hash();
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer_by_hash(prev_hash)
+                    .get_block_producer_by_height(height)
                     .map(|f| f.to_string())
                     .unwrap_or_default();
 
