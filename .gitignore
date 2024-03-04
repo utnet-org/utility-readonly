@@ -61,4 +61,5 @@ rusty-tags.vi
 # Estimator generated files
 costs-*.txt
 names-to-stats.txt
-data_dump_*.bin
+data_dump_*.bin!
+*_key.json

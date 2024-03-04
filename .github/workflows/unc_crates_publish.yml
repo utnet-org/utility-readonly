@@ -1,4 +1,4 @@
-name: Near Crates Publish
+name: Unc Crates Publish
 
 on:
   workflow_dispatch:
@@ -10,15 +10,15 @@ on:
 
 jobs:
   publish-cargo-crates:
-    name: "Publish near-workspaces on crates.io https://crates.io/crates/near-workspaces"
+    name: "Publish unc-workspaces on crates.io https://crates.io/crates/unc-workspaces"
     runs-on: "ubuntu-22.04-16core"
-    environment: deploy
+    #environment: deploy
     permissions:
       contents: write # required for crates push
     timeout-minutes: 30 
     
     steps:
-      - name: Checkout near/nearcore's ${{ github.event.inputs.branch }} branch
+      - name: Checkout utnet-org/utility's ${{ github.event.inputs.branch }} branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -35,10 +35,10 @@ jobs:
               --no-git-commit --no-git-push --no-individual-tags --tag-prefix 'crates-' \
               --tag-msg $$'crates.io snapshot\n---%{\n- %n - https://crates.io/crates/%n/%v}'
 
-      - name: Create tag on https://github.com/near/nearcore
+      - name: Create tag on https://github.com/utnet-org/utility
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push --no-follow-tags https://github.com/near/nearcore.git tag 'crates-*'
+          git push --no-follow-tags https://github.com/utnet-org/utility.git tag 'crates-*'
 
 
