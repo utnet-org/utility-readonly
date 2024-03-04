@@ -415,6 +415,7 @@ pub trait EpochManagerAdapter: Send + Sync {
     // }
     fn get_block_producer_by_height(&self, block_height: BlockHeight) -> Result<AccountId, EpochError>;
     fn add_bad_validator(&self, height: BlockHeight, validator: AccountId) -> Result<(), EpochError>;
+    fn get_bad_validator(&self, height: BlockHeight) -> Result<Arc<Vec<AccountId>>, EpochError>;
 }
 
 impl EpochManagerAdapter for EpochManagerHandle {
@@ -1034,4 +1035,8 @@ impl EpochManagerAdapter for EpochManagerHandle {
         epoch_manager.epoch_info_aggregator = EpochInfoAggregator::new(epoch_id.clone(), *hash);
     }
 
+    fn get_bad_validator(&self, height: BlockHeight) -> Result<Arc<Vec<AccountId>>, EpochError> {
+        let epoch_manager = self.read();
+        epoch_manager.get_bad_validator(height)
+    }
 }

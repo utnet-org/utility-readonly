@@ -4,7 +4,8 @@
 //! be put in Client.
 //! Unfortunately, this is not the case today. We are in the process of refactoring ClientActor
 //! https://github.com/near/nearcore/issues/7899
-
+use near_store::DBCol;
+use near_chain::ChainStoreAccess;
 use crate::adapter::{
     BlockApproval, BlockHeadersResponse, BlockResponse, ChunkEndorsementMessage,
     ChunkStateWitnessMessage, ProcessTxRequest, ProcessTxResponse, RecvChallenge, SetNetworkInfo,
@@ -62,9 +63,9 @@ use near_primitives::epoch_manager::RngSeed;
 use near_primitives::hash::CryptoHash;
 use near_primitives::network::{AnnounceAccount, PeerId};
 use near_primitives::static_clock::StaticClock;
-use near_primitives::types::BlockHeight;
+use near_primitives::types::{AccountId, BlockHeight};
 use near_primitives::unwrap_or_return;
-use near_primitives::utils::{from_timestamp, MaybeValidated};
+use near_primitives::utils::{from_timestamp, height_to_bytes, MaybeValidated};
 use near_primitives::validator_signer::ValidatorSigner;
 use near_primitives::version::PROTOCOL_VERSION;
 use near_primitives::views::{DetailedDebugStatus, ValidatorInfo};
@@ -1043,25 +1044,39 @@ impl ClientActor {
         };
         println!("Lastest know height from cache: {}",self.client.last_know_height);
         println!("same count from cache : {}",self.client.same_height_count);
-        if self.client.last_know_height == latest_known.height {
+        let bp_account =
+            self.client.epoch_manager.get_block_producer_by_height(latest_known.height + 1)?;
+        if self.client.last_know_height == latest_known.height && self.client.last_know_bp == bp_account{
             self.client.same_height_count += 1;
         }  else {
             self.client.same_height_count =0;
             self.client.last_know_height = latest_known.height;
+            self.client.last_know_bp  = bp_account.clone();
         }
         let loop1_max = self.client.doomslug.get_largest_approval_height();
         let loop2_max = self.client.doomslug.get_largest_height_crossing_threshold();
-        if self.client.same_height_count > 15 {
+        if self.client.same_height_count > 10 {
             // loop1_max = latest_known.height + 10;
             // loop2_max = latest_known.height + 10;
             // println!("latest know height : {}", latest_known.height);
             // println!("larget height crossing : {}", self.client.doomslug.get_largest_height_crossing_threshold());
-            let bad_account =
-                self.client.epoch_manager.get_block_producer_by_height(latest_known.height + 1)?;
-                //let new_epoch_manager:  Arc<dyn EpochManagerAdapter> = self.client.epoch_manager.clone().into();
-            println!("save bad account : {:?}", bad_account);
-                self.client.epoch_manager.add_bad_validator(latest_known.height + 1, bad_account).expect("TODO: panic message");
+
+            let root_account = "jamesavechives".parse::<AccountId>().unwrap();
+            if root_account != bp_account {
+                println!("save bad account : {:?}", bp_account);
+                let vec = self.client.epoch_manager.get_bad_validator(1)?;
+                if vec.len() == 0 {
+                    let mut new_vec = vec.clone().to_vec();
+                    new_vec.push(bp_account);
+                    let mut store_update = self.client.chain.chain_store().store().store_update();
+                    store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec).expect("TODO: panic message");
+                    store_update.commit().expect("TODO: panic message");
+                }
+            }
+            // self.client.same_height_count =0;
+            // return Ok(());
         }
+
         // For debug purpose, we record the approvals we have seen so far to the future blocks
         for height in latest_known.height + 1..=loop1_max {
 

@@ -978,6 +978,7 @@ impl EpochManagerAdapter for MockEpochManager {
     fn add_bad_validator(&self,_height: BlockHeight, _validator: AccountId) -> Result<(), EpochError> {
         todo!()
     }
+fn get_bad_validator(&self, _: u64) -> Result<Arc<Vec<AccountId>>, EpochError> { todo!() }
 }
 
 impl RuntimeAdapter for KeyValueRuntime {

@@ -4,7 +4,6 @@ use crate::types::EpochInfoAggregator;
 use near_cache::SyncLruCache;
 use near_chain_configs::GenesisConfig;
 use near_chain_primitives::Error;
-use near_crypto::PublicKey;
 use near_primitives::checked_feature;
 use near_primitives::epoch_manager::block_info::{BlockInfo, BlockInfoV2};
 use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
@@ -24,7 +23,7 @@ use near_primitives::types::validator_power_and_frozen::{
 use near_primitives::types::{
     AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
     EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier,
-    ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats,
+    ValidatorKickoutReason, ValidatorStats,
 };
 use near_primitives::utils::height_to_bytes;
 use near_primitives::validator_mandates::AssignmentWeight;
@@ -1096,7 +1095,7 @@ impl EpochManager {
 
                     let random_value = block_info.random_value();
                     let original_iter = block_info.validators_iter();
-                    let bad_validators = self.get_bad_validator(height)?;
+                    let bad_validators = self.get_bad_validator(1)?;
                     println!("bad validators are : {:?}", bad_validators);
                     let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
                         &original_iter,
@@ -1145,15 +1144,15 @@ impl EpochManager {
     // }
 
     fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let root_id_result = "jamesavechives".parse::<AccountId>();
-        let pkey = "ed25519:3mda2kgqvbybK9sHEEuoDWjeeZodJe9Fo64GRYCGBiZF".parse::<PublicKey>();
-        let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
-            account_id: root_id_result.unwrap(),
-            public_key: pkey.unwrap(),
-            power: 5000000000000,
-            frozen: 11000000000000000000000000000000,
-        });
-        // let validator = self.get_validator_by_account_id(root_id_result)?;
+         let root_id_result = "jamesavechives".parse::<AccountId>().unwrap();
+        // let pkey = "ed25519:3mda2kgqvbybK9sHEEuoDWjeeZodJe9Fo64GRYCGBiZF".parse::<PublicKey>();
+        // let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
+        //     account_id: root_id_result.unwrap(),
+        //     public_key: pkey.unwrap(),
+        //     power: 5000000000000,
+        //     frozen: 11000000000000000000000000000000,
+        // });
+        let validator = self.get_validator_by_account_id_block(&root_id_result)?;
         Ok(validator)
     }
 
@@ -1368,6 +1367,22 @@ impl EpochManager {
         epoch_info
             .get_validator_by_account(account_id)
             .ok_or_else(|| EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
+    }
+
+    pub fn get_validator_by_account_id_block(
+        &self,
+        account_id: &AccountId,
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        let height = if self.largest_final_height > 10 {
+            self.largest_final_height -10
+        } else {
+            self.largest_final_height
+        };
+        let block_hash = self.get_block_hash_by_height(height)?;
+        let block_info = self.get_block_info(&block_hash)?;
+        block_info
+            .get_validator_by_account(account_id)
+            .ok_or_else(|| BlockError::NotAValidator(account_id.clone(), height))
     }
 
     /// Returns fisherman for given account id for given epoch.
@@ -1954,7 +1969,7 @@ impl EpochManager {
             for proposal in all_frozen_proposals
                 .iter()
             {
-                if self.get_bad_validator(block_header_info.height)?.contains(&proposal.account_id()) {
+                if self.get_bad_validator(1)?.contains(&proposal.account_id()) {
                     // For bad validators, set frozen to 0 in a new proposal
                     tmp_frozen_proposals.push(ValidatorFrozen::new(
                         proposal.account_id().clone(),
@@ -2270,14 +2285,14 @@ impl EpochManager {
     pub fn get_bad_validator(&self, height: u64) -> Result<Arc<Vec<AccountId>>, EpochError> {
         match self.store.get_ser::<Vec<AccountId>>(DBCol::BadValidator, &height_to_bytes(height))? {
             Some(bad_validators) => {
-
+                println!("get bad validators from db, in height : {:?}", height);
                 Ok(Arc::new(bad_validators))
             },
             None => {
-                println!("get nothing from db");
-                let test_account = "node4-validator".parse::<AccountId>().unwrap();
-                let mut vec = Vec::new();
-                vec.push(test_account);
+                println!("get nothing from db, in height : {:?}", height);
+                // let test_account = "node4-validator".parse::<AccountId>().unwrap();
+                let vec = Vec::new();
+                // vec.push(test_account);
                 Ok(Arc::new(vec))
             }, // Return an empty Vec if no record is found
         }
@@ -2289,18 +2304,20 @@ impl EpochManager {
                              height: u64,
                              validator: AccountId
     ) -> Result<(), EpochError> {
-        let the_height = if height > 1 {
+        let _the_height = if height > 1 {
             height - 1
         } else {
             1
         };
-
-        let vec = self.get_bad_validator(the_height)?;
+        let default_account = "default".parse::<AccountId>().unwrap();
+        let vec = self.get_bad_validator(1)?;
         let mut new_vec = vec.clone().to_vec();
-        new_vec.push(validator);
-        println!("new vec : {:?}",new_vec);
+        if default_account!=validator {
+            new_vec.push(validator);
+        }
+        println!("new vec : {:?}, with height : {:?}",new_vec,height);
         store_update
-            .set_ser(DBCol::BadValidator, &height_to_bytes(height), &new_vec)
+            .set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec)
             .map_err(EpochError::from)?;
         Ok(())
     }

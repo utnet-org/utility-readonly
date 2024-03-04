@@ -918,7 +918,7 @@ impl Debug for crate::errors::BlockError {
             crate::errors::BlockError::MissingBlock(hash) => write!(f, "MissingBlock({})", hash),
             crate::errors::BlockError::IOErr(err) => write!(f, "IOErr({})", err),
             crate::errors::BlockError::NotAValidator(account_id, block_height) => {
-                write!(f, "NotAValidator({}, {:?})", account_id, block_height)
+                write!(f, "NotAValidator({:?}, {:?})", account_id, block_height)
             }
             crate::errors::BlockError::ShardingError(err) => write!(f, "ShardingError({})", err),
             crate::errors::BlockError::NotEnoughValidators { num_shards, num_validators } => {

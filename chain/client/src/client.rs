@@ -129,6 +129,7 @@ pub struct Client {
 
     /// count for not producing block times
     pub last_know_height: BlockHeight,
+    pub last_know_bp: AccountId,
     pub same_height_count: u16,
     pub config: ClientConfig,
     pub sync_status: SyncStatus,
@@ -343,6 +344,7 @@ impl Client {
         );
         let last_know_height = 0;
         let same_height_count = 0;
+        let last_know_bp= "default".parse::<AccountId>().unwrap();
         Ok(Self {
             #[cfg(feature = "test_features")]
             adv_produce_blocks: None,
@@ -353,6 +355,7 @@ impl Client {
             #[cfg(feature = "sandbox")]
             accrued_fastforward_delta: 0,
             last_know_height,
+            last_know_bp,
             same_height_count,
             config,
             sync_status,
