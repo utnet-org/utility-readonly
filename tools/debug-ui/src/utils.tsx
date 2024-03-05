@@ -48,7 +48,7 @@ export function formatTraffic(bytes_received: number, bytes_sent: number): React
 export function addDebugPortLink(peer_network_addr: string): ReactElement {
     // Each node running in a machine is assigned ports 24567+peer_num and 3030+peer_num, whereby peer_num is a whole number
     // peer_rpc_address is not shared between peer nodes. Hence, it cannot be programmatically fetched.
-    // https://github.com/near/nearcore/blob/700ec29270f72f2e78a17029b4799a8228926c07/chain/network/src/network_protocol/peer.rs#L13-L19
+    // https://github.com/utnet-org/utility/blob/700ec29270f72f2e78a17029b4799a8228926c07/chain/network/src/network_protocol/peer.rs#L13-L19
     const DEFAULT_RPC_PORT = 3030;
     const DEFAULT_NETWORK_PORT = 24567;
     const peer_network_addr_array = peer_network_addr.split(':');

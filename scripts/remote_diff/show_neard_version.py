@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shows results of '/home/ubuntu/neard -V' on provided google cloud machines.
+Shows results of '/home/ubuntu/uncd -V' on provided google cloud machines.
 Usage: ./show_neard_version.py project host1 host2 host3 ...
 Example for testnet canaries:
     ./show_neard_version.py near-core testnet-canary-rpc-01-europe-north1-a-1f3e1e97 \
@@ -12,7 +12,7 @@ from utils import display_table, run_on_machine
 
 
 def get_neard_info(project, host, user='ubuntu'):
-    return run_on_machine("./neard -V", user, host, project)
+    return run_on_machine("./uncd -V", user, host, project)
 
 
 def display_neard_info(hosts, neard_info, user='ubuntu'):

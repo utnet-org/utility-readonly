@@ -25,7 +25,7 @@ ActionFunctionCallBase          770_989_128_914 gas [   770.989µs]    (computed
 
 Finished in 40.11s, output saved to:
 
-    /home/you/near/nearcore/costs-2022-11-11T11:11:11Z-e40863c9b.txt
+    /home/you/utnet-org/utility/costs-2022-11-11T11:11:11Z-e40863c9b.txt
 ```
 
 This shows how much gas a parameter should cost to satisfy the 1ms = 1Tgas rule.
@@ -63,7 +63,7 @@ instruction count, read IO bytes, and write IO bytes respectively. The IO byte
 count is known to be inaccurate.
 
 ```
-+ /host/nearcore/runtime/runtime-params-estimator/emu-cost/counter_plugin/qemu-x86_64 -plugin file=/host/nearcore/runtime/runtime-params-estimator/emu-cost/counter_plugin/libcounter.so -cpu Westmere-v1 /host/nearcore/target/release/runtime-params-estimator --home /.near --accounts-num 20000 --iters 3 --warmup-iters 1 --metric icount --costs=ActionReceiptCreation,ActionTransfer,ActionCreateAccount,ActionFunctionCallBase --skip-build-test-contract --additional-accounts-num 0 --in-memory-db
++ /host/framework/runtime/runtime-params-estimator/emu-cost/counter_plugin/qemu-x86_64 -plugin file=/host/framework/runtime/runtime-params-estimator/emu-cost/counter_plugin/libcounter.so -cpu Westmere-v1 /host/framework/target/release/runtime-params-estimator --home /.near --accounts-num 20000 --iters 3 --warmup-iters 1 --metric icount --costs=ActionReceiptCreation,ActionTransfer,ActionCreateAccount,ActionFunctionCallBase --skip-build-test-contract --additional-accounts-num 0 --in-memory-db
 ActionReceiptCreation         214_581_685_500 gas [  1716653.48i 0.00r 0.00w]     (computed in 6.11s) 
 ActionTransfer                 21_528_212_916 gas [   172225.70i 0.00r 0.00w]     (computed in 4.71s) 
 ActionCreateAccount            26_608_336_250 gas [   212866.69i 0.00r 0.00w]     (computed in 4.67s) 
@@ -72,7 +72,7 @@ ActionFunctionCallBase         12_193_364_898 gas [    97546.92i 0.00r 0.00w]   
 
 Finished in 17.92s, output saved to:
 
-    /host/nearcore/costs-2022-11-01T16:27:36Z-e40863c9b.txt
+    /host/framework/costs-2022-11-01T16:27:36Z-e40863c9b.txt
 ```
 
 The difference between the metrics is discussed in the [Estimation

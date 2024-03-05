@@ -25,7 +25,7 @@ def main():
     executables = branches.prepare_ab_test()
 
     # Setup local network.
-    subprocess.check_call((executables.stable.neard, f'--home={node_root}',
+    subprocess.check_call((executables.stable.uncd, f'--home={node_root}',
                            'localnet', '-v', '2', '--prefix', 'test'))
 
     # Run both binaries at the same time.

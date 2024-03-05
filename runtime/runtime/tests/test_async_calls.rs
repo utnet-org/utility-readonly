@@ -10,10 +10,10 @@ use near_primitives::types::AccountId;
 pub mod runtime_group_tools;
 
 /// Initial balance used in tests.
-pub const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * NEAR_BASE;
+pub const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * UNC_BASE;
 
 /// One NEAR, divisible by 10^24.
-pub const NEAR_BASE: u128 = 1_000_000_000_000_000_000_000_000;
+pub const UNC_BASE: u128 = 1_000_000_000_000_000_000_000_000;
 
 const GAS_1: u64 = 900_000_000_000_000;
 const GAS_2: u64 = GAS_1 / 3;

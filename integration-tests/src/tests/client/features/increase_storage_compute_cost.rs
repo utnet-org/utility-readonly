@@ -23,10 +23,10 @@ use near_primitives::transaction::{
 };
 use near_primitives::types::AccountId;
 use near_primitives::version::ProtocolFeature;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
-/// Tracked in https://github.com/near/nearcore/issues/8938
+/// Tracked in https://github.com/utnet-org/utility/issues/8938
 const INCREASED_STORAGE_COSTS_PROTOCOL_VERSION: u32 = 61;
 
 /// Test that `storage_write` compute limit is respected in new version.

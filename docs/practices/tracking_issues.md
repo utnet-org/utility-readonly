@@ -1,9 +1,9 @@
 # Tracking issues
 
-`nearcore` uses so-called "tracking issues" to coordinate larger pieces of work
+`framework` uses so-called "tracking issues" to coordinate larger pieces of work
 (e.g. implementation of new NEPs).  Such issues are tagged with the
 [`C-tracking-issue`
-label](https://github.com/near/nearcore/issues?q=is%3Aopen+is%3Aissue+label%3AC-tracking-issue).
+label](https://github.com/utnet-org/utility/issues?q=is%3Aopen+is%3Aissue+label%3AC-tracking-issue).
 
 The goal of tracking issues is to serve as a coordination point. They can help
 new contributors and other interested parties come up to speed with the current
@@ -12,7 +12,7 @@ todo-lists of sub-issues, existing implementation PRs, etc.
 
 One can further use tracking issues to:
 
-- get a feeling for what's happening in `nearcore` by looking at the set of
+- get a feeling for what's happening in `framework` by looking at the set of
   open tracking issues.
 - find larger efforts to contribute to as tracking issues usually contain
   up-for-grab to-do lists.
@@ -23,9 +23,9 @@ issue for your work.
 
 ## Guidelines
 
-- Tracking issues should be maintained in the `nearcore` repository. If the
+- Tracking issues should be maintained in the `framework` repository. If the
   projects are security sensitive, then they should be maintained in the
-  `nearcore-private` repository.
+  `framework-private` repository.
 - The issues should be kept up-to-date. At a minimum, all new context
   should be added as comments, but preferably the original description should be
   edited to reflect the current status.
@@ -42,7 +42,7 @@ issue for your work.
   the discussions.
 - For security-sensitive discussions, use the appropriate private Zulip streams.
 
-[This issue](https://github.com/near/nearcore/issues/7670) is a good example of
+[This issue](https://github.com/utnet-org/utility/issues/7670) is a good example of
 how tracking issues should be maintained.
 
 ## Background

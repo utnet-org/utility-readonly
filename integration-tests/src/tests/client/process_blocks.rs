@@ -75,9 +75,9 @@ use near_store::test_utils::create_test_node_storage_with_cold;
 use near_store::test_utils::create_test_store;
 use near_store::NodeStorage;
 use near_store::{get, DBCol, TrieChanges};
-use nearcore::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::NEAR_BASE;
+use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::UNC_BASE;
 use rand::prelude::StdRng;
 use rand::{Rng, SeedableRng};
 
@@ -1965,7 +1965,7 @@ fn test_gc_tail_update() {
 fn test_gas_price_change() {
     init_test_logger();
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
-    let target_num_tokens_left = NEAR_BASE / 10 + 1;
+    let target_num_tokens_left = UNC_BASE / 10 + 1;
     let transaction_costs = RuntimeConfig::test().fees;
 
     let send_money_total_gas = transaction_costs.fee(ActionCosts::transfer).send_fee(false)
@@ -2170,7 +2170,7 @@ fn test_data_reset_before_state_sync() {
         1,
         "test0".parse().unwrap(),
         "test_account".parse().unwrap(),
-        NEAR_BASE,
+        UNC_BASE,
         signer.public_key(),
         &signer,
         genesis_hash,

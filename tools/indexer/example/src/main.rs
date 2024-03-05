@@ -261,7 +261,7 @@ fn main() -> Result<()> {
     // (sending telemetry and downloading genesis)
     openssl_probe::init_ssl_cert_env_vars();
     let env_filter = near_o11y::tracing_subscriber::EnvFilter::new(
-        "nearcore=info,indexer_example=info,tokio_reactor=info,near=info,\
+        "framework=info,indexer_example=info,tokio_reactor=info,near=info,\
          stats=info,telemetry=info,indexer=info,near-performance-metrics=info",
     );
     let _subscriber = near_o11y::default_subscriber(env_filter, &Default::default()).global();

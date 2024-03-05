@@ -1,7 +1,7 @@
 # Nearcore Debug UI
 
 ## How to Use
-Clone nearcore, go to this directory, run `npm install` (only needed for first time), and then
+Clone framework, go to this directory, run `npm install` (only needed for first time), and then
 ```
 npm start
 ```
@@ -19,8 +19,8 @@ For example:
 
 ```
 cd tools/debug-ui
-docker build -t nearcore-debug-ui .
-docker run -p 8080:80 nearcore-debug-ui
+docker build -t framework-debug-ui .
+docker run -p 8080:80 framework-debug-ui
 ```
 
 ## Development
@@ -55,7 +55,7 @@ Run `npm run lint` to check for linting & formatting errors, and `npm run fix` t
 can be automatically fixed.
 
 ## How to Use the TestLoop Log Visualizer
-For nearcore tests written in the TestLoop framework (any tests that mention "TestLoop", or
+For framework tests written in the TestLoop framework (any tests that mention "TestLoop", or
 more precisely, using TestLoop from core/async/src/test_loop.rs), the test can be visualized:
 
 1. First run the test from the Rust side and save the output, e.g.

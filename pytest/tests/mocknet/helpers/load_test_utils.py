@@ -129,7 +129,7 @@ def function_call_ft_transfer_call(account, test_state, base_block_hash=None):
     )
 
 
-# See https://near.github.io/nearcore/architecture/how/meta-tx.html to understand what is going on.
+# See https://near.github.io/framework/architecture/how/meta-tx.html to understand what is going on.
 # Alice pays the costs of Relayer sending 1 yoctoNear to Receiver
 def meta_transaction_transfer(alice_account, test_state, base_block_hash,
                               base_block_height):

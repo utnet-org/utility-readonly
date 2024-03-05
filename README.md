@@ -18,12 +18,12 @@
 [![Discord chat][discord-badge]][discord-url]
 [![Telegram Group][telegram-badge]][telegram-url]
 
-[stable-release]: https://img.shields.io/github/v/release/nearprotocol/nearcore?label=stable
-[prerelease]: https://img.shields.io/github/v/release/nearprotocol/nearcore?include_prereleases&label=prerelease
+[stable-release]: https://img.shields.io/github/v/release/utnet-org/utility?label=stable
+[prerelease]: https://img.shields.io/github/v/release/utnet-org/utility?include_prereleases&label=prerelease
 [ci-badge-master]: https://badge.buildkite.com/a81147cb62c585cc434459eedd1d25e521453120ead9ee6c64.svg?branch=master
-[ci-url]: https://buildkite.com/nearprotocol/nearcore
-[codecov-badge]: https://codecov.io/gh/nearprotocol/nearcore/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/nearprotocol/nearcore
+[ci-url]: https://buildkite.com/utnet-org/utility
+[codecov-badge]: https://codecov.io/gh/utnet-org/utility/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/utnet-org/utility
 [discord-badge]: https://img.shields.io/discord/490367152054992913.svg
 [discord-url]: https://near.chat
 [telegram-badge]: https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg

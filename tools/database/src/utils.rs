@@ -12,8 +12,8 @@ pub(crate) fn open_rocksdb(
     home: &Path,
     mode: near_store::Mode,
 ) -> anyhow::Result<near_store::db::RocksDB> {
-    let config = nearcore::config::Config::from_file_skip_validation(
-        &home.join(nearcore::config::CONFIG_FILENAME),
+    let config = framework::config::Config::from_file_skip_validation(
+        &home.join(framework::config::CONFIG_FILENAME),
     )?;
     let store_config = &config.store;
     let db_path = store_config.path.as_ref().cloned().unwrap_or_else(|| home.join("data"));
@@ -23,8 +23,8 @@ pub(crate) fn open_rocksdb(
 }
 
 pub(crate) fn open_state_snapshot(home: &Path, mode: near_store::Mode) -> anyhow::Result<Store> {
-    let config = nearcore::config::Config::from_file_skip_validation(
-        &home.join(nearcore::config::CONFIG_FILENAME),
+    let config = framework::config::Config::from_file_skip_validation(
+        &home.join(framework::config::CONFIG_FILENAME),
     )?;
     let store_config = &config.store;
     let db_path = store_config.path.as_ref().cloned().unwrap_or_else(|| home.join("data"));

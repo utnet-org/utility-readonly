@@ -23,8 +23,8 @@ use near_primitives::types::{BlockId, BlockReference, EpochId, EpochReference};
 use near_primitives::utils::MaybeValidated;
 use near_primitives_core::types::ShardId;
 use near_store::DBCol;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::{config::GenesisExt, load_test_config, start_with_config};
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::{config::GenesisExt, load_test_config, start_with_config};
 use std::ops::ControlFlow;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
@@ -46,7 +46,7 @@ fn sync_state_nodes() {
         near1.client_config.epoch_sync_enabled = false;
         run_actix(async move {
             let dir1 = tempfile::Builder::new().prefix("sync_nodes_1").tempdir().unwrap();
-            let nearcore::NearNode { view_client: view_client1, .. } =
+            let framework::NearNode { view_client: view_client1, .. } =
                 start_with_config(dir1.path(), near1).expect("start_with_config");
 
             let view_client2_holder = Arc::new(RwLock::new(None));
@@ -81,7 +81,7 @@ fn sync_state_nodes() {
                                             .prefix("sync_nodes_2")
                                             .tempdir()
                                             .unwrap();
-                                        let nearcore::NearNode {
+                                        let framework::NearNode {
                                             view_client: view_client2,
                                             arbiters,
                                             ..
@@ -184,7 +184,7 @@ fn sync_state_nodes_multishard() {
             near4.client_config.epoch_sync_enabled = false;
 
             let dir1 = tempfile::Builder::new().prefix("sync_nodes_1").tempdir().unwrap();
-            let nearcore::NearNode { view_client: view_client1, .. } =
+            let framework::NearNode { view_client: view_client1, .. } =
                 start_with_config(dir1.path(), near1).expect("start_with_config");
 
             let dir3 = tempfile::Builder::new().prefix("sync_nodes_3").tempdir().unwrap();
@@ -232,7 +232,7 @@ fn sync_state_nodes_multishard() {
                                             .prefix("sync_nodes_2")
                                             .tempdir()
                                             .unwrap();
-                                        let nearcore::NearNode {
+                                        let framework::NearNode {
                                             view_client: view_client2,
                                             arbiters,
                                             ..
@@ -317,7 +317,7 @@ fn sync_empty_state() {
             near1.client_config.epoch_sync_enabled = false;
 
             let dir1 = tempfile::Builder::new().prefix("sync_nodes_1").tempdir().unwrap();
-            let nearcore::NearNode { view_client: view_client1, .. } =
+            let framework::NearNode { view_client: view_client1, .. } =
                 start_with_config(dir1.path(), near1).expect("start_with_config");
             let dir2 = Arc::new(tempfile::Builder::new().prefix("sync_nodes_2").tempdir().unwrap());
 
@@ -357,7 +357,7 @@ fn sync_empty_state() {
                                         near2.client_config.tracked_shards = vec![0, 1, 2, 3];
                                         near2.client_config.epoch_sync_enabled = false;
 
-                                        let nearcore::NearNode {
+                                        let framework::NearNode {
                                             view_client: view_client2,
                                             arbiters,
                                             ..
@@ -457,7 +457,7 @@ fn sync_state_dump() {
             near1.config.store.state_snapshot_compaction_enabled = false;
 
             let dir1 = tempfile::Builder::new().prefix("sync_nodes_1").tempdir().unwrap();
-            let nearcore::NearNode {
+            let framework::NearNode {
                 view_client: view_client1,
                 state_sync_dump_handle: _state_sync_dump_handle,
                 ..
@@ -504,7 +504,7 @@ fn sync_state_dump() {
                                         num_concurrent_requests_during_catchup: 1,
                                     });
 
-                                let nearcore::NearNode {
+                                let framework::NearNode {
                                     view_client: view_client2, arbiters, ..
                                 } = start_with_config(dir2.path(), near2)
                                     .expect("start_with_config");
@@ -740,7 +740,7 @@ fn test_state_sync_headers() {
             near1.config.store.state_snapshot_enabled = true;
             near1.config.store.state_snapshot_compaction_enabled = false;
 
-            let nearcore::NearNode { view_client: view_client1, .. } =
+            let framework::NearNode { view_client: view_client1, .. } =
                 start_with_config(dir1.path(), near1).expect("start_with_config");
 
             // First we need to find sync_hash. That is done in 3 steps:
@@ -957,7 +957,7 @@ fn test_state_sync_headers_no_tracked_shards() {
             near2.config.state_sync_enabled = false;
             near2.client_config.state_sync_enabled = false;
 
-            let nearcore::NearNode { view_client: view_client2, .. } =
+            let framework::NearNode { view_client: view_client2, .. } =
                 start_with_config(dir2.path(), near2).expect("start_with_config");
 
             // First we need to find sync_hash. That is done in 3 steps:

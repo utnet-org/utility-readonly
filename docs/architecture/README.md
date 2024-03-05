@@ -1,6 +1,6 @@
 # Overview
 
-This document describes the high-level architecture of nearcore. The focus here
+This document describes the high-level architecture of framework. The focus here
 is on the implementation of the blockchain protocol, not the protocol itself.
 For reference documentation of the protocol, please refer to
 [nomicon](https://nomicon.io/)
@@ -9,7 +9,7 @@ Some parts of our architecture are also covered in this [video series on YouTube
 
 ## Bird's Eye View
 
-If we put the entirety of nearcore onto one picture, we get something like this:
+If we put the entirety of framework onto one picture, we get something like this:
 
 ![](../images/architecture.svg)
 
@@ -18,7 +18,7 @@ this document the above picture would become much clearer!
 
 ## Overall Operation
 
-`nearcore` is a blockchain node -- it's a single binary (`neard`) which runs on
+`framework` is a blockchain node -- it's a single binary (`uncd`) which runs on
 some machine and talks to other similar binaries running elsewhere. Together,
 the nodes agree (using a distributed consensus algorithm) on a particular
 sequence of transactions. Once transaction sequence is established, each node
@@ -27,7 +27,7 @@ deterministic, each node in the network ends up with identical state. To allow
 greater scalability, NEAR protocol uses sharding, which allows a node to hold
 only a small subset (shard) of the whole state.
 
-`neard` is a stateful, restartable process. When `neard` starts, the node
+`uncd` is a stateful, restartable process. When `uncd` starts, the node
 connects to the network and starts processing blocks (block is a batch of
 transactions, processed together; transactions are batched into blocks for
 greater efficiency). The results of processing are persisted in the database.
@@ -37,9 +37,9 @@ the node is offline it misses the block, so, after a restart, the sync process
 kicks in which brings the node up-to-speed with the network by downloading the
 missing bits of history from more up-to-date peer nodes.
 
-Major components of nearcore:
+Major components of framework:
 
-* **JSON RPC**. This HTTP RPC interface is how `neard` communicates with
+* **JSON RPC**. This HTTP RPC interface is how `uncd` communicates with
   non-blockchain outside world. For example, to submit a transaction, some
   client sends an RPC request with it to some node in the network. From that
   node, the transaction propagates through the network, until it is included in
@@ -48,7 +48,7 @@ Major components of nearcore:
   [here](https://docs.near.org/api/rpc/introduction).
 
 * **Network**. If RPC is aimed "outside" the blockchain, "network" is how peer
-  `neard` nodes communicate with each other within the blockchain. RPC carries
+  `uncd` nodes communicate with each other within the blockchain. RPC carries
   requests from users of the blockchain, while network carries various messages
   needed to implement consensus. Two directly connected nodes communicate by
   sending protobuf-encoded messages over TCP. A node also includes logic to
@@ -99,9 +99,9 @@ Major components of nearcore:
 
 ## Entry Points
 
-`neard/src/main.rs` contains the main function that starts a blockchain node.
+`uncd/src/main.rs` contains the main function that starts a blockchain node.
 However, this file mostly only contains the logic to parse arguments and
-dispatch different commands. `start_with_config` in `nearcore/src/lib.rs` is the
+dispatch different commands. `start_with_config` in `framework/src/lib.rs` is the
 actual entry point and it starts all the actors.
 
 `JsonRpcHandler::process` in the `jsonrpc` crate is the RPC entry point. It
@@ -237,9 +237,9 @@ production. The `imports` module exposes host functions defined in
 `near-vm-logic` to WASM code. In other words, it defines the ABI of the
 contracts on NEAR.
 
-### `neard`
+### `uncd`
 
-As mentioned before, `neard` is the crate that contains that main entry points.
+As mentioned before, `uncd` is the crate that contains that main entry points.
 All the actors are spawned in `start_with_config`. It is also worth noting that
 `NightshadeRuntime` is the struct that implements `RuntimeAdapter`.
 <!-- TODO: Maybe add RuntimeAdapter mention or explanation in runtime/runtime chapter? -->

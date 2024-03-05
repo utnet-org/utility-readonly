@@ -15,7 +15,7 @@ slow receipts.
 
 ## Setup 
 
-When compiling neard (or the paramater estimator) with `feature=io_trace` it
+When compiling uncd (or the paramater estimator) with `feature=io_trace` it
 instruments the binary code with fine-grained database operations tracking.
 
 *Aside: We don't enable it by default because we are afraid the overhead could be
@@ -24,24 +24,24 @@ cache hits. Although we haven't properly evaluated if it really is a performance
 problem.*
 
 This allows using the `--record-io-trace=/path/to/output.io_trace` CLI flag on
-neard. Run it in combination with the subcommands `neard run`, `neard
+uncd. Run it in combination with the subcommands `uncd run`, `uncd
 view-state`, or `runtime-params-estimator` and it will record an IO trace. Make
-sure to provide the flag to `neard` itself, however, not to the subcommands.
+sure to provide the flag to `uncd` itself, however, not to the subcommands.
 (See examples below)
 
 ```bash
 # Example command for normal node
 # (Careful! This will quickly fill your disk if you let it run.)
-cargo build --release -p neard --features=io_trace
-target/release/neard \
+cargo build --release -p uncd --features=io_trace
+target/release/uncd \
     --record-io-trace=/mnt/disks/some_disk_with_enough_space/my.io_trace \
     run
 ```
 
 ```bash
 # Example command for state viewer, applying a range of chunks in shard 0
-cargo build --release -p neard --features=io_trace
-target/release/neard \
+cargo build --release -p uncd --features=io_trace
+target/release/uncd \
     --record-io-trace=75220100-75220101.s0.io_trace \
     view-state apply-range --start-index 75220100 --end-index 75220101 \
     --sequential --shard-id 0
@@ -89,7 +89,7 @@ one level deeper indentation belong to that same database transaction commit.
 
 Later, you see a group that starts with an `apply` header. It groups all IO
 requests that were performed for a call to [`fn
-apply`](https://github.com/near/nearcore/blob/d38c94ac8e78a5a71c592125dfd47803beff58ce/runtime/runtime/src/lib.rs#L1172)
+apply`](https://github.com/utnet-org/utility/blob/d38c94ac8e78a5a71c592125dfd47803beff58ce/runtime/runtime/src/lib.rs#L1172)
 that applies transactions and receipts of a chunk to the previous state root.
 
 In the example, you see a list of `GET` requests that belong to that `apply`,
@@ -266,7 +266,7 @@ eyeball them to get a feeling for what's going on. But you can't understand the
 whole trace without additional tooling.
 
 The parameter estimator command `replay` can help with that. (See also [this
-readme](https://github.com/near/nearcore/tree/master/runtime/runtime-params-estimator/README.md))
+readme](https://github.com/utnet-org/utility/tree/master/runtime/runtime-params-estimator/README.md))
 Run the following command to see an overview of available commands.
 
 ```bash

@@ -1198,7 +1198,7 @@ impl Runtime {
         // Re-introduce receipts lost because of a bug in apply_chunks.
         // We take the first block with existing chunk in the first epoch in which protocol feature
         // RestoreReceiptsAfterFixApplyChunks was enabled, and put the restored receipts there.
-        // See https://github.com/near/nearcore/pull/4248/ for more details.
+        // See https://github.com/utnet-org/utility/pull/4248/ for more details.
         let receipts_to_restore = if ProtocolFeature::RestoreReceiptsAfterFixApplyChunks
             .protocol_version()
             == protocol_version

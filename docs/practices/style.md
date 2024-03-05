@@ -1,10 +1,10 @@
 # Code Style
 
-This document specifies the code style to use in the nearcore repository. The
+This document specifies the code style to use in the framework repository. The
 primary goal here is to achieve consistency, maintain it over time, and cut down
 on the mental overhead related to style choices.
 
-Right now, `nearcore` codebase is not perfectly consistent, and the style
+Right now, `framework` codebase is not perfectly consistent, and the style
 acknowledges this. It guides newly written code and serves as a tie breaker for
 decisions. Rewriting existing code to conform 100% to the style is not a goal.
 Local consistency is more important: if new code is added to a specific file,
@@ -29,7 +29,7 @@ While the most important thing is to solve the problem at hand, we strive to
 implement the solution in idiomatic Rust, if possible. To learn what is
 considered idiomatic Rust, a good start are the
 [Rust API guidelines](https://rust-lang.github.io/api-guidelines/about.html)
-(but keep in mind that `nearcore` is not a library with public API, not all
+(but keep in mind that `framework` is not a library with public API, not all
 advice applies literally).
 
 When in doubt, ask question in the [Rust
@@ -289,7 +289,7 @@ factors, most notably the compilation flags used. The quick explanation is that 
 computations may panic (cause side effects) if the result has overflowed, and when built with
 optimizations enabled, these computations will wrap-around instead.
 
-For nearcore and neard we have opted to enable the panicking behaviour regardless of the
+For framework and uncd we have opted to enable the panicking behaviour regardless of the
 optimization level. By doing it this we hope to prevent accidental stabilization of protocol
 mis-features that depend on incorrect handling of these overflows or similarly scary silent bugs.
 The downside to this approach is that any such arithmetic operation now may cause a node to crash,
@@ -443,13 +443,13 @@ metrics don't incur a significant runtime cost.
 
 ### Naming
 
-Prefix all `nearcore` metrics with `near_`. Follow the
+Prefix all `framework` metrics with `near_`. Follow the
 [Prometheus naming convention](https://prometheus.io/docs/practices/naming/)
 for new metrics.
 
 **Rationale:** The `near_` prefix makes it trivial to separate metrics exported
-by `nearcore` from other metrics, such as metrics about the state of the machine
-that runs `neard`.
+by `framework` from other metrics, such as metrics about the state of the machine
+that runs `uncd`.
 
 ### Performance
 

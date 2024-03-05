@@ -15,7 +15,7 @@ A new version of decentralized state sync is work in progress.
 
 ## How-to
 
-neard release `1.36.0-rc.1` adds an experimental option to sync state from
+uncd release `1.36.0-rc.1` adds an experimental option to sync state from
 external storage.
 
 The reference `config.json` file by default enables state sync from external
@@ -24,7 +24,7 @@ storage and configures it to get state parts from a location managed by Pagoda.
 Note: to obtain the reference configuration file, download it by running the
 following command:
 ```shell
-neard init --chain-id <testnet or mainnet> --download-config --download-genesis
+uncd init --chain-id <testnet or mainnet> --download-config --download-genesis
 ```
 
 To create your own State dumps to external storage, see the corresponding [how-to](state_sync_dump.md).
@@ -57,9 +57,9 @@ your `config.json` file:
 }
 ```
 
-Then run the `neard` binary and it will access GCS anonymously:
+Then run the `uncd` binary and it will access GCS anonymously:
 ```shell
-./neard run
+./uncd run
 ```
 
 #### Extra Options
@@ -97,9 +97,9 @@ You may add the other mentioned options too.
 },
 ```
 
-Then run the `neard` binary and it will access Amazon S3 anonymously:
+Then run the `uncd` binary and it will access Amazon S3 anonymously:
 ```shell
-./neard run
+./uncd run
 ```
 
 ## Sync from a local filesystem
@@ -122,7 +122,7 @@ You may add the other mentioned options too.
 }
 ```
 
-Then run the `neard` binary:
+Then run the `uncd` binary:
 ```shell
-./neard run
+./uncd run
 ```

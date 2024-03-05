@@ -3,7 +3,7 @@
 //! pass the control to Client. This means, any real block processing or production logic should
 //! be put in Client.
 //! Unfortunately, this is not the case today. We are in the process of refactoring ClientActor
-//! https://github.com/near/nearcore/issues/7899
+//! https://github.com/utnet-org/utility/issues/7899
 
 use crate::adapter::{
     BlockApproval, BlockHeadersResponse, BlockResponse, ChunkEndorsementMessage,
@@ -1508,7 +1508,7 @@ impl ClientActor {
     /// content of such block.
     ///
     /// The selected block will always be the first block on a new epoch:
-    /// <https://github.com/nearprotocol/nearcore/issues/2021#issuecomment-583039862>.
+    /// <https://github.com/utnet-org/utility/issues/2021#issuecomment-583039862>.
     fn find_sync_hash(&mut self) -> Result<CryptoHash, near_chain::Error> {
         let header_head = self.client.chain.header_head()?;
         let sync_hash = header_head.last_block_hash;

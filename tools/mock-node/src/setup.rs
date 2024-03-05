@@ -16,7 +16,7 @@ use near_primitives::state_part::PartId;
 use near_primitives::state_sync::get_num_state_parts;
 use near_primitives::types::{BlockHeight, NumShards, ShardId};
 use near_store::test_utils::create_test_store;
-use nearcore::{NearConfig, NightshadeRuntime};
+use framework::{NearConfig, NightshadeRuntime};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::cmp::min;
 use std::path::Path;
@@ -266,7 +266,7 @@ pub fn setup_mock_node(
         "http://{}",
         &config.rpc_config.as_ref().expect("the JSON RPC config must be set").addr
     ));
-    let _node = nearcore::start_with_config(client_home_dir, config).unwrap();
+    let _node = framework::start_with_config(client_home_dir, config).unwrap();
 
     MockNode { target_height, mock_peer, rpc_client }
 }
@@ -289,8 +289,8 @@ mod tests {
     use near_o11y::WithSpanContextExt;
     use near_primitives::transaction::SignedTransaction;
     use near_store::test_utils::gen_account_from_alphabet;
-    use nearcore::config::GenesisExt;
-    use nearcore::{load_test_config, start_with_config, NEAR_BASE};
+    use framework::config::GenesisExt;
+    use framework::{load_test_config, start_with_config, UNC_BASE};
     use rand::thread_rng;
     use std::ops::ControlFlow;
     use std::sync::{Arc, RwLock};
@@ -321,7 +321,7 @@ mod tests {
         let dir = tempfile::Builder::new().prefix("test0").tempdir().unwrap();
         let path1 = dir.path();
         run_actix(async move {
-            let nearcore::NearNode { view_client, client, .. } =
+            let framework::NearNode { view_client, client, .. } =
                 start_with_config(path1, near_config).expect("start_with_config");
 
             let view_client1 = view_client;
@@ -347,7 +347,7 @@ mod tests {
                                             next_nonce,
                                             "test1".parse().unwrap(),
                                             gen_account_from_alphabet(&mut rng, b"abcdefghijklmn"),
-                                            5 * NEAR_BASE,
+                                            5 * UNC_BASE,
                                             signer0.public_key.clone(),
                                             &signer0,
                                             block.header.hash,

@@ -1460,14 +1460,14 @@ impl ShardsManager {
         let num_total_parts = self.rs.total_shard_count();
         for part_info in partial_encoded_chunk.parts.iter() {
             // TODO: only validate parts we care about
-            // https://github.com/near/nearcore/issues/5885
+            // https://github.com/utnet-org/utility/issues/5885
             self.validate_part(header.encoded_merkle_root(), part_info, num_total_parts)?;
         }
 
         // 1.e Checking receipts validity
         for proof in partial_encoded_chunk.receipts.iter() {
             // TODO: only validate receipts we care about
-            // https://github.com/near/nearcore/issues/5885
+            // https://github.com/utnet-org/utility/issues/5885
             // we can't simply use prev_block_hash to check if the node tracks this shard or not
             // because prev_block_hash may not be ready
             if !proof.verify_against_receipt_root(header.prev_outgoing_receipts_root()) {
@@ -1795,7 +1795,7 @@ impl ShardsManager {
             // Technically, here we should check if the block producer actually cares about the shard.
             // We don't because with the current implementation, we force all validators to track all
             // shards by making their config tracking all shards.
-            // See https://github.com/near/nearcore/issues/7388
+            // See https://github.com/utnet-org/utility/issues/7388
             self.peer_manager_adapter.send(PeerManagerMessageRequest::NetworkRequests(
                 NetworkRequests::PartialEncodedChunkForward {
                     account_id: bp_account_id,

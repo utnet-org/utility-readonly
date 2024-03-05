@@ -1,4 +1,4 @@
-use crate::tests::nearcore::node_cluster::NodeCluster;
+use crate::tests::framework::node_cluster::NodeCluster;
 use actix::System;
 use near_client::GetBlock;
 use near_network::test_utils::wait_or_timeout;
@@ -42,7 +42,7 @@ fn run_heavy_nodes(
         System::current().stop()
     });
 
-    // See https://github.com/near/nearcore/issues/3925 for why it is here.
+    // See https://github.com/utnet-org/utility/issues/3925 for why it is here.
     //
     // The TL;DR is that actix doesn't allow to cleanly shut down multi-arbiter
     // actor systems, and that might cause RocksDB destructors to run when the

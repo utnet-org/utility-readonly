@@ -60,7 +60,7 @@ def main():
 
     # Init local node
     subprocess.call((
-        executables.stable.neard,
+        executables.stable.uncd,
         "--home=%s" % node_root,
         "init",
         "--fast",
@@ -97,7 +97,7 @@ def main():
     logging.info("Starting the current node...")
     config = executables.current.node_config()
     node.near_root = executables.current.root
-    node.binary_name = executables.current.neard
+    node.binary_name = executables.current.uncd
     node.start(boot_node=node)
 
     logging.info("Running the current node...")

@@ -14,7 +14,7 @@ use near_primitives::trie_key::TrieKey;
 use near_primitives::types::chunk_extra::ChunkExtra;
 use near_primitives::types::{BlockHeight, ShardId};
 use near_store::{DBCol, Store};
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::fs::File;
 use std::io::Write;
@@ -421,7 +421,7 @@ pub fn apply_chain_range(
 
 /**
  * With the database migration we can get into the situation where there are different
- * ChunkExtra versions in database and produced by `neard` playback. Consider them equal as
+ * ChunkExtra versions in database and produced by `uncd` playback. Consider them equal as
  * long as the content is equal.
  */
 fn smart_equals(extra1: &ChunkExtra, extra2: &ChunkExtra) -> bool {
@@ -478,9 +478,9 @@ mod test {
     use near_store::genesis::initialize_genesis_state;
     use near_store::test_utils::create_test_store;
     use near_store::Store;
-    use nearcore::config::GenesisExt;
-    use nearcore::config::TESTING_INIT_STAKE;
-    use nearcore::NightshadeRuntime;
+    use framework::config::GenesisExt;
+    use framework::config::TESTING_INIT_STAKE;
+    use framework::NightshadeRuntime;
 
     use crate::apply_chain_range::apply_chain_range;
 

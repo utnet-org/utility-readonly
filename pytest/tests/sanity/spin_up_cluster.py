@@ -18,8 +18,8 @@ def test_sanity_spin_up():
     Sets store.path of one of the node to something other than `data` to test if
     that option works as well.
 
-    This is just a sanity check that the neard binary isn’t borked too much.
-    See <https://github.com/near/nearcore/issues/4993>.
+    This is just a sanity check that the uncd binary isn’t borked too much.
+    See <https://github.com/utnet-org/utility/issues/4993>.
     """
     nodes = cluster.start_cluster(
         2,

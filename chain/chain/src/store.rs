@@ -549,7 +549,7 @@ impl ChainStore {
     /// changes very rarely.
     /// But we need to implement a more theoretically correct algorithm if shard layouts will change
     /// more often in the future
-    /// <https://github.com/near/nearcore/issues/4877>
+    /// <https://github.com/utnet-org/utility/issues/4877>
     pub fn get_outgoing_receipts_for_shard(
         &self,
         epoch_manager: &dyn EpochManagerAdapter,

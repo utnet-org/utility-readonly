@@ -16,7 +16,7 @@ use near_primitives::types::EpochId;
 use near_primitives::utils::index_to_bytes;
 use near_store::HEADER_HEAD_KEY;
 use near_store::{DBCol, Mode, NodeStorage, Store, StoreUpdate};
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 use std::fs;
 use std::path::Path;
 
@@ -221,7 +221,7 @@ fn load_snapshot(load_cmd: LoadCmd) {
     )
     .unwrap();
 
-    let config = nearcore::config::load_config(&home_dir, GenesisValidationMode::UnsafeFast)
+    let config = framework::config::load_config(&home_dir, GenesisValidationMode::UnsafeFast)
         .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
     let store = NodeStorage::opener(home_dir, config.config.archive, &Default::default(), None)
         .open()

@@ -27,9 +27,9 @@ use near_store::flat::FlatStorageStatus;
 use near_store::test_utils::{gen_account, gen_unique_accounts};
 use near_store::trie::SnapshotError;
 use near_store::{DBCol, ShardUId};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::NEAR_BASE;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::UNC_BASE;
 use rand::rngs::StdRng;
 use rand::seq::{IteratorRandom, SliceRandom};
 use rand::{Rng, SeedableRng};
@@ -908,7 +908,7 @@ fn generate_create_accounts_txs(
                 *nonce,
                 signer_account.clone(),
                 account_id.clone(),
-                NEAR_BASE,
+                UNC_BASE,
                 signer.public_key(),
                 &signer0,
                 genesis_hash,
@@ -1260,7 +1260,7 @@ fn gen_cross_contract_tx_impl(
                     "id": 0 },
                 {"action_transfer": {
                     "promise_index": 0,
-                    "amount": NEAR_BASE.to_string(),
+                    "amount": UNC_BASE.to_string(),
                 }, "id": 0 },
                 {"action_add_key_with_full_access": {
                     "promise_index": 0,
@@ -1268,7 +1268,7 @@ fn gen_cross_contract_tx_impl(
                     "nonce": 0,
                 }, "id": 0 }
             ],
-        "amount": NEAR_BASE.to_string(),
+        "amount": UNC_BASE.to_string(),
         "gas": GAS_2,
         }, "id": 1}
     ]);

@@ -504,21 +504,21 @@ def redownload_neard(nodes, binary_url):
     pmap(
         lambda node: node.machine.
         run('sudo -u ubuntu -i',
-            input='wget -O /home/ubuntu/neard {}; chmod +x /home/ubuntu/neard'.
+            input='wget -O /home/ubuntu/uncd {}; chmod +x /home/ubuntu/uncd'.
             format(binary_url)), nodes)
 
 
-# Check /home/ubuntu/neard.upgrade to see whether the amend-genesis command is
-# available. Returns the path to the neard binary or throws an exception.
+# Check /home/ubuntu/uncd.upgrade to see whether the amend-genesis command is
+# available. Returns the path to the uncd binary or throws an exception.
 def neard_amend_genesis_path(node):
     r = node.machine.run(
-        '/home/ubuntu/neard.upgrade amend-genesis --help',
+        '/home/ubuntu/uncd.upgrade amend-genesis --help',
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
     if r.exitcode == 0:
-        return '/home/ubuntu/neard.upgrade'
-    raise Exception(f'`neard.upgrade amend-genesis` not available')
+        return '/home/ubuntu/uncd.upgrade'
+    raise Exception(f'`uncd.upgrade amend-genesis` not available')
 
 
 # We assume that the nodes already have the .near directory with the files
@@ -548,7 +548,7 @@ def create_and_upload_genesis(
     config_filename_in = f'/home/ubuntu/.near/{chain_id_in}-genesis/config.json'
     stamp = time.strftime('%Y%m%d-%H%M%S', time.gmtime())
     done_filename = f'/home/ubuntu/genesis_update_done_{stamp}.txt'
-    neard = neard_amend_genesis_path(validator_nodes[1])
+    uncd = neard_amend_genesis_path(validator_nodes[1])
     pmap(
         lambda node: start_genesis_updater(
             node=node,
@@ -568,7 +568,7 @@ def create_and_upload_genesis(
             single_shard=single_shard,
             all_node_pks=all_node_pks,
             node_ips=node_ips,
-            neard=neard,
+            uncd=uncd,
         ),
         validator_nodes + rpc_nodes,
     )
@@ -718,7 +718,7 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
     return records, validators
 
 
-def neard_amend_genesis(neard, validator_keys, genesis_filename_in,
+def neard_amend_genesis(uncd, validator_keys, genesis_filename_in,
                         records_filename_in, out_dir, rpc_node_names, chain_id,
                         epoch_length, node_pks, increasing_stakes, num_seats,
                         single_shard):
@@ -738,7 +738,7 @@ def neard_amend_genesis(neard, validator_keys, genesis_filename_in,
         json.dump(extra_records, f)
 
     cmd = [
-        neard,
+        uncd,
         'amend-genesis',
         '--genesis-file-in',
         genesis_filename_in,
@@ -786,7 +786,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
 ):
     node0 = validator_node_and_stakes[0][0]
     node0.machine.run(
-        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/neard --home /home/ubuntu/.near-tmp init --chain-id {}'
+        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/uncd --home /home/ubuntu/.near-tmp init --chain-id {}'
         .format(chain_id))
     genesis_config = download_and_read_json(
         node0, "/home/ubuntu/.near-tmp/genesis.json")
@@ -997,7 +997,7 @@ def get_node_keys(node):
 def init_validator_key(node):
     account_id = node_account_name(node.instance_name)
     node.machine.run(
-        f'dir=$(mktemp -d) && /home/ubuntu/neard --home $dir init --account-id {account_id} && mv $dir/validator_key.json /home/ubuntu/.near/validator_key.json'
+        f'dir=$(mktemp -d) && /home/ubuntu/uncd --home $dir init --account-id {account_id} && mv $dir/validator_key.json /home/ubuntu/.near/validator_key.json'
     )
 
 
@@ -1031,7 +1031,7 @@ def update_config_file(
 
 def create_and_upload_config_file_from_default(nodes, chain_id, overrider=None):
     nodes[0].machine.run(
-        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/neard --home /home/ubuntu/.near-tmp init --chain-id {}'
+        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/uncd --home /home/ubuntu/.near-tmp init --chain-id {}'
         .format(chain_id))
     config_json = download_and_read_json(
         nodes[0],
@@ -1083,9 +1083,9 @@ def clear_data(nodes):
 def neard_start_script(node, upgrade_schedule=None, epoch_height=None):
     if upgrade_schedule and upgrade_schedule.get(node.instance_name,
                                                  0) <= epoch_height:
-        neard_binary = '/home/ubuntu/neard.upgrade'
+        neard_binary = '/home/ubuntu/uncd.upgrade'
     else:
-        neard_binary = '/home/ubuntu/neard'
+        neard_binary = '/home/ubuntu/uncd'
     return '''
         sudo mv /home/ubuntu/near.log /home/ubuntu/near.log.1 2>/dev/null
         sudo mv /home/ubuntu/near.upgrade.log /home/ubuntu/near.upgrade.log.1 2>/dev/null
@@ -1160,7 +1160,7 @@ def start_genesis_updater_script(
     single_shard,
     all_node_pks,
     node_ips,
-    neard,
+    uncd,
 ):
     validators = ','.join(
         [f'{account_id}={key}' for (account_id, key) in validator_keys.items()])
@@ -1184,7 +1184,7 @@ def start_genesis_updater_script(
             single_shard,
             ','.join(all_node_pks),
             ','.join(node_ips),
-            neard if neard is not None else 'None',
+            uncd if uncd is not None else 'None',
         ]
     ])
     return '''
@@ -1197,7 +1197,7 @@ def start_genesis_updater(node, script, genesis_filename_in,
                           records_filename_in, config_filename_in, out_dir,
                           chain_id, validator_keys, rpc_nodes, done_filename,
                           epoch_length, node_pks, increasing_stakes, num_seats,
-                          single_shard, all_node_pks, node_ips, neard):
+                          single_shard, all_node_pks, node_ips, uncd):
     logger.info(f'Starting genesis_updater on {node.instance_name}')
     node.machine.run(
         'bash',
@@ -1218,7 +1218,7 @@ def start_genesis_updater(node, script, genesis_filename_in,
             single_shard,
             all_node_pks,
             node_ips,
-            neard,
+            uncd,
         ),
     )
 
@@ -1227,10 +1227,10 @@ def wait_genesis_updater_done(node, done_filename):
     msg = f'Waiting for the genesis updater on {node.instance_name}'
     logger.info(msg)
 
-    # Wait until the neard process stops running.
+    # Wait until the uncd process stops running.
     while True:
         time.sleep(5)
-        if not is_binary_running('neard', node):
+        if not is_binary_running('uncd', node):
             break
 
     # Check if the done_filename was produced.
@@ -1254,8 +1254,8 @@ def wait_node_up(node):
     attempt = 0
     while True:
         try:
-            if not is_binary_running('neard', node):
-                raise Exception(f'{msg} - failed. The neard process crashed.')
+            if not is_binary_running('uncd', node):
+                raise Exception(f'{msg} - failed. The uncd process crashed.')
 
             response = node.get_validators()
 
@@ -1414,7 +1414,7 @@ def get_epoch_height(rpc_nodes, prev_epoch_height):
 
 
 def neard_restart_script(node):
-    neard_binary = '/home/ubuntu/neard.upgrade'
+    neard_binary = '/home/ubuntu/uncd.upgrade'
     return '''
         tmux send-keys -t near C-c
         sudo mv /home/ubuntu/near.log /home/ubuntu/near.log.1 2>/dev/null
@@ -1436,7 +1436,7 @@ def upgrade_node(node):
             success = True
             break
         logger.warn(
-            f'Failed to upgrade neard, return code: {start_process.returncode}\n{node.instance_name}\n{start_process.stderr}'
+            f'Failed to upgrade uncd, return code: {start_process.returncode}\n{node.instance_name}\n{start_process.stderr}'
         )
         attempt += 1
         time.sleep(1)

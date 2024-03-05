@@ -17,7 +17,7 @@ use near_primitives_core::types::AccountId;
 use near_primitives_core::version::PROTOCOL_VERSION;
 use near_store::test_utils::create_test_store;
 use near_store::{ShardUId, TrieConfig};
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use rand::seq::IteratorRandom;
 use rand::{thread_rng, Rng};
 

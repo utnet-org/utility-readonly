@@ -30,8 +30,8 @@ It will be mounted under `/host` in the Docker container.
 Start container and build estimator with:
 
     host> ./run.sh
-    docker> cd /host/nearcore
-    docker> cd /host/nearcore/runtime/runtime-params-estimator
+    docker> cd /host/framework
+    docker> cd /host/framework/runtime/runtime-params-estimator
     docker> pushd ./test-contract && ./build.sh && popd
     docker> cargo build --release --package runtime-params-estimator --features required
 
@@ -52,7 +52,7 @@ Now start the estimator under QEMU with the counter plugin enabled (note, that R
       CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
       export CARGO_PROFILE_RELEASE_LTO CARGO_PROFILE_RELEASE_CODEGEN_UNITS
   
-  See [#4678](https://github.com/near/nearcore/issues/4678) for more details.
+  See [#4678](https://github.com/utnet-org/utility/issues/4678) for more details.
   
 * You also may observe slight differences in different launches, because number of instructions operating with disk cache is not fully determined, as well as weight of RocksDB operations. 
   To improve estimation, you can launch it several times and take the worst result.
@@ -101,7 +101,7 @@ We ship prebuilt QEMU and TCG instruction counter plugin, so in many cases one d
 However, in case you still want to build it - use the following steps.
 
 Important: we build QEMU and the TCG plugin inside the container, so execute following commands inside Docker.
-Set environment variable HOST_DIR (on the host) to location where both QEMU and nearcore source code is checked
+Set environment variable HOST_DIR (on the host) to location where both QEMU and framework source code is checked
 out, it will be mounted as `/host` inside the Docker container.
 Start container with:
 
@@ -115,7 +115,7 @@ To build QEMU use:
 
 Then build and test the QEMU's JIT plugin:
 
-    cd /host/nearcore/runtime/runtime-params-estimator/emu-cost/counter_plugin
+    cd /host/framework/runtime/runtime-params-estimator/emu-cost/counter_plugin
     cp /host/qemu-linux/bin/qemu-x86_64 ./
     make QEMU_DIR=/host/qemu
     make test
@@ -129,4 +129,4 @@ To execute commands in already running container first find its id with:
 
 and the use container ID for `docker exec` command, like:
 
-    docker exec -it e9dcb52cc91b /host/qemu-linux/bin/qemu-x86_64 -d plugin -plugin file=/host/qemu-linux/plugins/libcounter.so /host/nearcore/runtime/runtime-params-estimator/emu-cost/counter_plugin/test_binary
+    docker exec -it e9dcb52cc91b /host/qemu-linux/bin/qemu-x86_64 -d plugin -plugin file=/host/qemu-linux/plugins/libcounter.so /host/framework/runtime/runtime-params-estimator/emu-cost/counter_plugin/test_binary

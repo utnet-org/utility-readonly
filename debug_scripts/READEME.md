@@ -12,7 +12,7 @@
 ## Instruction to RUN
 
   ```
-  cd <path-to-nearcore>/nearcore/debug_scripts
+  cd <path-to-framework>/framework/debug_scripts
   python3 -m pip install pipenv
   python3 -m pipenv shell
   python3 send_validator_logs.py --help
@@ -21,13 +21,13 @@
   ```
 
 ## Instruction to run test
-Add nearcore/debug_scripts to your PYTHONPATH
+Add framework/debug_scripts to your PYTHONPATH
 ```
-export PYTHONPATH="<absolute path>/nearcore/debug_scripts:$PYTHONPATH"
+export PYTHONPATH="<absolute path>/framework/debug_scripts:$PYTHONPATH"
 ```
 
 ```
-cd <absolute path>/nearcore/debug_scripts
+cd <absolute path>/framework/debug_scripts
 python3 -m pipenv sync
 python3 -m pipenv shell
 python3 -m unittest tests.send_validator_logs_test 

@@ -11,8 +11,8 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
 use near_primitives::types::BlockHeight;
 use near_primitives::views::FinalExecutionStatus;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 use crate::tests::client::process_blocks::{
     deploy_test_contract_with_protocol_version, produce_blocks_from_height_with_protocol_version,

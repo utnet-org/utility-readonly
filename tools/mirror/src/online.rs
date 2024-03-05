@@ -29,10 +29,10 @@ pub(crate) struct ChainAccess {
 impl ChainAccess {
     pub(crate) fn new<P: AsRef<Path>>(home: P) -> anyhow::Result<Self> {
         let config =
-            nearcore::config::load_config(home.as_ref(), GenesisValidationMode::UnsafeFast)
+            framework::config::load_config(home.as_ref(), GenesisValidationMode::UnsafeFast)
                 .with_context(|| format!("Error loading config from {:?}", home.as_ref()))?;
 
-        let node = nearcore::start_with_config(home.as_ref(), config)
+        let node = framework::start_with_config(home.as_ref(), config)
             .context("failed to start NEAR node")?;
         Ok(Self { view_client: node.view_client })
     }

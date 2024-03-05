@@ -10,8 +10,8 @@ use near_primitives::transaction::{Action, ExecutionMetadata, FunctionCallAction
 use near_primitives::version::ProtocolFeature;
 use near_primitives_core::hash::CryptoHash;
 use near_primitives_core::types::Gas;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 /// Check that after flat storage upgrade:
 /// - value read from contract is the same;

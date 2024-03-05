@@ -30,7 +30,7 @@
 //!   * Some costs are measured more directly. For example, to measure cost of
 //!     wasm opcode we call vm_runner directly, bypassing the rest of runtime
 //!     machinery.
-//!   * Some RocksDB related estimations avoid nearcore entirely and run on
+//!   * Some RocksDB related estimations avoid framework entirely and run on
 //!     completely independent database instances. This DB is controlled by the
 //!     `rdb-` prefixed flags which are combined in `RocksDBTestConfig`.
 //!

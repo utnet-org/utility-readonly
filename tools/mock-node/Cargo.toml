@@ -42,10 +42,10 @@ near-o11y.workspace = true
 near-telemetry.workspace = true
 near-performance-metrics.workspace = true
 near-primitives.workspace = true
-nearcore.workspace = true
+framework.workspace = true
 
 [[bin]]
 name = "mock-node"
 
 [features]
-test_features = ["nearcore/test_features"]
+test_features = ["framework/test_features"]

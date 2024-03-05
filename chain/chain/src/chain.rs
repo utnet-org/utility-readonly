@@ -116,7 +116,7 @@ const NUM_PARENTS_TO_CHECK_FINALITY: usize = 20;
 const ACCEPTABLE_TIME_DIFFERENCE: i64 = 12 * 10;
 
 /// Private constant for 1 NEAR (copy from near/config.rs) used for reporting.
-const NEAR_BASE: Balance = 1_000_000_000_000_000_000_000_000;
+const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
 /// apply_chunks may be called in two code paths, through process_block or through catchup_blocks
 /// When it is called through process_block, it is possible that the shard state for the next epoch
@@ -721,7 +721,7 @@ impl Chain {
                 // Special case: genesis chunks can be in non-genesis blocks and don't have a signature
                 // We must verify that content matches and signature is empty.
                 // TODO: this code will not work when genesis block has different number of chunks as the current block
-                // https://github.com/near/nearcore/issues/4908
+                // https://github.com/utnet-org/utility/issues/4908
                 let chunks = genesis_block.chunks();
                 let genesis_chunk = chunks.get(shard_id);
                 let genesis_chunk = genesis_chunk.ok_or(Error::InvalidChunk)?;
@@ -1852,7 +1852,7 @@ impl Chain {
                 count += producers.len();
             }
 
-            stake /= NEAR_BASE;
+            stake /= UNC_BASE;
             metrics::VALIDATOR_AMOUNT_STAKED.set(i64::try_from(stake).unwrap_or(i64::MAX));
             metrics::VALIDATOR_ACTIVE_TOTAL.set(i64::try_from(count).unwrap_or(i64::MAX));
 
@@ -1963,7 +1963,7 @@ impl Chain {
         let epoch_protocol_version =
             self.epoch_manager.get_epoch_protocol_version(header.epoch_id())?;
         if epoch_protocol_version > PROTOCOL_VERSION {
-            panic!("The client protocol version is older than the protocol version of the network. Please update nearcore. Client protocol version:{}, network protocol version {}", PROTOCOL_VERSION, epoch_protocol_version);
+            panic!("The client protocol version is older than the protocol version of the network. Please update framework. Client protocol version:{}, network protocol version {}", PROTOCOL_VERSION, epoch_protocol_version);
         }
 
         // First real I/O expense.
@@ -3424,7 +3424,7 @@ impl Chain {
                 let receipts = [new_receipts, old_receipts].concat();
 
                 // This variable is responsible for checking to which block we can apply receipts previously lost in apply_chunks
-                // (see https://github.com/near/nearcore/pull/4248/)
+                // (see https://github.com/utnet-org/utility/pull/4248/)
                 // We take the first block with existing chunk in the first epoch in which protocol feature
                 // RestoreReceiptsAfterFixApplyChunks was enabled, and put the restored receipts there.
                 let is_first_block_with_chunk_of_version =

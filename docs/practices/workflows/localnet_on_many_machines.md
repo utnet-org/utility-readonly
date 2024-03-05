@@ -10,13 +10,13 @@ Quick instructions on how to run a localnet on 2 separate machines.
 
 Run on both machines (make sure that they are using the same version of the code):
 ```
-cargo build -p neard
+cargo build -p uncd
 ```
 
 Then on machine1 run the command below, which will generate the configurations:
 
 ```
-./target/debug/neard --home ~/.near/localnet_multi localnet --shards 3 --v 2
+./target/debug/uncd --home ~/.near/localnet_multi localnet --shards 3 --v 2
 ```
 
 This command has generated configuration for 3 shards and 2 validators (in directories ~/.near/localnet_multi/node0 and ~/.near/localnet_multi/node1).
@@ -37,12 +37,12 @@ Now open the config.json file on both machines (node0/config.json on machine1 an
 
 On machine1:
 ```
-./target/debug/neard --home ~/.near/localnet_multi/node0 run
+./target/debug/uncd --home ~/.near/localnet_multi/node0 run
 ```
 
 On machine2:
 ```
-./target/debug/neard --home ~/.near/localnet_multi/node1 run --boot-nodes ed25519:7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX@192.168.0.1:37665
+./target/debug/uncd --home ~/.near/localnet_multi/node1 run --boot-nodes ed25519:7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX@192.168.0.1:37665
 ```
 The boot node address should be the IP of the machine1 + the network addr port **from the node0/config.json**
 

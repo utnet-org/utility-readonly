@@ -22,7 +22,7 @@ use near_primitives_core::{
 use near_store::ShardUId;
 use near_vm_runner::ContractCode;
 use near_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
-use nearcore::{config::GenesisExt, test_utils::TestEnvNightshadeSetupExt, NEAR_BASE};
+use framework::{config::GenesisExt, test_utils::TestEnvNightshadeSetupExt, UNC_BASE};
 use node_runtime::ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT;
 use rlp::RlpStream;
 use testlib::runtime_utils::{alice_account, bob_account, carol_account};
@@ -134,7 +134,7 @@ fn test_transaction_from_eth_implicit_account_fail() {
         .nightshade_runtimes(&genesis)
         .build();
     let genesis_block = env.clients[0].chain.get_block_by_height(0).unwrap();
-    let deposit_for_account_creation = NEAR_BASE;
+    let deposit_for_account_creation = UNC_BASE;
     let mut height = 1;
     let blocks_number = 5;
     let signer1 = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
@@ -262,7 +262,7 @@ fn meta_tx_call_wallet_contract(create_account: bool, authorized: bool) {
     let mut stream = RlpStream::new_list(3);
     stream.append(&target.as_str());
     // The RLP trait `Encodable` is not implemented for `u128`. We must encode it as bytes.
-    // TODO(eth-implicit) Do not try to encode `u128` values directly, see https://github.com/near/nearcore/pull/10269#discussion_r1425585051.
+    // TODO(eth-implicit) Do not try to encode `u128` values directly, see https://github.com/utnet-org/utility/pull/10269#discussion_r1425585051.
     stream.append(&transfer_amount.to_be_bytes().as_slice());
     if authorized {
         stream.append(&public_key.key_data());

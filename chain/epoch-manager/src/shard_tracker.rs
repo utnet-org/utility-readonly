@@ -121,7 +121,7 @@ impl ShardTracker {
         is_me: bool,
     ) -> bool {
         // TODO: fix these unwrap_or here and handle error correctly. The current behavior masks potential errors and bugs
-        // https://github.com/near/nearcore/issues/4936
+        // https://github.com/utnet-org/utility/issues/4936
         if let Some(account_id) = account_id {
             let account_cares_about_shard = self
                 .epoch_manager

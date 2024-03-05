@@ -59,13 +59,13 @@ message AccountKeySignedPayload {
 //////////////////////////////////////
 
 // Wrapper of borsh-encoded PublicKey.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/crypto/src/signature.rs#L201
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/crypto/src/signature.rs#L201
 message PublicKey {
   bytes borsh = 1;
 }
 
 // Wrapper of borsh-encoded PeerInfo.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/mod.rs#L30
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/mod.rs#L30
 message PeerInfo {
   bytes borsh = 1;
 }
@@ -77,31 +77,31 @@ message CryptoHash {
 }
 
 // Wrapper of borsh-encoded Edge.
-// https://cs.github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/edge.rs#L32
+// https://cs.github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/edge.rs#L32
 message Edge {
   bytes borsh = 1;
 }
 
 // Wrapper of the borsh-encoded PartialEdgeInfo.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/edge.rs#L11
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/edge.rs#L11
 message PartialEdgeInfo {
   bytes borsh = 1;
 }
 
 // Wrapper of the borsh-encoded AnnounceAccount.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/network.rs#L86
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/network.rs#L86
 message AnnounceAccount {
   bytes borsh = 1;
 }
 
 // Wrapper of the borsh-encoded NEAR chain block.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/block.rs#L77
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/block.rs#L77
 message Block {
   bytes borsh = 1;
 }
 
 // Wrapper of the borsh-encoded BlockHeader.
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/block_header.rs#L325
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/block_header.rs#L325
 message BlockHeader {
   bytes borsh = 1;
 }
@@ -173,7 +173,7 @@ message Handshake {
   PartialEdgeInfo partial_edge_info = 7;
   // See description of OwnedAccount.
   AccountKeySignedPayload owned_account = 8; // optional
-  reserved 9; // https://github.com/near/nearcore/pull/9191
+  reserved 9; // https://github.com/utnet-org/utility/pull/9191
 }
 
 // Response to Handshake, in case the Handshake was rejected.
@@ -338,7 +338,7 @@ message PeersResponse {
 // Receiver finds in block_hashes the first hash of a block it knows about
 // and rends back BlockHeadersResponse with block headers following that block.
 // At most 512 block headers are returned:
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/client/src/sync.rs#L38
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/client/src/sync.rs#L38
 // It might happen that the receiver doesn't know some of the hashes in the list
 // in the following cases:
 // - sender's view of the chain forked from the receiver's view of the chain
@@ -365,13 +365,13 @@ message BlockResponse {
 }
 
 // Wrapper of borsh-encoded SignedTransaction
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/transaction.rs#L218
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/transaction.rs#L218
 message SignedTransaction {
   bytes borsh = 1;
 }
 
 // Wrapper of borsh-encoded RoutedMessage
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/mod.rs#L295
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network-primitives/src/network_protocol/mod.rs#L295
 message RoutedMessage {
   bytes borsh = 1;
   // Timestamp of creating the Routed message by its original author.
@@ -387,13 +387,13 @@ message Disconnect {
 }
 
 // Wrapper of borsh-encoded Challenge
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/challenge.rs#L89
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/challenge.rs#L89
 message Challenge {
   bytes borsh = 1;
 }
 
 // Wrapper of borsh-encoded RoutingSyncV2
-// https://github.com/near/nearcore/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network/src/network_protocol.rs#L225
+// https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/chain/network/src/network_protocol.rs#L225
 message RoutingSyncV2 {
   bytes borsh = 1;
 }

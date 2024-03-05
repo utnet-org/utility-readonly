@@ -1,24 +1,24 @@
-# How neard works
+# How uncd works
 
-This chapter describes how neard works with a focus on implementation details
+This chapter describes how uncd works with a focus on implementation details
 and practical scenarios. To get a better understanding of how the protocol
 works, please refer to [nomicon](https://nomicon.io). For a high-level code map
-of nearcore, please refer to this [document](../).
+of framework, please refer to this [document](../).
 
 ## High level overview
 
-On the high level, neard is a daemon that periodically receives messages from
+On the high level, uncd is a daemon that periodically receives messages from
 the network and sends messages to peers based on different triggers. Neard is
 implemented using an [actor
 framework](https://en.wikipedia.org/wiki/Actor_model) called
 [actix](https://docs.rs/actix).
 
 **Note:** Using actix was decided in the early days of the implementation of
-nearcore and by no means represents our confidence in actix. On the contrary, we
+framework and by no means represents our confidence in actix. On the contrary, we
 have noticed a number of issues with actix and are considering implementing an
 actor framework in house.
 
-There are several important actors in neard:
+There are several important actors in uncd:
 
 * `PeerActor` - Each peer is represented by one peer actor and runs in a separate
   thread. It is responsible for sending messages to and receiving messages from
@@ -34,7 +34,7 @@ There are several important actors in neard:
   handles `RoutedMessage`s. Peer manager would decide whether the `RoutedMessage`s
   should be routed to `ClientActor` or `ViewClientActor`.
 
-* `ClientActor` - Client actor is the “core” of neard. It contains all the main
+* `ClientActor` - Client actor is the “core” of uncd. It contains all the main
   logic including consensus, block and chunk processing, state transition, garbage
   collection, etc. Client actor is single threaded.
 
@@ -48,7 +48,7 @@ There are several important actors in neard:
 
   `ViewClientActor` runs in four threads by default but this number is configurable.
 
-## Data flow within `neard`
+## Data flow within `uncd`
 
 Flow for incoming messages:
 
@@ -60,7 +60,7 @@ Flow for outgoing messages:
 ![](https://user-images.githubusercontent.com/1711539/195626792-7697129b-7f9c-4953-b939-0b9bcacaf72c.png)
 
 
-## How neard operates when it is fully synced
+## How uncd operates when it is fully synced
 
 When a node is fully synced, the main logic of the node operates in the
 following way (the node is assumed to track all shards, as most nodes on mainnet
@@ -107,7 +107,7 @@ The main logic is illustrated below:
 ![](https://user-images.githubusercontent.com/1711539/195635652-f0c7ebae-a2e5-423f-8e62-b853b815fcec.png)
 
 
-## How neard works when it is synchronizing
+## How uncd works when it is synchronizing
 
 `PeerManagerActor` periodically sends a `NetworkInfo` message to `ClientActor`
 to update it on the latest peer information, which includes the height of each
@@ -116,14 +116,14 @@ peer. Once `ClientActor` realizes that it is more than `sync_height_threshold`
 to sync. The synchronization process is done in three steps:
 
 1. Header sync. The node first identifies the headers it needs to sync through a
-   [`get_locator`](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/sync.rs#L332)
+   [`get_locator`](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/sync.rs#L332)
    calculation. This is essentially an exponential backoff computation that
    tries to identify commonly known headers between the node and its peers. Then
    it would request headers from different peers, at most
    `MAX_BLOCK_HEADER_HASHES` (which is 512) headers at a time.
 2. After the headers are synced, the node would determine whether it needs to
    run state sync. The exact condition can be found
-   [here](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/sync.rs#L458)
+   [here](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/sync.rs#L458)
    but basically a node would do state sync if it is more than 2 epochs behind
    the head of the network. State sync is a very complex process and warrants
    its own section. We will give a high level overview here.
@@ -131,28 +131,28 @@ to sync. The synchronization process is done in three steps:
    1. First, the node computes `sync_hash` which is the hash of the block that
       identifies the state that the node wants to sync. This is guaranteed to be
       the first block of the most recent epoch. In fact, there is a
-      [check](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L4292)
+      [check](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L4292)
       on the receiver side that this is indeed the case. The node would also
       request the block whose hash is `sync_hash`
    2. The node [deletes basically all data (blocks, chunks, state) from its
-      storage](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L1809).
+      storage](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L1809).
       This is not an optimal solution, but it makes the implementation for
       combining state easier when there is no stale data in storage.
    3. For the state of each shard that the node needs to download, it first
       requests a
-      [header](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/core/primitives/src/syncing.rs#L40)
+      [header](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/core/primitives/src/syncing.rs#L40)
       that contains some metadata the node needs to know about. Then the node
       computes the number of state parts it needs to download and requests those
       parts from different peers who track the shard.
     4. After all parts are downloaded, the node [combines those state
-       parts](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/client_actor.rs#L1877)
+       parts](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/client/src/client_actor.rs#L1877)
        and then
-       [finalizes](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L3065)
+       [finalizes](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L3065)
        the state sync by applying the last chunk included in or before the sync
        block so that the node has the state after applying sync block to be able
        to apply the next block.
      5. The node [resets
-        heads](https://github.com/near/nearcore/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L1874)
+        heads](https://github.com/utnet-org/utility/blob/279044f09a7e6e5e3f26db4898af3655dae6eda6/chain/chain/src/chain.rs#L1874)
         properly after state sync.
 
 3. Block Sync. The node first gets the block with highest height that is on the
@@ -173,28 +173,28 @@ head height, the block is simply dropped.
 ClientActor has some periodically running routines that are worth noting:
 
 * [Doomslug
-  timer](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1198) - 
+  timer](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1198) - 
   This routine runs every `doosmslug_step_period` (set to 100ms by default) and
   updates consensus information. If the node is a validator node, it also sends
   approvals when necessary.
 * [Block
-  production](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L991) - 
+  production](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L991) - 
   This routine runs every `block_production_tracking_delay` (which is set to
   100ms by default) and checks if the node should produce a block.
 * [Log
-  summary](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1790) - 
+  summary](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1790) - 
   Prints a log line that summarizes block rate, average gas used, the height of
   the node, etc. every 10 seconds.
 * [Resend chunk
-  requests](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/chunks/src/lib.rs#L910) - 
+  requests](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/chunks/src/lib.rs#L910) - 
   This routine runs every `chunk_request_retry_period` (which is set to 400ms).
   It resends the chunk part requests for those that are not yet responded to.
-* [Sync](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1629) - 
+* [Sync](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1629) - 
   This routine runs every `sync_step_period` (which is set to 10ms by default)
   and checks whether the node needs to sync from its peers and, if needed, also
   starts the syncing process.
 * [Catch
-  up](https://github.com/near/nearcore/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1581) - 
+  up](https://github.com/utnet-org/utility/blob/fa78002a1b4119e5efe277c3073b3f333f451ffc/chain/client/src/client_actor.rs#L1581) - 
   This routine runs every `catchup_step_period` (which is set to 100ms by
   default) and runs the catch up process. This only applies if a node validates
   shard A in epoch X and is going to validate a different shard B in epoch X+1.

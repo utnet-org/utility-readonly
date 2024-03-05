@@ -15,7 +15,7 @@ use near_primitives::views::{
     AccessKeyPermissionView, ExecutionOutcomeWithIdView, QueryRequest, QueryResponseKind,
 };
 use near_primitives_core::types::ShardId;
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -36,10 +36,10 @@ pub(crate) struct ChainAccess {
 impl ChainAccess {
     pub(crate) fn new<P: AsRef<Path>>(home: P) -> anyhow::Result<Self> {
         let mut config =
-            nearcore::config::load_config(home.as_ref(), GenesisValidationMode::UnsafeFast)
+            framework::config::load_config(home.as_ref(), GenesisValidationMode::UnsafeFast)
                 .with_context(|| format!("Error loading config from {:?}", home.as_ref()))?;
         let node_storage =
-            nearcore::open_storage(home.as_ref(), &mut config).context("failed opening storage")?;
+            framework::open_storage(home.as_ref(), &mut config).context("failed opening storage")?;
         let store = node_storage.get_hot_store();
         let chain = ChainStore::new(
             store.clone(),

@@ -9,7 +9,7 @@ Spawn everything and wait for them to make some progress.
 Kill one of the validators, delete state and rerun it
 
 To run this test is important to compile genesis-populate tool first.
-In nearcore folder run:
+In framework folder run:
 
 ```
 cargo build -p genesis-populate

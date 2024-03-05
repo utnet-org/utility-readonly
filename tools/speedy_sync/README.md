@@ -51,12 +51,12 @@ cargo build -p speedy_sync
 
 ### After running speedy
 
-**Important:** After running the 'load' command, you must still copy the 'node_key.json' file into that directory, before running neard.
+**Important:** After running the 'load' command, you must still copy the 'node_key.json' file into that directory, before running uncd.
 
 Please also check and verify the config.json file.
 
-Afterwards you can start the neard with the new homedir and let it sync:
+Afterwards you can start the uncd with the new homedir and let it sync:
 
 ```
-./neard --home $PATH_TO_HOME_DIR_OF_A_NEW_NODE
+./uncd --home $PATH_TO_HOME_DIR_OF_A_NEW_NODE
 ```

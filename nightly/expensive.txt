@@ -163,65 +163,65 @@ expensive integration-tests integration_tests tests::test_simple::test_4_10_mult
 expensive integration-tests integration_tests tests::test_simple::test_7_10_multiple_nodes
 expensive integration-tests integration_tests tests::test_simple::test_7_10_multiple_nodes --features nightly
 
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_after_sync_nodes
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_after_sync_nodes --features nightly
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_nodes
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_nodes --features nightly
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_state_stake_change
-expensive integration-tests integration_tests tests::nearcore::sync_nodes::sync_state_stake_change --features nightly
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_after_sync_nodes
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_after_sync_nodes --features nightly
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_nodes
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_nodes --features nightly
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_stake_change
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_stake_change --features nightly
 
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_block_unknown_block_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_block_unknown_block_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_chunk_unknown_chunk_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_chunk_unknown_chunk_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_gas_price_unknown_block_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_gas_price_unknown_block_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_protocol_config_unknown_block_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_protocol_config_unknown_block_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_query_rpc_account_view_unknown_block_must_return_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_query_rpc_account_view_unknown_block_must_return_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_receipt_id_unknown_receipt_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_receipt_id_unknown_receipt_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_tx_invalid_tx_error
-expensive integration-tests integration_tests tests::nearcore::rpc_error_structs::test_tx_invalid_tx_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_block_unknown_block_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_block_unknown_block_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_chunk_unknown_chunk_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_chunk_unknown_chunk_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_gas_price_unknown_block_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_gas_price_unknown_block_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_protocol_config_unknown_block_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_protocol_config_unknown_block_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_query_rpc_account_view_unknown_block_must_return_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_query_rpc_account_view_unknown_block_must_return_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_receipt_id_unknown_receipt_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_receipt_id_unknown_receipt_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_tx_invalid_tx_error
+expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_tx_invalid_tx_error --features nightly
 
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_tx_status_on_lightclient_must_return_does_not_track_shard
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_tx_status_on_lightclient_must_return_does_not_track_shard --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_check_unknown_tx_must_return_error
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_check_unknown_tx_must_return_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_execution_outcome_tx_failure
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_execution_outcome_tx_failure --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_execution_outcome_tx_success
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_execution_outcome_tx_success --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_validator_info_rpc
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_get_validator_info_rpc --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_protocol_config_rpc
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_protocol_config_rpc --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_query_rpc_account_view_account_doesnt_exist_must_return_error
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_query_rpc_account_view_account_doesnt_exist_must_return_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_query_rpc_account_view_must_succeed
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_query_rpc_account_view_must_succeed --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_tx_not_enough_balance_must_return_error
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_tx_not_enough_balance_must_return_error --features nightly
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_validators_by_epoch_id_current_epoch_not_fails
-expensive integration-tests integration_tests tests::nearcore::rpc_nodes::test_validators_by_epoch_id_current_epoch_not_fails --features nightly
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_2_1
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_2_1 --features nightly
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_2_2
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_2_2 --features nightly
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_4_4
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_1_4_4 --features nightly
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_4_4_2
-expensive integration-tests integration_tests tests::nearcore::run_nodes::run_nodes_4_4_2 --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_tx_status_on_lightclient_must_return_does_not_track_shard
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_tx_status_on_lightclient_must_return_does_not_track_shard --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_check_unknown_tx_must_return_error
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_check_unknown_tx_must_return_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_execution_outcome_tx_failure
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_execution_outcome_tx_failure --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_execution_outcome_tx_success
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_execution_outcome_tx_success --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_validator_info_rpc
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_get_validator_info_rpc --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_protocol_config_rpc
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_protocol_config_rpc --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_query_rpc_account_view_account_doesnt_exist_must_return_error
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_query_rpc_account_view_account_doesnt_exist_must_return_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_query_rpc_account_view_must_succeed
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_query_rpc_account_view_must_succeed --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_tx_not_enough_balance_must_return_error
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_tx_not_enough_balance_must_return_error --features nightly
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_validators_by_epoch_id_current_epoch_not_fails
+expensive integration-tests integration_tests tests::framework::rpc_nodes::test_validators_by_epoch_id_current_epoch_not_fails --features nightly
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_2_1
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_2_1 --features nightly
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_2_2
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_2_2 --features nightly
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_4_4
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_1_4_4 --features nightly
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_4_4_2
+expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_4_4_2 --features nightly
 
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_inflation
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_inflation --features nightly
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_stake_nodes
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_stake_nodes --features nightly
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_validator_join
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_validator_join --features nightly
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_validator_kickout
-expensive integration-tests integration_tests tests::nearcore::stake_nodes::test_validator_kickout --features nightly
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_inflation
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_inflation --features nightly
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_stake_nodes
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_stake_nodes --features nightly
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_join
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_join --features nightly
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_kickout
+expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_kickout --features nightly
 
-expensive integration-tests integration_tests tests::nearcore::track_shards::track_shards
-expensive integration-tests integration_tests tests::nearcore::track_shards::track_shards --features nightly
+expensive integration-tests integration_tests tests::framework::track_shards::track_shards
+expensive integration-tests integration_tests tests::framework::track_shards::track_shards --features nightly

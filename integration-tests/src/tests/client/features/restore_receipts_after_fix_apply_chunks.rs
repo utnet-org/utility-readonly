@@ -7,9 +7,9 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::runtime::migration_data::MigrationData;
 use near_primitives::types::BlockHeight;
 use near_primitives::version::ProtocolFeature;
-use nearcore::config::GenesisExt;
-use nearcore::migrations::load_migration_data;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::migrations::load_migration_data;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::collections::HashSet;
 
 const EPOCH_LENGTH: u64 = 5;

@@ -162,7 +162,7 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         // Also, continuous estimation should be able to pick up such changes.
         let contract_code = near_test_contracts::estimator_contract();
 
-        nearcore::init_configs(
+        framework::init_configs(
             &state_dump_path,
             None,
             Some("test.near".parse().unwrap()),
@@ -180,7 +180,7 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         )
         .expect("failed to init config");
 
-        let near_config = nearcore::load_config(&state_dump_path, GenesisValidationMode::Full)
+        let near_config = framework::load_config(&state_dump_path, GenesisValidationMode::Full)
             .context("Error loading config")?;
         let store = near_store::NodeStorage::opener(
             &state_dump_path,
@@ -339,8 +339,8 @@ fn main_docker(
 
         let mut buf = String::new();
         buf.push_str("set -ex;\n");
-        buf.push_str("cd /host/nearcore;\n");
-        buf.push_str("cargo build --manifest-path /host/nearcore/Cargo.toml");
+        buf.push_str("cd /host/framework;\n");
+        buf.push_str("cargo build --manifest-path /host/framework/Cargo.toml");
         buf.push_str(" --package runtime-params-estimator --bin runtime-params-estimator");
 
         // Feature "required" is always necessary for accurate measurements.
@@ -362,7 +362,7 @@ fn main_docker(
             qemu_cmd_builder = qemu_cmd_builder.plugin_log(true).print_on_every_close(true);
         }
         let mut qemu_cmd = qemu_cmd_builder
-            .build(&format!("/host/nearcore/target/{profile}/runtime-params-estimator"))?;
+            .build(&format!("/host/framework/target/{profile}/runtime-params-estimator"))?;
 
         qemu_cmd.args(&["--home", "/.near"]);
         buf.push_str(&format!("{:?}", qemu_cmd));
@@ -399,15 +399,15 @@ fn main_docker(
         buf
     };
 
-    let nearcore =
-        format!("type=bind,source={},target=/host/nearcore", project_root.to_str().unwrap());
+    let framework =
+        format!("type=bind,source={},target=/host/framework", project_root.to_str().unwrap());
     let nearhome = format!("type=bind,source={},target=/.near", state_dump_path.to_str().unwrap());
 
     let mut cmd = Command::new("docker");
     cmd.args(&["run", "--rm", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"])
-        .args(&["--mount", &nearcore])
+        .args(&["--mount", &framework])
         .args(&["--mount", &nearhome])
-        .args(&["--mount", "source=rust-emu-target-dir,target=/host/nearcore/target"])
+        .args(&["--mount", "source=rust-emu-target-dir,target=/host/framework/target"])
         .args(&["--mount", "source=rust-emu-cargo-dir,target=/usr/local/cargo"])
         .args(&["--env", "RUST_BACKTRACE=full"]);
     // Spawning an interactive shell and pseudo TTY is necessary for debug shell

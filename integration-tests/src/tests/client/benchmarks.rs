@@ -10,8 +10,8 @@ use near_client::test_utils::{create_chunk_on_height, TestEnv};
 use near_client::ProcessTxResponse;
 use near_crypto::{InMemorySigner, KeyType};
 use near_primitives::transaction::{Action, DeployContractAction, SignedTransaction};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 /// How long does it take to produce a large chunk?
 ///

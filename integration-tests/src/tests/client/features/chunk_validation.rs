@@ -12,7 +12,7 @@ use near_primitives_core::checked_feature;
 use near_primitives_core::hash::CryptoHash;
 use near_primitives_core::types::AccountId;
 use near_primitives_core::version::PROTOCOL_VERSION;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::collections::HashSet;
 
 const ONE_NEAR: u128 = 1_000_000_000_000_000_000_000_000;

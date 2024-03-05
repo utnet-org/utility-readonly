@@ -4,7 +4,7 @@ The directory contains Python-based tests.  The tests are run as part
 of nightly testing on NayDuck though they can be run locally as well.
 
 There is no set format of what the tests do but they typical start
-a local test cluster using neard binary at `../target/debug/neard`.
+a local test cluster using uncd binary at `../target/debug/uncd`.
 There is also some capacity of starting the cluster on remote
 machines.
 
@@ -13,7 +13,7 @@ machines.
 
 ### Running tests locally
 
-To run tests locally first compile a debug build of the nearcore
+To run tests locally first compile a debug build of the framework
 package, make sure that all required Python packages are installed and
 then execute the test file using python.  For example:
 
@@ -168,7 +168,7 @@ For example, a simple test for checking implementation of
 
 ### NayDuck environment
 
-When executed on NayDuck, tests have access to `neard`,
+When executed on NayDuck, tests have access to `uncd`,
 `genesis-populate` and `restaked` binaries in `../target/debug` or
 `../target/release` directory (depending if the test has been
 scheduled with `--release` flag) just as if they were executed on

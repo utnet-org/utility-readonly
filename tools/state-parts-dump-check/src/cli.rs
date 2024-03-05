@@ -13,7 +13,7 @@ use near_primitives::types::{
 };
 use near_primitives::views::BlockView;
 use near_store::Trie;
-use nearcore::state_sync::extract_part_id_from_part_file_name;
+use framework::state_sync::extract_part_id_from_part_file_name;
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::Arc;

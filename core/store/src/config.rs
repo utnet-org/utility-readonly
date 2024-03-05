@@ -9,7 +9,7 @@ use std::{collections::HashMap, iter::FromIterator};
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct StoreConfig {
-    /// Path to the database.  If relative, resolved relative to neard home
+    /// Path to the database.  If relative, resolved relative to uncd home
     /// directory.  This is useful if node runs with a separate disk holding the
     /// database.
     pub path: Option<std::path::PathBuf>,
@@ -78,7 +78,7 @@ pub struct StoreConfig {
     /// The field can be one of:
     /// * an absolute path name → the snapshot will be created in specified
     ///   directory.  No sub-directories will be created so for example you
-    ///   probably don’t want `/tmp` but rather `/tmp/neard-db-snapshot`;
+    ///   probably don’t want `/tmp` but rather `/tmp/uncd-db-snapshot`;
     /// * an relative path name → the snapshot will be created in a directory
     ///   inside of the RocksDB database directory (see `path` field);
     /// * `true` (the default) → this is equivalent to setting the field to
@@ -247,7 +247,7 @@ impl Default for StoreConfig {
                     // Temporary solution to make contracts with heavy trie access
                     // patterns on shard 3 more stable. It was chosen by the estimation
                     // of the largest contract storage size we are aware as of 23/08/2022.
-                    // Note: on >= 1.34 nearcore version use 1_000_000_000 if you have
+                    // Note: on >= 1.34 framework version use 1_000_000_000 if you have
                     // minimal hardware.
                     // In simple nightshade the heavy contract "token.sweat" is in shard 3
                     (ShardUId { version: 1, shard_id: 3 }, 3_000_000_000),

@@ -28,7 +28,7 @@
                     let version = data.version;
                     let githubLink = $('<a>')
                         .text(version.build)
-                        .attr('href', `https://github.com/near/nearcore/tree/${data.version.build}`);
+                        .attr('href', `https://github.com/utnet-org/utility/tree/${data.version.build}`);
                     if (version.version == 'trunk') {
                         binaryText.append('Nightly build ').append(githubLink);
                     } else if (version.version == version.build) {

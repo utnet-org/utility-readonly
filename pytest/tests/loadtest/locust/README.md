@@ -9,7 +9,7 @@ only about generating the load.
 ## Install
 ```sh
 pip3 install locust
-# Run in nearcore directory.
+# Run in framework directory.
 pip3 install -r pytest/requirements.txt
 ```
 
@@ -30,7 +30,7 @@ KEY=~/.near/localnet/node0/validator_key.json
 
 For a quick demo, you can also run a localnet using [nearup](https://github.com/near/nearup).
 ```sh
-nearup run localnet --binary-path ../nearcore/target/release/ --num-nodes 4 --num-shards 4 --override
+nearup run localnet --binary-path ../framework/target/release/ --num-nodes 4 --num-shards 4 --override
 ```
 
 Then to actually run it, this is the command. (Update ports and IP according to your localnet, nearup will print it.)

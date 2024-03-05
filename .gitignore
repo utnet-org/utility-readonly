@@ -52,8 +52,8 @@ tmp/
 rusty-tags.vi
 
 # testnet genesis
-/nearcore/res/testnet.json
-/nearcore/res/testnet_genesis_records*.json
+/framework/res/testnet.json
+/framework/res/testnet_genesis_records*.json
 
 # logs from mocknet nodes
 /pytest/logs/

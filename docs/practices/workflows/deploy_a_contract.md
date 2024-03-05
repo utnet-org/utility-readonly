@@ -10,8 +10,8 @@ deploy a contract. You might want to re-read [how to run a node](./run_a_node.md
 to understand what's going one here:
 
 ```console
-$ cargo run --profile dev-release -p neard -- init
-$ cargo run --profile dev-release -p neard -- run
+$ cargo run --profile dev-release -p uncd -- init
+$ cargo run --profile dev-release -p uncd -- run
 $ NEAR_ENV=local near create-account alice.test.near --masterAccount test.near
 ```
 
@@ -52,7 +52,7 @@ Such "interactions" are carried through host functions, which are quite a bit
 like syscalls in traditional operating systems.
 
 The set of host functions that the contract can import is defined in
-[`imports.rs`](https://github.com/near/nearcore/blob/aeccaaab334275f6d0a62deabd184675bc3c6a23/runtime/near-vm-runner/src/imports.rs#L71-L242).
+[`imports.rs`](https://github.com/utnet-org/utility/blob/aeccaaab334275f6d0a62deabd184675bc3c6a23/runtime/near-vm-runner/src/imports.rs#L71-L242).
 
 In this particular case, we need the `value_return` function:
 

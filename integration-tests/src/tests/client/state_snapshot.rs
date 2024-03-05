@@ -15,9 +15,9 @@ use near_store::{
     StoreConfig, TrieConfig,
 };
 use near_store::{NodeStorage, Store};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::NEAR_BASE;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::UNC_BASE;
 use std::path::PathBuf;
 
 struct StateSnaptshotTestEnv {
@@ -218,7 +218,7 @@ fn test_make_state_snapshot() {
             nonce,
             "test0".parse().unwrap(),
             new_account_id.parse().unwrap(),
-            NEAR_BASE,
+            UNC_BASE,
             signer.public_key(),
             &signer,
             genesis_hash,

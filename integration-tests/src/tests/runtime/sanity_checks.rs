@@ -7,16 +7,16 @@ use near_primitives::version::PROTOCOL_VERSION;
 use near_primitives::views::{
     CostGasUsed, ExecutionOutcomeWithIdView, ExecutionStatusView, FinalExecutionStatus,
 };
-use nearcore::config::GenesisExt;
+use framework::config::GenesisExt;
 use std::collections::HashSet;
 use std::mem::size_of;
 use testlib::runtime_utils::{add_test_contract, alice_account, bob_account};
 
 /// Initial balance used in tests.
-const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * NEAR_BASE;
+const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * UNC_BASE;
 
 /// One NEAR, divisible by 10^24.
-const NEAR_BASE: u128 = 1_000_000_000_000_000_000_000_000;
+const UNC_BASE: u128 = 1_000_000_000_000_000_000_000_000;
 
 /// Max prepaid amount of gas.
 const MAX_GAS: u64 = 300_000_000_000_000;

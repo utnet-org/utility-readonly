@@ -120,7 +120,7 @@ impl AccountRecords {
                     })?;
                 }
                 if self.amount_needed {
-                    account.set_amount(10_000 * nearcore::config::NEAR_BASE);
+                    account.set_amount(10_000 * framework::config::UNC_BASE);
                 }
                 *total_supply += account.amount() + account.locked();
                 seq.serialize_element(&StateRecord::Account { account_id, account })?;
@@ -587,37 +587,37 @@ mod test {
                 genesis_time: StaticClock::utc(),
                 chain_id: "rusttestnet".to_string(),
                 genesis_height: 0,
-                num_block_producer_seats: nearcore::config::NUM_BLOCK_PRODUCER_SEATS,
+                num_block_producer_seats: framework::config::NUM_BLOCK_PRODUCER_SEATS,
                 num_block_producer_seats_per_shard: utils::get_num_seats_per_shard(
                     num_shards,
-                    nearcore::config::NUM_BLOCK_PRODUCER_SEATS,
+                    framework::config::NUM_BLOCK_PRODUCER_SEATS,
                 ),
                 avg_hidden_validator_seats_per_shard: (0..num_shards).map(|_| 0).collect(),
                 dynamic_resharding: false,
                 protocol_upgrade_stake_threshold:
-                    nearcore::config::PROTOCOL_UPGRADE_STAKE_THRESHOLD,
+                    framework::config::PROTOCOL_UPGRADE_STAKE_THRESHOLD,
                 epoch_length: 1000,
-                gas_limit: nearcore::config::INITIAL_GAS_LIMIT,
-                gas_price_adjustment_rate: nearcore::config::GAS_PRICE_ADJUSTMENT_RATE,
+                gas_limit: framework::config::INITIAL_GAS_LIMIT,
+                gas_price_adjustment_rate: framework::config::GAS_PRICE_ADJUSTMENT_RATE,
                 block_producer_kickout_threshold:
-                    nearcore::config::BLOCK_PRODUCER_KICKOUT_THRESHOLD,
+                    framework::config::BLOCK_PRODUCER_KICKOUT_THRESHOLD,
                 chunk_producer_kickout_threshold:
-                    nearcore::config::CHUNK_PRODUCER_KICKOUT_THRESHOLD,
+                    framework::config::CHUNK_PRODUCER_KICKOUT_THRESHOLD,
                 online_max_threshold: Rational32::new(99, 100),
                 online_min_threshold: Rational32::new(
-                    nearcore::config::BLOCK_PRODUCER_KICKOUT_THRESHOLD as i32,
+                    framework::config::BLOCK_PRODUCER_KICKOUT_THRESHOLD as i32,
                     100,
                 ),
                 validators: initial_validators,
-                transaction_validity_period: nearcore::config::TRANSACTION_VALIDITY_PERIOD,
-                protocol_reward_rate: nearcore::config::PROTOCOL_REWARD_RATE,
-                max_inflation_rate: nearcore::config::MAX_INFLATION_RATE,
+                transaction_validity_period: framework::config::TRANSACTION_VALIDITY_PERIOD,
+                protocol_reward_rate: framework::config::PROTOCOL_REWARD_RATE,
+                max_inflation_rate: framework::config::MAX_INFLATION_RATE,
                 total_supply: get_initial_supply(&records_in),
-                num_blocks_per_year: nearcore::config::NUM_BLOCKS_PER_YEAR,
+                num_blocks_per_year: framework::config::NUM_BLOCKS_PER_YEAR,
                 protocol_treasury_account: "treasury.near".parse().unwrap(),
-                fishermen_threshold: nearcore::config::FISHERMEN_THRESHOLD,
+                fishermen_threshold: framework::config::FISHERMEN_THRESHOLD,
                 shard_layout: shards,
-                min_gas_price: nearcore::config::MIN_GAS_PRICE,
+                min_gas_price: framework::config::MIN_GAS_PRICE,
                 ..Default::default()
             };
 
@@ -795,7 +795,7 @@ mod test {
                 },
                 TestStateRecord::Account {
                     account_id: "foo2",
-                    amount: 10_000 * nearcore::config::NEAR_BASE,
+                    amount: 10_000 * framework::config::UNC_BASE,
                     locked: 3_000_000,
                     storage_usage: 182,
                 },
@@ -956,7 +956,7 @@ mod test {
                 },
                 TestStateRecord::Account {
                     account_id: "foo3",
-                    amount: 10_000 * nearcore::config::NEAR_BASE,
+                    amount: 10_000 * framework::config::UNC_BASE,
                     locked: 2_000_000,
                     storage_usage: 182,
                 },

@@ -19,7 +19,7 @@ from utils import wait_for_blocks
 class SimpleTest(unittest.TestCase):
 
     # Spin up a single node and wait for a few blocks.
-    # Please note that this uses the default neard config and is pretty slow.
+    # Please note that this uses the default uncd config and is pretty slow.
     def test_simple(self):
         logger.info("The simple test is starting.")
 

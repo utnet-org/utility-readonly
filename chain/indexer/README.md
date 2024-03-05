@@ -8,24 +8,24 @@ As scaling dApps enter NEAR’s mainnet, an issue may arise: how do they quickly
 
 NEAR Indexer is already in use for several new projects, namely, we index all the events for NEAR Blockchain Explorer, and we also dig into Access Keys and index all of them for NEAR Wallet passphrase recovery and multi-factor authentication. With NEAR Indexer you can do high-level aggregation as well as low-level introspection of all the events inside the blockchain.
 
-We are going to build more Indexers in the future, and will also consider building Indexer integrations with streaming solutions like Kafka, RabbitMQ, ZeroMQ, and NoSQL databases. Feel free to [join our discussions](https://github.com/nearprotocol/nearcore/issues/2996).
+We are going to build more Indexers in the future, and will also consider building Indexer integrations with streaming solutions like Kafka, RabbitMQ, ZeroMQ, and NoSQL databases. Feel free to [join our discussions](https://github.com/utnet-org/utility/issues/2996).
 
-See the [example](https://github.com/nearprotocol/nearcore/tree/master/tools/indexer/example) for further technical details.
+See the [example](https://github.com/utnet-org/utility/tree/master/tools/indexer/example) for further technical details.
 
 ## How to set up and test NEAR Indexer
 
 Before you proceed, make sure you have the following software installed:
-* [rustup](https://rustup.rs/) or Rust version that is mentioned in `rust-toolchain` file in the root of nearcore project.
+* [rustup](https://rustup.rs/) or Rust version that is mentioned in `rust-toolchain` file in the root of framework project.
 
 ### localnet
 
-Clone [nearcore](https://github.com/nearprotocol/nearcore)
+Clone [framework](https://github.com/utnet-org/utility)
 
 To run the NEAR Indexer connected to a network we need to have configs and keys prepopulated. To generate configs for localnet do the following
 
 ```bash
-$ git clone git@github.com:nearprotocol/nearcore.git
-$ cd nearcore/tools/indexer/example
+$ git clone git@github.com:utnet-org/utility.git
+$ cd framework/tools/indexer/example
 $ cargo run --release -- --home-dir ~/.near/localnet init
 ```
 
@@ -55,10 +55,10 @@ $ cargo run --release -- --home-dir ~/.near/testnet init --chain-id testnet --do
 
 The above code will download the official genesis config and generate necessary configs. You can replace `testnet` in the command above to different network ID `betanet`.
 
-**NB!** According to changes in `nearcore` config generation we don't fill all the necessary fields in the config file. While this issue is open <https://github.com/nearprotocol/nearcore/issues/3156> you need to download config you want and replace the generated one manually.
- - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json)
- - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/betanet/config.json)
- - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/mainnet/config.json)
+**NB!** According to changes in `framework` config generation we don't fill all the necessary fields in the config file. While this issue is open <https://github.com/utnet-org/utility/issues/3156> you need to download config you want and replace the generated one manually.
+ - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/testnet/config.json)
+ - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/betanet/config.json)
+ - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/mainnet/config.json)
 
 Replace `config.json` in your `--home-dir` (e.g. `~/.near/testnet/config.json`) with downloaded one.
 
@@ -83,7 +83,7 @@ After the network is synced, you should see logs of every block produced in Test
 
 ## Tweaks
 
-By default, nearcore is configured to do as little work as possible while still operating on an up-to-date state. Indexers may have different requirements, so there is no solution that would work for everyone, and thus we are going to provide you with the set of knobs you can tune for your requirements.
+By default, framework is configured to do as little work as possible while still operating on an up-to-date state. Indexers may have different requirements, so there is no solution that would work for everyone, and thus we are going to provide you with the set of knobs you can tune for your requirements.
 
 As already has been mentioned above, the most common tweak you need to apply is listing all the shards you want to index data from; to do that, you should ensure that `"tracked_shards"` in the `config.json` lists all the shard IDs, e.g. for the current betanet and testnet, which have a single shard:
 
@@ -99,9 +99,9 @@ You can choose Indexer Framework sync mode by setting what to stream:
  - `FromInterruption` - Starts syncing from the block NEAR Indexer was interrupted last time
  - `BlockHeight(u64)` - Specific block height to start syncing from
 
- Refer to `main()` function in [Indexer Example](https://github.com/nearprotocol/nearcore/blob/master/tools/indexer/example/src/main.rs)
+ Refer to `main()` function in [Indexer Example](https://github.com/utnet-org/utility/blob/master/tools/indexer/example/src/main.rs)
 
-Indexer Framework also exposes access to the internal APIs (see `Indexer::client_actors` method), so you can fetch data about any block, transaction, etc, yet by default, nearcore is configured to remove old data (garbage collection), so querying the data that was observed a few epochs before may return an error saying that the data is not found. If you only need blocks streaming, you don't need this tweak, but if you need access to the historical data right from your Indexer, consider updating `"archive"` setting in `config.json` to `true`:
+Indexer Framework also exposes access to the internal APIs (see `Indexer::client_actors` method), so you can fetch data about any block, transaction, etc, yet by default, framework is configured to remove old data (garbage collection), so querying the data that was observed a few epochs before may return an error saying that the data is not found. If you only need blocks streaming, you don't need this tweak, but if you need access to the historical data right from your Indexer, consider updating `"archive"` setting in `config.json` to `true`:
 
 ```json
 ...

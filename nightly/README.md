@@ -56,7 +56,7 @@ The arguments of an expensive test specify package in which the test
 is defined, test binary name and the full path to the test function.
 For example:
 
-    expensive nearcore test_tps_regression test::test_highload
+    expensive framework test_tps_regression test::test_highload
 
 (Currently the package name is ignored but it may change in the future
 so make sure it’s set correctly).  The path to the test function must
@@ -129,7 +129,7 @@ Every 24 hours NayDuck checks if master branch has changed and if it
 has schedules a new run including all tests listed in the
 `nightly.txt` file.  It’s also possible to request a run manually in
 which case arbitrary set of tests can be run on an arbitrary commit
-(so long as it exists in the near/nearcore repository).
+(so long as it exists in the utnet-org/utility repository).
 
 This can be done with `nayduck.py` script which takes the list file as
 an argument.  For example, to run spec tests one might invoke:
@@ -142,8 +142,8 @@ and commit to run against with `--branch` and `--sha` arguments.  For
 full usage refer to `./scripts/nayduck.py --help` output.
 
 NayDuck cannot run tests against local working directory or even
-commits in a private fork of the nearcore repository.  To schedule
-a NayDuck run, the commit must first be pushed to nearcore.  The
+commits in a private fork of the framework repository.  To schedule
+a NayDuck run, the commit must first be pushed to framework.  The
 commit does not need to be on master branch; testing a feature branch
 is supported.
 

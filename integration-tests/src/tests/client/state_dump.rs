@@ -21,10 +21,10 @@ use near_primitives::views::{QueryRequest, QueryResponseKind};
 use near_store::flat::store_helper;
 use near_store::DBCol;
 use near_store::Store;
-use nearcore::config::GenesisExt;
-use nearcore::state_sync::spawn_state_sync_dump;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::NEAR_BASE;
+use framework::config::GenesisExt;
+use framework::state_sync::spawn_state_sync_dump;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::UNC_BASE;
 use std::ops::ControlFlow;
 use std::sync::Arc;
 use std::time::Duration;
@@ -189,7 +189,7 @@ fn run_state_sync_with_dumped_parts(
                     1,
                     "test0".parse().unwrap(),
                     "test_account".parse().unwrap(),
-                    NEAR_BASE,
+                    UNC_BASE,
                     signer.public_key(),
                     &signer,
                     genesis_hash,

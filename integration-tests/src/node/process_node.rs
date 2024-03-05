@@ -11,7 +11,7 @@ use tracing::error;
 use near_chain_configs::Genesis;
 use near_crypto::{InMemorySigner, KeyType, Signer};
 use near_primitives::types::AccountId;
-use nearcore::config::NearConfig;
+use framework::config::NearConfig;
 
 use crate::node::Node;
 use crate::user::rpc_user::RpcUser;
@@ -128,17 +128,17 @@ impl ProcessNode {
     pub fn get_start_node_command(&self) -> Command {
         if std::env::var("NIGHTLY_RUNNER").is_err() {
             let mut command = Command::new("cargo");
-            command.args(&["run", "-p", "neard"]);
+            command.args(&["run", "-p", "uncd"]);
             #[cfg(feature = "nightly_protocol")]
             command.args(&["--features", "nightly_protocol"]);
             #[cfg(feature = "nightly")]
             command.args(&["--features", "nightly"]);
-            command.args(&["--bin", "neard", "--", "--home"]);
+            command.args(&["--bin", "uncd", "--", "--home"]);
             command.arg(&self.work_dir);
             command.arg("run");
             command
         } else {
-            let mut command = Command::new("target/debug/neard");
+            let mut command = Command::new("target/debug/uncd");
             command.arg("--home");
             command.arg(&self.work_dir);
             command.arg("run");

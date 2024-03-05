@@ -11,7 +11,7 @@ use near_primitives::trie_key::trie_key_parsers::{
 };
 use near_primitives_core::types::ShardId;
 use near_store::{ShardUId, Store, Trie, TrieDBStorage};
-use nearcore::NearConfig;
+use framework::NearConfig;
 
 #[derive(Clone)]
 pub enum TrieIterationType {

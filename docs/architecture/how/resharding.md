@@ -89,9 +89,9 @@ The state sync of the parent shard, the resharing and the catchup of the childre
 
 ### Flow
 
-The resharding will be initiated by having it included in a dedicated protocol version together with neard . Here is the expected flow of events:
+The resharding will be initiated by having it included in a dedicated protocol version together with uncd . Here is the expected flow of events:
 
-* A new neard release is published and protocol version upgrade date is set to D, roughly a week from the release. 
+* A new uncd release is published and protocol version upgrade date is set to D, roughly a week from the release. 
 * All node operatores upgrade their binaries to the newly released version within the given timeframe, ideally as soon as possible but no later than D. 
 * The protocol version upgrade voting takes place at D in an epoch E and nodes vote in favour of switching to the new protocol version in epoch E+2. 
 * The resharding begins at the beginning of epoch E+1. 
@@ -135,11 +135,11 @@ Here are some example metric values when finished for different shards and netwo
 Here is an example of what that may look like in a grafana dashboard. Please keep in mind that the values and duration is not representative as the sample data below is captured in a testing environment with different configuration.
 
 
-<img width="941" alt="Screenshot 2023-12-01 at 10 10 20" src="https://github.com/near/nearcore/assets/1555986/42824d5a-af16-4a06-9727-a04b1b9d7c03">
+<img width="941" alt="Screenshot 2023-12-01 at 10 10 20" src="https://github.com/utnet-org/utility/assets/1555986/42824d5a-af16-4a06-9727-a04b1b9d7c03">
 
-<img width="941" alt="Screenshot 2023-12-01 at 10 10 50" src="https://github.com/near/nearcore/assets/1555986/06a2c6f1-1daf-4220-b3fe-e21992e2d62c">
+<img width="941" alt="Screenshot 2023-12-01 at 10 10 50" src="https://github.com/utnet-org/utility/assets/1555986/06a2c6f1-1daf-4220-b3fe-e21992e2d62c">
 
-<img width="941" alt="Screenshot 2023-12-01 at 10 10 42" src="https://github.com/near/nearcore/assets/1555986/fea2ad6b-2fa4-4862-875e-a3ca5d61d849">
+<img width="941" alt="Screenshot 2023-12-01 at 10 10 42" src="https://github.com/utnet-org/utility/assets/1555986/fea2ad6b-2fa4-4862-875e-a3ca5d61d849">
 
 
 
@@ -154,7 +154,7 @@ The remainig fields in the ReshardingConfig are only intended for testing purpos
 
 The default configuration for ReshardingConfig should provide a good and safe setting for resharding in the production networks. There is no need for node operators to make any changes to it unless they observe issues. 
 
-The resharding config can be adjusted at runtime, without restarting the node. The config needs to be updated first and then a SIGHUP signal should be sent to the neard process. When received the signal neard will update the config and print a log message showing what fields were changed. It's recommended to check the log to make sure the relevant config change was correctly picked up. 
+The resharding config can be adjusted at runtime, without restarting the node. The config needs to be updated first and then a SIGHUP signal should be sent to the uncd process. When received the signal uncd will update the config and print a log message showing what fields were changed. It's recommended to check the log to make sure the relevant config change was correctly picked up. 
 
 ## Future possibilities
 

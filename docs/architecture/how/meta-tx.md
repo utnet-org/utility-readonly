@@ -177,10 +177,10 @@ see why, let's first list the normal flow of gas, outside of meta transactions.
    implicitly defined by the content of the receipt. For function calls, the
    caller decides explicitly how much gas is attached on top of the minimum
    required amount. The NEAR token price per gas unit is dynamically adjusted on
-   the blockchain. In today's nearcore code base, this happens as part of
-   [`verify_and_charge_transaction`](https://github.com/near/nearcore/blob/4510472d69c059644bb2d2579837c6bd6d94f190/runtime/runtime/src/verifier.rs#L69)
+   the blockchain. In today's framework code base, this happens as part of
+   [`verify_and_charge_transaction`](https://github.com/utnet-org/utility/blob/4510472d69c059644bb2d2579837c6bd6d94f190/runtime/runtime/src/verifier.rs#L69)
    which gets called in
-   [`process_transaction`](https://github.com/near/nearcore/blob/4510472d69c059644bb2d2579837c6bd6d94f190/runtime/runtime/src/lib.rs#L218).
+   [`process_transaction`](https://github.com/utnet-org/utility/blob/4510472d69c059644bb2d2579837c6bd6d94f190/runtime/runtime/src/lib.rs#L218).
 2. For all actions listed inside the transaction, the `SEND` cost is burned
    immediately. Depending on the condition `sender == receiver`, one of two
    possible `SEND` costs is chosen. The `EXEC` cost is not burned, yet. But it

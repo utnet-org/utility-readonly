@@ -19,7 +19,7 @@ use near_primitives::views::{
     FinalExecutionOutcomeView, FinalExecutionStatus, ViewApplyState, ViewStateResult,
 };
 use near_store::{ShardTries, TrieUpdate};
-use nearcore::config::MIN_GAS_PRICE;
+use framework::config::MIN_GAS_PRICE;
 use node_runtime::state_viewer::TrieViewer;
 use node_runtime::{ApplyState, Runtime};
 

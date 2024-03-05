@@ -14,8 +14,8 @@ use near_primitives::transaction::Action::AddKey;
 use near_primitives::transaction::{Action, AddKeyAction, DeleteKeyAction, SignedTransaction};
 use near_primitives::version::{ProtocolFeature, PROTOCOL_VERSION};
 use near_primitives::views::{FinalExecutionStatus, QueryRequest, QueryResponseKind};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use node_runtime::ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT;
 
 /// Assert that an account exists and has zero balance

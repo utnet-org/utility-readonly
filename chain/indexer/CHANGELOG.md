@@ -2,11 +2,11 @@
 
 ## 1.32.x
 
-* Add `nightly` feature to NEAR Indexer Framework to respect this feature for `nearcore` lib (requried for `betanet`)
+* Add `nightly` feature to NEAR Indexer Framework to respect this feature for `framework` lib (requried for `betanet`)
 
 ## 1.26.0
 
-* `state_changes` field is moved from the top-level `StreamerMessage` to `IndexerShard` struct to align better with the sharded nature of NEAR protocol. In the future, when nearcore will be able to track only a subset of shards, this API will work naturally, so we take pro-active measures to solidify the APIs
+* `state_changes` field is moved from the top-level `StreamerMessage` to `IndexerShard` struct to align better with the sharded nature of NEAR protocol. In the future, when framework will be able to track only a subset of shards, this API will work naturally, so we take pro-active measures to solidify the APIs
 * All the NEAR Indexer Framework types were extracted to a separate crate `near-indexer-primitives`
 * Increase the streamer size from 16 to 100 in order to increase the speed of streaming messages (affects reindexing jobs)
 
@@ -18,7 +18,7 @@ to the specific shard.
 
 ## 0.10.1
 
-* (mainnet only) Add additional handler to inject restored receipts to the block #47317863. See [PR 4248](https://github.com/near/nearcore/pull/4248) for reference
+* (mainnet only) Add additional handler to inject restored receipts to the block #47317863. See [PR 4248](https://github.com/utnet-org/utility/pull/4248) for reference
 
 ## 0.10.0
 
@@ -62,7 +62,7 @@ Since the change of reading genesis method to optimize memory usage. You'd be ab
 
 * Add `InitConfigArgs` and `indexer_init_configs`
 
-As current `neard::init_configs()` signature is a bit hard to read and use we introduce `InitConfigArgs` struct to make a process of passing arguments more explicit. That's why we introduce `indexer_init_configs` which is just a wrapper on `neard::init_configs()` but takes `dir` and `InitConfigArgs` as an input.
+As current `uncd::init_configs()` signature is a bit hard to read and use we introduce `InitConfigArgs` struct to make a process of passing arguments more explicit. That's why we introduce `indexer_init_configs` which is just a wrapper on `uncd::init_configs()` but takes `dir` and `InitConfigArgs` as an input.
 
 ## 0.8.0
 
@@ -70,7 +70,7 @@ As current `neard::init_configs()` signature is a bit hard to read and use we in
 
 ## Breaking change
 
-actix update changed the way we used to deal with starting the node and getting necessary data from neard.
+actix update changed the way we used to deal with starting the node and getting necessary data from uncd.
 The `start()` method was deleted, `Indexer` struct doesn't have `actix_runtime` anymore and runtime should be
 created and started on the Indexer implementation, not on the Indexer Framework one.
 
@@ -98,7 +98,7 @@ created and started on the Indexer implementation, not on the Indexer Framework 
 
 ## Breaking changes
 
-Since #3529 nearcore stores `ExecutionOutcome`s in their execution order, and we can also attribute outcomes to specific chunk. That's why:
+Since #3529 framework stores `ExecutionOutcome`s in their execution order, and we can also attribute outcomes to specific chunk. That's why:
 
 * `receipt_execution_outcomes` was moved from `StreamerMessage` to a relevant `IndexerChunkView`
 * `ExecutionOutcomesWithReceipts` type alias was removed (just use `Vec<IndexerExecutionOutcomeWithReceipt>` instead)

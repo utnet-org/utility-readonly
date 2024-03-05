@@ -33,7 +33,7 @@ direct (aka TIER1) connections between each other, which will optimize the
 communication latency and minimize the number of dropped chunks. If you are a
 validator, you can enable TIER1 connections by setting the following fields in the config:
 
-* [public_addrs](https://github.com/near/nearcore/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L154)
+* [public_addrs](https://github.com/utnet-org/utility/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L154)
   * this is a list of the public addresses (in the format `"<node public key>@<IP>:<port>"`)
     of trusted nodes, which are willing to route messages to your node
   * this list will be broadcasted to the network so that other validator nodes can connect
@@ -45,13 +45,13 @@ validator, you can enable TIER1 connections by setting the following fields in t
     `public_addrs` to a list (<=10 entries) of proxy nodes that you trust (arbitrary nodes
     with static public IPs).
   * support for nodes with dynamic public IPs is not implemented yet.
-* [experimental.tier1_enable_outbound](https://github.com/near/nearcore/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L213)
+* [experimental.tier1_enable_outbound](https://github.com/utnet-org/utility/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L213)
   * makes your node actively try to establish outbound TIER1 connections (recommended)
     once it learns about the public addresses of other validator nodes. If disabled, your
     node won't try to establish outbound TIER1 connections, but it still may accept
     incoming TIER1 connections from other nodes.
   * currently `false` by default, but will be changed to `true` by default in the future
-* [experimental.tier1_enable_inbound](https://github.com/near/nearcore/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L209)
+* [experimental.tier1_enable_inbound](https://github.com/utnet-org/utility/blob/d95a5f58d998c69cb8d4e965ad6b0a440cf3f233/chain/network/src/config_json.rs#L209)
   * makes your node accept inbound TIER1 connections from other validator nodes.
   * disable both `tier1_enable_inbound` and `tier1_enable_outbound` if you want to opt-out
     from the TIER1 communication entirely

@@ -9,7 +9,7 @@
 # without degrading blocks per second.
 #
 # To run this test is important to compile genesis-populate tool first.
-# In nearcore folder run:
+# In framework folder run:
 #
 # ```
 # cargo build -p genesis-populate

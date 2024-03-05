@@ -333,7 +333,7 @@ pub fn publishable_has_readme(workspace: &Workspace) -> anyhow::Result<()> {
     Ok(())
 }
 
-const EXPECTED_LINK: &str = "https://github.com/near/nearcore";
+const EXPECTED_LINK: &str = "https://github.com/utnet-org/utility";
 
 /// Ensure all non-private crates have appropriate repository links
 pub fn publishable_has_near_link(workspace: &Workspace) -> anyhow::Result<()> {

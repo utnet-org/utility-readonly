@@ -5,7 +5,7 @@ use near_primitives::block_header::BlockHeader;
 use near_primitives::types::ShardId;
 use near_store::trie::mem::loading::load_trie_from_flat_state;
 use near_store::{DBCol, ShardUId, HEAD_KEY};
-use nearcore::NearConfig;
+use framework::NearConfig;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;

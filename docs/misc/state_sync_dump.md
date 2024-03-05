@@ -15,7 +15,7 @@ A new version of decentralized state sync is work in progress.
 
 ## How-to
 
-neard release `1.36.0-rc.1` adds an experimental option to sync state from
+uncd release `1.36.0-rc.1` adds an experimental option to sync state from
 external storage.
 
 See [how-to](state_sync_from_external_storage.md) how to configure your node to
@@ -42,7 +42,7 @@ To enable Google Cloud Storage as your external storage, add this to your
 And run your node with an environment variable `SERVICE_ACCOUNT` or
 `GOOGLE_APPLICATION_CREDENTIALS` pointing to the credentials json file
 ```shell
-SERVICE_ACCOUNT=/path/to/file ./neard run
+SERVICE_ACCOUNT=/path/to/file ./uncd run
 ```
 
 ### Amazon S3
@@ -65,7 +65,7 @@ file:
 And run your node with environment variables `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY`:
 ```shell
-AWS_ACCESS_KEY_ID="MY_ACCESS_KEY" AWS_SECRET_ACCESS_KEY="MY_AWS_SECRET_ACCESS_KEY" ./neard run
+AWS_ACCESS_KEY_ID="MY_ACCESS_KEY" AWS_SECRET_ACCESS_KEY="MY_AWS_SECRET_ACCESS_KEY" ./uncd run
 ```
 
 ## Dump to a local filesystem
@@ -88,5 +88,5 @@ filesystem:
 In this case you don't need any extra environment variables. Simply run your
 node:
 ```shell
-./neard run
+./uncd run
 ```

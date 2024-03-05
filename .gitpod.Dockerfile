@@ -1,4 +1,4 @@
 FROM gitpod/workspace-full
 
-RUN git clone https://github.com/nearprotocol/nearcore.git --depth 1 /home/gitpod/nearcore
-RUN bash -cl "cd /home/gitpod/nearcore && cargo build && cargo test"
+RUN git clone https://github.com/unet-org/utility.git --depth 1 /home/gitpod/utility
+RUN bash -cl "cd /home/gitpod/utility && cargo build && cargo test"

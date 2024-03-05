@@ -47,7 +47,7 @@ def test_binaries(exclude=None):
         fname = os.path.basename(f)
         ext = os.path.splitext(fname)[1]
         is_near_binary = filecmp.cmp(f, f'{target_debug}/near') or filecmp.cmp(
-            f, f'{target_debug}/neard')
+            f, f'{target_debug}/uncd')
         if os.path.isfile(f) and not is_near_binary and ext == '':
             if not exclude:
                 binaries.append(f)

@@ -36,7 +36,7 @@ def __get_latest_deploy(chain_id: str) -> typing.Tuple[str, str]:
     """Returns latest (release, deploy) for given chain.
 
     Gets latest release and deploy identifier from S3 for given chain.  Those
-    can be used to uniquely identify a neard executable running on the chain.
+    can be used to uniquely identify a uncd executable running on the chain.
     """
 
     def download(url: str) -> str:
@@ -45,7 +45,7 @@ def __get_latest_deploy(chain_id: str) -> typing.Tuple[str, str]:
         res.raise_for_status()
         return res.text
 
-    basehref = f'{_BASEHREF}/nearcore-deploy/{chain_id}'
+    basehref = f'{_BASEHREF}/framework-deploy/{chain_id}'
     release = download(f'{basehref}/latest_release')
     deploy = download(f'{basehref}/latest_deploy')
 
@@ -58,13 +58,13 @@ def __get_latest_deploy(chain_id: str) -> typing.Tuple[str, str]:
 
 class Executables(typing.NamedTuple):
     root: pathlib.Path
-    neard: pathlib.Path
+    uncd: pathlib.Path
 
     def node_config(self) -> typing.Dict[str, typing.Any]:
         return {
             'local': True,
             'neard_root': self.root,
-            'binary_name': self.neard.name
+            'binary_name': self.uncd.name
         }
 
 
@@ -106,22 +106,22 @@ def _compile_current(branch: str) -> Executables:
     prebuilt_neard = os.environ.get("CURRENT_NEARD")
     if prebuilt_neard is not None:
         logger.info(
-            f'Using `CURRENT_NEARD={prebuilt_neard}` neard for branch {branch}')
+            f'Using `CURRENT_NEARD={prebuilt_neard}` uncd for branch {branch}')
         try:
             path = pathlib.Path(prebuilt_neard).resolve()
             return Executables(path.parent, path)
         except OSError as e:
             logger.exception('Could not use `CURRENT_NEARD`, will build…')
 
-    logger.info(f'Building neard for branch {branch}')
-    subprocess.check_call(['cargo', 'build', '-p', 'neard', '--bin', 'neard'],
+    logger.info(f'Building uncd for branch {branch}')
+    subprocess.check_call(['cargo', 'build', '-p', 'uncd', '--bin', 'uncd'],
                           cwd=_REPO_DIR)
     subprocess.check_call(['cargo', 'build', '-p', 'near-test-contracts'],
                           cwd=_REPO_DIR)
     branch = escaped(branch)
-    neard = _OUT_DIR / f'neard-{branch}'
-    (_OUT_DIR / 'neard').rename(neard)
-    return Executables(_OUT_DIR, neard)
+    uncd = _OUT_DIR / f'uncd-{branch}'
+    (_OUT_DIR / 'uncd').rename(uncd)
+    return Executables(_OUT_DIR, uncd)
 
 
 def patch_binary(binary: pathlib.Path) -> None:
@@ -144,7 +144,7 @@ def patch_binary(binary: pathlib.Path) -> None:
     nix_expr = '''
     with (import <nixpkgs> {});
     symlinkJoin {
-      name = "nearcore-dependencies";
+      name = "framework-dependencies";
       paths = [patchelf stdenv.cc.bintools gcc.cc.lib];
     }
     '''
@@ -202,11 +202,11 @@ def __download_file_if_missing(filename: pathlib.Path, url: str) -> None:
 
 def __download_binary(release: str, deploy: str) -> Executables:
     """Download binary for given release and deploy."""
-    logger.info(f'Getting neard for {release}@{_UNAME} (deploy={deploy})')
-    neard = _OUT_DIR / f'neard-{release}-{deploy}'
-    basehref = f'{_BASEHREF}/nearcore/{_UNAME}/{release}/{deploy}'
-    __download_file_if_missing(neard, f'{basehref}/neard')
-    return Executables(_OUT_DIR, neard)
+    logger.info(f'Getting uncd for {release}@{_UNAME} (deploy={deploy})')
+    uncd = _OUT_DIR / f'uncd-{release}-{deploy}'
+    basehref = f'{_BASEHREF}/framework/{_UNAME}/{release}/{deploy}'
+    __download_file_if_missing(uncd, f'{basehref}/uncd')
+    return Executables(_OUT_DIR, uncd)
 
 
 class ABExecutables(typing.NamedTuple):
@@ -234,7 +234,7 @@ def prepare_ab_test(chain_id: str = 'mainnet') -> ABExecutables:
     if _IS_NAYDUCK:
         # On NayDuck the file is fetched from a builder host so there’s no need
         # to build it.
-        current = Executables(_OUT_DIR, _OUT_DIR / 'neard')
+        current = Executables(_OUT_DIR, _OUT_DIR / 'uncd')
     else:
         current = _compile_current(current_branch())
 

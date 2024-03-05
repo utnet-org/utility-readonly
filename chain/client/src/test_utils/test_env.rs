@@ -324,7 +324,7 @@ impl TestEnv {
     }
 
     /// This function will actually bump to the latest protocol version instead of the provided one.
-    /// See https://github.com/near/nearcore/issues/8590 for details.
+    /// See https://github.com/utnet-org/utility/issues/8590 for details.
     pub fn upgrade_protocol(&mut self, protocol_version: ProtocolVersion) {
         assert_eq!(self.clients.len(), 1, "at the moment, this support only a single client");
 

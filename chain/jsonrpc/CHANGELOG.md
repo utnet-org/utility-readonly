@@ -16,7 +16,7 @@
 
 ## 0.2.2
 
-* Extended error structures to be more explicit. See [#2976 decision comment for reference](https://github.com/near/nearcore/issues/2976#issuecomment-865834617)
+* Extended error structures to be more explicit. See [#2976 decision comment for reference](https://github.com/utnet-org/utility/issues/2976#issuecomment-865834617)
 
 ## 0.2.1
 
@@ -36,7 +36,7 @@ returns response with transaction hash instead of empty body.
 
 * Added `EXPERIMENTAL_tx_status` endpoint exposing receipts in addition to all
   the rest data available in `tx` endpoint
-  ([#3383](https://github.com/nearprotocol/nearcore/pull/3383))
+  ([#3383](https://github.com/utnet-org/utility/pull/3383))
 
 ## 0.2.0
 

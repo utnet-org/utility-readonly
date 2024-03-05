@@ -20,8 +20,8 @@ use near_primitives::hash::CryptoHash;
 use near_primitives::transaction::SignedTransaction;
 use near_primitives::types::{AccountId, BlockHeightDelta, BlockReference, NumSeats};
 use near_primitives::views::{QueryRequest, QueryResponseKind, ValidatorInfo};
-use nearcore::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
-use nearcore::{load_test_config, start_with_config, NearConfig, NEAR_BASE};
+use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::{load_test_config, start_with_config, NearConfig, UNC_BASE};
 
 use near_o11y::WithSpanContextExt;
 use {near_primitives::types::BlockId, primitive_types::U256};
@@ -87,7 +87,7 @@ fn init_test_staking(
         .enumerate()
         .map(|(i, config)| {
             let genesis_hash = genesis_hash(&config.genesis);
-            let nearcore::NearNode { client, view_client, .. } =
+            let framework::NearNode { client, view_client, .. } =
                 start_with_config(paths[i], config.clone()).expect("start_with_config");
             let account_id = format!("near.{}", i).parse::<AccountId>().unwrap();
             let signer = Arc::new(InMemorySigner::from_seed(
@@ -205,12 +205,12 @@ fn test_validator_kickout() {
                 4,
                 15,
                 false,
-                (TESTING_INIT_STAKE / NEAR_BASE) as u64 + 1,
+                (TESTING_INIT_STAKE / UNC_BASE) as u64 + 1,
                 false,
                 false,
             );
             let mut rng = rand::thread_rng();
-            let stakes = (0..num_nodes / 2).map(|_| NEAR_BASE + rng.gen_range(1..100));
+            let stakes = (0..num_nodes / 2).map(|_| UNC_BASE + rng.gen_range(1..100));
             let stake_transactions = stakes.enumerate().map(|(i, stake)| {
                 let test_node = &test_nodes[i];
                 let signer = Arc::new(InMemorySigner::from_seed(

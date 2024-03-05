@@ -492,8 +492,8 @@ mod test {
     use near_primitives::utils::get_num_seats_per_shard;
     use near_store::genesis::initialize_genesis_state;
     use near_store::test_utils::create_test_store;
-    use nearcore::config::GenesisExt;
-    use nearcore::NightshadeRuntime;
+    use framework::config::GenesisExt;
+    use framework::NightshadeRuntime;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
     use std::path::Path;

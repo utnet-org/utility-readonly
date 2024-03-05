@@ -10,15 +10,15 @@ protocol are correct. Correct in this context means, a chunk filled with 1 Pgas
 (**P**eta gas) will take at most 1 second to be applied. Or more generally,
 per 1 Tgas of execution, we spend no more than 1ms wall-clock time. 
 
-For now, nearcore timing is the only one that matters. Things will become more
+For now, framework timing is the only one that matters. Things will become more
 complicated once there are multiple client implementations. But knowing that
-nearcore can serve requests fast enough proves that it is possible to be at
+framework can serve requests fast enough proves that it is possible to be at
 least as fast. However, we should be careful to not couple costs too tightly
-with the specific implementation of nearcore to allow for innovation in new
+with the specific implementation of framework to allow for innovation in new
 clients.
 
-The estimator code is part of the nearcore repository in the directory
-[runtime/runtime-params-estimator](https://github.com/near/nearcore/tree/master/runtime/runtime-params-estimator).
+The estimator code is part of the framework repository in the directory
+[runtime/runtime-params-estimator](https://github.com/utnet-org/utility/tree/master/runtime/runtime-params-estimator).
 
 For a practical guide on how to run the estimator, please take a look at
 [Running the Estimator](../../practices/workflows/gas_estimations.md) in the
@@ -27,19 +27,19 @@ workflows chapter.
 ## Code Structure
 
 The estimator contains a binary and a library module. The
-[main.rs](https://github.com/near/nearcore/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/main.rs)
+[main.rs](https://github.com/utnet-org/utility/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/main.rs)
 contains the CLI arguments parsing code and logic to fill the test database.
 
 The interesting code lives in
-[lib.rs](https://github.com/near/nearcore/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/lib.rs)
+[lib.rs](https://github.com/utnet-org/utility/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/lib.rs)
 and its submodules. The comments at the top of that file provide a
 high-level overview of how estimations work. More details on specific
 estimations are available as comments on the enum variants of `Cost` in
-[costs.rs](https://github.com/near/nearcore/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/cost.rs#L9).
+[costs.rs](https://github.com/utnet-org/utility/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/cost.rs#L9).
 
 If you roughly understand the three files above, you already have a great
 overview of the estimator.
-[estimator_context.rs](https://github.com/near/nearcore/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/estimator_context.rs)
+[estimator_context.rs](https://github.com/utnet-org/utility/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/estimator_context.rs)
 is another central file. A full estimation run creates a single
 `EstimatorContext`. Each estimation will use it to spawn a new `Testbed`
 with a fresh database that contains the same data as the setup in the
@@ -48,12 +48,12 @@ estimator context.
 Most estimations fill blocks with transactions to be executed and hand them to
 `Testbed::measure_blocks`. To allow for easy repetitions, the block is usually
 filled by an instance of the
-[`TransactionBuilder`](https://github.com/near/nearcore/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/transaction_builder.rs),
+[`TransactionBuilder`](https://github.com/utnet-org/utility/blob/e40863c9ba61a0de140c869583b2113358605771/runtime/runtime-params-estimator/src/transaction_builder.rs),
 which can be retrieved from a testbed.
 
 But even filling blocks with transactions becomes repetitive since many
 parameters are estimated similarly.
-[utils.rs](https://github.com/near/nearcore/blob/master/runtime/runtime-params-estimator/src/utils.rs)
+[utils.rs](https://github.com/utnet-org/utility/blob/master/runtime/runtime-params-estimator/src/utils.rs)
 has a collection of helpful functions that let you write estimations very
 quickly.
 
@@ -77,11 +77,11 @@ cloud-hosted VMs) and manual labor to set it up.
 The other supported metric `icount` is much more stable. It uses
 [qemu](https://www.qemu.org/) to emulate an x86 CPU. We then insert a custom
 [TCG plugin](https://www.qemu.org/docs/master/devel/tcg-plugins.html)
-([counter.c](https://github.com/near/nearcore/blob/08c4a1bd4b16847eb1c2fccee36bf16f6efb71fd/runtime/runtime-params-estimator/emu-cost/counter_plugin/counter.c))
+([counter.c](https://github.com/utnet-org/utility/blob/08c4a1bd4b16847eb1c2fccee36bf16f6efb71fd/runtime/runtime-params-estimator/emu-cost/counter_plugin/counter.c))
 that counts the number of executed x86 instructions. It also intercepts system
 calls and counts the number of bytes seen in `sys_read`, `sys_write` and their
 variations. This gives an approximation for IO bytes, as seen on the interface
-between the operating system and nearcore. To convert to gas, we use three
+between the operating system and framework. To convert to gas, we use three
 constants to multiply with instruction count, read bytes, and write bytes.
 
 We run qemu inside a Docker container, to make sure the qemu and qemu plugin
@@ -115,7 +115,7 @@ on standardized cloud hardware. The output is then sanity checked manually by
 several people. Based on that, the final gas parameter value is determined.
 Usually, it will be the higher output of the two metrics rounded up.
 
-The PR [#8031](https://github.com/near/nearcore/pull/8031) to set the ed25519
+The PR [#8031](https://github.com/utnet-org/utility/pull/8031) to set the ed25519
 verification gas parameters is a good example of how such an analysis and
 report could look like.
 

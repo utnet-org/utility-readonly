@@ -19,10 +19,10 @@ def init_locust_node(instance_name):
     commands = [
         'sudo apt update',
         'sudo apt-get install -y git virtualenv build-essential python3-dev',
-        'git clone https://github.com/near/nearcore /home/ubuntu/nearcore',
+        'git clone https://github.com/utnet-org/utility /home/ubuntu/framework',
         'mkdir /home/ubuntu/locust',
         'cd /home/ubuntu/locust && python3 -m virtualenv venv -p $(which python3)',
-        './venv/bin/pip install -r /home/ubuntu/nearcore/pytest/requirements.txt',
+        './venv/bin/pip install -r /home/ubuntu/framework/pytest/requirements.txt',
         './venv/bin/pip install locust',
     ]
     init_command = ' && '.join(commands)
@@ -82,7 +82,7 @@ def run_master(args, node, num_workers):
         cmd,
         'locust-master.txt',
         pre_cmd=
-        'ulimit -S -n 100000 && cd /home/ubuntu/nearcore/pytest/tests/loadtest/locust'
+        'ulimit -S -n 100000 && cd /home/ubuntu/framework/pytest/tests/loadtest/locust'
     )
 
 
@@ -117,7 +117,7 @@ def run_worker(args, node, master_ip):
         cmd,
         'locust-worker.txt',
         pre_cmd=
-        'ulimit -S -n 100000 && cd /home/ubuntu/nearcore/pytest/tests/loadtest/locust'
+        'ulimit -S -n 100000 && cd /home/ubuntu/framework/pytest/tests/loadtest/locust'
     )
 
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         type=str,
         default='ft.py',
         help=
-        'locustfile name in nearcore/pytest/tests/loadtest/locust/locustfiles')
+        'locustfile name in framework/pytest/tests/loadtest/locust/locustfiles')
     run_parser.add_argument(
         '--max-workers',
         type=int,

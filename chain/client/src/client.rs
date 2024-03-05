@@ -674,7 +674,7 @@ impl Client {
             .get_epoch_protocol_version(&epoch_id)
             .expect("Epoch info should be ready at this point");
         if protocol_version > PROTOCOL_VERSION {
-            panic!("The client protocol version is older than the protocol version of the network. Please update nearcore. Client protocol version:{}, network protocol version {}", PROTOCOL_VERSION, protocol_version);
+            panic!("The client protocol version is older than the protocol version of the network. Please update framework. Client protocol version:{}, network protocol version {}", PROTOCOL_VERSION, protocol_version);
         }
 
         let approvals = self
@@ -2631,7 +2631,7 @@ impl Client {
         let tip = self.chain.head()?;
         // convert config tracked shards
         // runtime will track all shards if config tracked shards is not empty
-        // https://github.com/near/nearcore/issues/4930
+        // https://github.com/utnet-org/utility/issues/4930
         let tracked_shards = if self.config.tracked_shards.is_empty() {
             vec![]
         } else {

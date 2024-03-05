@@ -30,7 +30,7 @@ use near_store::{
     checkpoint_hot_storage_and_cleanup_columns, DBCol, Store, TrieDBStorage, TrieStorage,
     FINAL_HEAD_KEY,
 };
-use nearcore::{load_config, open_storage, NearConfig, NightshadeRuntime, NEAR_BASE};
+use framework::{load_config, open_storage, NearConfig, NightshadeRuntime, UNC_BASE};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::Deserialize;
 use std::collections::HashSet;
@@ -730,7 +730,7 @@ impl ForkNetworkCommand {
     ) -> anyhow::Result<(Vec<StateRoot>, Vec<AccountInfo>)> {
         let mut new_validator_accounts = vec![];
 
-        let liquid_balance = 100_000_000 * NEAR_BASE;
+        let liquid_balance = 100_000_000 * UNC_BASE;
         let storage_bytes = runtime_config.fees.storage_usage_config.num_bytes_account;
         let validators_path = if validators.is_absolute() {
             PathBuf::from(validators)
@@ -744,7 +744,7 @@ impl ForkNetworkCommand {
         for validator in new_validators.into_iter() {
             let validator_account = AccountInfo {
                 account_id: validator.account_id,
-                amount: validator.amount.unwrap_or(50_000 * NEAR_BASE),
+                amount: validator.amount.unwrap_or(50_000 * UNC_BASE),
                 power: validator.power.unwrap_or(5),
                 locked: validator.frozen.unwrap_or(5),
                 public_key: validator.public_key,

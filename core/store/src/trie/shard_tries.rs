@@ -532,7 +532,7 @@ impl WrappedTrieChanges {
                     ),
                 }
             } else {
-                // This branch is the current neard behavior.
+                // This branch is the current uncd behavior.
                 // Only a subset of state changes get serialized.
 
                 // Filtering trie keys for user facing RPC reporting.

@@ -8,8 +8,8 @@ use near_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermi
 use near_primitives::errors::{ActionsValidationError, InvalidTxError};
 use near_primitives::hash::CryptoHash;
 use near_primitives::transaction::{Action, AddKeyAction, Transaction};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 #[test]
 fn test_account_id_in_function_call_permission_upgrade() {

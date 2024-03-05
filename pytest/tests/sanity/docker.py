@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Verifies that node can be started inside of a Docker image.
 
-The script builds Docker image using 'make docker-nearcore' command and then
+The script builds Docker image using 'make docker-framework' command and then
 starts a cluster with all nodes running inside of containers.  As sanity check
 to see if the cluster works correctly, the test waits for a several blocks and
 then interrogates each node about block with specified hash expecting all of
 them to return the same data.
 
 The purpose of the test is to verify that:
-- `make docker-nearcore` builds a working Docker image,
-- `docker run ... nearcore` (i.e. the `run_docker.sh` script) works,
-- `docker run -eBOOT_NODE=... ... nearcore` (i.e. passing boot nodes via
+- `make docker-framework` builds a working Docker image,
+- `docker run ... framework` (i.e. the `run_docker.sh` script) works,
+- `docker run -eBOOT_NODE=... ... framework` (i.e. passing boot nodes via
   BOOT_NODE environment variable) works and
-- `docker run ... nearcore sh -c 'neard ...'` works.
+- `docker run ... framework sh -c 'uncd ...'` works.
 """
 
 import os
@@ -37,7 +37,7 @@ _REPO_DIR = pathlib.Path(__file__).resolve().parents[3]
 _CD_PRINTED = False
 _Command = typing.Sequence[typing.Union[str, pathlib.Path]]
 
-_DOCKER_IMAGE_TAG = 'nearcore-testimage-' + uuid.uuid4().hex
+_DOCKER_IMAGE_TAG = 'framework-testimage-' + uuid.uuid4().hex
 
 
 def run(cmd: _Command, *, capture_output: bool = False) -> typing.Optional[str]:
@@ -173,8 +173,8 @@ class DockerNode(cluster.LocalNode):
 
     def output_logs(self):
         # Unfortunately because we’re running the containers as detached
-        # anything neard writes to stdout and stderr is lost.  We could start
-        # nodes using `docker run -d ... sh -c 'neard ... >stdout 2>stderr'` but
+        # anything uncd writes to stdout and stderr is lost.  We could start
+        # nodes using `docker run -d ... sh -c 'uncd ... >stdout 2>stderr'` but
         # that would mean that we’re not testing the `run_docker.sh` script
         # which we do want to read.
         if self.__WARN_LOGS:
@@ -188,12 +188,12 @@ def main():
     nodes = []
 
     logger.info("Build the container")
-    run(('make', 'DOCKER_TAG=' + _DOCKER_IMAGE_TAG, 'docker-nearcore'))
+    run(('make', 'DOCKER_TAG=' + _DOCKER_IMAGE_TAG, 'docker-framework'))
     try:
         dot_near = pathlib.Path.home() / '.near'
 
         logger.info("Initialise local network nodes config.")
-        cmd = f'neard --home /home/near localnet --v {NUM_NODES} --prefix test'
+        cmd = f'uncd --home /home/near localnet --v {NUM_NODES} --prefix test'
         docker_run(cmd, volume=(dot_near, '/home/near'), network=True)
 
         # Start all the nodes

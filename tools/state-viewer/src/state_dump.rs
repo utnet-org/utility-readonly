@@ -9,8 +9,8 @@ use near_primitives::block::BlockHeader;
 use near_primitives::state_record::state_record_to_account_id;
 use near_primitives::state_record::StateRecord;
 use near_primitives::types::{AccountInfo, Balance, StateRoot};
-use nearcore::config::NearConfig;
-use nearcore::NightshadeRuntime;
+use framework::config::NearConfig;
+use framework::NightshadeRuntime;
 use redis::Commands;
 use serde::ser::{SerializeSeq, Serializer};
 use std::collections::HashMap;
@@ -313,11 +313,11 @@ mod test {
     use near_store::genesis::initialize_genesis_state;
     use near_store::test_utils::create_test_store;
     use near_store::Store;
-    use nearcore::config::GenesisExt;
-    use nearcore::config::TESTING_INIT_STAKE;
-    use nearcore::config::{Config, NearConfig};
-    use nearcore::test_utils::TestEnvNightshadeSetupExt;
-    use nearcore::NightshadeRuntime;
+    use framework::config::GenesisExt;
+    use framework::config::TESTING_INIT_STAKE;
+    use framework::config::{Config, NearConfig};
+    use framework::test_utils::TestEnvNightshadeSetupExt;
+    use framework::NightshadeRuntime;
 
     use crate::state_dump::state_dump;
     use near_primitives::hash::CryptoHash;

@@ -467,14 +467,14 @@ and received must implement `serde::Serialize` and `serde::Deserialize`.
 # 11. Code flow - routing a message
 
 This is the example of the message that is being sent between nodes
-[`RawRoutedMessage`](https://github.com/near/nearcore/blob/fa8749dc60fe0de8e94c3046571731c622326e9f/chain/network-primitives/src/types.rs#L362).
+[`RawRoutedMessage`](https://github.com/utnet-org/utility/blob/fa8749dc60fe0de8e94c3046571731c622326e9f/chain/network-primitives/src/types.rs#L362).
 
 Each of these methods have a `target` - that is either the `account_id` or `peer_id`
 or hash (which seems to be used only for route back...). If target is the
 account - it will be converted using `routing_table.account_owner` to the peer.
 
 Upon receiving the message, the `PeerManagerActor`
-[will sign it](https://github.com/near/nearcore/blob/cadf11d5851be7611011b4e89542e11f41f3d827/chain/network/src/peer_manager/peer_manager_actor.rs)
+[will sign it](https://github.com/utnet-org/utility/blob/cadf11d5851be7611011b4e89542e11f41f3d827/chain/network/src/peer_manager/peer_manager_actor.rs)
 and convert into RoutedMessage (which also have things like TTL etc.).
 
 Then it will use the `routing_table`, to find the route to the target peer (add

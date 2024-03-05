@@ -6,7 +6,7 @@ use near_epoch_manager::{
     EpochManager,
 };
 use near_o11y::testonly::init_integration_logger;
-use nearcore::{get_default_home, load_config};
+use framework::{get_default_home, load_config};
 use std::path::PathBuf;
 use std::process;
 use yansi::Color::{Green, Red, White, Yellow};
@@ -44,7 +44,7 @@ fn main() {
         TrackedConfig::from_config(&near_config.client_config),
         epoch_manager.clone(),
     );
-    let runtime = nearcore::NightshadeRuntime::from_config(
+    let runtime = framework::NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
         &near_config,

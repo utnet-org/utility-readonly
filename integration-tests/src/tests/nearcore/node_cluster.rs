@@ -9,7 +9,7 @@ use near_network::tcp;
 use near_network::test_utils::convert_boot_nodes;
 use near_o11y::testonly::init_integration_logger;
 use near_primitives::types::{BlockHeight, BlockHeightDelta, NumSeats, NumShards};
-use nearcore::{config::GenesisExt, load_test_config, start_with_config};
+use framework::{config::GenesisExt, load_test_config, start_with_config};
 
 fn start_nodes(
     temp_dir: &std::path::Path,
@@ -60,7 +60,7 @@ fn start_nodes(
     for (i, near_config) in near_configs.into_iter().enumerate() {
         let dir = temp_dir.join(format!("node{i}"));
         std::fs::create_dir(&dir).unwrap();
-        let nearcore::NearNode { client, view_client, arbiters, .. } =
+        let framework::NearNode { client, view_client, arbiters, .. } =
             start_with_config(&dir, near_config).expect("start_with_config");
         res.push((client, view_client, arbiters))
     }

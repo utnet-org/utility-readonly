@@ -9,8 +9,8 @@ use near_crypto::{InMemorySigner, KeyType, Signer};
 use near_parameters::RuntimeConfigStore;
 use near_primitives::hash::CryptoHash;
 use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 #[cfg_attr(all(target_arch = "aarch64", target_vendor = "apple"), ignore)]
 #[test]

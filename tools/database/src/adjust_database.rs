@@ -25,7 +25,7 @@ pub(crate) struct ChangeDbKindCommand {
 
 impl ChangeDbKindCommand {
     pub(crate) fn run(&self, home_dir: &Path) -> anyhow::Result<()> {
-        let near_config = nearcore::config::load_config(
+        let near_config = framework::config::load_config(
             &home_dir,
             near_chain_configs::GenesisValidationMode::UnsafeFast,
         )?;

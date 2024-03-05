@@ -1,9 +1,9 @@
 [workspace.package]
 version = "0.0.0" # managed by cargo-workspaces, see below
-authors = ["Near Inc <hello@nearprotocol.com>"]
+authors = ["Unc Inc <hello@uncprotocol.com>"]
 edition = "2021"
 rust-version = "1.75.0"
-repository = "https://github.com/near/nearcore"
+repository = "https://github.com/utnet-org/utility"
 license = "MIT OR Apache-2.0"
 
 [workspace.metadata.workspaces]
@@ -13,7 +13,7 @@ license = "MIT OR Apache-2.0"
 # significant developer time expense. Please think thoroughly before adding
 # anything to the list of stable crates.
 version = "0.1.0"
-exclude = ["neard"]
+exclude = ["uncd"]
 
 [workspace]
 resolver = "2"
@@ -33,7 +33,6 @@ members = [
     "chain/jsonrpc/jsonrpc-tests",
     "chain/network",
     "chain/pool",
-    "chain/rosetta-rpc",
     "chain/telemetry",
     "core/async",
     "core/chain-configs",
@@ -48,8 +47,8 @@ members = [
     "genesis-tools/genesis-populate",
     "genesis-tools/keypair-generator",
     "integration-tests",
-    "nearcore",
-    "neard",
+    "framework",
+    "uncd",
     "runtime/near-vm/test-api",
     "runtime/near-vm/compiler",
     "runtime/near-vm/compiler-singlepass",
@@ -205,7 +204,7 @@ near-client = { path = "chain/client" }
 near-client-primitives = { path = "chain/client-primitives" }
 near-cold-store-tool = { path = "tools/cold-store", package = "cold-store-tool" }
 near-config-utils = { path = "utils/config" }
-nearcore = { path = "nearcore" }
+framework = { path = "framework" }
 near-crypto = { path = "core/crypto" }
 near-dyn-configs = { path = "core/dyn-configs" }
 near-epoch-manager = { path = "chain/epoch-manager" }
@@ -231,7 +230,6 @@ near-ping = { path = "tools/ping" }
 near-pool = { path = "chain/pool" }
 near-primitives = { path = "core/primitives" }
 near-primitives-core = { path = "core/primitives-core" }
-near-rosetta-rpc = { path = "chain/rosetta-rpc" }
 near-rpc-error-core = { path = "tools/rpctypegen/core" }
 near-rpc-error-macro = { path = "tools/rpctypegen/macro" }
 near-stable-hasher = { path = "utils/near-stable-hasher" }

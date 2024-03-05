@@ -50,7 +50,7 @@ export const HeaderBar = ({ addr }: Props) => {
                 {version.version === version.build && 'Release '}
                 {version.version === 'trunk' || version.version === version.build ? (
                     <a
-                        href={`https://github.com/near/nearcore/tree/${version.build}`}
+                        href={`https://github.com/utnet-org/utility/tree/${version.build}`}
                         target="_blank"
                         rel="noreferrer">
                         {version.build}

@@ -28,9 +28,9 @@ use near_primitives_core::hash::CryptoHash;
 use near_primitives_core::types::BlockHeight;
 use near_store::Mode::ReadOnly;
 use near_store::{DBCol, NodeStorage};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::{start_with_config, NearConfig};
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::{start_with_config, NearConfig};
 use std::collections::HashSet;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
@@ -135,7 +135,7 @@ fn test_continuous_epoch_sync_info_population() {
 /// Sync second node to first node (at least headers).
 /// Check that it has all EpochSyncInfo records and all of them are correct.
 ///
-/// The header sync part is based on `integration-tests::nearcore::sync_nodes::sync_nodes`.
+/// The header sync part is based on `integration-tests::framework::sync_nodes::sync_nodes`.
 #[test]
 fn test_continuous_epoch_sync_info_population_on_header_sync() {
     heavy_test(|| {
@@ -158,7 +158,7 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
 
         run_actix(async move {
             // Start first node
-            let nearcore::NearNode { client: client1, .. } =
+            let framework::NearNode { client: client1, .. } =
                 start_with_config(dir1_path, near1).expect("start_with_config");
 
             // Generate 4 epochs + 10 blocks
@@ -173,13 +173,13 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
             }
 
             // Start second node
-            let nearcore::NearNode { view_client: view_client2, .. } =
+            let framework::NearNode { view_client: view_client2, .. } =
                 start_with_config(dir2_path, near2).expect("start_with_config");
 
             // Wait for second node's headers to sync.
             // Timeout here means that header sync is not working.
             // Header sync is better debugged through other tests.
-            // For example, run `integration-tests::nearcore::sync_nodes::sync_nodes` test,
+            // For example, run `integration-tests::framework::sync_nodes::sync_nodes` test,
             // on which this test's setup is based.
             WaitOrTimeoutActor::new(
                 Box::new(move |_ctx| {

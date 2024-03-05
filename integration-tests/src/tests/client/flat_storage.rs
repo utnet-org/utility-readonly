@@ -19,8 +19,8 @@ use near_store::flat::{
 use near_store::test_utils::create_test_store;
 use near_store::{KeyLookupMode, Store, TrieTraversalItem};
 use near_vm_runner::logic::TrieNodesCount;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::str::FromStr;
 use std::thread;
 use std::time::Duration;

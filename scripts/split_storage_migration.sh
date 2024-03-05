@@ -6,23 +6,23 @@ set -euo pipefail
 # /split_storage_migration.sh (testnet|mainnnet)  >> ./split_storage_migration.log &
 # Takes one argument -- chain_id (mainnet or testnet)
 # Prerequisites:
-# - systemd neard service
-# - neard home is in /home/ubuntu/.near
-# - neard binary is in /home/ubuntu/neard
+# - systemd uncd service
+# - uncd home is in /home/ubuntu/.near
+# - uncd binary is in /home/ubuntu/uncd
 # - /home/ubuntu/.near/config.json is initialised
 # - metrics are exported to 3030 port
 # - aws s3 client
 # First, prepares config files using jq.
-# Restarts neard and waits for cold head to sync with final head
+# Restarts uncd and waits for cold head to sync with final head
 # Downloads latest rpc db in hot-data
-# Stops neard, prepares rpc db to be used as hot db, changes config to look at hot db instead of archival db
-# Restarts neard
+# Stops uncd, prepares rpc db to be used as hot db, changes config to look at hot db instead of archival db
+# Restarts uncd
 # After that node is running in split storage mode
 # Legacy archival db can be removed
 
 NEAR_HOME=/home/ubuntu/.near
 chain=$1
-service_name=neard
+service_name=uncd
 
 if [ "$chain" != "testnet" ] && [ "$chain" != "mainnet" ]; then
   echo "Chain should be 'mainnet' or 'testnet', got '$chain'"
@@ -149,7 +149,7 @@ function finish_split_storage_migration {
   do
     stop_neard
     echo "Trying to change RPC DB kind to Hot"
-    if /home/ubuntu/neard cold-store prepare-hot --store-relative-path='hot-data'
+    if /home/ubuntu/uncd cold-store prepare-hot --store-relative-path='hot-data'
     then
       echo "Successfully changed RPC DB kind to Hot"
       break

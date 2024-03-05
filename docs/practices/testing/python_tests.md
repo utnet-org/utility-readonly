@@ -1,10 +1,10 @@
 # Python Tests
 
-To simplify writing integration tests for nearcore we have a python
+To simplify writing integration tests for framework we have a python
 infrastructure that allows writing a large variety of tests that run small local
 clusters, remove clusters, or run against full-scale live deployments.
 
-Such tests are written in python and not in Rust (in which the nearcore itself,
+Such tests are written in python and not in Rust (in which the framework itself,
 and most of the sanity and fuzz tests, are written) due to the availability of
 libraries to easily connect to, remove nodes and orchestrate cloud instances.
 
@@ -15,8 +15,8 @@ exercised by an honest actor.
 
 # Basics
 
-The infrastructure is located in `{nearcore}/pytest/lib` and the tests themselves
-are in subdirectories of `{nearcore}/pytest/tests`. To prepare the local machine to
+The infrastructure is located in `{framework}/pytest/lib` and the tests themselves
+are in subdirectories of `{framework}/pytest/tests`. To prepare the local machine to
 run the tests you'd need python3 (python 3.7), and have several dependencies
 installed, for which we recommend using virtualenv:
 
@@ -42,12 +42,12 @@ until it produces several blocks.
 ## Compiling the client for tests
 
 The local tests by default expect the binary to be in the default location for a
-debug build (`{nearcore}/target/debug`). Some tests might also expect
+debug build (`{framework}/target/debug`). Some tests might also expect
 test-specific features guarded by a feature flag to be available. To compile the
 binary with such features run:
 
 ```
-cargo build -p neard --features=adversarial
+cargo build -p uncd --features=adversarial
 ```
 
 The feature is called `adversarial` to highlight that the many functions it enables,
@@ -116,7 +116,7 @@ Note that `start_cluster` spins up all the nodes right away. Some tests (e.g.
 tests that test syncing) might want to configure the nodes but delay their
 start. In such a case you will initialize the cluster by calling
 `init_cluster` and will run the nodes manually, for example, see
-[`state_sync.py`](https://github.com/near/nearcore/blob/master/pytest/tests/sanity/state_sync.py)
+[`state_sync.py`](https://github.com/utnet-org/utility/blob/master/pytest/tests/sanity/state_sync.py)
 
 ## Connecting to a mocknet
 
@@ -153,7 +153,7 @@ environment variable. The config should have the following format:
 
 The nodes returned by `start_cluster` and `init_cluster` have certain
 convenience functions. You can see the full interface in
-`{nearcore}/pytest/lib/cluster.py`.
+`{framework}/pytest/lib/cluster.py`.
 
 `start(boot_public_key, (boot_ip, boot_port))` starts the node. If both
 arguments are `None`, the node will start as a boot node (note that the concept
@@ -193,7 +193,7 @@ For the most popular calls, there are convenience functions:
   which contains e.g. last block hash and height
 * `get_tx` returns a transaction by the transaction hash and the recipient ID.
 
-See all the methods in `{nearcore}/pytest/lib/cluster.rs` after the definition
+See all the methods in `{framework}/pytest/lib/cluster.rs` after the definition
 of the `json_rpc` method.
 
 ### Signing and sending transactions
@@ -234,7 +234,7 @@ if want_async:
 ```
 
 See
-[rpc_tx_forwarding.py](https://github.com/near/nearcore/blob/master/pytest/tests/sanity/rpc_tx_forwarding.py)
+[rpc_tx_forwarding.py](https://github.com/utnet-org/utility/blob/master/pytest/tests/sanity/rpc_tx_forwarding.py)
 for an example of signing and submitting a transaction.
 
 ## Adversarial behavior
@@ -245,8 +245,8 @@ functionality that is protected by an "adversarial" feature flag.
 
 It's an advanced feature, and more thorough documentation is a TODO. Most of the
 tests that depend on the feature flag enabled are under
-`{nearcore}/pytest/tests/adversarial`, refer to them for how such features can
-be used. Search for code in the `nearcore` codebase guarded by the "adversarial"
+`{framework}/pytest/tests/adversarial`, refer to them for how such features can
+be used. Search for code in the `framework` codebase guarded by the "adversarial"
 feature flag for an example of how such features are added and exposed.
 
 ## Interfering with the network
@@ -269,6 +269,6 @@ See the tests that match `tests/sanity/proxy_*.py` for examples.
 
 We always welcome new tests, especially python tests that use the above
 infrastructure. We have a list of test requests
-[here](https://github.com/nearprotocol/nearcore/issues?q=is%3Aissue+is%3Aopen+label%3A%22A-testing%22),
+[here](https://github.com/utnet-org/utility/issues?q=is%3Aissue+is%3Aopen+label%3A%22A-testing%22),
 but also welcome any other tests that test aspects of the network we haven't
 thought about.

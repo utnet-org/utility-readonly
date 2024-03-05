@@ -1,10 +1,10 @@
 #!/bin/bash
 set -xeo pipefail
 
-release="${1:-neard-release}"
+release="${1:-uncd-release}"
 
 case "$release" in
-  neard-release|nightly-release|perf-release|assertions-release)
+  uncd-release|nightly-release|perf-release|assertions-release)
     ;;
   *)  
     echo "Unsupported release type '$release'. Please provide no argument for normal release or provide nightly-release for nightly."
@@ -28,30 +28,30 @@ function tar_binary {
 make $release
 
 function upload_binary {
-  if [ "$release" = "neard-release" ]
+  if [ "$release" = "uncd-release" ]
   then
     tar_binary $1
     tar_file=$1.tar.gz
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os}/${BRANCH}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os}/${BRANCH}/${COMMIT}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os}/${BRANCH}/${COMMIT}/stable/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os}/${BRANCH}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os}/${BRANCH}/${COMMIT}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os}/${BRANCH}/${COMMIT}/stable/$1
 
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${COMMIT}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${COMMIT}/stable/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/stable/$1
 
-    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${tar_file}
-    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${COMMIT}/${tar_file}
-    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${COMMIT}/stable/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/stable/${tar_file}
 
   else
     folder="${release%-release}"
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os}/${BRANCH}/${COMMIT}/${folder}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/nearcore/${os_and_arch}/${BRANCH}/${COMMIT}/${folder}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os}/${BRANCH}/${COMMIT}/${folder}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://build.nearprotocol.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/${folder}/$1
   fi
 }
 
-upload_binary neard
+upload_binary uncd
 
 # disabled until we clarify why we need this binary in S3
 # if [ "$release" != "assertions-release" ]

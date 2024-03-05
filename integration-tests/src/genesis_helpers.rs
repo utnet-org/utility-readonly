@@ -9,7 +9,7 @@ use near_chain_configs::Genesis;
 use near_primitives::block::{Block, BlockHeader};
 use near_primitives::hash::CryptoHash;
 use near_store::test_utils::create_test_store;
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 
 /// Compute genesis hash from genesis.
 pub fn genesis_hash(genesis: &Genesis) -> CryptoHash {

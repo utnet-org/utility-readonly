@@ -30,5 +30,5 @@ near-primitives.workspace = true
 near-primitives-core.workspace = true
 near-store.workspace = true
 near-test-contracts.workspace = true
-nearcore.workspace = true
+framework.workspace = true
 node-runtime.workspace = true

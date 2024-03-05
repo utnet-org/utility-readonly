@@ -8,7 +8,7 @@ use near_primitives::{
     },
     types::{AccountId, Balance, BlockHeight, Nonce},
 };
-use nearcore::config::{NEAR_BASE, TESTING_INIT_BALANCE};
+use framework::config::{UNC_BASE, TESTING_INIT_BALANCE};
 
 use libfuzzer_sys::arbitrary::{Arbitrary, Result, Unstructured};
 
@@ -168,7 +168,7 @@ impl TransactionConfig {
                             permission: AccessKeyPermission::FullAccess,
                         },
                     })),
-                    Action::Transfer(TransferAction { deposit: NEAR_BASE }),
+                    Action::Transfer(TransferAction { deposit: UNC_BASE }),
                 ],
             })
         });

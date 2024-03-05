@@ -467,7 +467,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
         AccountType::NearImplicitAccount => {
             let mut access_key = AccessKey::full_access();
             // Set default nonce for newly created access key to avoid transaction hash collision.
-            // See <https://github.com/near/nearcore/issues/3779>.
+            // See <https://github.com/utnet-org/utility/issues/3779>.
             if checked_feature!(
                 "stable",
                 AccessKeyNonceForImplicitAccounts,
@@ -498,8 +498,8 @@ pub(crate) fn action_implicit_account_creation_transfer(
         AccountType::EthImplicitAccount => {
             if checked_feature!("stable", EthImplicitAccounts, current_protocol_version) {
                 // We deploy "near[wallet contract hash]" magic bytes as the contract code,
-                // to mark that this is a neard-defined contract. It will not be used on a function call.
-                // Instead, neard-defined Wallet Contract implementation will be used.
+                // to mark that this is a uncd-defined contract. It will not be used on a function call.
+                // Instead, uncd-defined Wallet Contract implementation will be used.
                 let magic_bytes = wallet_contract_magic_bytes();
 
                 let storage_usage = fee_config.storage_usage_config.num_bytes_account

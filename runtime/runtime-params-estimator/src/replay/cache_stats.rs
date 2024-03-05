@@ -92,7 +92,7 @@ impl CacheStats {
                 self.num_read += 1;
                 self.total_size_read += size;
                 // We are currently counting one node too little, see
-                // https://github.com/near/nearcore/issues/6225. But we don't
+                // https://github.com/utnet-org/utility/issues/6225. But we don't
                 // know where, could be either tn_db_reads or tn_mem_reads. But
                 // we know that tn_db_reads = shard_cache_hits +
                 // shard_cache_misses. So we can correct for it here.

@@ -18,7 +18,7 @@ Flags:
   with this block up to the newest block (or until block-limit is reached).
 * qps-limit - maximum number of requests per second that the binary is allowed to send.
   This is a global limit (NOT per connection). The requests are distributed uniformly across
-  all the connections that the program establishes. Peer discovery works the same way as for neard.
+  all the connections that the program establishes. Peer discovery works the same way as for uncd.
 * block-limit - number of blocks to fetch
 
 ## Example usage

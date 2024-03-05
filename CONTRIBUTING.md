@@ -5,24 +5,24 @@ our [zulip channel](https://near.zulipchat.com/).
 
 ## Quick Start
 
-nearcore is a fairly standard Rust project, so building is as easy as
+framework is a fairly standard Rust project, so building is as easy as
 
 ```console
 $ cargo build
 ```
 
-Building nearcore requires a fairly recent Rust compiler (get it
+Building framework requires a fairly recent Rust compiler (get it
 [here](https://rustup.rs)), as well as `clang` and `cmake` to build RocksDB
 (`sudo apt install cmake clang`).
 
-Sadly at the moment nearcore is only compatible with Linux and MacOS, Windows is
+Sadly at the moment framework is only compatible with Linux and MacOS, Windows is
 not supported yet.
 
 To run a local NEAR network with one node, use
 
 ```console
-$ cargo run -p neard -- init # generates various configs in ~/.near
-$ cargo run -p neard -- run
+$ cargo run -p uncd -- init # generates various configs in ~/.near
+$ cargo run -p uncd -- run
 ```
 
 You can now use your own node's HTTP RPC API (e.g.
@@ -40,14 +40,14 @@ CLI](https://docs.near.org/tools/near-cli) utility.
 
 ## Next Steps
 
-To learn more about how nearcore works, skim through our guide to nearcore
+To learn more about how framework works, skim through our guide to framework
 development:
 
-https://near.github.io/nearcore/
+https://near.github.io/framework/
 
 If you are looking for relatively simple tasks to familiarise yourself with
-`nearcore`, please check out issues labeled with the `C-good-first-issue` label
-[here](https://github.com/near/nearcore/labels/C-good-first-issue).  If you see
+`framework`, please check out issues labeled with the `C-good-first-issue` label
+[here](https://github.com/utnet-org/utility/labels/C-good-first-issue).  If you see
 one that looks interesting and is unassigned or has not been actively worked on
 in some time, please ask to have the issue assigned to you and someone from
 the team should help you get started.  We do not always keep the issue tracker
@@ -60,16 +60,16 @@ Proposal](https://github.com/near/NEPs/blob/master/neps/nep-0001.md) process.
 
 ## Pull Requests
 
-All the contributions to `nearcore` happen via Pull Requests.  Please follow the
+All the contributions to `framework` happen via Pull Requests.  Please follow the
 following steps when creating a PR:
 
-1. Fork the `nearcore` repository and create a new branch there to do your work.
+1. Fork the `framework` repository and create a new branch there to do your work.
 2. The branch can contain any number of commits.  When merged, all commits will
    be squashed into a single commit.
 3. The changes should be thoroughly tested.  Please refer to [this
-   document](https://github.com/near/nearcore/blob/master/docs/practices/testing/README.md)
+   document](https://github.com/utnet-org/utility/blob/master/docs/practices/testing/README.md)
    for our testing guidelines and an overview of the testing infrastructure.
-4. When ready, send a pull request against the `master` branch of the `nearcore`
+4. When ready, send a pull request against the `master` branch of the `framework`
    repository.
 5. Feel free to submit draft PRs to get early feedback and to make sure you are
    on the right track.

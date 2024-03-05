@@ -182,7 +182,7 @@ impl TriePrefetcher {
     /// Prefetcher specifically tuned for SWEAT record batch
     ///
     /// Temporary hack, consider removing after merging flat storage, see
-    /// <https://github.com/near/nearcore/issues/7327>.
+    /// <https://github.com/utnet-org/utility/issues/7327>.
     fn prefetch_sweat_record_batch(
         &self,
         account_id: AccountId,

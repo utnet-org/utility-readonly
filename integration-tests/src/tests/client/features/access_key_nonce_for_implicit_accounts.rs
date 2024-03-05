@@ -21,9 +21,9 @@ use near_primitives::types::{AccountId, BlockHeight};
 use near_primitives::utils::derive_near_implicit_account_id;
 use near_primitives::version::{ProtocolFeature, ProtocolVersion};
 use near_primitives::views::FinalExecutionStatus;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::NEAR_BASE;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::UNC_BASE;
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
@@ -94,7 +94,7 @@ fn test_transaction_hash_collision() {
         1,
         "test0".parse().unwrap(),
         "test1".parse().unwrap(),
-        NEAR_BASE,
+        UNC_BASE,
         signer1.public_key(),
         &signer0,
         *genesis_block.hash(),

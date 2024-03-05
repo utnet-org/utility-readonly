@@ -29,7 +29,7 @@ impl ProtocolUpgradeVotingSchedule {
     /// It will first check if the NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE is
     /// set in the environment and if so return the immediate upgrade schedule.
     /// This should only be used in tests, in particular in tests the in some
-    /// way test neard upgrades.
+    /// way test uncd upgrades.
     ///
     /// Otherwise it will parse the given string and return the corresponding
     /// upgrade schedule.

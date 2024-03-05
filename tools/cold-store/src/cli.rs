@@ -11,7 +11,7 @@ use near_store::cold_storage::{copy_all_data_to_cold, update_cold_db, update_col
 use near_store::metadata::DbKind;
 use near_store::{DBCol, NodeStorage, Store, StoreOpener};
 use near_store::{COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY, TAIL_KEY};
-use nearcore::NearConfig;
+use framework::NearConfig;
 use rand::seq::SliceRandom;
 use std::io::Result;
 use std::path::Path;
@@ -59,7 +59,7 @@ impl ColdStoreCommand {
     pub fn run(self, home_dir: &Path) -> anyhow::Result<()> {
         let mode =
             if self.readwrite { near_store::Mode::ReadWrite } else { near_store::Mode::ReadOnly };
-        let mut near_config = nearcore::config::load_config(
+        let mut near_config = framework::config::load_config(
             &home_dir,
             near_chain_configs::GenesisValidationMode::Full,
         )
@@ -254,7 +254,7 @@ fn copy_all_blocks(storage: &NodeStorage, batch_size: usize, check: bool) {
     .expect("Failed to do migration to cold db");
 
     // Setting cold head to hot_final_head captured BEFORE the start of initial migration.
-    // Doesn't really matter here, but very important in case of migration during `neard run`.
+    // Doesn't really matter here, but very important in case of migration during `uncd run`.
     update_cold_head(&*storage.cold_db().unwrap(), &storage.get_hot_store(), &hot_final_head)
         .unwrap_or_else(|_| panic!("Failed to update cold HEAD to {}", hot_final_head));
 
@@ -358,7 +358,7 @@ impl PrepareHotCmd {
         tracing::info!(target : "prepare-hot", "Changing the DbKind of the RPC store to Hot");
         rpc_store.set_db_kind(DbKind::Hot)?;
 
-        tracing::info!(target : "prepare-hot", "Successfully prepared the hot store for migration. You can now set the config.store.path in neard config to {:#?}", path);
+        tracing::info!(target : "prepare-hot", "Successfully prepared the hot store for migration. You can now set the config.store.path in uncd config to {:#?}", path);
 
         Ok(())
     }

@@ -147,7 +147,7 @@ impl GasCounter {
 
         // Technically we shall do `self.promises_gas = 0;` or error paths, as in this case
         // no promises will be kept, but that would mean protocol change.
-        // See https://github.com/near/nearcore/issues/5148.
+        // See https://github.com/utnet-org/utility/issues/5148.
         // TODO: consider making this change!
         let used_gas_limit = min(self.prepaid_gas, new_used_gas);
         // [CONTINUATION OF THE PREVIOUS COMMENT]

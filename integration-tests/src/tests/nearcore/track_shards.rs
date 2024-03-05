@@ -9,7 +9,7 @@ use near_o11y::testonly::init_integration_logger;
 use near_o11y::WithSpanContextExt;
 use near_primitives::hash::CryptoHash;
 
-use crate::tests::nearcore::node_cluster::NodeCluster;
+use crate::tests::framework::node_cluster::NodeCluster;
 
 #[test]
 #[cfg_attr(not(feature = "expensive_tests"), ignore)]

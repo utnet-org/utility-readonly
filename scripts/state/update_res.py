@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Checks or updates contents of nearcore/res/genesis_config.json file.
+"""Checks or updates contents of framework/res/genesis_config.json file.
 
-* `update_res.py` updates nearcore/res/genesis_config.json to current
+* `update_res.py` updates framework/res/genesis_config.json to current
   `near init` version without any records.
 
-* `update_res.py check` checks whether nearcore/res/genesis_config.json
+* `update_res.py check` checks whether framework/res/genesis_config.json
   file matches what `near init` generates.
 """
 
@@ -40,7 +40,7 @@ def near_init_genesis():
             subprocess.check_call([prebuilt_neard] + args)
         else:
             subprocess.check_call(
-                ['cargo', 'run', '-p', 'neard', '--bin', 'neard', '--'] + args)
+                ['cargo', 'run', '-p', 'uncd', '--bin', 'uncd', '--'] + args)
         with open(os.path.join(tempdir, 'genesis.json')) as rd:
             genesis = json.load(rd, object_pairs_hook=collections.OrderedDict)
     genesis['records'] = []

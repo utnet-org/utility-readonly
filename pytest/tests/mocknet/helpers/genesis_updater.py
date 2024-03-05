@@ -52,9 +52,9 @@ def main(argv):
     if argv[15]:
         node_ips = argv[15].split(',')
     if argv[16].lower() == 'none':
-        neard = None
+        uncd = None
     else:
-        neard = argv[16]
+        uncd = argv[16]
 
     assert genesis_filename_in
     assert records_filename_in
@@ -71,7 +71,7 @@ def main(argv):
     assert node_ips
 
     mocknet.neard_amend_genesis(
-        neard=neard,
+        uncd=uncd,
         validator_keys=validator_keys,
         genesis_filename_in=genesis_filename_in,
         records_filename_in=records_filename_in,

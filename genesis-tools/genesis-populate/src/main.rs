@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
 use genesis_populate::GenesisBuilder;
 use near_chain_configs::GenesisValidationMode;
-use nearcore::{get_default_home, load_config};
+use framework::{get_default_home, load_config};
 use std::path::PathBuf;
 
 fn main() {

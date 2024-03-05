@@ -6,7 +6,7 @@ use tokio::sync::mpsc;
 use near_chain_configs::GenesisValidationMode;
 pub use near_primitives;
 use near_primitives::types::Gas;
-pub use nearcore::{get_default_home, init_configs, NearConfig};
+pub use framework::{get_default_home, init_configs, NearConfig};
 
 pub use near_indexer_primitives::{
     IndexerChunkView, IndexerExecutionOutcomeWithOptionalReceipt,
@@ -18,7 +18,7 @@ mod streamer;
 
 pub const INDEXER: &str = "indexer";
 
-/// Config wrapper to simplify signature and usage of `nearcore::init_configs`
+/// Config wrapper to simplify signature and usage of `framework::init_configs`
 /// function by making args more explicit via struct
 #[derive(Debug, Clone)]
 pub struct InitConfigArgs {
@@ -83,16 +83,16 @@ pub struct IndexerConfig {
     pub validate_genesis: bool,
 }
 
-/// This is the core component, which handles `nearcore` and internal `streamer`.
+/// This is the core component, which handles `framework` and internal `streamer`.
 pub struct Indexer {
     indexer_config: IndexerConfig,
-    near_config: nearcore::NearConfig,
+    near_config: framework::NearConfig,
     view_client: actix::Addr<near_client::ViewClientActor>,
     client: actix::Addr<near_client::ClientActor>,
 }
 
 impl Indexer {
-    /// Initialize Indexer by configuring `nearcore`
+    /// Initialize Indexer by configuring `framework`
     pub fn new(indexer_config: IndexerConfig) -> Result<Self, anyhow::Error> {
         tracing::info!(
             target: INDEXER,
@@ -106,7 +106,7 @@ impl Indexer {
             GenesisValidationMode::UnsafeFast
         };
         let near_config =
-            nearcore::config::load_config(&indexer_config.home_dir, genesis_validation_mode)
+            framework::config::load_config(&indexer_config.home_dir, genesis_validation_mode)
                 .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
         assert!(
@@ -116,8 +116,8 @@ impl Indexer {
             ",
             indexer_config.home_dir.join("config.json").display()
         );
-        let nearcore::NearNode { client, view_client, .. } =
-            nearcore::start_with_config(&indexer_config.home_dir, near_config.clone())
+        let framework::NearNode { client, view_client, .. } =
+            framework::start_with_config(&indexer_config.home_dir, near_config.clone())
                 .with_context(|| "start_with_config")?;
         Ok(Self { view_client, client, near_config, indexer_config })
     }
@@ -136,8 +136,8 @@ impl Indexer {
         receiver
     }
 
-    /// Expose neard config
-    pub fn near_config(&self) -> &nearcore::NearConfig {
+    /// Expose uncd config
+    pub fn near_config(&self) -> &framework::NearConfig {
         &self.near_config
     }
 
@@ -150,7 +150,7 @@ impl Indexer {
 }
 
 /// Function that initializes configs for the node which
-/// accepts `InitConfigWrapper` and calls original `init_configs` from `neard`
+/// accepts `InitConfigWrapper` and calls original `init_configs` from `uncd`
 pub fn indexer_init_configs(
     dir: &std::path::PathBuf,
     params: InitConfigArgs,

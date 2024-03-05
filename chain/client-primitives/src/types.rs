@@ -385,7 +385,7 @@ pub enum GetProviderError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -430,7 +430,7 @@ pub enum GetBlockError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -498,7 +498,7 @@ pub enum GetChunkError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -600,7 +600,7 @@ pub enum QueryError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -625,7 +625,7 @@ pub enum StatusError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -668,7 +668,7 @@ pub enum GetNextLightClientBlockError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -719,7 +719,7 @@ pub enum GetGasPriceError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -811,7 +811,7 @@ pub enum GetProviderInfoError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -837,7 +837,7 @@ pub enum GetValidatorInfoError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -879,7 +879,7 @@ pub enum GetStateChangesError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -958,7 +958,7 @@ pub enum GetExecutionOutcomeError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -1026,7 +1026,7 @@ pub enum GetBlockProofError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {error_message}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
     Unreachable { error_message: String },
 }
 
@@ -1063,7 +1063,7 @@ pub enum GetReceiptError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -1097,7 +1097,7 @@ pub enum GetProtocolConfigError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -1124,7 +1124,7 @@ impl Message for GetMaintenanceWindows {
 pub enum GetMaintenanceWindowsError {
     #[error("IO Error: {0}")]
     IOError(String),
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -1152,7 +1152,7 @@ pub enum GetClientConfigError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 
@@ -1180,7 +1180,7 @@ pub enum GetSplitStorageInfoError {
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
     // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
-    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/near/nearcore/issues/new/choose. Details: {0}")]
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {0}")]
     Unreachable(String),
 }
 

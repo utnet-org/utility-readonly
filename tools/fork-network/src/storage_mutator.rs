@@ -3,7 +3,7 @@ use near_crypto::PublicKey;
 use near_epoch_manager::EpochManagerAdapter;
 use near_primitives::account::{AccessKey, Account};
 use near_primitives::types::{AccountId, EpochId, StateRoot};
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 use std::sync::Arc;
 
 /// Object that updates the existing state. Combines all changes, commits them

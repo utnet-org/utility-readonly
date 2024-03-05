@@ -127,7 +127,7 @@ if __name__ == '__main__':
                         help="Total stake percentage for bad validators")
     parser.add_argument('--binary-url',
                         required=False,
-                        help="url to download neard binary")
+                        help="url to download uncd binary")
 
     args = parser.parse_args()
 

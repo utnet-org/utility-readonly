@@ -5,8 +5,8 @@ use near_chain_configs::Genesis;
 use near_client::test_utils::TestEnv;
 use near_primitives::types::{AccountId, BlockHeight};
 use near_primitives::views::FinalExecutionStatus;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 /// Create a `TestEnv` with an account and a contract deployed to that account.
 fn prepare_env_with_contract(

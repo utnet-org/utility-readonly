@@ -21,7 +21,7 @@ use near_primitives::views::{
     AccessKeyView, AccountView, ExecutionMetadataView, FinalExecutionOutcomeView,
     FinalExecutionStatus,
 };
-use nearcore::config::{NEAR_BASE, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::config::{UNC_BASE, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
 
 use crate::node::Node;
 use crate::user::User;
@@ -547,7 +547,7 @@ pub fn test_create_account(node: impl Node) {
     let account_id = &node.account_id().unwrap();
     let node_user = node.user();
     let root = node_user.get_state_root();
-    let money_used = NEAR_BASE;
+    let money_used = UNC_BASE;
     let transaction_result = node_user
         .create_account(
             account_id.clone(),
@@ -583,7 +583,7 @@ pub fn test_create_account_again(node: impl Node) {
     let account_id = &node.account_id().unwrap();
     let node_user = node.user();
     let root = node_user.get_state_root();
-    let money_used = NEAR_BASE;
+    let money_used = UNC_BASE;
     let transaction_result = node_user
         .create_account(
             account_id.clone(),

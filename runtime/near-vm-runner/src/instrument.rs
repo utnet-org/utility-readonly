@@ -11,7 +11,7 @@
 //!
 //! At the moment, the implementation is a direct copy, but we don't intend  to
 //! keep the code aligned with the upstream, feel free to refactor if you find
-//! something odd! See <https://github.com/near/nearcore/issues/6659> for the
+//! something odd! See <https://github.com/utnet-org/utility/issues/6659> for the
 //! overall instrumentation story.
 
 pub(crate) mod gas;

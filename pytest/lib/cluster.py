@@ -73,7 +73,7 @@ def make_boot_nodes_arg(boot_node: BootNode) -> typing.Tuple[str]:
     """Converts `boot_node` argument to `--boot-nodes` command line argument.
 
     If the argument is `None` returns an empty tuple.  Otherwise, returns
-    a tuple representing arguments to be added to `neard` invocation for setting
+    a tuple representing arguments to be added to `uncd` invocation for setting
     boot nodes according to `boot_node` argument.
 
     Apart from `None` as described above, `boot_node` can be a [`BaseNode`]
@@ -81,13 +81,13 @@ def make_boot_nodes_arg(boot_node: BootNode) -> typing.Tuple[str]:
     address of a BaseNode object is contstructed using [`BaseNode.addr_with_pk`]
     method.
 
-    If iterable of nodes is given, the `neard` is going to be configured with
+    If iterable of nodes is given, the `uncd` is going to be configured with
     multiple boot nodes.
 
     Args:
         boot_node: Specification of boot node(s).
     Returns:
-        A tuple to add to `neard` invocation specifying boot node(s) if any
+        A tuple to add to `uncd` invocation specifying boot node(s) if any
         specified.
     """
     if not boot_node:
@@ -190,7 +190,7 @@ class BaseNode(object):
                           near_root,
                           node_dir,
                           boot_node: BootNode,
-                          binary_name='neard'):
+                          binary_name='uncd'):
         cmd = (os.path.join(near_root, binary_name), '--home', node_dir, 'run')
         return cmd + make_boot_nodes_arg(boot_node)
 
@@ -396,7 +396,7 @@ class LocalNode(BaseNode):
         self.rpc_port = rpc_port
         self.near_root = str(near_root)
         self.node_dir = node_dir
-        self.binary_name = binary_name or 'neard'
+        self.binary_name = binary_name or 'uncd'
         self.cleaned = False
         self.validator_key = Key.from_json_file(
             os.path.join(node_dir, "validator_key.json"))
@@ -603,8 +603,8 @@ class GCloudNode(BaseNode):
     def _download_binary(self, binary):
         p = self.machine.run('bash',
                              input=f'''
-/snap/bin/gsutil cp gs://nearprotocol_nearcore_release/{binary} neard
-chmod +x neard
+/snap/bin/gsutil cp gs://nearprotocol_nearcore_release/{binary} uncd
+chmod +x uncd
 ''')
         if p.returncode != 0:
             raise DownloadException(p.stderr)
@@ -748,7 +748,7 @@ def init_cluster(num_nodes,
 
     is_local = config['local']
     near_root = config['near_root']
-    binary_name = config.get('binary_name', 'neard')
+    binary_name = config.get('binary_name', 'uncd')
 
     logger.info("Creating %s cluster configuration with %s nodes" %
                 ("LOCAL" if is_local else "REMOTE", num_nodes + num_observers))
@@ -941,7 +941,7 @@ def get_near_root():
 DEFAULT_CONFIG = {
     'local': True,
     'near_root': get_near_root(),
-    'binary_name': 'neard',
+    'binary_name': 'uncd',
     'release': False,
 }
 CONFIG_ENV_VAR = 'NEAR_PYTEST_CONFIG'
@@ -967,13 +967,13 @@ def load_config():
 
 # Returns the protocol version of the binary.
 def get_binary_protocol_version(config) -> typing.Optional[int]:
-    binary_name = config.get('binary_name', 'neard')
+    binary_name = config.get('binary_name', 'uncd')
     near_root = config.get('near_root')
     binary_path = os.path.join(near_root, binary_name)
 
     # Get the protocol version of the binary
     # The --version output looks like this:
-    # neard (release trunk) (build 1.1.0-3884-ge93793a61-modified) (rustc 1.71.0) (protocol 137) (db 37)
+    # uncd (release trunk) (build 1.1.0-3884-ge93793a61-modified) (rustc 1.71.0) (protocol 137) (db 37)
     out = subprocess.check_output([binary_path, "--version"], text=True)
     out = out.replace('(', '')
     out = out.replace(')', '')
@@ -987,7 +987,7 @@ def get_binary_protocol_version(config) -> typing.Optional[int]:
 
 def corrupt_state_snapshot(config, node_dir, shard_layout_version):
     near_root = config['near_root']
-    binary_name = config.get('binary_name', 'neard')
+    binary_name = config.get('binary_name', 'uncd')
     binary_path = os.path.join(near_root, binary_name)
 
     cmd = [

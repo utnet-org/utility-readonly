@@ -17,7 +17,7 @@ on:
 
 jobs:
   binary-release:
-    name: "Build and publish neard binary"
+    name: "Build and publish uncd binary"
     runs-on: "ubuntu-20.04-16core"
     #environment: deploy
     permissions:
@@ -36,7 +36,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Checkout nearcore repository
+      - name: Checkout unc repository
         if: ${{ github.event_name != 'workflow_dispatch'}}
         uses: actions/checkout@v4
 
@@ -47,10 +47,10 @@ jobs:
         run: |
           echo $(git rev-parse HEAD) > latest
           BRANCH=$(git branch --show-current)
-          aws s3 cp --acl public-read latest s3://build.nearprotocol.com/nearcore/$(uname)/${BRANCH}/latest
+          aws s3 cp --acl public-read latest s3://build.nearprotocol.com/unc/$(uname)/${BRANCH}/latest
 
   docker-release:
-    name: "Build and publish nearcore Docker image"
+    name: "Build and publish unc Docker image"
     runs-on: "ubuntu-20.04-16core"
     #environment: deploy
     steps:
@@ -60,7 +60,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Checkout nearcore repository
+      - name: Checkout unc repository
         if: ${{ github.event_name != 'workflow_dispatch'}}
         uses: actions/checkout@v4
 
@@ -74,15 +74,15 @@ jobs:
         run: |
           COMMIT=$(git rev-parse HEAD)
           BRANCH=${{ github.ref_name }}
-          make docker-nearcore
-          docker tag nearcore nearprotocol/nearcore:${BRANCH}-${COMMIT}
-          docker tag nearcore nearprotocol/nearcore:${BRANCH}
+          make docker-unc
+          docker tag unc utnet-org/utility:${BRANCH}-${COMMIT}
+          docker tag unc utnet-org/utility:${BRANCH}
 
-          docker push nearprotocol/nearcore:${BRANCH}-${COMMIT}
-          docker push nearprotocol/nearcore:${BRANCH}
+          docker push utnet-org/utility:${BRANCH}-${COMMIT}
+          docker push utnet-org/utility:${BRANCH}
           
           if [[ ${BRANCH} == "master" ]];
           then
-            docker tag nearcore nearprotocol/nearcore:latest
-            docker push nearprotocol/nearcore:latest
+            docker tag unc utnet-org/utility:latest
+            docker push utnet-org/utility:latest
           fi

@@ -22,7 +22,7 @@ use near_primitives::sharding::ShardChunkHeader;
 use near_primitives::transaction::SignedTransaction;
 use near_primitives::types::{AccountId, EpochId, ShardId};
 use near_primitives::views::FinalExecutionOutcomeView;
-use nearcore::config::NearConfig;
+use framework::config::NearConfig;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -62,7 +62,7 @@ pub struct Network {
     // client_config.min_num_peers
     min_peers: usize,
     // Currently it is equivalent to genesis_config.num_block_producer_seats,
-    // (see https://cs.github.com/near/nearcore/blob/dae9553670de13c279d3ebd55f17da13d94fa691/nearcore/src/runtime/mod.rs#L1114).
+    // (see https://cs.github.com/utnet-org/utility/blob/dae9553670de13c279d3ebd55f17da13d94fa691/framework/src/runtime/mod.rs#L1114).
     // AFAICT eventually it will change dynamically (I guess it will be provided in the Block).
     parts_per_chunk: u64,
 
@@ -152,7 +152,7 @@ impl Network {
     // fetch_block_headers fetches a batch of headers, starting with the header
     // AFTER the header with the given <hash>. The batch size is bounded by
     // sync::MAX_BLOCK_HEADERS = (currently) 512
-    // https://github.com/near/nearcore/blob/ad896e767b0efbce53060dd145836bbeda3d656b/chain/client/src/sync.rs#L38
+    // https://github.com/utnet-org/utility/blob/ad896e767b0efbce53060dd145836bbeda3d656b/chain/client/src/sync.rs#L38
     pub async fn fetch_block_headers(
         self: &Arc<Self>,
         hash: CryptoHash,

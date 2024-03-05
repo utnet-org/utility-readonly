@@ -6,10 +6,10 @@ use std::mem::size_of;
 use assert_matches::assert_matches;
 
 /// Initial balance used in tests.
-pub const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * NEAR_BASE;
+pub const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * UNC_BASE;
 
 /// One NEAR, divisible by 10^24.
-pub const NEAR_BASE: u128 = 1_000_000_000_000_000_000_000_000;
+pub const UNC_BASE: u128 = 1_000_000_000_000_000_000_000_000;
 
 /// Max prepaid amount of gas.
 const MAX_GAS: u64 = 300_000_000_000_000;

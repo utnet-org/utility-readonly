@@ -9,7 +9,7 @@ use near_primitives::epoch_manager::block_info::BlockInfo;
 use near_primitives::epoch_manager::AGGREGATOR_KEY;
 use near_primitives::hash::CryptoHash;
 use near_store::{checkpoint_hot_storage_and_cleanup_columns, DBCol, NodeStorage};
-use nearcore::NightshadeRuntime;
+use framework::NightshadeRuntime;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
@@ -31,15 +31,15 @@ enum SubCommand {
 impl EpochSyncCommand {
     pub fn run(self, home_dir: &Path) -> anyhow::Result<()> {
         let mut near_config = Self::create_snapshot(home_dir)?;
-        let storage = nearcore::open_storage(&home_dir, &mut near_config)?;
+        let storage = framework::open_storage(&home_dir, &mut near_config)?;
 
         match self.subcmd {
             SubCommand::ValidateEpochSyncInfo(cmd) => cmd.run(&home_dir, &storage, &near_config),
         }
     }
 
-    fn create_snapshot(home_dir: &Path) -> anyhow::Result<nearcore::config::NearConfig> {
-        let mut near_config = nearcore::config::load_config(
+    fn create_snapshot(home_dir: &Path) -> anyhow::Result<framework::config::NearConfig> {
+        let mut near_config = framework::config::load_config(
             &home_dir,
             near_chain_configs::GenesisValidationMode::UnsafeFast,
         )
@@ -54,7 +54,7 @@ impl EpochSyncCommand {
             .join("epoch-sync-snapshot");
         let snapshot_path = home_dir.join(store_path_addition.clone());
 
-        let storage = nearcore::open_storage(&home_dir, &mut near_config)?;
+        let storage = framework::open_storage(&home_dir, &mut near_config)?;
 
         if snapshot_path.exists() && snapshot_path.is_dir() {
             tracing::info!(?snapshot_path, "Found a DB snapshot");
@@ -88,7 +88,7 @@ impl ValidateEpochSyncInfoCmd {
         &self,
         home_dir: &Path,
         storage: &NodeStorage,
-        config: &nearcore::config::NearConfig,
+        config: &framework::config::NearConfig,
     ) -> anyhow::Result<()> {
         let store = storage.get_hot_store();
 

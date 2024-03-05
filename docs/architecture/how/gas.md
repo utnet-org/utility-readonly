@@ -74,8 +74,8 @@ transaction. The transaction consists of a function call performing a cross
 contract call, hence two function calls in sequence. (Note: This diagram is
 heavily simplified, more accurate diagrams are further down.)
 
-![Very Simplified Gas Flow Diagram](https://github.com/near/nearcore/assets/6342444/f52c6e4b-6fca-4f61-8e6e-ac786076aa65)
-<!-- Editable source: https://github.com/near/nearcore/issues/7821#issuecomment-1705672850 -->
+![Very Simplified Gas Flow Diagram](https://github.com/utnet-org/utility/assets/6342444/f52c6e4b-6fca-4f61-8e6e-ac786076aa65)
+<!-- Editable source: https://github.com/utnet-org/utility/issues/7821#issuecomment-1705672850 -->
 
 ### Gas in Contract Calls
 
@@ -84,7 +84,7 @@ draws gas from the `attached_gas`, sometimes also called `prepaid_gas`, until it
 reaches zero, at which point the function call aborts with a `GasExceeded`
 error. No changes are persisted on chain.
 
-(*Note on naming: If you see `prepaid_fee: Balance` in the nearcore code base,
+(*Note on naming: If you see `prepaid_fee: Balance` in the framework code base,
 this is NOT only the fee for `prepaid_gas`. It also includes prepaid fees for
 other gas costs. However, `prepaid_gas: Gas` is used the same in the code base
 as described in this document.*)
@@ -155,14 +155,14 @@ How much contracts receive from execution depends on two things.
    [`burnt_gas_reward`](../../../core/parameters/res/runtime_configs/parameters.snap#L5C5-L5C5)
    which currently is at 30%.
 
-During receipt execution, nearcore code tracks the `gas_burnt_for_function_call`
+During receipt execution, framework code tracks the `gas_burnt_for_function_call`
 separately from other gas burning to enable this contract reward calculations.
 
 In the (still simplified) flow diagram, the contract reward looks like this.
 For brevity, `gas_burnt_for_function_call` in the diagram is denoted as `wasm fee`.
 
-![Slightly Simplified Gas Flow Diagram](https://github.com/near/nearcore/assets/6342444/32600ef0-1475-43af-b196-576317787578)
-<!-- Editable source: https://github.com/near/nearcore/issues/7821#issuecomment-1705673349 -->
+![Slightly Simplified Gas Flow Diagram](https://github.com/utnet-org/utility/assets/6342444/32600ef0-1475-43af-b196-576317787578)
+<!-- Editable source: https://github.com/utnet-org/utility/issues/7821#issuecomment-1705673349 -->
 
 
 ## Gas Price
@@ -195,9 +195,9 @@ is at 100% capacity, this will not cause the price to increase. The 50% capacity
 is calculated as an average across all shards.
 
 Going slightly off-topic, it should also be mentioned that chunk capacity is not
-constant. Chunk producers can change it by 0.1% per chunk. The nearcore client
+constant. Chunk producers can change it by 0.1% per chunk. The framework client
 does not currently make use of this option, so it really is a nitpick only
-relevant in theory. However, any client implementation such as nearcore must
+relevant in theory. However, any client implementation such as framework must
 compute the total capacity as the sum of gas limits stored in the chunk headers
 to be compliant. Using a hard-coded `1000 Tgas * num_shards` would lead to
 incorrect block header validation.
@@ -250,8 +250,8 @@ out the updated formula for the effective purchase price at the top left and the
 resulting higher number.
 
 ![Complete Gas Flow
-Diagram](https://github.com/near/nearcore/assets/6342444/8341fb45-9beb-4808-8a89-8144fa075930)
-<!-- Editable source: https://github.com/near/nearcore/issues/7821#issuecomment-1705673807 -->
+Diagram](https://github.com/utnet-org/utility/assets/6342444/8341fb45-9beb-4808-8a89-8144fa075930)
+<!-- Editable source: https://github.com/utnet-org/utility/issues/7821#issuecomment-1705673807 -->
 
 
 ## Tracking Gas in Receipts

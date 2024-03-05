@@ -14,5 +14,5 @@ workspace = true
 [dependencies]
 clap.workspace = true
 
-nearcore.workspace = true
+framework.workspace = true
 near-crypto.workspace = true

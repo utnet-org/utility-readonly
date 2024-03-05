@@ -25,7 +25,7 @@ pub fn x_dot_y_dot_alice_account() -> AccountId {
 /// Pre-deploy in genesis the standard test contract for a given account.
 ///
 /// This contract contains various functions useful for testing and its code is available in
-/// `/home/jakmeier/near/core-runtime/nearcore/runtime/near-test-contracts/test-contract-rs/src/lib.rs`
+/// `/home/jakmeier/near/core-runtime/framework/runtime/near-test-contracts/test-contract-rs/src/lib.rs`
 pub fn add_test_contract(genesis: &mut Genesis, account_id: &AccountId) {
     add_contract(genesis, account_id, near_test_contracts::rs_contract().to_vec())
 }

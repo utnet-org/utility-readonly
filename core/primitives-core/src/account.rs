@@ -173,7 +173,7 @@ impl BorshSerialize for Account {
 pub struct AccessKey {
     /// Nonce for this access key, used for tx nonce generation. When access key is created, nonce
     /// is set to `(block_height - 1) * 1e6` to avoid tx hash collision on access key re-creation.
-    /// See <https://github.com/near/nearcore/issues/3779> for more details.
+    /// See <https://github.com/utnet-org/utility/issues/3779> for more details.
     pub nonce: Nonce,
 
     /// Defines permissions for this access key.
@@ -234,7 +234,7 @@ pub struct FunctionCallPermission {
     pub allowance: Option<Balance>,
 
     // This isn't an AccountId because already existing records in testnet genesis have invalid
-    // values for this field (see: https://github.com/near/nearcore/pull/4621#issuecomment-892099860)
+    // values for this field (see: https://github.com/utnet-org/utility/pull/4621#issuecomment-892099860)
     // we accomodate those by using a string, allowing us to read and parse genesis.
     /// The access key only allows transactions with the given receiver's account id.
     pub receiver_id: String,

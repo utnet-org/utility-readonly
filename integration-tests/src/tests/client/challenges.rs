@@ -24,8 +24,8 @@ use near_primitives::types::AccountId;
 use near_primitives::validator_signer::ValidatorSigner;
 use near_primitives::version::PROTOCOL_VERSION;
 use near_store::Trie;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::sync::Arc;
 
 /// Check that block containing a challenge is rejected.

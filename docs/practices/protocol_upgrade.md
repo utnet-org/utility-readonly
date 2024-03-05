@@ -8,7 +8,7 @@ this process.
 ### Background
 
 At NEAR, we use the term protocol version to mean the version of the blockchain
-protocol and is separate from the version of some specific client (such as nearcore),
+protocol and is separate from the version of some specific client (such as framework),
 since the protocol version defines the protocol rather than some specific
 implementation of the protocol. More concretely, for each epoch, there is a
 corresponding protocol version that is agreed upon by validators through
@@ -25,26 +25,26 @@ and that it doesn't break other parts of the system.
 
 ### Protocol version voting and upgrade
 
-When a new neard version, containing a new protocol version, is released, all node maintainers need 
-to upgrade their binary. That typically means stopping neard, downloading or compiling the new neard
-binary and restarting neard. However the protocol version of the whole network is not immediately 
+When a new uncd version, containing a new protocol version, is released, all node maintainers need 
+to upgrade their binary. That typically means stopping uncd, downloading or compiling the new uncd
+binary and restarting uncd. However the protocol version of the whole network is not immediately 
 bumped to the new protocol version. Instead a process called voting takes place and determines if and 
 when the protocol version upgrade will take place. 
 
 Voting is a fully automated process in which all block producers across the network vote in support 
 or against upgrading the protocol version. The voting happens in the last block every epoch. Upgraded
 nodes will begin voting in favour of the new protocol version after a predetermined date. The voting 
-date is configured by the release owner [like this](https://github.com/near/nearcore/commit/9b0275de057a01f87c259580f93e58f746da75aa). 
+date is configured by the release owner [like this](https://github.com/utnet-org/utility/commit/9b0275de057a01f87c259580f93e58f746da75aa). 
 Once at least 80% of the stake votes in favour of the protocol change in the last block of epoch X, the 
 protocol version will be upgraded in the first block of epoch X+2. 
 
 For mainnet releases, the release on github typically happens on a Monday or Tuesday, the voting 
 typically happens a week later and the protocol version upgrade happens 1-2 epochs after the voting. This 
-gives the node maintainers enough time to upgrade their neard nodes. The node maintainers can upgrade
+gives the node maintainers enough time to upgrade their uncd nodes. The node maintainers can upgrade
 their nodes at any time between the release and the voting but it is recommended to upgrade soon after the
 release. This is to accommodate for any database migrations or miscellaneous delays. 
 
-Starting a neard node with protocol version voting in the future in a network that is already operating 
+Starting a uncd node with protocol version voting in the future in a network that is already operating 
 at that protocol version is supported as well. This is useful in the scenario where there is a mainnet 
 security release where mainnet has not yet voted or upgraded to the new version. That same binary with
 protocol voting date in the future can be released in testnet even though it has already upgraded to 
@@ -59,7 +59,7 @@ codebase overall. The use of the nightly and nightly_protocol for new features
 is mandatory while the use of dedicated rust features for new protocol features 
 is optional and only recommended when necessary. Adding rust features leads to 
 conditional compilation which is generally not developer friendly. In `Cargo.toml`
-file of the crates we have in nearcore, we introduce rust compile-time features
+file of the crates we have in framework, we introduce rust compile-time features
 `nightly_protocol` and `nightly`:
 
 ```toml
@@ -92,7 +92,7 @@ nightly = [
 ]
 ```
 
-In [core/primitives/src/version.rs](https://github.com/near/nearcore/blob/master/core/primitives/src/version.rs), we would
+In [core/primitives/src/version.rs](https://github.com/utnet-org/utility/blob/master/core/primitives/src/version.rs), we would
 change the protocol version by:
 
 ```rust
@@ -119,7 +119,7 @@ To determine whether a protocol feature is enabled, we do the following:
   `checked_feature`
 
 For more details, please refer to
-[core/primitives/src/version.rs](https://github.com/near/nearcore/blob/master/core/primitives/src/version.rs).
+[core/primitives/src/version.rs](https://github.com/utnet-org/utility/blob/master/core/primitives/src/version.rs).
 
 ### Feature Gating
 
@@ -139,13 +139,13 @@ Nightly protocol features allow us to enable the most bleeding-edge code in some
 testing environments. We can choose to enable all nightly protocol features by
 
 ```rust
-cargo build -p neard --release --features nightly
+cargo build -p uncd --release --features nightly
 ```
 
 or enable some specific protocol feature by
 
 ```rust
-cargo build -p neard --release --features nightly_protocol,<protocol_feature>
+cargo build -p uncd --release --features nightly_protocol,<protocol_feature>
 ```
 
 In practice, we have all nightly protocol features enabled for Nayduck tests and
@@ -163,7 +163,7 @@ release), and change the `protocol_version` implementation to map the
 stabilized features to the new protocol version.
 
 A feature stabilization request must be approved by at least **two**
-[nearcore code owners](https://github.com/orgs/near/teams/nearcore-codeowners).
+[framework code owners](https://github.com/orgs/near/teams/framework-codeowners).
 Unless it is a security-related fix, a protocol feature cannot be included in
 any release until at least **one** week after its stabilization. This is to ensure
 that feature implementation and stabilization are not rushed.

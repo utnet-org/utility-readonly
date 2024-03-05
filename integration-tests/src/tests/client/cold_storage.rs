@@ -20,9 +20,9 @@ use near_store::metadata::DbKind;
 use near_store::metadata::DB_VERSION;
 use near_store::test_utils::create_test_node_storage_with_cold;
 use near_store::{DBCol, Store, COLD_HEAD_KEY, HEAD_KEY};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
-use nearcore::{cold_storage::spawn_cold_store_loop, NearConfig};
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
+use framework::{cold_storage::spawn_cold_store_loop, NearConfig};
 use std::collections::HashSet;
 use std::str::FromStr;
 use strum::IntoEnumIterator;
@@ -476,7 +476,7 @@ fn test_initial_copy_to_cold_medium_batch() {
 /// - Produce a lot of blocks.
 /// - Manually perform initial migration.
 /// - Produce a lot more blocks for hot tail to reach its boundary.
-/// - Spawn a cold store loop (just like we do in neard).
+/// - Spawn a cold store loop (just like we do in uncd).
 /// - Wait 10 seconds.
 /// - Check that cold head progressed.
 #[test]
@@ -558,7 +558,7 @@ fn test_cold_loop_on_gc_boundary() {
         InMemorySigner::from_random(AccountId::from_str("test").unwrap(), KeyType::ED25519);
 
     let mut near_config = NearConfig::new(
-        nearcore::config::Config::default(),
+        framework::config::Config::default(),
         genesis.clone(),
         near_crypto::KeyFile {
             account_id: signer.account_id,

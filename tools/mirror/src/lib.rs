@@ -29,7 +29,7 @@ use near_primitives::views::{
 use near_primitives_core::account::id::AccountType;
 use near_primitives_core::account::{AccessKey, AccessKeyPermission};
 use near_primitives_core::types::{Nonce, ShardId};
-use nearcore::config::NearConfig;
+use framework::config::NearConfig;
 use rocksdb::DB;
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -860,7 +860,7 @@ impl<T: ChainAccess> TxMirror<T> {
         secret: Option<[u8; crate::secret::SECRET_LEN]>,
     ) -> anyhow::Result<Self> {
         let target_config =
-            nearcore::config::load_config(target_home.as_ref(), GenesisValidationMode::UnsafeFast)
+            framework::config::load_config(target_home.as_ref(), GenesisValidationMode::UnsafeFast)
                 .with_context(|| {
                     format!("Error loading target config from {:?}", target_home.as_ref())
                 })?;

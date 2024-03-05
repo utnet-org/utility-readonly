@@ -10,7 +10,7 @@ use near_primitives::sharding::ChunkHash;
 use near_primitives::trie_key::col;
 use near_primitives::types::{BlockHeight, ShardId};
 use near_store::{Mode, NodeStorage, Store, Temperature};
-use nearcore::{load_config, NearConfig};
+use framework::{load_config, NearConfig};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 

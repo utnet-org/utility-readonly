@@ -93,7 +93,7 @@ class TestSplitStorage(unittest.TestCase):
     # for localnet tests it is enough to use epoch size * number of epochs to keep.
     def _migrate_to_split_storage(self, rpc, archival, archival_dir,
                                   wait_period):
-        logger.info("Phase 1 - Running neard before migration.")
+        logger.info("Phase 1 - Running uncd before migration.")
 
         # Wait until a few blocks are produced so that we're sure that the db is
         # properly created and populated with some data.
@@ -110,7 +110,7 @@ class TestSplitStorage(unittest.TestCase):
             check_cold_head=False,
         )
 
-        logger.info("Phase 2 - Setting the cold storage and restarting neard.")
+        logger.info("Phase 2 - Setting the cold storage and restarting uncd.")
 
         self._configure_cold_storage(archival_dir)
         archival.kill()
@@ -191,7 +191,7 @@ class TestSplitStorage(unittest.TestCase):
         # expected proximity to final head.
         time.sleep(4)
 
-        # Wait for just a few blocks to make sure neard correctly restarted.
+        # Wait for just a few blocks to make sure uncd correctly restarted.
         n += 5
         wait_for_blocks(archival, target=n)
 
@@ -205,7 +205,7 @@ class TestSplitStorage(unittest.TestCase):
             check_cold_head=True,
         )
 
-    # Configure cold storage and start neard. Wait for a few blocks
+    # Configure cold storage and start uncd. Wait for a few blocks
     # and verify that cold head is moving and that it's close behind
     # final head.
     def step1_base_case_test(self):

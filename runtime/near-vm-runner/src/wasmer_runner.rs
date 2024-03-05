@@ -97,7 +97,7 @@ impl IntoVMError for wasmer_runtime::error::RuntimeError {
                     // etc.)
                     //
                     // Then, in
-                    // https://github.com/near/nearcore/pull/4181#discussion_r606267838
+                    // https://github.com/utnet-org/utility/pull/4181#discussion_r606267838
                     // we reasoned that this error actually happens
                     // non-deterministically, so it's better to panic in this
                     // case.

@@ -9,8 +9,8 @@ use near_primitives::errors::{
 };
 use near_primitives::version::ProtocolFeature;
 use near_primitives::views::FinalExecutionStatus;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 fn verify_contract_limits_upgrade(
     feature: ProtocolFeature,

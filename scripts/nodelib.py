@@ -40,7 +40,7 @@ def docker_init(image, home_dir, init_flags):
 
 
 def nodocker_init(home_dir, is_release, init_flags):
-    target = './target/%s/neard' % ('release' if is_release else 'debug')
+    target = './target/%s/uncd' % ('release' if is_release else 'debug')
     cmd = [target]
     if home_dir:
         cmd.extend(['--home', home_dir])
@@ -83,7 +83,7 @@ def check_and_setup(nodocker,
                     init_flags,
                     no_gas_price=False):
     if nodocker:
-        compile_package('neard', is_release)
+        compile_package('uncd', is_release)
 
     chain_id = get_chain_id_from_flags(init_flags)
     if os.path.exists(os.path.join(home_dir, 'config.json')):
@@ -195,8 +195,8 @@ def get_port(home_dir, net):
 def run_docker(image, home_dir, boot_nodes, telemetry_url, verbose):
     print("Starting NEAR client and Watchtower dockers...")
     docker_stop_if_exists('watchtower')
-    docker_stop_if_exists('nearcore')
-    # Start nearcore container, mapping home folder and ports.
+    docker_stop_if_exists('framework')
+    # Start framework container, mapping home folder and ports.
     envs = [
         '-e',
         'BOOT_NODES=%s' % boot_nodes, '-e',
@@ -211,16 +211,16 @@ def run_docker(image, home_dir, boot_nodes, telemetry_url, verbose):
         'docker', 'run', '-u', USER, '-d', '-p', rpc_port, '-p', network_port,
         '-v',
         '%s:/srv/near' % home_dir, '-v', '/tmp:/tmp', '--ulimit', 'core=-1',
-        '--name', 'nearcore', '--restart', 'unless-stopped'
+        '--name', 'framework', '--restart', 'unless-stopped'
     ] + envs + [image])
-    # Start Watchtower that will automatically update the nearcore container when new version appears.
+    # Start Watchtower that will automatically update the framework container when new version appears.
     subprocess.check_output([
         'docker', 'run', '-u', USER, '-d', '--restart', 'unless-stopped',
         '--name', 'watchtower', '-v',
         '/var/run/docker.sock:/var/run/docker.sock', 'v2tec/watchtower', image
     ])
     print(
-        "Node is running! \nTo check logs call: docker logs --follow nearcore")
+        "Node is running! \nTo check logs call: docker logs --follow framework")
 
 
 """Runs NEAR core outside of docker."""
@@ -230,7 +230,7 @@ def run_nodocker(home_dir, is_release, boot_nodes, telemetry_url, verbose):
     print("Starting NEAR client...")
     print(
         "Autoupdate is not supported at the moment for runs outside of docker")
-    cmd = ['./target/%s/neard' % ('release' if is_release else 'debug')]
+    cmd = ['./target/%s/uncd' % ('release' if is_release else 'debug')]
     cmd.extend(['--home', home_dir])
     if verbose:
         cmd += ['--verbose', '']
@@ -280,7 +280,7 @@ def setup_and_run(nodocker,
 
 def stop_docker():
     docker_stop_if_exists('watchtower')
-    docker_stop_if_exists('nearcore')
+    docker_stop_if_exists('framework')
 
 
 def generate_node_key(home, is_release, nodocker, image):
@@ -426,7 +426,7 @@ def start_stakewars(home, is_release, nodocker, image, telemetry_url, verbose,
     if nodocker:
         install_cargo()
         compile_package('genesis-csv-to-json', is_release)
-        compile_package('neard', is_release)
+        compile_package('uncd', is_release)
     else:
         try:
             subprocess.check_output(['docker', 'pull', image])

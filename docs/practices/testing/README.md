@@ -42,7 +42,7 @@ It requires nextest harness which can be installed by running `cargo install car
    remotely, in python, and interact with them using RPC. The infrastructure and
    the tests are located in the `pytest` folder. The infrastructure is relatively
    straightforward, see for example `block_production.py`
-   [here](https://github.com/near/nearcore/blob/master/pytest/tests/sanity/block_production.py).
+   [here](https://github.com/utnet-org/utility/blob/master/pytest/tests/sanity/block_production.py).
    See the `Test infrastructure` section below for details.
 
 Expensive and python tests are not part of CI, and are run by a custom nightly
@@ -70,7 +70,7 @@ predefined timeout.
 
 For the most basic example of using this infrastructure see `produce_two_blocks`
 in
-[`tests/process_blocks.rs`](https://github.com/near/nearcore/blob/master/chain/client/src/tests/process_blocks.rs).
+[`tests/process_blocks.rs`](https://github.com/utnet-org/utility/blob/master/chain/client/src/tests/process_blocks.rs).
 
 1. The callback (`Box::new(move |msg, _ctx, _| { ...`) is what is executed
    whenever the client sends a message. The return value of the callback is sent
@@ -83,13 +83,13 @@ in
 
 For an example of a test that launches multiple nodes, see
 `chunks_produced_and_distributed_common` in
-[tests/chunks_management.rs](https://github.com/near/nearcore/blob/master/chain/client/src/tests/chunks_management.rs).
+[tests/chunks_management.rs](https://github.com/utnet-org/utility/blob/master/chain/client/src/tests/chunks_management.rs).
 The `setup_mock_all_validators` function is the key piece of infrastructure here.
 
 ## Runtime
 
 Tests for Runtime are listed in
-[tests/test_cases_runtime.rs](https://github.com/near/nearcore/blob/master/integration-tests/src/tests/standard_cases/runtime.rs).
+[tests/test_cases_runtime.rs](https://github.com/utnet-org/utility/blob/master/integration-tests/src/tests/standard_cases/runtime.rs).
 
 To run a test, usually, a mock `RuntimeNode` is created via `create_runtime_node()`.
 In its constructor, the `Runtime` is created in the
@@ -113,11 +113,11 @@ make sure to build new components sufficiently abstract so that they can be test
 without relying on other components.
 
 For example, see tests for doomslug
-[here](https://github.com/near/nearcore/blob/master/chain/chain/src/tests/doomslug.rs),
+[here](https://github.com/utnet-org/utility/blob/master/chain/chain/src/tests/doomslug.rs),
 for network cache
-[here](https://github.com/near/nearcore/blob/master/chain/network/src/routing/edge_cache/tests.rs),
+[here](https://github.com/utnet-org/utility/blob/master/chain/network/src/routing/edge_cache/tests.rs),
 or for promises in runtime
-[here](https://github.com/near/nearcore/blob/master/runtime/near-vm-runner/src/logic/tests/promises.rs).
+[here](https://github.com/utnet-org/utility/blob/master/runtime/near-vm-runner/src/logic/tests/promises.rs).
 
 ## Python tests
 
@@ -127,7 +127,7 @@ for detailed coverage of how to write a python test.
 
 We have a python library that allows one to create and run python tests.
 
-To run python tests, from the `nearcore` repo the first time, do the following:
+To run python tests, from the `framework` repo the first time, do the following:
 
 ```shell
 cd pytest

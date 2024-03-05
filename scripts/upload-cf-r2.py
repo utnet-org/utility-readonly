@@ -22,7 +22,7 @@ s3 = boto3.client(
     region_name="auto",  # Must be one of: wnam, enam, weur, eeur, apac, auto
 )
 
-#run_neard_command(["/Users/es/utility/target/debug/neard", "--home=/Users/es/.unc", "database", "make-snapshot", "--destination=/Users/es/snapshot"])
-#run_neard_command(["/Users/es/utility/target/debug/neard", "--home=/Users/es/snapshot", "database", "compact-database"])
+#run_neard_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/.unc", "database", "make-snapshot", "--destination=/Users/es/snapshot"])
+#run_neard_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/snapshot", "database", "compact-database"])
 
 upload_directory('/Users/es/snapshot', 'near', s3)

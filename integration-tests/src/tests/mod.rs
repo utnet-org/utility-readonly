@@ -1,5 +1,5 @@
 mod client;
-mod nearcore;
+mod framework;
 mod network;
 mod runtime;
 mod standard_cases;

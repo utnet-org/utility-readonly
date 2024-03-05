@@ -5,7 +5,7 @@
 # Architecture
 
 - [Overview](./architecture/README.md)
-- [How neard works](./architecture/how/README.md)
+- [How uncd works](./architecture/how/README.md)
   - [How Sync Works](./architecture/how/sync.md)
   - [Garbage Collection](./architecture/how/gc.md)
   - [How Epoch Works](./architecture/how/epoch.md)
@@ -17,7 +17,7 @@
   - [Serialization: Borsh, Json, ProtoBuf](./architecture/how/serialization.md)
   - [Proofs](./architecture/how/proofs.md)
   - [Resharding](./architecture/how/resharding.md)
-- [How neard will work](./architecture/next/README.md)
+- [How uncd will work](./architecture/next/README.md)
   - [Catchup and state sync improvements](./architecture/next/catchup_and_state_sync.md)
   - [Malicious producers and phase 2](./architecture/next/malicious_chunk_producer_and_phase2.md)
 - [Storage](./architecture/storage.md)

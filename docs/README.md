@@ -1,15 +1,15 @@
 # Introduction
 
-Welcome to the nearcore development guide!
+Welcome to the framework development guide!
 
-The target audience of this guide are developers of nearcore itself. If you are
+The target audience of this guide are developers of framework itself. If you are
 a user of NEAR (either a contract developer, or validator running a node),
 please refer to the user docs at <https://docs.near.org>.
 
 This guide is built with [mdBook](https://rust-lang.github.io/mdBook/)
-from sources in the [nearcore repository](https://github.com/near/nearcore/).
+from sources in the [framework repository](https://github.com/utnet-org/utility/).
 You can edit it by pressing the "edit" icon in the top right corner, we welcome
-all contributions. The guide is hosted at <https://near.github.io/nearcore/>.
+all contributions. The guide is hosted at <https://near.github.io/framework/>.
 
 The guide is organized as a collection of loosely coupled chapters -- you don't
 need to read them in order, feel free to peruse the TOC, and focus on

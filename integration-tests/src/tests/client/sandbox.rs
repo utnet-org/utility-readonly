@@ -10,8 +10,8 @@ use near_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
 use near_primitives::types::{AccountId, BlockHeight, Nonce};
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 fn test_setup() -> (TestEnv, InMemorySigner) {
     let epoch_length = 5;

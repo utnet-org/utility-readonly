@@ -21,7 +21,7 @@ near-chain.workspace = true
 near-chain-configs.workspace = true
 near-epoch-manager.workspace = true
 near-store.workspace = true
-nearcore.workspace = true
+framework.workspace = true
 near-primitives.workspace = true
 
 [features]
@@ -32,7 +32,7 @@ nightly = [
   "near-epoch-manager/nightly",
   "near-primitives/nightly",
   "near-store/nightly",
-  "nearcore/nightly",
+  "framework/nightly",
 ]
 nightly_protocol = [
   "near-chain-configs/nightly_protocol",
@@ -40,5 +40,5 @@ nightly_protocol = [
   "near-epoch-manager/nightly_protocol",
   "near-primitives/nightly_protocol",
   "near-store/nightly_protocol",
-  "nearcore/nightly_protocol",
+  "framework/nightly_protocol",
 ]

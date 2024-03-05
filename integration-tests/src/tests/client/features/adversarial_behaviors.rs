@@ -13,8 +13,8 @@ use near_primitives::{
     shard_layout::ShardLayout,
     types::{AccountId, EpochId, ShardId},
 };
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 use tracing::log::debug;
 
 struct AdversarialBehaviorTestData {

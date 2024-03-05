@@ -46,7 +46,7 @@ near-primitives-core.workspace = true
 near-primitives.workspace = true
 near-store.workspace = true
 near-test-contracts.workspace = true
-nearcore.workspace = true
+framework.workspace = true
 node-runtime.workspace = true
 
 [dev-dependencies]
@@ -67,7 +67,7 @@ nightly = [
   "near-primitives-core/nightly",
   "near-primitives/nightly",
   "near-store/nightly",
-  "nearcore/nightly",
+  "framework/nightly",
   "node-runtime/nightly",
 ]
 nightly_protocol = [
@@ -80,6 +80,6 @@ nightly_protocol = [
   "near-primitives-core/nightly_protocol",
   "near-primitives/nightly_protocol",
   "near-store/nightly_protocol",
-  "nearcore/nightly_protocol",
+  "framework/nightly_protocol",
   "node-runtime/nightly_protocol",
 ]

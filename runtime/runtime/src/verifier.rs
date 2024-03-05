@@ -580,10 +580,10 @@ mod tests {
     use near_vm_runner::ContractCode;
 
     /// Initial balance used in tests.
-    const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * NEAR_BASE;
+    const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * UNC_BASE;
 
     /// One NEAR, divisible by 10^24.
-    const NEAR_BASE: Balance = 1_000_000_000_000_000_000_000_000;
+    const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
     fn test_limit_config() -> LimitConfig {
         let store = near_parameters::RuntimeConfigStore::test();

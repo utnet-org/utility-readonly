@@ -10,7 +10,7 @@ sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
 import transaction
 
-from account import TGAS, NEAR_BASE
+from account import TGAS, UNC_BASE
 import key
 from common.base import Account, Deploy, NearNodeProxy, Transaction, FunctionCall, INIT_DONE
 from locust import events, runners
@@ -89,7 +89,7 @@ class InitSocialDbAccount(FunctionCall):
         super().__init__(account,
                          contract_id,
                          "storage_deposit",
-                         balance=1 * NEAR_BASE)
+                         balance=1 * UNC_BASE)
         self.contract_id = contract_id
         self.account = account
 

@@ -57,7 +57,7 @@ impl DatabaseCommand {
             SubCommand::CompactDatabase(cmd) => cmd.run(home),
             SubCommand::CorruptStateSnapshot(cmd) => cmd.run(home),
             SubCommand::MakeSnapshot(cmd) => {
-                let near_config = nearcore::config::load_config(
+                let near_config = framework::config::load_config(
                     &home,
                     near_chain_configs::GenesisValidationMode::UnsafeFast,
                 )
@@ -67,7 +67,7 @@ impl DatabaseCommand {
             SubCommand::RunMigrations(cmd) => cmd.run(home),
             SubCommand::StatePerf(cmd) => cmd.run(home),
             SubCommand::LoadMemTrie(cmd) => {
-                let near_config = nearcore::config::load_config(
+                let near_config = framework::config::load_config(
                     &home,
                     near_chain_configs::GenesisValidationMode::UnsafeFast,
                 )

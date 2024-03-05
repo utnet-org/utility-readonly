@@ -56,7 +56,7 @@ impl FlatStorageInner {
     /// If they are exceeded, warnings are displayed. Flat storage still will work, but its
     /// performance will slow down, and eventually it can cause OOM error.
     /// Limit for number of blocks needed to read. When over 100, introduces significant overhead.
-    /// https://github.com/near/nearcore/issues/8006#issuecomment-1473621334
+    /// https://github.com/utnet-org/utility/issues/8006#issuecomment-1473621334
     const HOPS_LIMIT: usize = 100;
     /// Limit for total size of cached changes. We allocate 600 MiB for cached deltas, which
     /// means 150 MiB per shards.

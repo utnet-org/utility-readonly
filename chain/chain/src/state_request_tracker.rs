@@ -13,7 +13,7 @@ const REQUESTED_STATE_PARTS_CACHE_SIZE: usize = 4;
 //Track the state parts that are already requested for debugging
 //This struct provides methods to save and retrieve the information
 //along with time elapsed to create state part.
-//See https://github.com/near/nearcore/issues/7991 for more details
+//See https://github.com/utnet-org/utility/issues/7991 for more details
 #[derive(Debug)]
 pub(crate) struct StateRequestTracker {
     requested_state_parts: LruCache<CryptoHash, HashMap<ShardId, Vec<PartElapsedTimeView>>>,

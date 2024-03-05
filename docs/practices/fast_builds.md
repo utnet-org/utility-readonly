@@ -1,6 +1,6 @@
 # Fast Builds
 
-nearcore is implemented in Rust and is a fairly sizable project, so it takes a
+framework is implemented in Rust and is a fairly sizable project, so it takes a
 while to build. This chapter collects various tips to make the development
 process faster.
 
@@ -50,7 +50,7 @@ the distro/package manager of your choice).
 
 ## Prebuilt RocksDB
 
-By default, we compile RocksDB (a C++ project) from source during the neard
+By default, we compile RocksDB (a C++ project) from source during the uncd
 build. By linking to a prebuilt copy of RocksDB this work can be avoided
 entirely. This is a huge win, especially if you clean the `./target` directory
 frequently.
@@ -60,7 +60,7 @@ a location containing `librocksdb.a`:
 
 ```console
 $ export ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
-$ cargo build -p neard
+$ cargo build -p uncd
 ```
 
 Note, that the system must provide a recent version of the library which,
@@ -95,7 +95,7 @@ the global cache whenever possible. This tool can be set up as such:
 $ cargo install sccache
 $ export RUSTC_WRAPPER="sccache"
 $ export SCCACHE_CACHE_SIZE="30G"
-$ cargo build -p neard
+$ cargo build -p uncd
 ```
 
 Refer to the [project’s README](https://github.com/mozilla/sccache) for further

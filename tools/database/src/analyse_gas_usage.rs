@@ -6,13 +6,13 @@ use clap::Parser;
 use near_chain::{Block, ChainStore};
 use near_chain_configs::GenesisValidationMode;
 use near_epoch_manager::EpochManager;
-use nearcore::config::load_config;
+use framework::config::load_config;
 
 use near_primitives::hash::CryptoHash;
 use near_primitives::shard_layout::{account_id_to_shard_id, ShardUId};
 use near_primitives::types::{AccountId, BlockHeight};
 
-use nearcore::open_storage;
+use framework::open_storage;
 
 use crate::block_iterators::{
     make_block_iterator_from_command_args, CommandArgs, LastNBlocksIterator,

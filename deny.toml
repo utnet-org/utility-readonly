@@ -27,12 +27,12 @@ deny = [
     # See: https://github.com/rust-random/rand/issues/645
     { name = "rand", version = "<0.6" },
 
-    # See: https://github.com/near/nearcore/pull/3595
+    # See: https://github.com/utnet-org/utility/pull/3595
     { name = "keccak-hash", version = "<0.4.1" },
     { name = "primitive-types", version = "<0.10.1" },
     { name = "uint", version = "<0.8.2" },
 
-    # https://github.com/near/nearcore/pull/8562
+    # https://github.com/utnet-org/utility/pull/8562
     { name = "borsh", version = "0.10, <0.10.2" },
 ]
 

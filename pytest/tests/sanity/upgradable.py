@@ -37,7 +37,7 @@ def test_protocol_versions() -> None:
     Checks whether the protocol versions used by the latest mainnet, the latest
     testnet and current binary do not differed by more than one.  Some protocol
     features implementations rely on the fact that no protocol version is
-    skipped.  See <https://github.com/near/nearcore/issues/4956>.
+    skipped.  See <https://github.com/utnet-org/utility/issues/4956>.
 
     This test downloads the latest official mainnet and testnet binaries.  If
     that fails for whatever reason, builds each of those executables.
@@ -52,9 +52,9 @@ def test_protocol_versions() -> None:
                    f'Got {line.rstrip()} on standard output')
         return m.group(1), int(m.group(2))
 
-    main_release, main_proto = get_proto_version(executables.stable.neard)
-    test_release, test_proto = get_proto_version(testnet.neard)
-    _, head_proto = get_proto_version(executables.current.neard)
+    main_release, main_proto = get_proto_version(executables.stable.uncd)
+    test_release, test_proto = get_proto_version(testnet.uncd)
+    _, head_proto = get_proto_version(executables.current.uncd)
 
     logger.info(f'Got protocol {main_proto} in mainnet release {main_release}.')
     logger.info(f'Got protocol {test_proto} in testnet release {test_release}.')
@@ -78,7 +78,7 @@ def test_upgrade() -> None:
     node_root = utils.get_near_tempdir('upgradable', clean=True)
 
     # Setup local network.
-    cmd = (executables.stable.neard, f'--home={node_root}', 'localnet', '-v',
+    cmd = (executables.stable.uncd, f'--home={node_root}', 'localnet', '-v',
            '4', '--prefix', 'test')
     logger.info(' '.join(str(arg) for arg in cmd))
     subprocess.check_call(cmd)
@@ -145,7 +145,7 @@ def test_upgrade() -> None:
     for i in range(3):
         nodes[i].kill()
         nodes[i].near_root = executables.current.root
-        nodes[i].binary_name = executables.current.neard
+        nodes[i].binary_name = executables.current.uncd
         nodes[i].start(
             boot_node=nodes[0],
             extra_env={"NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE": "1"},

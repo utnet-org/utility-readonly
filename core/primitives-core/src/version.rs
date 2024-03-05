@@ -13,7 +13,7 @@ pub enum ProtocolFeature {
     ImplicitAccountCreation,
     RectifyInflation,
     /// Add `AccessKey` nonce range by setting nonce to `(block_height - 1) * 1e6`, see
-    /// <https://github.com/near/nearcore/issues/3779>.
+    /// <https://github.com/utnet-org/utility/issues/3779>.
     AccessKeyNonceRange,
     /// Don't process any receipts for shard when chunk is not present.
     /// Always use gas price computed in the previous block.
@@ -31,7 +31,7 @@ pub enum ProtocolFeature {
     /// Add `ripemd60` and `ecrecover` host function
     MathExtension,
     /// Restore receipts that were previously stuck because of
-    /// <https://github.com/near/nearcore/pull/4228>.
+    /// <https://github.com/utnet-org/utility/pull/4228>.
     RestoreReceiptsAfterFixApplyChunks,
     /// This feature switch our WASM engine implementation from wasmer 0.* to
     /// wasmer 2.*, bringing better performance and reliability.
@@ -51,7 +51,7 @@ pub enum ProtocolFeature {
     /// compiler-intrinsics based gas counter.
     LowerRegularOpCost2,
     /// Limit number of wasm functions in one contract. See
-    /// <https://github.com/near/nearcore/pull/4954> for more details.
+    /// <https://github.com/utnet-org/utility/pull/4954> for more details.
     LimitContractFunctionsNumber,
     BlockHeaderV3,
     /// Changes how we select validators for epoch and how we select validators

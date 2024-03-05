@@ -17,7 +17,7 @@ clap.workspace = true
 csv.workspace = true
 serde.workspace = true
 
-nearcore.workspace = true
+framework.workspace = true
 near-chain-configs.workspace = true
 near-crypto.workspace = true
 near-primitives.workspace = true

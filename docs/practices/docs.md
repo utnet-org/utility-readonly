@@ -1,20 +1,20 @@
 # Documentation
 
-This chapter describes nearcore's approach to documentation. There are three
+This chapter describes framework's approach to documentation. There are three
 primary types of documentation to keep in mind:
 
 * [**The NEAR Protocol Specification**](https://nomicon.io)
   ([source code](https://github.com/near/NEPs)) is the formal description of
-  the NEAR protocol. The reference nearcore implementation and any other NEAR
+  the NEAR protocol. The reference framework implementation and any other NEAR
   client implementations must follow this specification.
 * [**User docs**](https://docs.near.org) ([source code](https://github.com/near/docs))
   explain what is NEAR and how to participate in the network. In particular,
   they contain information pertinent to the users of NEAR: validators and
   smart contract developers.
-* [**Documentation for nearcore developers**](https://near.github.io/nearcore/)
-  ([source code](https://github.com/near/nearcore/tree/master/docs)) is the
+* [**Documentation for framework developers**](https://near.github.io/framework/)
+  ([source code](https://github.com/utnet-org/utility/tree/master/docs)) is the
   book you are reading right now! The target audience here is the contributors
-  to the main implementation of the NEAR protocol (nearcore).
+  to the main implementation of the NEAR protocol (framework).
 
 ## Overview
 
@@ -39,7 +39,7 @@ a doc comment via `#![doc = include_str!("../README.md")]` in `lib.rs`. We don't
 much as possible. If you spend some time refactoring or fixing a function,
 consider adding a doc comment (`///`) to it as a drive-by improvement.
 
-We currently don't render `rustdoc`, see [#7836](https://github.com/near/nearcore/issues/7836).
+We currently don't render `rustdoc`, see [#7836](https://github.com/utnet-org/utility/issues/7836).
 
 ## Book How To
 
@@ -50,9 +50,9 @@ but the basics are very simple.
 To add a new page to the book:
 
 1. Add a `.md` file somewhere in the
-   [`./docs`](https://github.com/near/nearcore/tree/master/docs) folder.
+   [`./docs`](https://github.com/utnet-org/utility/tree/master/docs) folder.
 2. Add a link to that page to the
-   [`SUMMARY.md`](https://github.com/near/nearcore/blob/master/docs/SUMMARY.md).
+   [`SUMMARY.md`](https://github.com/utnet-org/utility/blob/master/docs/SUMMARY.md).
 3. Submit a PR (again, we promise to merge it without much ceremony).
 
 The doc itself is in vanilla markdown.
@@ -73,7 +73,7 @@ need to go out of your way to preview your changes when drafting a page or
 reviewing pull requests to this book.
 
 The book is deployed via the
-[book GitHub Action workflow](https://github.com/near/nearcore/blob/master/.github/workflows/book.yml).
+[book GitHub Action workflow](https://github.com/utnet-org/utility/blob/master/.github/workflows/book.yml).
 This workflow runs mdBook and then deploys the result to
 [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages).
 
@@ -82,7 +82,7 @@ have a recommended workflow, but here are some tips:
 
 * Don't add binary media files to Git to avoid inflating repository size.
   Rather, upload images as comments to this super-secret issue
-  [#7821](https://github.com/near/nearcore/issues/7821), and then link to
+  [#7821](https://github.com/utnet-org/utility/issues/7821), and then link to
   the images as
 
   ```

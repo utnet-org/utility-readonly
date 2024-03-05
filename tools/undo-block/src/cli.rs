@@ -2,7 +2,7 @@ use near_chain::ChainStore;
 use near_chain_configs::GenesisValidationMode;
 use near_epoch_manager::EpochManager;
 use near_store::{Mode, NodeStorage};
-use nearcore::load_config;
+use framework::load_config;
 use std::path::Path;
 
 #[derive(clap::Parser)]

@@ -17,11 +17,11 @@ snapshots generated in this directory:
 
 As the introduction on this page already hints at it, parameter values are
 versioned. In other words, they can change if the protocol version changes. A
-nearcore binary has to support multiple versions and choose the correct
+framework binary has to support multiple versions and choose the correct
 parameter value at runtime.
 
 To make this easy, there is
-[`RuntimeConfigStore`](https://github.com/near/nearcore/blob/a8964d200b3938a63d389263bc39c1bcd75b1de4/core/primitives/src/runtime/config_store.rs#L43).
+[`RuntimeConfigStore`](https://github.com/utnet-org/utility/blob/a8964d200b3938a63d389263bc39c1bcd75b1de4/core/primitives/src/runtime/config_store.rs#L43).
 It contains a sparse map from protocol versions to complete runtime
 configurations (`BTreeMap<ProtocolVersion, Arc<RuntimeConfig>>`).
 The runtime then uses `store.get_config(protocol_version)` to access a runtime
@@ -52,7 +52,7 @@ Before adding anything, please review the basic principles for gas parameters.
   storage.)
 - Charge gas before executing the workload.
 - Parameters should be independent of specific implementation choices in
-  nearcore.
+  framework.
 - Ideally, contract developers can easily understand what the cost is simply by
   reading the name in a gas profile.
 
@@ -79,7 +79,7 @@ Adding the parameter in code involves several steps.
    Now is a good time to ensure `cargo check` and `cargo test --no-run` pass.
    Most likely you have to update some testing code, such as
    `ExtCostsConfig::test()`.
-6. To merge your changes into nearcore, you will have to hide your parameter
+6. To merge your changes into framework, you will have to hide your parameter
    behind a feature flag. Add the feature to the `Cargo.toml` of each crate
    touched in steps 3 and 4 and hide the code behind `#[cfg(feature =
    "protocol_feature_MY_NEW_FEATURE")]`. Do not hide code in step 2 so that

@@ -12,7 +12,7 @@ to recover from them.
 ### Localnet
 
 #### Prepare data
-- Run `neard init` / `neard localnet`.  
+- Run `uncd init` / `uncd localnet`.  
 - Change your config (`--home-dir`/config.json)
 to not garbage collect larger number of epochs.  
 By default it is 5, 
@@ -21,7 +21,7 @@ Epoch lasts 500 blocks on localnet (as specified in `--home-dir`/genesis.json).
 That will give you sort of archival storage of max 500'0000 blocks.
 
 #### Produce blocks
-Start localnet node as usual `neard run`.
+Start localnet node as usual `uncd run`.
 Run node WITHOUT `--archive` parameter.  
 In archive mode node will not save `TrieChanges`
 and they are needed to copy blocks to cold.  
@@ -47,16 +47,16 @@ for archival storage.
 #### Produce blocks
 Run that binary for at least `gc_num_epochs_to_keep`.
 Epochs are larger on testnet/mainnet, so just give it a few days.  
-You can use `sudo systemctl start neard` to run `/home/ubuntu/neard`  
-and `jornalctl -u neard` to check logs.  
-Be careful with what binary is at `/home/ubuntu/neard`.  
+You can use `sudo systemctl start uncd` to run `/home/ubuntu/uncd`  
+and `jornalctl -u uncd` to check logs.  
+Be careful with what binary is at `/home/ubuntu/uncd`.  
 **TODO** some kind of system to maintain a bunch of local binaries.
 
 #### Migrate
 After archival storage is populated with enough of `TrieChanges`, 
 it should not be experimented with. If we need more block, we should 
 run a binary with that and only that one path -- saving of `TrieChanges`.  
-Archival storage should probably lie NOT in `/home/ubuntu/.neard/data`.
+Archival storage should probably lie NOT in `/home/ubuntu/.uncd/data`.
 
 That means, that unlike in real life, hot storage will not be mutated
 archival storage, but rather a brand new one,

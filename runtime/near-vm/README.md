@@ -24,4 +24,4 @@ composed of a set of crates. We can group them as follows:
   everything.
 
 This is no longer a case for near-vm which is moving away from this to being specialized for
-nearcore needs.
+framework needs.

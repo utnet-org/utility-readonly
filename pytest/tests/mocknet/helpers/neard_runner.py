@@ -1,5 +1,5 @@
 # TODO: reimplement this logic using standard tooling like systemd instead of relying on this
-# python script to handle neard process management.
+# python script to handle uncd process management.
 
 import argparse
 from enum import Enum
@@ -121,14 +121,14 @@ class NeardRunner:
             pass
         with open(self.home_path('config.json'), 'r') as f:
             self.config = json.load(f)
-        self.neard = None
+        self.uncd = None
         self.num_restarts = 0
         self.last_start = time.time()
         # self.data will contain data that we want to persist so we can
         # start where we left off if this process is killed and restarted
-        # for now we save info on the neard binaries (their paths and epoch
-        # heights where we want to run them), a bool that tells whether neard
-        # should be running, and info on the currently running neard process
+        # for now we save info on the uncd binaries (their paths and epoch
+        # heights where we want to run them), a bool that tells whether uncd
+        # should be running, and info on the currently running uncd process
         try:
             with open(self.home_path('data.json'), 'r') as f:
                 self.data = json.load(f)
@@ -182,7 +182,7 @@ class NeardRunner:
             binaries.append({
                 'url': b['url'],
                 'epoch_height': b['epoch_height'],
-                'system_path': self.home_path('binaries', f'neard{i}')
+                'system_path': self.home_path('binaries', f'uncd{i}')
             })
         return binaries
 
@@ -242,7 +242,7 @@ class NeardRunner:
         return os.path.join(self.home, *args)
 
     def neard_init(self):
-        # We make neard init save files to self.tmp_near_home_path() just to make it
+        # We make uncd init save files to self.tmp_near_home_path() just to make it
         # a bit cleaner, so we can init to a non-existent directory and then move
         # the files we want to the real near home without having to remove it first
         cmd = [
@@ -286,7 +286,7 @@ class NeardRunner:
             shutil.move(self.tmp_near_home_path(path),
                         self.target_near_home_path(path))
 
-    # This RPC method tells to stop neard and re-initialize its home dir. This returns the
+    # This RPC method tells to stop uncd and re-initialize its home dir. This returns the
     # validator and node key that resulted from the initialization. We can't yet call amend-genesis
     # and compute state roots, because the caller of this method needs to hear back from
     # each node before it can build the list of initial validators. So after this RPC method returns,
@@ -339,7 +339,7 @@ class NeardRunner:
 
     # After the new_test RPC, we wait to get this RPC that gives us the list of validators
     # and boot nodes for the test network. After this RPC call, we run amend-genesis and
-    # start neard to compute genesis state roots.
+    # start uncd to compute genesis state roots.
     def do_network_init(self,
                         validators,
                         boot_nodes,
@@ -493,13 +493,13 @@ class NeardRunner:
             return self.data['current_neard_path']
 
     def run_neard(self, cmd, out_file=None):
-        assert (self.neard is None)
+        assert (self.uncd is None)
         assert (self.data['neard_process'] is None)
         env = os.environ.copy()
         if 'RUST_LOG' not in env:
             env['RUST_LOG'] = 'actix_web=warn,mio=warn,tokio_util=warn,actix_server=warn,actix_http=warn,indexer=info,debug'
         logging.info(f'running {" ".join(cmd)}')
-        self.neard = subprocess.Popen(
+        self.uncd = subprocess.Popen(
             cmd,
             stdin=subprocess.DEVNULL,
             stdout=out_file,
@@ -510,42 +510,42 @@ class NeardRunner:
         # to the one we saved is the same process. It's not that likely, but
         # if we don't do this (or maybe something else like it), then it's possble
         # that if this process is killed and restarted and we see a process with that PID,
-        # it could actually be a different process that was started later after neard exited
+        # it could actually be a different process that was started later after uncd exited
         try:
-            create_time = int(psutil.Process(self.neard.pid).create_time())
+            create_time = int(psutil.Process(self.uncd.pid).create_time())
         except psutil.NoSuchProcess:
             # not that likely, but if it already exited, catch the exception so
             # at least this process doesn't die
             create_time = 0
 
         self.data['neard_process'] = {
-            'pid': self.neard.pid,
+            'pid': self.uncd.pid,
             'create_time': create_time,
             'path': cmd[0],
         }
         self.save_data()
 
     def poll_neard(self):
-        if self.neard is not None:
-            code = self.neard.poll()
+        if self.uncd is not None:
+            code = self.uncd.poll()
             path = self.data['neard_process']['path']
             running = code is None
             if not running:
-                self.neard = None
+                self.uncd = None
                 self.data['neard_process'] = None
                 self.save_data()
             return path, running, code
         elif self.data['neard_process'] is not None:
             path = self.data['neard_process']['path']
             # we land here if this process previously died and is now restarted,
-            # and the old neard process is still running
+            # and the old uncd process is still running
             try:
                 p = psutil.Process(self.data['neard_process']['pid'])
                 if int(p.create_time()
                       ) == self.data['neard_process']['create_time']:
                     return path, True, None
             except psutil.NoSuchProcess:
-                self.neard = None
+                self.uncd = None
                 self.data['neard_process'] = None
                 self.save_data()
                 return path, False, None
@@ -553,11 +553,11 @@ class NeardRunner:
             return None, False, None
 
     def kill_neard(self):
-        if self.neard is not None:
-            logging.info('stopping neard')
-            self.neard.send_signal(signal.SIGINT)
-            self.neard.wait()
-            self.neard = None
+        if self.uncd is not None:
+            logging.info('stopping uncd')
+            self.uncd.send_signal(signal.SIGINT)
+            self.uncd.wait()
+            self.uncd = None
             self.data['neard_process'] = None
             self.save_data()
             return
@@ -569,16 +569,16 @@ class NeardRunner:
             p = psutil.Process(self.data['neard_process']['pid'])
             if int(p.create_time()
                   ) == self.data['neard_process']['create_time']:
-                logging.info('stopping neard')
+                logging.info('stopping uncd')
                 p.send_signal(signal.SIGINT)
                 p.wait()
         except psutil.NoSuchProcess:
             pass
-        self.neard = None
+        self.uncd = None
         self.data['neard_process'] = None
         self.save_data()
 
-    # If this is a regular node, starts neard run. If it's a traffic generator, starts neard mirror run
+    # If this is a regular node, starts uncd run. If it's a traffic generator, starts uncd mirror run
     def start_neard(self):
         for i in range(20, -1, -1):
             old_log = os.path.join(self.neard_logs_dir, f'log-{i}.txt')
@@ -616,10 +616,10 @@ class NeardRunner:
         if self.is_traffic_generator():
             # TODO: This is just a lazy way to deal with the fact
             # that the mirror command is expected to exit after it finishes sending all the traffic.
-            # For now just don't restart neard on the traffic generator. Here we should be smart
+            # For now just don't restart uncd on the traffic generator. Here we should be smart
             # about restarting only if it makes sense, and we also shouldn't restart over and over.
             # Right now we can't just check the exit_code because there's a bug that makes the
-            # neard mirror run command not exit cleanly when it's finished
+            # uncd mirror run command not exit cleanly when it's finished
             return False
 
         now = time.time()
@@ -642,13 +642,13 @@ class NeardRunner:
             start_neard = self.on_neard_died()
         elif not running:
             if exit_code is not None:
-                logging.info(f'neard exited with code {exit_code}.')
+                logging.info(f'uncd exited with code {exit_code}.')
             start_neard = self.on_neard_died()
         else:
             if path == neard_path:
                 start_neard = False
             else:
-                logging.info('upgrading neard upon new epoch')
+                logging.info('upgrading uncd upon new epoch')
                 self.kill_neard()
                 start_neard = True
 
@@ -722,7 +722,7 @@ class NeardRunner:
         elif not running:
             if exit_code is not None and exit_code != 0:
                 logging.error(
-                    f'neard amend-genesis exited with code {exit_code}')
+                    f'uncd amend-genesis exited with code {exit_code}')
                 # for now just set the state to None, and if this ever happens, the
                 # test operator will have to intervene manually. Probably shouldn't
                 # really happen in practice
@@ -784,7 +784,7 @@ class NeardRunner:
         path, running, exit_code = self.poll_neard()
         if not running:
             logging.error(
-                f'neard exited with code {exit_code} on the first run')
+                f'uncd exited with code {exit_code} on the first run')
             # For now just exit, because if this happens, there is something pretty wrong with
             # the setup, so a human needs to investigate and fix the bug
             sys.exit(1)
@@ -792,7 +792,7 @@ class NeardRunner:
             r = requests.get(f'http://{self.data["neard_addr"]}/status',
                              timeout=5)
             if r.status_code == 200:
-                logging.info('neard finished computing state roots')
+                logging.info('uncd finished computing state roots')
                 self.kill_neard()
 
                 try:
@@ -824,7 +824,7 @@ class NeardRunner:
         self.set_state(TestState.STOPPED)
         self.save_data()
 
-    # periodically check if we should update neard after a new epoch
+    # periodically check if we should update uncd after a new epoch
     def main_loop(self):
         while True:
             with self.lock:
@@ -854,10 +854,10 @@ class NeardRunner:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='run neard')
+    parser = argparse.ArgumentParser(description='run uncd')
     parser.add_argument('--home', type=str, required=True)
-    parser.add_argument('--neard-home', type=str, required=True)
-    parser.add_argument('--neard-logs-dir', type=str, required=True)
+    parser.add_argument('--uncd-home', type=str, required=True)
+    parser.add_argument('--uncd-logs-dir', type=str, required=True)
     parser.add_argument('--port', type=int, required=True)
     args = parser.parse_args()
 
@@ -873,7 +873,7 @@ def main():
     # only let one instance of this code run at a time
     _fd = get_lock(args.home)
 
-    logging.info("creating neard runner")
+    logging.info("creating uncd runner")
     runner = NeardRunner(args)
 
     logging.info("downloading binaries")

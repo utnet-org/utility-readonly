@@ -102,7 +102,7 @@ actions.
 To be complete, the output above should also have a gas profile entry for the
 function call action. But currently this is not included since gas profiles only
 work properly on function call receipts. Improving this is planned, see
-[nearcore#8261](https://github.com/near/nearcore/issues/8261).
+[framework#8261](https://github.com/utnet-org/utility/issues/8261).
 
 The `tx-status` query returns one gas profile for each receipt. The output above
 contains a single gas profile because the transaction only spawned one receipt.
@@ -131,7 +131,7 @@ Which version of the profile an RPC node returns depends on the version it had
 when it first processed the transaction. The profiles are stored in the database
 with one version and never updated. Therefore, older transactions will usually
 only have old profiles. However, one could replay the chain from genesis with a
-new nearcore client and generate the newest profile for all transactions in this
+new framework client and generate the newest profile for all transactions in this
 way.
 
 Note: Due to bugs, some nodes will claim they send version 1 but actually
@@ -162,11 +162,11 @@ When charging gas for an action, the `ActionResult` can be updated directly. But
 when charging WASM costs, it would be too slow to do a context switch each time,
 Therefore, a fast gas counter exists that can be updated from within the VM.
 (See
-[gas_counter.rs](https://github.com/near/nearcore/blob/06711f8460f946b8d2042aa1df6abe03c5184767/runtime/near-vm-logic/src/gas_counter.rs))
+[gas_counter.rs](https://github.com/utnet-org/utility/blob/06711f8460f946b8d2042aa1df6abe03c5184767/runtime/near-vm-logic/src/gas_counter.rs))
 At the end of a function call execution, the gas counter is read by the host and
 merged into the `ActionResult`.
 
 <!-- 
 TODO: We can expand a bit more on how profiles are created and how it interacts 
-with gas charging after merging https://github.com/near/nearcore/issues/8033
+with gas charging after merging https://github.com/utnet-org/utility/issues/8033
 -->

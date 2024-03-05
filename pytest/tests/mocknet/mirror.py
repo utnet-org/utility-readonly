@@ -83,17 +83,17 @@ def prompt_setup_flags(args):
 
 
 def start_neard_runner(node):
-    cmd_utils.run_in_background(node, f'/home/ubuntu/neard-runner/venv/bin/python /home/ubuntu/neard-runner/neard_runner.py ' \
-        '--home /home/ubuntu/neard-runner --neard-home /home/ubuntu/.near ' \
-        '--neard-logs /home/ubuntu/neard-logs --port 3000', 'neard-runner.txt')
+    cmd_utils.run_in_background(node, f'/home/ubuntu/uncd-runner/venv/bin/python /home/ubuntu/uncd-runner/neard_runner.py ' \
+        '--home /home/ubuntu/uncd-runner --uncd-home /home/ubuntu/.near ' \
+        '--uncd-logs /home/ubuntu/uncd-logs --port 3000', 'uncd-runner.txt')
 
 
 def upload_neard_runner(node):
     node.machine.upload('tests/mocknet/helpers/neard_runner.py',
-                        '/home/ubuntu/neard-runner',
+                        '/home/ubuntu/uncd-runner',
                         switch_user='ubuntu')
     node.machine.upload('tests/mocknet/helpers/requirements.txt',
-                        '/home/ubuntu/neard-runner',
+                        '/home/ubuntu/uncd-runner',
                         switch_user='ubuntu')
 
 
@@ -103,13 +103,13 @@ def init_neard_runner(node, config, remove_home_dir=False):
     if remove_home_dir:
         cmd_utils.run_cmd(
             node,
-            'rm -rf /home/ubuntu/neard-runner && mkdir -p /home/ubuntu/neard-runner'
+            'rm -rf /home/ubuntu/uncd-runner && mkdir -p /home/ubuntu/uncd-runner'
         )
     else:
-        cmd_utils.run_cmd(node, 'mkdir -p /home/ubuntu/neard-runner')
+        cmd_utils.run_cmd(node, 'mkdir -p /home/ubuntu/uncd-runner')
     upload_neard_runner(node)
-    mocknet.upload_json(node, '/home/ubuntu/neard-runner/config.json', config)
-    cmd = 'cd /home/ubuntu/neard-runner && python3 -m virtualenv venv -p $(which python3)' \
+    mocknet.upload_json(node, '/home/ubuntu/uncd-runner/config.json', config)
+    cmd = 'cd /home/ubuntu/uncd-runner && python3 -m virtualenv venv -p $(which python3)' \
     ' && ./venv/bin/pip install -r requirements.txt'
     cmd_utils.run_cmd(node, cmd)
     start_neard_runner(node)
@@ -122,13 +122,13 @@ def stop_neard_runner(node):
 
 def prompt_init_flags(args):
     if args.neard_binary_url is None:
-        print('neard binary URL?: ')
+        print('uncd binary URL?: ')
         args.neard_binary_url = sys.stdin.readline().strip()
         assert len(args.neard_binary_url) > 0
 
     if args.neard_upgrade_binary_url is None:
         print(
-            'add a second neard binary URL to upgrade to mid-test? enter nothing here to skip: '
+            'add a second uncd binary URL to upgrade to mid-test? enter nothing here to skip: '
         )
         url = sys.stdin.readline().strip()
         if len(url) > 0:
@@ -263,7 +263,7 @@ def new_test(args, traffic_generator, nodes):
         zip([n.machine.ip for n in all_nodes], test_keys), args.num_validators)
 
     logger.info("""setting validators: {0}
-Then running neard amend-genesis on all nodes, and starting neard to compute genesis \
+Then running uncd amend-genesis on all nodes, and starting uncd to compute genesis \
 state roots. This will take a few hours. Run `status` to check if the nodes are \
 ready. After they're ready, you can run `start-traffic`""".format(validators))
     pmap(
@@ -299,7 +299,7 @@ def reset_cmd(args, traffic_generator, nodes):
     all_nodes = nodes + [traffic_generator]
     pmap(neard_runner_reset, all_nodes)
     logger.info(
-        'Data dir reset in progress. Run the `status` command to see when this is finished. Until it is finished, neard runners may not respond to HTTP requests.'
+        'Data dir reset in progress. Run the `status` command to see when this is finished. Until it is finished, uncd runners may not respond to HTTP requests.'
     )
 
 
@@ -328,7 +328,7 @@ def neard_runner_jsonrpc(node, method, params=[]):
     if 'error' in response:
         # TODO: errors should be handled better here in general but just exit for now
         sys.exit(
-            f'bad response trying to send {method} JSON RPC to neard runner on {node.instance_name}:\n{response}'
+            f'bad response trying to send {method} JSON RPC to uncd runner on {node.instance_name}:\n{response}'
         )
     return response['result']
 
@@ -436,13 +436,13 @@ if __name__ == '__main__':
                                        description='valid subcommands',
                                        help='additional help')
 
-    init_parser = subparsers.add_parser('init-neard-runner',
+    init_parser = subparsers.add_parser('init-uncd-runner',
                                         help='''
     Sets up the helper servers on each of the nodes. Doesn't start initializing the test
     state, which is done with the `new-test` command.
     ''')
-    init_parser.add_argument('--neard-binary-url', type=str)
-    init_parser.add_argument('--neard-upgrade-binary-url', type=str)
+    init_parser.add_argument('--uncd-binary-url', type=str)
+    init_parser.add_argument('--uncd-upgrade-binary-url', type=str)
     init_parser.set_defaults(func=init_cmd)
 
     update_config_parser = subparsers.add_parser(
@@ -462,23 +462,23 @@ if __name__ == '__main__':
     update_config_parser.set_defaults(func=update_config_cmd)
 
     restart_parser = subparsers.add_parser(
-        'restart-neard-runner',
-        help='''Restarts the neard runner on all nodes.''')
+        'restart-uncd-runner',
+        help='''Restarts the uncd runner on all nodes.''')
     restart_parser.add_argument('--upload-program', action='store_true')
     restart_parser.set_defaults(func=restart_cmd, upload_program=False)
 
     hard_reset_parser = subparsers.add_parser(
         'hard-reset',
-        help='''Stops neard and clears all test state on all nodes.''')
-    hard_reset_parser.add_argument('--neard-binary-url', type=str)
-    hard_reset_parser.add_argument('--neard-upgrade-binary-url', type=str)
+        help='''Stops uncd and clears all test state on all nodes.''')
+    hard_reset_parser.add_argument('--uncd-binary-url', type=str)
+    hard_reset_parser.add_argument('--uncd-upgrade-binary-url', type=str)
     hard_reset_parser.set_defaults(func=hard_reset_cmd)
 
     new_test_parser = subparsers.add_parser('new-test',
                                             help='''
     Sets up new state from the prepared records and genesis files with the number
-    of validators specified. This calls neard amend-genesis to create the new genesis
-    and records files, and then starts the neard nodes and waits for them to be online
+    of validators specified. This calls uncd amend-genesis to create the new genesis
+    and records files, and then starts the uncd nodes and waits for them to be online
     after computing the genesis state roots. This step takes a long time (a few hours).
     ''')
     new_test_parser.add_argument('--epoch-length', type=int)
@@ -496,7 +496,7 @@ if __name__ == '__main__':
     start_traffic_parser = subparsers.add_parser(
         'start-traffic',
         help=
-        'Starts all nodes and starts neard mirror run on the traffic generator.'
+        'Starts all nodes and starts uncd mirror run on the traffic generator.'
     )
     start_traffic_parser.set_defaults(func=start_traffic_cmd)
 
@@ -506,7 +506,7 @@ if __name__ == '__main__':
     start_nodes_parser.set_defaults(func=start_nodes_cmd)
 
     stop_parser = subparsers.add_parser('stop-nodes',
-                                        help='kill all neard processes')
+                                        help='kill all uncd processes')
     stop_parser.set_defaults(func=stop_nodes_cmd)
 
     stop_parser = subparsers.add_parser(
@@ -524,13 +524,13 @@ if __name__ == '__main__':
     reset_parser.set_defaults(func=reset_cmd)
 
     # It re-uses the same binary urls because it's quite easy to do it with the
-    # nearcore-release buildkite and urls in the following format without commit
+    # framework-release buildkite and urls in the following format without commit
     # but only with the branch name:
-    # https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore/Linux/<branch-name>/neard"
+    # https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework/Linux/<branch-name>/uncd"
     update_binaries_parser = subparsers.add_parser(
         'update-binaries',
         help=
-        'Update the neard binaries by re-downloading them. The same urls are used.'
+        'Update the uncd binaries by re-downloading them. The same urls are used.'
     )
     update_binaries_parser.set_defaults(func=update_binaries_cmd)
 

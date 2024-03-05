@@ -95,7 +95,7 @@ class RecompressStorageTestCase(unittest.TestCase):
 
     def _call(self, node: cluster.LocalNode, prefix: str, *args:
               typing.Union[str, pathlib.Path]) -> None:
-        """Calls node’s neard with given arguments."""
+        """Calls node’s uncd with given arguments."""
         node_dir = pathlib.Path(node.node_dir)
         cmd = [
             pathlib.Path(node.near_root) / node.binary_name,

@@ -14,8 +14,8 @@ use near_primitives::transaction::{
 use near_primitives::types::{BlockHeightDelta, Gas, TrieNodesCount};
 use near_primitives::version::{ProtocolFeature, ProtocolVersion};
 use near_primitives::views::FinalExecutionStatus;
-use nearcore::config::GenesisExt;
-use nearcore::test_utils::TestEnvNightshadeSetupExt;
+use framework::config::GenesisExt;
+use framework::test_utils::TestEnvNightshadeSetupExt;
 
 fn process_transaction(
     env: &mut TestEnv,
