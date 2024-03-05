@@ -1,4 +1,4 @@
-name: Neard binary and Docker image release
+name: Uncd binary and Docker image release
 
 on:
   # Run when a new release or rc is created
@@ -40,7 +40,7 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch'}}
         uses: actions/checkout@v4
 
-      - name: Neard binary build and upload to S3
+      - name: Uncd binary build and upload to S3
         run: ./scripts/binary_release.sh
 
       - name: Update latest version metadata in S3

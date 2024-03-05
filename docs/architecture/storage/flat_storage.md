@@ -20,7 +20,7 @@ oversimplification.
 
 ## Time dimension of the state
 
-The blockchain state is modified with every chunk. Neard must be able to travel
+The blockchain state is modified with every chunk. Uncd must be able to travel
 back in time and resolve key lookups for older versions, as well as travel to
 alternative universes to resolve requests for chunks that belong to a different
 fork.

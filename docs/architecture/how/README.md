@@ -8,7 +8,7 @@ of framework, please refer to this [document](../).
 ## High level overview
 
 On the high level, uncd is a daemon that periodically receives messages from
-the network and sends messages to peers based on different triggers. Neard is
+the network and sends messages to peers based on different triggers. Uncd is
 implemented using an [actor
 framework](https://en.wikipedia.org/wiki/Actor_model) called
 [actix](https://docs.rs/actix).

@@ -1,4 +1,4 @@
-name: Neard Assertion binary release
+name: Uncd Assertion binary release
 
 on:
   schedule:
@@ -37,7 +37,7 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch'}}
         uses: actions/checkout@v4
 
-      - name: Neard binary build and upload to S3
+      - name: Uncd binary build and upload to S3
         run: ./scripts/binary_release.sh assertions-release
 
       - name: Update latest version metadata in S3

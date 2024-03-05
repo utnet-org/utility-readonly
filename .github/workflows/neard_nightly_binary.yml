@@ -1,4 +1,4 @@
-name: Neard Nightly binary release
+name: Uncd Nightly binary release
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Neard binary build and upload to S3
+      - name: Uncd binary build and upload to S3
         run: ./scripts/binary_release.sh nightly-release
 
       - name: Update latest version metadata in S3
