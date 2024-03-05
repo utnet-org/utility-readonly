@@ -2,14 +2,14 @@ use crate::network_protocol::StateResponseInfo;
 
 use crate::types::{NetworkInfo, ReasonForBan};
 
-use near_primitives::block::{Approval, Block, BlockHeader};
-use near_primitives::challenge::Challenge;
-use near_primitives::chunk_validation::{ChunkEndorsement, ChunkStateWitness};
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, EpochId, ShardId};
-use near_primitives::views::FinalExecutionOutcomeView;
+use unc_primitives::block::{Approval, Block, BlockHeader};
+use unc_primitives::challenge::Challenge;
+use unc_primitives::chunk_validation::{ChunkEndorsement, ChunkStateWitness};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, EpochId, ShardId};
+use unc_primitives::views::FinalExecutionOutcomeView;
 
 /// A strongly typed asynchronous API for the Client logic.
 /// It abstracts away the fact that client is implemented using actix

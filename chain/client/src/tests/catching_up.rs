@@ -9,22 +9,22 @@ use futures::{future, FutureExt};
 use crate::adapter::ProcessTxRequest;
 use crate::test_utils::{setup_mock_all_validators, ActorHandlesForTesting};
 use crate::{ClientActor, Query};
-use near_actix_test_utils::run_actix;
-use near_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
-use near_chain_configs::TEST_STATE_SYNC_TIMEOUT;
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::types::PeerInfo;
-use near_network::types::{NetworkRequests, NetworkResponses, PeerManagerMessageRequest};
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::{hash as hash_func, CryptoHash};
-use near_primitives::network::PeerId;
-use near_primitives::receipt::Receipt;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, BlockHeight, BlockHeightDelta, BlockReference};
-use near_primitives::views::QueryRequest;
-use near_primitives::views::QueryResponseKind::ViewAccount;
+use unc_actix_test_utils::run_actix;
+use unc_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
+use unc_chain_configs::TEST_STATE_SYNC_TIMEOUT;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::types::PeerInfo;
+use unc_network::types::{NetworkRequests, NetworkResponses, PeerManagerMessageRequest};
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::{hash as hash_func, CryptoHash};
+use unc_primitives::network::PeerId;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, BlockHeight, BlockHeightDelta, BlockReference};
+use unc_primitives::views::QueryRequest;
+use unc_primitives::views::QueryResponseKind::ViewAccount;
 
 fn get_validators_and_key_pairs() -> (ValidatorSchedule, Vec<PeerInfo>) {
     let vs = ValidatorSchedule::new().num_shards(4).block_producers_per_epoch(vec![
@@ -359,7 +359,7 @@ fn test_catchup_receipts_sync_common(wait_till: u64, send: u64, sync_hold: bool)
             max_wait_ms *= TEST_STATE_SYNC_TIMEOUT as u64;
         }
 
-        near_network::test_utils::wait_or_panic(max_wait_ms);
+        unc_network::test_utils::wait_or_panic(max_wait_ms);
     });
 }
 
@@ -596,7 +596,7 @@ fn test_catchup_random_single_part_sync_common(skip_15: bool, non_zero: bool, he
         );
         *connectors.write().unwrap() = conn;
 
-        near_network::test_utils::wait_or_panic(480000);
+        unc_network::test_utils::wait_or_panic(480000);
     });
 }
 
@@ -668,7 +668,7 @@ fn test_catchup_sanity_blocks_produced() {
         );
         *connectors.write().unwrap() = conn;
 
-        near_network::test_utils::wait_or_panic(60000);
+        unc_network::test_utils::wait_or_panic(60000);
     });
 }
 
@@ -802,6 +802,6 @@ fn test_all_chunks_accepted_common(
         *connectors.write().unwrap() = conn;
         let max_wait_ms = block_prod_time * last_height / 10 * 18 + 20000;
 
-        near_network::test_utils::wait_or_panic(max_wait_ms);
+        unc_network::test_utils::wait_or_panic(max_wait_ms);
     });
 }

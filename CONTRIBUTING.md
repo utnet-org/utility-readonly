@@ -36,7 +36,7 @@ $ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
 
 The RPC is documented [here](https://docs.near.org/api/rpc/introduction), and
 can be conveniently accessed from the command line [NEAR
-CLI](https://docs.near.org/tools/near-cli) utility.
+CLI](https://docs.near.org/tools/unc-cli) utility.
 
 ## Next Steps
 

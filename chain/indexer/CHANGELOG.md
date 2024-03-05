@@ -7,7 +7,7 @@
 ## 1.26.0
 
 * `state_changes` field is moved from the top-level `StreamerMessage` to `IndexerShard` struct to align better with the sharded nature of NEAR protocol. In the future, when framework will be able to track only a subset of shards, this API will work naturally, so we take pro-active measures to solidify the APIs
-* All the NEAR Indexer Framework types were extracted to a separate crate `near-indexer-primitives`
+* All the NEAR Indexer Framework types were extracted to a separate crate `unc-indexer-primitives`
 * Increase the streamer size from 16 to 100 in order to increase the speed of streaming messages (affects reindexing jobs)
 
 ## Breaking changes
@@ -28,7 +28,7 @@ to the specific shard.
 
 ## Breaking changes
 
-Since the change of reading genesis method to optimize memory usage. You'd be able to iterate over genesis records with `near_config.genesis.for_each_record(|record| {...})`. Nothing is changed for you your indexer does nothing about genesis records.
+Since the change of reading genesis method to optimize memory usage. You'd be able to iterate over genesis records with `unc_config.genesis.for_each_record(|record| {...})`. Nothing is changed for you your indexer does nothing about genesis records.
 
 ## 0.9.2
 

@@ -1,5 +1,5 @@
 [package]
-name = "near-rpc-error-macro"
+name = "unc-rpc-error-macro"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -20,8 +20,8 @@ serde_json = { workspace = true, optional = true, features = ["preserve_order"] 
 syn.workspace = true
 fs2.workspace = true
 
-near-rpc-error-core.workspace = true
+unc-rpc-error-core.workspace = true
 
 [features]
 test = []
-dump_errors_schema = ["near-rpc-error-core/dump_errors_schema", "serde_json"]
+dump_errors_schema = ["unc-rpc-error-core/dump_errors_schema", "serde_json"]

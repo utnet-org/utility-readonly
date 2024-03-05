@@ -1,9 +1,9 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use near_primitives::hash::hash;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::{FlatStateValue, ValueRef};
-use near_primitives::types::{BlockHeight, RawStateChangesWithTrieKey};
+use unc_primitives::hash::hash;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::{FlatStateValue, ValueRef};
+use unc_primitives::types::{BlockHeight, RawStateChangesWithTrieKey};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -62,7 +62,7 @@ where
 impl std::fmt::Debug for FlatStateChanges {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FlatStateChanges")
-            .field("changes", &near_fmt::Slice(&Vec::from_iter(self.0.iter())))
+            .field("changes", &unc_fmt::Slice(&Vec::from_iter(self.0.iter())))
             .finish()
     }
 }
@@ -173,9 +173,9 @@ impl CachedFlatStateChanges {
 #[cfg(test)]
 mod tests {
     use super::FlatStateChanges;
-    use near_primitives::state::FlatStateValue;
-    use near_primitives::trie_key::TrieKey;
-    use near_primitives::types::{RawStateChange, RawStateChangesWithTrieKey, StateChangeCause};
+    use unc_primitives::state::FlatStateValue;
+    use unc_primitives::trie_key::TrieKey;
+    use unc_primitives::types::{RawStateChange, RawStateChangesWithTrieKey, StateChangeCause};
 
     /// Check correctness of creating `FlatStateChanges` from state changes.
     #[test]

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use syn::{parse_macro_input, DeriveInput};
 
-use near_rpc_error_core::{parse_error_type, ErrorType};
+use unc_rpc_error_core::{parse_error_type, ErrorType};
 
 thread_local!(static SCHEMA: RefCell<Schema> = RefCell::new(Schema::default()));
 

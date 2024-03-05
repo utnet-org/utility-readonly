@@ -2,13 +2,13 @@ use crate::test_helpers::heavy_test;
 use actix::Addr;
 use actix_rt::ArbiterHandle;
 use futures::future;
-use near_actix_test_utils::{run_actix, spawn_interruptible};
-use near_chain_configs::Genesis;
-use near_client::{ClientActor, ViewClientActor};
-use near_network::tcp;
-use near_network::test_utils::convert_boot_nodes;
-use near_o11y::testonly::init_integration_logger;
-use near_primitives::types::{BlockHeight, BlockHeightDelta, NumSeats, NumShards};
+use unc_actix_test_utils::{run_actix, spawn_interruptible};
+use unc_chain_configs::Genesis;
+use unc_client::{ClientActor, ViewClientActor};
+use unc_network::tcp;
+use unc_network::test_utils::convert_boot_nodes;
+use unc_o11y::testonly::init_integration_logger;
+use unc_primitives::types::{BlockHeight, BlockHeightDelta, NumSeats, NumShards};
 use framework::{config::GenesisExt, load_test_config, start_with_config};
 
 fn start_nodes(
@@ -33,35 +33,35 @@ fn start_nodes(
     genesis.config.genesis_height = genesis_height;
 
     let validators = (0..num_validator_seats).map(|i| format!("near.{}", i)).collect::<Vec<_>>();
-    let mut near_configs = vec![];
+    let mut unc_configs = vec![];
     let first_node = tcp::ListenerAddr::reserve_for_test();
     let mut rpc_addrs = vec![];
     for i in 0..num_nodes {
-        let mut near_config = load_test_config(
+        let mut unc_config = load_test_config(
             validators.get(i as usize).map(String::as_str).unwrap_or(""),
             if i == 0 { first_node } else { tcp::ListenerAddr::reserve_for_test() },
             genesis.clone(),
         );
-        rpc_addrs.push(near_config.rpc_addr().unwrap().to_owned());
-        near_config.client_config.min_num_peers = (num_nodes as usize) - 1;
+        rpc_addrs.push(unc_config.rpc_addr().unwrap().to_owned());
+        unc_config.client_config.min_num_peers = (num_nodes as usize) - 1;
         if i > 0 {
-            near_config.network_config.peer_store.boot_nodes =
+            unc_config.network_config.peer_store.boot_nodes =
                 convert_boot_nodes(vec![("near.0", *first_node)]);
         }
         // if non validator, track all shards
         if i >= num_validator_seats && i < num_tracking_nodes {
-            near_config.client_config.tracked_shards = vec![0];
+            unc_config.client_config.tracked_shards = vec![0];
         }
-        near_config.client_config.epoch_sync_enabled = false;
-        near_configs.push(near_config);
+        unc_config.client_config.epoch_sync_enabled = false;
+        unc_configs.push(unc_config);
     }
 
     let mut res = vec![];
-    for (i, near_config) in near_configs.into_iter().enumerate() {
+    for (i, unc_config) in unc_configs.into_iter().enumerate() {
         let dir = temp_dir.join(format!("node{i}"));
         std::fs::create_dir(&dir).unwrap();
         let framework::NearNode { client, view_client, arbiters, .. } =
-            start_with_config(&dir, near_config).expect("start_with_config");
+            start_with_config(&dir, unc_config).expect("start_with_config");
         res.push((client, view_client, arbiters))
     }
     (genesis, rpc_addrs, res)
@@ -112,7 +112,7 @@ impl NodeCluster {
     where
         R: future::Future<Output = ()> + 'static,
         F: FnOnce(
-            near_chain_configs::Genesis,
+            unc_chain_configs::Genesis,
             Vec<String>,
             Vec<(
                 actix::Addr<ClientActor>,

@@ -15,11 +15,11 @@ workspace = true
 clap.workspace = true
 tokio.workspace = true
 
-near-crypto.workspace = true
-near-primitives.workspace = true
-near-jsonrpc-client.workspace = true
+unc-crypto.workspace = true
+unc-primitives.workspace = true
+unc-jsonrpc-client.workspace = true
 framework.workspace = true
-near-o11y.workspace = true
+unc-o11y.workspace = true
 
 integration-tests.workspace = true
 

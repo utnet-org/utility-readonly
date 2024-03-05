@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::types::{ValidatorId};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::types::Balance;
+use unc_primitives_core::types::Balance;
 use rand::{seq::SliceRandom, Rng};
 use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
@@ -269,8 +269,8 @@ impl ShuffledShardIds {
 mod tests {
     use std::collections::HashMap;
 
-    use near_crypto::PublicKey;
-    use near_primitives_core::types::Balance;
+    use unc_crypto::PublicKey;
+    use unc_primitives_core::types::Balance;
     use rand::SeedableRng;
     use rand_chacha::ChaCha8Rng;
 
@@ -313,7 +313,7 @@ mod tests {
         let new_vs = |account_id: &str, balance: Balance| -> ValidatorStake {
             ValidatorStake::new(
                 account_id.parse().unwrap(),
-                PublicKey::empty(near_crypto::KeyType::ED25519),
+                PublicKey::empty(unc_crypto::KeyType::ED25519),
                 balance,
             )
         };

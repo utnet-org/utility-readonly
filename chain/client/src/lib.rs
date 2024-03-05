@@ -1,4 +1,4 @@
-pub use near_client_primitives::types::{
+pub use unc_client_primitives::types::{
     Error, GetBlock, GetBlockProof, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunk,
     GetClientConfig, GetExecutionOutcome, GetExecutionOutcomeResponse,
     GetExecutionOutcomesForBlock, GetGasPrice, GetMaintenanceWindows, GetNetworkInfo,
@@ -18,7 +18,7 @@ pub use crate::client_actor::{start_client, ClientActor};
 pub use crate::config_updater::ConfigUpdater;
 pub use crate::sync::adapter::{SyncAdapter, SyncMessage};
 pub use crate::view_client::{start_view_client, ViewClientActor};
-pub use near_client_primitives::debug::DebugStatus;
+pub use unc_client_primitives::debug::DebugStatus;
 
 pub mod adapter;
 pub mod adversarial;

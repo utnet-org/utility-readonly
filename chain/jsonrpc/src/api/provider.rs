@@ -1,8 +1,8 @@
 use serde_json::Value;
 
-use near_client_primitives::types::{GetProviderError, GetProviderInfoError};
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::provider::{
+use unc_client_primitives::types::{GetProviderError, GetProviderInfoError};
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::provider::{
     RpcProviderError, RpcProviderRequest,
 };
 

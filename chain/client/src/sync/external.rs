@@ -1,6 +1,6 @@
 use crate::metrics;
 use futures::TryStreamExt;
-use near_primitives::types::{EpochId, ShardId};
+use unc_primitives::types::{EpochId, ShardId};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -331,7 +331,7 @@ mod test {
         get_num_parts_from_filename, get_part_id_from_filename, is_part_filename, part_filename,
         ExternalConnection,
     };
-    use near_o11y::testonly::init_test_logger;
+    use unc_o11y::testonly::init_test_logger;
     use rand::distributions::{Alphanumeric, DistString};
 
     fn random_string(rand_len: usize) -> String {

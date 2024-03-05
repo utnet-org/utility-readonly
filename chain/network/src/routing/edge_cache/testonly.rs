@@ -1,6 +1,6 @@
 use crate::routing::edge_cache::{EdgeCache, EdgeKey};
 use crate::types::Edge;
-use near_primitives::network::PeerId;
+use unc_primitives::network::PeerId;
 
 impl EdgeCache {
     pub(crate) fn is_active(&self, edge: &Edge) -> bool {

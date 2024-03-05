@@ -4,25 +4,25 @@ pub mod state_dump;
 
 use crate::state_dump::StateDump;
 use indicatif::{ProgressBar, ProgressStyle};
-use near_chain::types::RuntimeAdapter;
-use near_chain::{Block, Chain, ChainStore};
-use near_chain_configs::Genesis;
-use near_crypto::{InMemorySigner, KeyType};
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::block::{genesis_chunks, Tip};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::shard_layout::{account_id_to_shard_id, ShardUId};
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::chunk_extra::ChunkExtra;
-use near_primitives::types::{AccountId, Balance, EpochId, ShardId, StateChangeCause, StateRoot};
-use near_store::genesis::{compute_storage_usage, initialize_genesis_state};
-use near_store::{
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{Block, Chain, ChainStore};
+use unc_chain_configs::Genesis;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::block::{genesis_chunks, Tip};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::shard_layout::{account_id_to_shard_id, ShardUId};
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::chunk_extra::ChunkExtra;
+use unc_primitives::types::{AccountId, Balance, EpochId, ShardId, StateChangeCause, StateRoot};
+use unc_store::genesis::{compute_storage_usage, initialize_genesis_state};
+use unc_store::{
     get_account, get_genesis_state_roots, set_access_key, set_account, set_code, Store, TrieUpdate,
 };
-use near_vm_runner::ContractCode;
-use framework::{NearConfig, NightshadeRuntime};
+use unc_vm_runner::ContractCode;
+use framework::{UncConfig, NightshadeRuntime};
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
@@ -50,7 +50,7 @@ pub fn get_account_id(account_index: u64) -> AccountId {
     let hash = hasher.finish();
     // Some estimations rely on the account ID length being constant.
     // Pad booth numbers to length 20, the longest decimal representation of an u64.
-    AccountId::try_from(format!("{hash:020}_near_{account_index:020}")).unwrap()
+    AccountId::try_from(format!("{hash:020}_unc_{account_index:020}")).unwrap()
 }
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -77,7 +77,7 @@ pub struct GenesisBuilder {
 }
 
 impl GenesisBuilder {
-    pub fn from_config_and_store(home_dir: &Path, config: NearConfig, store: Store) -> Self {
+    pub fn from_config_and_store(home_dir: &Path, config: UncConfig, store: Store) -> Self {
         let tmpdir = tempfile::Builder::new().prefix("storage").tempdir().unwrap();
         initialize_genesis_state(store.clone(), &config.genesis, Some(tmpdir.path()));
         let epoch_manager = EpochManager::new_arc_handle(store.clone(), &config.genesis.config);
@@ -194,7 +194,7 @@ impl GenesisBuilder {
         let shard_uid = ShardUId { version: genesis_shard_version, shard_id: shard_idx as u32 };
         let mut store_update = tries.store_update();
         let root = tries.apply_all(&trie_changes, shard_uid, &mut store_update);
-        near_store::flat::FlatStateChanges::from_state_changes(&state_changes)
+        unc_store::flat::FlatStateChanges::from_state_changes(&state_changes)
             .apply_to_flat_state(&mut store_update, shard_uid);
         store_update.commit()?;
 

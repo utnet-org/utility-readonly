@@ -18,22 +18,22 @@ from mainnet
 The first step is to obtain an RPC node home directory for the chain
 you'd like to spoon. So if you want to use mainnet state, you can
 follow the instructions
-[here](https://near-nodes.io/rpc/run-rpc-node-without-nearup#5-get-data-backup-1)
+[here](https://unc-nodes.io/rpc/run-rpc-node-without-nearup#5-get-data-backup-1)
 to obtain a recent snapshot of a mainnet node's home directory. Once
 you have your node's home directory set up, run the following
 `state-viewer` command to generate a dump of the chain's state:
 
 ```shell
-$ uncd --home $NEAR_HOME_DIRECTORY view-state dump-state --stream
+$ uncd --home $unc_HOME_DIRECTORY view-state dump-state --stream
 ```
 
 This command will take a while (possibly many hours) to run. But at the
 end you should have `genesis.json` and `records.json` files in
-`$NEAR_HOME_DIRECTORY/output`. This records file represents all of the
+`$unc_HOME_DIRECTORY/output`. This records file represents all of the
 chain's current state, and is what we'll use to start our chain.
 
 From here, we need to make some changes to the `genesis.json` that was
-generated in `$NEAR_HOME_DIRECTORY/output`. To see why, note that the
+generated in `$unc_HOME_DIRECTORY/output`. To see why, note that the
 validators field of this genesis file lists all the current mainnet
 validators and their keys. So that means if we were to try and start a
 test chain from the generated genesis and records files as-is, it
@@ -75,8 +75,8 @@ These validator keys should be keys you've already generated. So for
 the rest of this document, we'll assume you've run:
 
 ```shell
-$ uncd --home ~/near-test-chain/validator0 init --account-id validator0.near
-$ uncd --home ~/near-test-chain/validator1 init --account-id validator1.near
+$ uncd --home ~/unc-test-chain/validator0 init --account-id validator0.near
+$ uncd --home ~/unc-test-chain/validator1 init --account-id validator1.near
 ```
 
 This is also a good time to think about what extra accounts you might
@@ -124,14 +124,14 @@ Now to make these changes to the genesis and records files, you can
 use the `uncd amend-genesis` command like so:
 
 ```shell
-# mkdir ~/near-test-chain/
-$ uncd amend-genesis --genesis-file-in $NEAR_HOME_DIRECTORY/output/genesis.json --records-file-in $NEAR_HOME_DIRECTORY/output/records.json --validators ~/test-chain-scratch/validators.json --extra-records ~/test-chain-scratch/extra-records.json --chain-id $TEST_CHAIN_ID --records-file-out ~/near-test-chain/records.json --genesis-file-out ~/near-test-chain/genesis.json
+# mkdir ~/unc-test-chain/
+$ uncd amend-genesis --genesis-file-in $unc_HOME_DIRECTORY/output/genesis.json --records-file-in $unc_HOME_DIRECTORY/output/records.json --validators ~/test-chain-scratch/validators.json --extra-records ~/test-chain-scratch/extra-records.json --chain-id $TEST_CHAIN_ID --records-file-out ~/unc-test-chain/records.json --genesis-file-out ~/unc-test-chain/genesis.json
 ```
 
 ## Starting the network
 
 After running the previous steps you should have the files
-`genesis.json` and `records.json` in `~/near-test-chain/`. Assuming
+`genesis.json` and `records.json` in `~/unc-test-chain/`. Assuming
 you've started it with the two validators `validator0.near` and
 `validator1.near` as described above, you'll want to run at least two
 nodes, one for each of these validator accounts. If you're working
@@ -146,17 +146,17 @@ copy the records and genesis files generated in the previous step to
 each of these:
 
 ```shell
-$ cp ~/near-test-chain/records.json ~/near-test-chain/validator0
-$ cp ~/near-test-chain/genesis.json ~/near-test-chain/validator0
-$ cp ~/near-test-chain/records.json ~/near-test-chain/validator1
-$ cp ~/near-test-chain/genesis.json ~/near-test-chain/validator1
+$ cp ~/unc-test-chain/records.json ~/unc-test-chain/validator0
+$ cp ~/unc-test-chain/genesis.json ~/unc-test-chain/validator0
+$ cp ~/unc-test-chain/records.json ~/unc-test-chain/validator1
+$ cp ~/unc-test-chain/genesis.json ~/unc-test-chain/validator1
 ```
 
 Now we'll need to make a few config changes to each of
-`~/near-test-chain/validator0/config.json` and
-`~/near-test-chain/validator1/config.json`:
+`~/unc-test-chain/validator0/config.json` and
+`~/unc-test-chain/validator1/config.json`:
 
-changes to `~/near-test-chain/validator0/config.json`:
+changes to `~/unc-test-chain/validator0/config.json`:
 
 ```json
 {
@@ -176,7 +176,7 @@ changes to `~/near-test-chain/validator0/config.json`:
 }
 ```
 
-changes to `~/near-test-chain/validator1/config.json`:
+changes to `~/unc-test-chain/validator1/config.json`:
 
 ```json
 {
@@ -212,8 +212,8 @@ After making these changes, you can try running one uncd process for
 each of your validators:
 
 ```shell
-$ uncd --home ~/near-test-chain/validator0 run
-$ uncd --home ~/near-test-chain/validator1 run
+$ uncd --home ~/unc-test-chain/validator0 run
+$ uncd --home ~/unc-test-chain/validator1 run
 ```
 
 Now these nodes will begin by taking the records laid out in

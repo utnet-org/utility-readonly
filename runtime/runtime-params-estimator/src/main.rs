@@ -2,9 +2,9 @@
 
 use anyhow::Context;
 use genesis_populate::GenesisBuilder;
-use near_chain_configs::GenesisValidationMode;
-use near_parameters::vm::VMKind;
-use near_parameters::RuntimeConfigView;
+use unc_chain_configs::GenesisValidationMode;
+use unc_parameters::vm::VMKind;
+use unc_parameters::RuntimeConfigView;
 use replay::ReplayCmd;
 use runtime_params_estimator::config::{Config, GasMetric};
 use runtime_params_estimator::{
@@ -160,7 +160,7 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         // example.) But this is generally a sign of a badly designed
         // estimation, therefore we make no effort to guarantee a fixed size.
         // Also, continuous estimation should be able to pick up such changes.
-        let contract_code = near_test_contracts::estimator_contract();
+        let contract_code = unc_test_contracts::estimator_contract();
 
         framework::init_configs(
             &state_dump_path,
@@ -180,18 +180,18 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         )
         .expect("failed to init config");
 
-        let near_config = framework::load_config(&state_dump_path, GenesisValidationMode::Full)
+        let unc_config = framework::load_config(&state_dump_path, GenesisValidationMode::Full)
             .context("Error loading config")?;
-        let store = near_store::NodeStorage::opener(
+        let store = unc_store::NodeStorage::opener(
             &state_dump_path,
-            near_config.config.archive,
-            &near_config.config.store,
+            unc_config.config.archive,
+            &unc_config.config.store,
             None,
         )
         .open()
         .unwrap()
         .get_hot_store();
-        GenesisBuilder::from_config_and_store(&state_dump_path, near_config, store)
+        GenesisBuilder::from_config_and_store(&state_dump_path, unc_config, store)
             .add_additional_accounts(cli_args.additional_accounts_num)
             .add_additional_accounts_contract(contract_code.to_vec())
             .print_progress()
@@ -257,7 +257,7 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         let subscriber = subscriber.with(cli_args.record_io_trace.map(|path| {
             let log_file =
                 fs::File::create(path).expect("unable to create or truncate IO trace output file");
-            let (subscriber, guard) = near_o11y::make_io_tracing_layer(log_file);
+            let (subscriber, guard) = unc_o11y::make_io_tracing_layer(log_file);
             _maybe_writer_guard = Some(guard);
             subscriber
         }));

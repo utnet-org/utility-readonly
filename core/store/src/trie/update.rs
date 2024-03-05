@@ -2,8 +2,8 @@ pub use self::iterator::TrieUpdateIterator;
 use super::{OptimizedValueRef, Trie};
 use crate::trie::{KeyLookupMode, TrieChanges};
 use crate::StorageError;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{
     RawStateChange, RawStateChanges, RawStateChangesWithTrieKey, StateChangeCause, StateRoot,
     TrieCacheMode,
 };
@@ -170,7 +170,7 @@ mod tests {
     use super::*;
     use crate::test_utils::TestTriesBuilder;
     use crate::ShardUId;
-    use near_primitives::hash::CryptoHash;
+    use unc_primitives::hash::CryptoHash;
     const SHARD_VERSION: u32 = 1;
     const COMPLEX_SHARD_UID: ShardUId = ShardUId { version: SHARD_VERSION, shard_id: 0 };
 

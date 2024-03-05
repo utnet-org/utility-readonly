@@ -1,4 +1,4 @@
-use near_primitives::types::AccountId;
+use unc_primitives::types::AccountId;
 
 /// A multi-instance test using the TestLoop framework can support routing
 /// lookup for network messages, as long as the Data type contains AccountId.

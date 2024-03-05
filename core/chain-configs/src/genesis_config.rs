@@ -6,12 +6,12 @@
 use crate::genesis_validate::validate_genesis;
 use anyhow::Context;
 use chrono::{DateTime, Utc};
-use near_config_utils::ValidationError;
-use near_parameters::{RuntimeConfig, RuntimeConfigView};
-use near_primitives::epoch_manager::EpochConfig;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::StateRoot;
-use near_primitives::{
+use unc_config_utils::ValidationError;
+use unc_parameters::{RuntimeConfig, RuntimeConfigView};
+use unc_primitives::epoch_manager::EpochConfig;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::types::StateRoot;
+use unc_primitives::{
     hash::CryptoHash,
     serialize::dec_format,
     state_record::StateRecord,
@@ -32,7 +32,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 use tracing::warn;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 const MAX_GAS_PRICE: Balance = 10_000_000_000_000_000_000_000;
 
@@ -183,8 +183,8 @@ pub struct GenesisConfig {
 impl GenesisConfig {
     pub fn use_production_config(&self) -> bool {
         self.use_production_config
-            || self.chain_id == near_primitives::chains::TESTNET
-            || self.chain_id == near_primitives::chains::MAINNET
+            || self.chain_id == unc_primitives::chains::TESTNET
+            || self.chain_id == unc_primitives::chains::MAINNET
     }
 }
 
@@ -205,7 +205,7 @@ impl From<&GenesisConfig> for EpochConfig {
             protocol_upgrade_stake_threshold: config.protocol_upgrade_stake_threshold,
             minimum_stake_divisor: config.minimum_stake_divisor,
             shard_layout: config.shard_layout.clone(),
-            validator_selection_config: near_primitives::epoch_manager::ValidatorSelectionConfig {
+            validator_selection_config: unc_primitives::epoch_manager::ValidatorSelectionConfig {
                 num_chunk_only_producer_seats: config.num_chunk_only_producer_seats,
                 minimum_validators_per_shard: config.minimum_validators_per_shard,
                 minimum_stake_ratio: config.minimum_stake_ratio,
@@ -296,7 +296,7 @@ impl GenesisConfig {
     /// It panics if the contents cannot be parsed from JSON to the GenesisConfig structure.
     pub fn from_json(value: &str) -> Self {
         let json_str_without_comments: String =
-            near_config_utils::strip_comments_from_json_str(&value.to_string())
+            unc_config_utils::strip_comments_from_json_str(&value.to_string())
                 .expect("Failed to strip comments from genesis config.");
         serde_json::from_str(&json_str_without_comments)
             .expect("Failed to deserialize the genesis config.")
@@ -311,7 +311,7 @@ impl GenesisConfig {
         let mut json_str = String::new();
         file.read_to_string(&mut json_str)?;
         let json_str_without_comments: String =
-            near_config_utils::strip_comments_from_json_str(&json_str)?;
+            unc_config_utils::strip_comments_from_json_str(&json_str)?;
         let genesis_config: GenesisConfig = serde_json::from_str(&json_str_without_comments)
             .with_context(|| "Failed to deserialize the genesis config.")?;
         Ok(genesis_config)
@@ -360,7 +360,7 @@ impl GenesisRecords {
         file.read_to_string(&mut json_str)
             .expect("Failed to read the genesis config file to string. ");
         let json_str_without_comments: String =
-            near_config_utils::strip_comments_from_json_str(&json_str)
+            unc_config_utils::strip_comments_from_json_str(&json_str)
                 .expect("Failed to strip comments from Genesis config file.");
         serde_json::from_str(&json_str_without_comments)
             .expect("Failed to deserialize the genesis records.")
@@ -448,7 +448,7 @@ pub fn stream_records_from_file(
     reader: impl Read,
     mut callback: impl FnMut(StateRecord),
 ) -> serde_json::Result<()> {
-    let reader_without_comments = near_config_utils::strip_comments_from_json_reader(reader);
+    let reader_without_comments = unc_config_utils::strip_comments_from_json_reader(reader);
     let mut deserializer = serde_json::Deserializer::from_reader(reader_without_comments);
     let records_processor = RecordsProcessor { sink: &mut callback };
     deserializer.deserialize_any(records_processor)
@@ -538,7 +538,7 @@ impl Genesis {
             error_message: format!("Failed to read genesis config file to string: {:?}", e),
         })?;
 
-        let json_str_without_comments = near_config_utils::strip_comments_from_json_str(&json_str)
+        let json_str_without_comments = unc_config_utils::strip_comments_from_json_str(&json_str)
             .map_err(|e| ValidationError::GenesisFileError {
                 error_message: format!(
                     "Failed to strip comments from genesis config file: {:?}",
@@ -848,7 +848,7 @@ pub fn get_initial_supply(records: &[StateRecord]) -> Balance {
 mod test {
     use crate::genesis_config::RecordsProcessor;
     use crate::{Genesis, GenesisValidationMode};
-    use near_primitives::state_record::StateRecord;
+    use unc_primitives::state_record::StateRecord;
     use serde::Deserializer;
 
     fn stream_records_from_json_str(genesis: &str) -> serde_json::Result<()> {

@@ -4,11 +4,11 @@ use serde_json::Value;
 #[serde(untagged)]
 pub enum ChunkReference {
     BlockShardId {
-        block_id: near_primitives::types::BlockId,
-        shard_id: near_primitives::types::ShardId,
+        block_id: unc_primitives::types::BlockId,
+        shard_id: unc_primitives::types::ShardId,
     },
     ChunkHash {
-        chunk_id: near_primitives::hash::CryptoHash,
+        chunk_id: unc_primitives::hash::CryptoHash,
     },
 }
 
@@ -21,7 +21,7 @@ pub struct RpcChunkRequest {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcChunkResponse {
     #[serde(flatten)]
-    pub chunk_view: near_primitives::views::ChunkView,
+    pub chunk_view: unc_primitives::views::ChunkView,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
@@ -37,7 +37,7 @@ pub enum RpcChunkError {
     #[error("Shard id {shard_id} does not exist")]
     InvalidShardId { shard_id: u64 },
     #[error("Chunk with hash {chunk_hash:?} has never been observed on this node")]
-    UnknownChunk { chunk_hash: near_primitives::sharding::ChunkHash },
+    UnknownChunk { chunk_hash: unc_primitives::sharding::ChunkHash },
 }
 
 impl From<RpcChunkError> for crate::errors::RpcError {

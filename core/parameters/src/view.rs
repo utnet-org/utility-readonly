@@ -1,7 +1,7 @@
 use crate::{ActionCosts, ExtCosts, Fee, ParameterCost};
-use near_account_id::AccountId;
-use near_primitives_core::serialize::dec_format;
-use near_primitives_core::types::{Balance, Gas};
+use unc_account_id::AccountId;
+use unc_primitives_core::serialize::dec_format;
+use unc_primitives_core::types::{Balance, Gas};
 use num_rational::Rational32;
 
 /// View that preserves JSON format of the runtime config.
@@ -601,7 +601,7 @@ mod tests {
         use crate::view::RuntimeConfigView;
         use crate::RuntimeConfig;
         use crate::RuntimeConfigStore;
-        use near_primitives_core::version::PROTOCOL_VERSION;
+        use unc_primitives_core::version::PROTOCOL_VERSION;
 
         let config_store = RuntimeConfigStore::new(None);
         let config = config_store.get_config(PROTOCOL_VERSION);

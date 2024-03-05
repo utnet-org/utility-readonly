@@ -6,17 +6,17 @@ use futures::{future, FutureExt, TryFutureExt};
 
 use crate::genesis_helpers::genesis_block;
 use crate::tests::framework::node_cluster::NodeCluster;
-use near_actix_test_utils::spawn_interruptible;
-use near_client::GetBlock;
-use near_crypto::{InMemorySigner, KeyType};
-use near_jsonrpc::client::new_client;
-use near_network::test_utils::WaitOrTimeoutActor;
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
-use near_primitives::serialize::to_base64;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::BlockId;
+use unc_actix_test_utils::spawn_interruptible;
+use unc_client::GetBlock;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_jsonrpc::client::new_client;
+use unc_network::test_utils::WaitOrTimeoutActor;
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::serialize::to_base64;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::BlockId;
 
 // Queries json-rpc block that doesn't exists
 // Checks if the struct is expected and contains the proper data
@@ -108,7 +108,7 @@ fn test_chunk_unknown_chunk_error() {
                             let client = new_client(&format!("http://{}", rpc_addrs_copy[2]));
                             spawn_interruptible(
                                 client
-                                    .chunk(near_jsonrpc::client::ChunkId::Hash(
+                                    .chunk(unc_jsonrpc::client::ChunkId::Hash(
                                         CryptoHash::from_str(
                                             "3tMcx4KU2KvkwJPMWPXqK2MUU1FDVbigPFNiAeuVa7Tu",
                                         )
@@ -178,8 +178,8 @@ fn test_protocol_config_unknown_block_error() {
                             spawn_interruptible(
                                 client
                                     .EXPERIMENTAL_protocol_config(
-                                        near_jsonrpc_primitives::types::config::RpcProtocolConfigRequest {
-                                            block_reference: near_primitives::types::BlockReference::BlockId(BlockId::Height(block.header.height + 100))
+                                        unc_jsonrpc_primitives::types::config::RpcProtocolConfigRequest {
+                                            block_reference: unc_primitives::types::BlockReference::BlockId(BlockId::Height(block.header.height + 100))
                                         }
                                     )
                                     .map_err(|err| {
@@ -302,8 +302,8 @@ fn test_receipt_id_unknown_receipt_error() {
                             spawn_interruptible(
                                 client
                                     .EXPERIMENTAL_receipt(
-                                        near_jsonrpc_primitives::types::receipts::RpcReceiptRequest {
-                                            receipt_reference: near_jsonrpc_primitives::types::receipts::ReceiptReference {
+                                        unc_jsonrpc_primitives::types::receipts::RpcReceiptRequest {
+                                            receipt_reference: unc_jsonrpc_primitives::types::receipts::ReceiptReference {
                                             receipt_id: CryptoHash::from_str("3tMcx4KU2KvkwJPMWPXqK2MUU1FDVbigPFNiAeuVa7Tu").unwrap()
                                         }
                                         }
@@ -437,11 +437,11 @@ fn test_query_rpc_account_view_unknown_block_must_return_error() {
     cluster.exec_until_stop(|_, rpc_addrs, _| async move {
         let client = new_client(&format!("http://{}", rpc_addrs[0]));
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
-                block_reference: near_primitives::types::BlockReference::BlockId(BlockId::Height(
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
+                block_reference: unc_primitives::types::BlockReference::BlockId(BlockId::Height(
                     1,
                 )),
-                request: near_primitives::views::QueryRequest::ViewAccount {
+                request: unc_primitives::views::QueryRequest::ViewAccount {
                     account_id: "near.0".parse().unwrap(),
                 },
             })

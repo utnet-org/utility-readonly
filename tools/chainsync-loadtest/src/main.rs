@@ -3,27 +3,27 @@ mod fetch_chain;
 mod network;
 
 use anyhow::{anyhow, Context};
-use near_async::actix::AddrWithAutoSpanContextExt;
-use near_async::messaging::LateBoundSender;
-use near_async::messaging::Sender;
-use near_async::time;
-use near_chain_configs::Genesis;
-use near_network::concurrency::ctx;
-use near_network::concurrency::scope;
-use near_network::PeerManagerActor;
-use near_o11y::tracing::{error, info};
-use near_primitives::block::GenesisId;
-use near_primitives::hash::CryptoHash;
+use unc_async::actix::AddrWithAutoSpanContextExt;
+use unc_async::messaging::LateBoundSender;
+use unc_async::messaging::Sender;
+use unc_async::time;
+use unc_chain_configs::Genesis;
+use unc_network::concurrency::ctx;
+use unc_network::concurrency::scope;
+use unc_network::PeerManagerActor;
+use unc_o11y::tracing::{error, info};
+use unc_primitives::block::GenesisId;
+use unc_primitives::hash::CryptoHash;
 use framework::config;
-use framework::config::NearConfig;
+use framework::config::UncConfig;
 use network::Network;
 use openssl_probe;
 use std::sync::Arc;
 
 fn genesis_hash(chain_id: &str) -> CryptoHash {
     return match chain_id {
-        near_primitives::chains::MAINNET => "EPnLgE7iEq9s7yTkos96M3cWymH5avBAPm3qx3NXqR8H",
-        near_primitives::chains::TESTNET => "FWJ9kR6KFWoyMoNjpLXXGHeuiy7tEY6GmoFeCA5yuc6b",
+        unc_primitives::chains::MAINNET => "EPnLgE7iEq9s7yTkos96M3cWymH5avBAPm3qx3NXqR8H",
+        unc_primitives::chains::TESTNET => "FWJ9kR6KFWoyMoNjpLXXGHeuiy7tEY6GmoFeCA5yuc6b",
         _ => {
             return Default::default();
         }
@@ -32,13 +32,13 @@ fn genesis_hash(chain_id: &str) -> CryptoHash {
     .unwrap();
 }
 
-pub fn start_with_config(config: NearConfig, qps_limit: u32) -> anyhow::Result<Arc<Network>> {
+pub fn start_with_config(config: UncConfig, qps_limit: u32) -> anyhow::Result<Arc<Network>> {
     let network_adapter = Arc::new(LateBoundSender::default());
     let network = Network::new(&config, network_adapter.clone().into(), qps_limit);
 
     let network_actor = PeerManagerActor::spawn(
         time::Clock::real(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         config.network_config,
         network.clone(),
         Sender::noop(),
@@ -52,7 +52,7 @@ pub fn start_with_config(config: NearConfig, qps_limit: u32) -> anyhow::Result<A
     return Ok(network);
 }
 
-fn download_configs(chain_id: &str, dir: &std::path::Path) -> anyhow::Result<NearConfig> {
+fn download_configs(chain_id: &str, dir: &std::path::Path) -> anyhow::Result<UncConfig> {
     // Always fetch the config.
     std::fs::create_dir_all(dir)?;
     let url = config::get_config_url(chain_id);
@@ -63,10 +63,10 @@ fn download_configs(chain_id: &str, dir: &std::path::Path) -> anyhow::Result<Nea
     // Generate node key.
     let account_id = "node".parse().unwrap();
     let node_signer =
-        near_crypto::InMemorySigner::from_random(account_id, near_crypto::KeyType::ED25519);
+        unc_crypto::InMemorySigner::from_random(account_id, unc_crypto::KeyType::ED25519);
     let mut genesis = Genesis::default();
     genesis.config.chain_id = chain_id.to_string();
-    NearConfig::new(config, genesis, (&node_signer).into(), None)
+    UncConfig::new(config, genesis, (&node_signer).into(), None)
 }
 
 #[derive(clap::Parser, Debug)]
@@ -88,15 +88,15 @@ impl Cmd {
             cmd.start_block_hash.parse::<CryptoHash>().map_err(|x| anyhow!(x.to_string()))?;
 
         let mut cache_dir = dirs::cache_dir().context("dirs::cache_dir() = None")?;
-        cache_dir.push("near_configs");
+        cache_dir.push("unc_configs");
         cache_dir.push(&cmd.chain_id);
 
         info!("downloading configs for chain {}", cmd.chain_id);
         let home_dir = cache_dir.as_path();
-        let near_config =
+        let unc_config =
             download_configs(&cmd.chain_id, home_dir).context("Failed to initialize configs")?;
 
-        info!("#boot nodes = {}", near_config.network_config.peer_store.boot_nodes.len());
+        info!("#boot nodes = {}", unc_config.network_config.peer_store.boot_nodes.len());
         // Dropping Runtime is blocking, while futures should never be blocking.
         // Tokio has a runtime check which panics if you drop tokio Runtime from a future executed
         // on another Tokio runtime.
@@ -106,7 +106,7 @@ impl Cmd {
         let rt = rt_;
         return actix::System::new().block_on(async move {
             let network =
-                start_with_config(near_config, cmd.qps_limit).context("start_with_config")?;
+                start_with_config(unc_config, cmd.qps_limit).context("start_with_config")?;
 
             // We execute the chain_sync on a totally separate set of system threads to minimize
             // the interaction with actix.
@@ -134,11 +134,11 @@ impl Cmd {
 }
 
 fn main() {
-    let env_filter = near_o11y::EnvFilterBuilder::from_env()
+    let env_filter = unc_o11y::EnvFilterBuilder::from_env()
         .finish()
         .unwrap()
-        .add_directive(near_o11y::tracing::Level::INFO.into());
-    let _subscriber = near_o11y::default_subscriber(env_filter, &Default::default()).global();
+        .add_directive(unc_o11y::tracing::Level::INFO.into());
+    let _subscriber = unc_o11y::default_subscriber(env_filter, &Default::default()).global();
     let orig_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
         orig_hook(panic_info);

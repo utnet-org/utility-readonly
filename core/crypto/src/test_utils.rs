@@ -2,7 +2,7 @@ use secp256k1::rand::SeedableRng;
 
 use crate::signature::{ED25519PublicKey, ED25519SecretKey, KeyType, PRIVTAE_KEY_DEFAULT_RSA_KEY_BITS, PublicKey, SecretKey};
 use crate::{InMemorySigner, Signature};
-use near_account_id::AccountId;
+use unc_account_id::AccountId;
 
 fn ed25519_key_pair_from_seed(seed: &str) -> ed25519_dalek::SigningKey {
     let seed_bytes = seed.as_bytes();

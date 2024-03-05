@@ -71,7 +71,7 @@ class InitSweat(FunctionCall):
         # As an example, the postfix can be `.u.sweat.testnet`.
         #
         # Source code for reference:
-        # https://github.com/sweatco/near-sdk-rs/blob/af6ba3cb75e0bbfc26e346e61aa3a0d1d7f5ac7b/near-contract-standards/src/fungible_token/core_impl.rs#L249-L259
+        # https://github.com/sweatco/unc-sdk-rs/blob/af6ba3cb75e0bbfc26e346e61aa3a0d1d7f5ac7b/unc-contract-standards/src/fungible_token/core_impl.rs#L249-L259
         #
         # Here we don't provide a postfix, so everything will be hashed. This is
         # fine for new contracts we create. And when we reuse a contract, we

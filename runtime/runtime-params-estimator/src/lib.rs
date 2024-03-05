@@ -98,19 +98,19 @@ use crate::vm_estimator::create_context;
 use estimator_params::sha256_cost;
 use gas_cost::{LeastSquaresTolerance, NonNegativeTolerance};
 use gas_metering::gas_metering_cost;
-use near_crypto::{KeyType, SecretKey};
-use near_parameters::{ExtCosts, RuntimeConfigStore, RuntimeFeesConfig};
-use near_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
-use near_primitives::transaction::{
+use unc_crypto::{KeyType, SecretKey};
+use unc_parameters::{ExtCosts, RuntimeConfigStore, RuntimeFeesConfig};
+use unc_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
+use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, SignedTransaction, StakeAction, TransferAction,
 };
-use near_primitives::types::AccountId;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_vm_runner::internal::VMKindExt;
-use near_vm_runner::logic::mocks::mock_external::MockedExternal;
-use near_vm_runner::ContractCode;
-use near_vm_runner::MockCompiledContractCache;
+use unc_primitives::types::AccountId;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_vm_runner::internal::VMKindExt;
+use unc_vm_runner::logic::mocks::mock_external::MockedExternal;
+use unc_vm_runner::ContractCode;
+use unc_vm_runner::MockCompiledContractCache;
 use serde_json::json;
 use std::convert::TryFrom;
 use std::iter;
@@ -568,7 +568,7 @@ fn action_deploy_contract_base(ctx: &mut EstimatorContext) -> GasCost {
     }
 
     let cost = {
-        let code = near_test_contracts::smallest_rs_contract();
+        let code = unc_test_contracts::smallest_rs_contract();
         deploy_contract_cost(ctx, code.to_vec(), Some(b"sum"))
     };
 
@@ -683,7 +683,7 @@ fn contract_compile_base_per_byte_v2(ctx: &mut EstimatorContext) -> (GasCost, Ga
         return costs;
     }
 
-    let smallest_contract = near_test_contracts::smallest_rs_contract();
+    let smallest_contract = unc_test_contracts::smallest_rs_contract();
     let smallest_cost =
         compile_single_contract_cost(ctx.config.metric, ctx.config.vm_kind, smallest_contract);
     let smallest_size = smallest_contract.len() as u64;
@@ -864,7 +864,7 @@ fn host_function_call(ctx: &mut EstimatorContext) -> GasCost {
 fn wasm_instruction(ctx: &mut EstimatorContext) -> GasCost {
     let vm_kind = ctx.config.vm_kind;
 
-    let code = near_test_contracts::estimator_contract();
+    let code = unc_test_contracts::estimator_contract();
 
     let n_iters = 10;
 

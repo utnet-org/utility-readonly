@@ -187,11 +187,11 @@ class BaseNode(object):
         raise NotImplementedError('change_config not supported by ' + name)
 
     def _get_command_line(self,
-                          near_root,
+                          unc_root,
                           node_dir,
                           boot_node: BootNode,
                           binary_name='uncd'):
-        cmd = (os.path.join(near_root, binary_name), '--home', node_dir, 'run')
+        cmd = (os.path.join(unc_root, binary_name), '--home', node_dir, 'run')
         return cmd + make_boot_nodes_arg(boot_node)
 
     def addr_with_pk(self) -> str:
@@ -386,7 +386,7 @@ class LocalNode(BaseNode):
     def __init__(self,
                  port,
                  rpc_port,
-                 near_root,
+                 unc_root,
                  node_dir,
                  blacklist,
                  binary_name=None,
@@ -394,7 +394,7 @@ class LocalNode(BaseNode):
         super(LocalNode, self).__init__()
         self.port = port
         self.rpc_port = rpc_port
-        self.near_root = str(near_root)
+        self.unc_root = str(unc_root)
         self.node_dir = node_dir
         self.binary_name = binary_name or 'uncd'
         self.cleaned = False
@@ -463,7 +463,7 @@ class LocalNode(BaseNode):
         env.update(extra_env)
 
         cmd = self._get_command_line(
-            self.near_root,
+            self.unc_root,
             self.node_dir,
             boot_node,
             self.binary_name,
@@ -679,7 +679,7 @@ chmod +x uncd
 
 
 def spin_up_node(config,
-                 near_root,
+                 unc_root,
                  node_dir,
                  ordinal,
                  *,
@@ -700,7 +700,7 @@ def spin_up_node(config,
             for bl_ordinal in blacklist
         ]
         node = LocalNode(24567 + 10 + ordinal, 3030 + 10 + ordinal,
-                         near_root, node_dir, blacklist,
+                         unc_root, node_dir, blacklist,
                          config.get('binary_name'), single_node)
     else:
         # TODO: Figure out how to know IP address beforehand for remote deployment.
@@ -708,7 +708,7 @@ def spin_up_node(config,
             blacklist) == 0, "Blacklist is only supported in LOCAL deployment."
 
         instance_name = '{}-{}-{}'.format(
-            config['remote'].get('instance_name', 'near-pytest'), ordinal,
+            config['remote'].get('instance_name', 'unc-pytest'), ordinal,
             uuid.uuid4())
         zones = config['remote']['zones']
         zone = zones[ordinal % len(zones)]
@@ -747,13 +747,13 @@ def init_cluster(num_nodes,
         sys.exit(1)
 
     is_local = config['local']
-    near_root = config['near_root']
+    unc_root = config['unc_root']
     binary_name = config.get('binary_name', 'uncd')
 
     logger.info("Creating %s cluster configuration with %s nodes" %
                 ("LOCAL" if is_local else "REMOTE", num_nodes + num_observers))
 
-    binary_path = os.path.join(near_root, binary_name)
+    binary_path = os.path.join(unc_root, binary_name)
     process = subprocess.Popen(
         [
             binary_path,
@@ -793,7 +793,7 @@ def init_cluster(num_nodes,
         if overrides:
             apply_config_changes(node_dir, overrides)
 
-    return near_root, node_dirs
+    return unc_root, node_dirs
 
 
 def apply_genesis_changes(node_dir, genesis_config_changes):
@@ -882,14 +882,14 @@ def start_cluster(num_nodes,
 
     dot_near = pathlib.Path.home() / '.near'
     if (dot_near / 'test0').exists():
-        near_root = config['near_root']
+        unc_root = config['unc_root']
         node_dirs = [
             str(dot_near / name)
             for name in os.listdir(dot_near)
             if name.startswith('test') and not name.endswith('_finished')
         ]
     else:
-        near_root, node_dirs = init_cluster(num_nodes, num_observers,
+        unc_root, node_dirs = init_cluster(num_nodes, num_observers,
                                             num_shards, config,
                                             genesis_config_changes,
                                             client_config_changes)
@@ -900,7 +900,7 @@ def start_cluster(num_nodes,
     def spin_up_node_and_push(i, boot_node: BootNode):
         single_node = (num_nodes == 1) and (num_observers == 0)
         node = spin_up_node(config,
-                            near_root,
+                            unc_root,
                             node_dirs[i],
                             i,
                             boot_node=boot_node,
@@ -932,19 +932,19 @@ def start_cluster(num_nodes,
 ROOT_DIR = pathlib.Path(__file__).resolve().parents[2]
 
 
-def get_near_root():
+def get_unc_root():
     cargo_target_dir = os.environ.get('CARGO_TARGET_DIR', 'target')
     default_root = (ROOT_DIR / cargo_target_dir / 'debug').resolve()
-    return os.environ.get('NEAR_ROOT', str(default_root))
+    return os.environ.get('unc_ROOT', str(default_root))
 
 
 DEFAULT_CONFIG = {
     'local': True,
-    'near_root': get_near_root(),
+    'unc_root': get_unc_root(),
     'binary_name': 'uncd',
     'release': False,
 }
-CONFIG_ENV_VAR = 'NEAR_PYTEST_CONFIG'
+CONFIG_ENV_VAR = 'unc_PYTEST_CONFIG'
 
 
 def load_config():
@@ -968,8 +968,8 @@ def load_config():
 # Returns the protocol version of the binary.
 def get_binary_protocol_version(config) -> typing.Optional[int]:
     binary_name = config.get('binary_name', 'uncd')
-    near_root = config.get('near_root')
-    binary_path = os.path.join(near_root, binary_name)
+    unc_root = config.get('unc_root')
+    binary_path = os.path.join(unc_root, binary_name)
 
     # Get the protocol version of the binary
     # The --version output looks like this:
@@ -986,9 +986,9 @@ def get_binary_protocol_version(config) -> typing.Optional[int]:
 
 
 def corrupt_state_snapshot(config, node_dir, shard_layout_version):
-    near_root = config['near_root']
+    unc_root = config['unc_root']
     binary_name = config.get('binary_name', 'uncd')
-    binary_path = os.path.join(near_root, binary_name)
+    binary_path = os.path.join(unc_root, binary_name)
 
     cmd = [
         binary_path,

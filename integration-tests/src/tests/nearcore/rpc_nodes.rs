@@ -6,24 +6,24 @@ use assert_matches::assert_matches;
 
 use futures::future::join_all;
 use futures::{future, FutureExt, TryFutureExt};
-use near_actix_test_utils::spawn_interruptible;
-use near_client::{GetBlock, GetExecutionOutcome, GetValidatorInfo};
-use near_crypto::{InMemorySigner, KeyType};
-use near_jsonrpc::client::new_client;
-use near_jsonrpc_primitives::types::transactions::{RpcTransactionStatusRequest, TransactionInfo};
-use near_network::test_utils::WaitOrTimeoutActor;
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_parameters::{RuntimeConfigStore, RuntimeConfigView};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::merkle::{compute_root_from_path_and_item, verify_path};
-use near_primitives::serialize::to_base64;
-use near_primitives::transaction::{PartialExecutionStatus, SignedTransaction};
-use near_primitives::types::{
+use unc_actix_test_utils::spawn_interruptible;
+use unc_client::{GetBlock, GetExecutionOutcome, GetValidatorInfo};
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_jsonrpc::client::new_client;
+use unc_jsonrpc_primitives::types::transactions::{RpcTransactionStatusRequest, TransactionInfo};
+use unc_network::test_utils::WaitOrTimeoutActor;
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_parameters::{RuntimeConfigStore, RuntimeConfigView};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::merkle::{compute_root_from_path_and_item, verify_path};
+use unc_primitives::serialize::to_base64;
+use unc_primitives::transaction::{PartialExecutionStatus, SignedTransaction};
+use unc_primitives::types::{
     BlockId, BlockReference, EpochId, EpochReference, Finality, TransactionOrReceiptId,
 };
-use near_primitives::version::ProtocolVersion;
-use near_primitives::views::{ExecutionOutcomeView, ExecutionStatusView, TxExecutionStatus};
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives::views::{ExecutionOutcomeView, ExecutionStatusView, TxExecutionStatus};
 use std::time::Duration;
 
 #[test]
@@ -235,8 +235,8 @@ fn test_protocol_config_rpc() {
         let client = new_client(&format!("http://{}", rpc_addrs[0]));
         let config_response = client
             .EXPERIMENTAL_protocol_config(
-                near_jsonrpc_primitives::types::config::RpcProtocolConfigRequest {
-                    block_reference: near_primitives::types::BlockReference::Finality(
+                unc_jsonrpc_primitives::types::config::RpcProtocolConfigRequest {
+                    block_reference: unc_primitives::types::BlockReference::Finality(
                         Finality::None,
                     ),
                 },
@@ -247,7 +247,7 @@ fn test_protocol_config_rpc() {
         let runtime_config_store = RuntimeConfigStore::new(None);
         let intial_runtime_config = runtime_config_store.get_config(ProtocolVersion::MIN);
         let latest_runtime_config =
-            runtime_config_store.get_config(near_primitives::version::PROTOCOL_VERSION);
+            runtime_config_store.get_config(unc_primitives::version::PROTOCOL_VERSION);
         assert_ne!(
             config_response.config_view.runtime_config.storage_amount_per_byte,
             intial_runtime_config.storage_amount_per_byte()
@@ -276,16 +276,16 @@ fn test_query_rpc_account_view_must_succeed() {
     cluster.exec_until_stop(|_, rpc_addrs, _| async move {
         let client = new_client(&format!("http://{}", rpc_addrs[0]));
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
-                block_reference: near_primitives::types::BlockReference::Finality(Finality::Final),
-                request: near_primitives::views::QueryRequest::ViewAccount {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
+                block_reference: unc_primitives::types::BlockReference::Finality(Finality::Final),
+                request: unc_primitives::views::QueryRequest::ViewAccount {
                     account_id: "near.0".parse().unwrap(),
                 },
             })
             .await
             .unwrap();
         let account =
-            if let near_jsonrpc_primitives::types::query::QueryResponseKind::ViewAccount(account) =
+            if let unc_jsonrpc_primitives::types::query::QueryResponseKind::ViewAccount(account) =
                 query_response.kind
             {
                 account
@@ -295,7 +295,7 @@ fn test_query_rpc_account_view_must_succeed() {
                     query_response.kind
                 );
             };
-        assert_matches!(account, near_primitives::views::AccountView { .. });
+        assert_matches!(account, unc_primitives::views::AccountView { .. });
         System::current().stop();
     });
 }
@@ -316,9 +316,9 @@ fn test_query_rpc_account_view_account_doesnt_exist_must_return_error() {
         let client = new_client(&format!("http://{}", rpc_addrs[0]));
         let error_message = loop {
             let query_response = client
-                .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
-                    block_reference: near_primitives::types::BlockReference::Finality(Finality::Final),
-                    request: near_primitives::views::QueryRequest::ViewAccount {
+                .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
+                    block_reference: unc_primitives::types::BlockReference::Finality(Finality::Final),
+                    request: unc_primitives::views::QueryRequest::ViewAccount {
                         account_id: "accountdoesntexist.0".parse().unwrap(),
                     },
                 })

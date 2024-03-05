@@ -12,6 +12,6 @@ Optionally creates accounts for the remote nodes, but requires public and privat
 ```
 python3 tests/shardnet/restake.py
     --delay-sec 60
-    --near-pk $NEAR_PUBLIC_KEY
-    --near-sk $NEAR_PRIVATE_KEY
+    --unc-pk $unc_PUBLIC_KEY
+    --unc-sk $unc_PRIVATE_KEY
 ```

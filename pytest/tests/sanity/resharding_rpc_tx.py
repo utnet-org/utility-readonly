@@ -101,9 +101,9 @@ class ReshardingRpcTx(unittest.TestCase):
 
             # Quick check whether resharding is completed
             version = metrics_tracker.get_int_metric_value(
-                "near_shard_layout_version")
+                "unc_shard_layout_version")
             num_shards = metrics_tracker.get_int_metric_value(
-                "near_shard_layout_num_shards")
+                "unc_shard_layout_num_shards")
             self.assertEqual(version, self.target_shard_layout_version)
             self.assertEqual(num_shards, self.target_num_shards)
 

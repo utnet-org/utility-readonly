@@ -27,29 +27,29 @@ use crate::sync::external::{
 use actix_rt::ArbiterHandle;
 use chrono::{DateTime, Duration, Utc};
 use futures::{future, FutureExt};
-use near_async::messaging::CanSendAsync;
-use near_chain::chain::ApplyStatePartsRequest;
-use near_chain::near_chain_primitives;
-use near_chain::resharding::ReshardingRequest;
-use near_chain::types::RuntimeAdapter;
-use near_chain::Chain;
-use near_chain_configs::{ExternalStorageConfig, ExternalStorageLocation, SyncConfig};
-use near_client_primitives::types::{
+use unc_async::messaging::CanSendAsync;
+use unc_chain::chain::ApplyStatePartsRequest;
+use unc_chain::unc_chain_primitives;
+use unc_chain::resharding::ReshardingRequest;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::Chain;
+use unc_chain_configs::{ExternalStorageConfig, ExternalStorageLocation, SyncConfig};
+use unc_client_primitives::types::{
     format_shard_sync_phase, DownloadStatus, ShardSyncDownload, ShardSyncStatus,
 };
-use near_epoch_manager::EpochManagerAdapter;
-use near_network::types::PeerManagerMessageRequest;
-use near_network::types::{
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_network::types::PeerManagerMessageRequest;
+use unc_network::types::{
     HighestHeightPeerInfo, NetworkRequests, NetworkResponses, PeerManagerAdapter,
 };
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::{ShardStateSyncResponse, StatePartKey};
-use near_primitives::static_clock::StaticClock;
-use near_primitives::types::{AccountId, EpochHeight, EpochId, ShardId, StateRoot};
-use near_store::DBCol;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::{ShardStateSyncResponse, StatePartKey};
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::types::{AccountId, EpochHeight, EpochId, ShardId, StateRoot};
+use unc_store::DBCol;
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
@@ -137,11 +137,11 @@ pub struct StateSync {
     timeout: Duration,
 
     /// Maps shard_id to result of applying downloaded state.
-    state_parts_apply_results: HashMap<ShardId, Result<(), near_chain_primitives::error::Error>>,
+    state_parts_apply_results: HashMap<ShardId, Result<(), unc_chain_primitives::error::Error>>,
 
     /// Maps shard_id to result of splitting state for resharding.
     resharding_state_roots:
-        HashMap<ShardId, Result<HashMap<ShardUId, StateRoot>, near_chain::Error>>,
+        HashMap<ShardId, Result<HashMap<ShardUId, StateRoot>, unc_chain::Error>>,
 
     /// Message queue to process the received state parts.
     state_parts_mpsc_tx: Sender<StateSyncGetPartResult>,
@@ -225,7 +225,7 @@ impl StateSync {
         state_parts_arbiter_handle: &ArbiterHandle,
         use_colour: bool,
         runtime_adapter: Arc<dyn RuntimeAdapter>,
-    ) -> Result<bool, near_chain::Error> {
+    ) -> Result<bool, unc_chain::Error> {
         let mut all_done = true;
 
         let prev_hash = *chain.get_block_header(&sync_hash)?.prev_hash();
@@ -400,7 +400,7 @@ impl StateSync {
     pub fn set_apply_result(
         &mut self,
         shard_id: ShardId,
-        apply_result: Result<(), near_chain::Error>,
+        apply_result: Result<(), unc_chain::Error>,
     ) {
         self.state_parts_apply_results.insert(shard_id, apply_result);
     }
@@ -409,7 +409,7 @@ impl StateSync {
     pub fn set_resharding_result(
         &mut self,
         shard_id: ShardId,
-        result: Result<HashMap<ShardUId, StateRoot>, near_chain::Error>,
+        result: Result<HashMap<ShardUId, StateRoot>, unc_chain::Error>,
     ) {
         self.resharding_state_roots.insert(shard_id, result);
     }
@@ -418,7 +418,7 @@ impl StateSync {
     pub fn get_epoch_start_sync_hash(
         chain: &Chain,
         sync_hash: &CryptoHash,
-    ) -> Result<CryptoHash, near_chain::Error> {
+    ) -> Result<CryptoHash, unc_chain::Error> {
         let mut header = chain.get_block_header(sync_hash)?;
         let mut epoch_id = header.epoch_id().clone();
         let mut hash = *header.hash();
@@ -471,7 +471,7 @@ impl StateSync {
         &mut self,
         highest_height_peers: &[HighestHeightPeerInfo],
         shard_id: ShardId,
-    ) -> Result<Vec<PeerId>, near_chain::Error> {
+    ) -> Result<Vec<PeerId>, unc_chain::Error> {
         let peers: Vec<PeerId> =
             highest_height_peers.iter().map(|peer| peer.peer_info.id.clone()).collect();
         let res = match &mut self.inner {
@@ -500,7 +500,7 @@ impl StateSync {
         highest_height_peers: &[HighestHeightPeerInfo],
         runtime_adapter: Arc<dyn RuntimeAdapter>,
         state_parts_arbiter_handle: &ArbiterHandle,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let possible_targets = self.select_peers(highest_height_peers, shard_id)?;
 
         if possible_targets.is_empty() {
@@ -551,7 +551,7 @@ impl StateSync {
         new_shard_sync_download.downloads[0].state_requests_count += 1;
         new_shard_sync_download.downloads[0].last_target = Some(peer_id.clone());
         let run_me = new_shard_sync_download.downloads[0].run_me.clone();
-        near_performance_metrics::actix::spawn(
+        unc_performance_metrics::actix::spawn(
             std::any::type_name::<Self>(),
             self.network_adapter
                 .send_async(PeerManagerMessageRequest::NetworkRequests(
@@ -670,7 +670,7 @@ impl StateSync {
         state_parts_arbiter_handle: &ArbiterHandle,
         use_colour: bool,
         runtime_adapter: Arc<dyn RuntimeAdapter>,
-    ) -> Result<StateSyncResult, near_chain::Error> {
+    ) -> Result<StateSyncResult, unc_chain::Error> {
         let _span = tracing::debug_span!(target: "sync", "run", sync = "StateSync").entered();
         tracing::trace!(target: "sync", %sync_hash, ?tracking_shards, "syncing state");
         let now = StaticClock::utc();
@@ -786,7 +786,7 @@ impl StateSync {
         sync_hash: CryptoHash,
         chain: &Chain,
         now: DateTime<Utc>,
-    ) -> Result<(bool, bool), near_chain::Error> {
+    ) -> Result<(bool, bool), unc_chain::Error> {
         let download = &mut shard_sync_download.downloads[0];
         // StateDownloadHeader is the first step. We want to fetch the basic information about the state (its size, hash etc).
         if download.done {
@@ -890,7 +890,7 @@ impl StateSync {
         chain: &mut Chain,
         now: DateTime<Utc>,
         state_parts_task_scheduler: &dyn Fn(ApplyStatePartsRequest),
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let shard_state_header = chain.get_state_header(shard_id, sync_hash)?;
         let state_num_parts = shard_state_header.num_state_parts();
         // Now apply all the parts to the chain / runtime.
@@ -927,7 +927,7 @@ impl StateSync {
         sync_hash: CryptoHash,
         chain: &mut Chain,
         now: DateTime<Utc>,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         // Keep waiting until our shard is on the list of results
         // (these are set via callback from ClientActor - both for sync and catchup).
         if let Some(result) = self.state_parts_apply_results.remove(&shard_id) {
@@ -983,7 +983,7 @@ impl StateSync {
         chain: &Chain,
         resharding_scheduler: &dyn Fn(ReshardingRequest),
         me: &Option<AccountId>,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         chain.build_state_for_resharding_preprocessing(
             &sync_hash,
             shard_id,
@@ -1002,7 +1002,7 @@ impl StateSync {
         shard_sync_download: &mut ShardSyncDownload,
         sync_hash: CryptoHash,
         chain: &mut Chain,
-    ) -> Result<bool, near_chain::Error> {
+    ) -> Result<bool, unc_chain::Error> {
         let result = self.resharding_state_roots.remove(&shard_uid.shard_id());
         let mut shard_sync_done = false;
         if let Some(state_roots) = result {
@@ -1122,7 +1122,7 @@ fn request_part_from_peers(
     download.last_target = Some(peer_id.clone());
     let run_me = download.run_me.clone();
 
-    near_performance_metrics::actix::spawn(
+    unc_performance_metrics::actix::spawn(
         "StateSync",
         network_adapter
             .send_async(PeerManagerMessageRequest::NetworkRequests(
@@ -1260,17 +1260,17 @@ mod test {
     use super::*;
     use actix::System;
     use actix_rt::Arbiter;
-    use near_actix_test_utils::run_actix;
-    use near_chain::test_utils;
-    use near_chain::{test_utils::process_block_sync, BlockProcessingArtifact, Provenance};
-    use near_crypto::SecretKey;
-    use near_epoch_manager::EpochManagerAdapter;
-    use near_network::test_utils::MockPeerManagerAdapter;
-    use near_network::types::PeerInfo;
-    use near_primitives::state_sync::{
+    use unc_actix_test_utils::run_actix;
+    use unc_chain::test_utils;
+    use unc_chain::{test_utils::process_block_sync, BlockProcessingArtifact, Provenance};
+    use unc_crypto::SecretKey;
+    use unc_epoch_manager::EpochManagerAdapter;
+    use unc_network::test_utils::MockPeerManagerAdapter;
+    use unc_network::types::PeerInfo;
+    use unc_primitives::state_sync::{
         CachedParts, ShardStateSyncResponseHeader, ShardStateSyncResponseV3,
     };
-    use near_primitives::{test_utils::TestBlockBuilder, types::EpochId};
+    use unc_primitives::{test_utils::TestBlockBuilder, types::EpochId};
 
     #[test]
     // Start a new state sync - and check that it asks for a header.
@@ -1320,7 +1320,7 @@ mod test {
         let apply_parts_fn = move |_: ApplyStatePartsRequest| {};
         let resharding_fn = move |_: ReshardingRequest| {};
 
-        let secret_key = SecretKey::from_random(near_crypto::KeyType::ED25519);
+        let secret_key = SecretKey::from_random(unc_crypto::KeyType::ED25519);
         let public_key = secret_key.public_key();
         let peer_id = PeerId::new(public_key);
         let highest_height_peer_info = HighestHeightPeerInfo {

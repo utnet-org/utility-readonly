@@ -1,8 +1,8 @@
 use serde_json::Value;
 
-use near_client_primitives::types::GetGasPriceError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::gas_price::{RpcGasPriceError, RpcGasPriceRequest};
+use unc_client_primitives::types::GetGasPriceError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::gas_price::{RpcGasPriceError, RpcGasPriceRequest};
 
 use super::{Params, RpcFrom, RpcRequest};
 

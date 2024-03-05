@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-NEAR_HOME=${NEAR_HOME:-/srv/near}
-export NEAR_HOME
+unc_HOME=${unc_HOME:-/srv/near}
+export unc_HOME
 
 if [ -n "$INIT" ]; then
     uncd init ${CHAIN_ID:+--chain-id="$CHAIN_ID"} \
@@ -10,7 +10,7 @@ if [ -n "$INIT" ]; then
 fi
 
 if [ -n "$NODE_KEY" ]; then
-    cat << EOF > "$NEAR_HOME/node_key.json"
+    cat << EOF > "$unc_HOME/node_key.json"
 {"account_id": "", "public_key": "", "secret_key": "$NODE_KEY"}
 EOF
 fi

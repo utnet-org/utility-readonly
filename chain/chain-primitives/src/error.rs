@@ -3,59 +3,59 @@ use std::io;
 use chrono::DateTime;
 use chrono::Utc;
 
-use near_primitives::block::BlockValidityError;
-use near_primitives::challenge::{ChunkProofs, ChunkState};
-use near_primitives::errors::{BlockError, EpochError, StorageError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardLayoutError;
-use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
-use near_primitives::types::{BlockHeight, EpochId, ShardId};
+use unc_primitives::block::BlockValidityError;
+use unc_primitives::challenge::{ChunkProofs, ChunkState};
+use unc_primitives::errors::{BlockError, EpochError, StorageError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardLayoutError;
+use unc_primitives::sharding::{ChunkHash, ShardChunkHeader};
+use unc_primitives::types::{BlockHeight, EpochId, ShardId};
 
 #[derive(thiserror::Error, Debug)]
 pub enum QueryError {
     #[error("Account ID {requested_account_id} is invalid")]
     InvalidAccount {
-        requested_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        requested_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Account {requested_account_id} does not exist while viewing")]
     UnknownAccount {
-        requested_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        requested_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error(
         "Contract code for contract ID {contract_account_id} has never been observed on the node"
     )]
     NoContractCode {
-        contract_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        contract_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Access key for public key {public_key} does not exist while viewing")]
     UnknownAccessKey {
-        public_key: near_crypto::PublicKey,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        public_key: unc_crypto::PublicKey,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Internal error occurred: {error_message}")]
     InternalError {
         error_message: String,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Function call returned an error: {error_message}")]
     ContractExecutionError {
         error_message: String,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("The state of account {requested_account_id} is too large")]
     TooLargeContractState {
-        requested_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        requested_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
 }
 
@@ -322,7 +322,7 @@ impl Error {
     /// Some blockchain errors are reported in the prometheus metrics. In such cases a report might
     /// contain a label that specifies the type of error that has occured. For example when the node
     /// receives a block with an invalid signature this would be reported as:
-    ///  `near_num_invalid_blocks{error="invalid_signature"}`.
+    ///  `unc_num_invalid_blocks{error="invalid_signature"}`.
     /// This function returns the value of the error label for a specific instance of Error.
     pub fn prometheus_label_value(&self) -> &'static str {
         match self {
@@ -460,7 +460,7 @@ pub mod epoch_sync {
     #[derive(thiserror::Error, std::fmt::Debug)]
     pub enum EpochSyncInfoError {
         #[error(transparent)]
-        EpochSyncInfoErr(#[from] near_primitives::errors::epoch_sync::EpochSyncInfoError),
+        EpochSyncInfoErr(#[from] unc_primitives::errors::epoch_sync::EpochSyncInfoError),
         #[error(transparent)]
         IOErr(#[from] std::io::Error),
         #[error(transparent)]

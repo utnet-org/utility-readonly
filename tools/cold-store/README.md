@@ -67,7 +67,7 @@ By semi-proper I mean everything, but accurately changing State
 column in hot. That is not needed to start experimenting.
 
 ## Subcommands
-Before every subcommand the `NodeStorage` is opened with `NearConfig`
+Before every subcommand the `NodeStorage` is opened with `UncConfig`
 from `home_dir`.
 
 ### Open

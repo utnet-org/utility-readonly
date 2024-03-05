@@ -75,7 +75,7 @@ class RosettaExecResult:
         return self.identifier['hash']
 
     @property
-    def near_hash(self) -> str:
+    def unc_hash(self) -> str:
         """A NEAR transaction hash in base85.
 
         Compared to `hash` it’s just the `<base58-hash>’ part of the Rosetta
@@ -449,7 +449,7 @@ class RosettaTestCase(unittest.TestCase):
 
         block = result.block()
         tx = result.transaction()
-        json_res = self.node.get_tx(result.near_hash, implicit.account_id)
+        json_res = self.node.get_tx(result.unc_hash, implicit.account_id)
         json_res = json_res['result']
         receipt_ids = json_res['transaction_outcome']['outcome']['receipt_ids']
         receipt_id = {'hash': 'receipt:' + receipt_ids[0]}
@@ -479,7 +479,7 @@ class RosettaTestCase(unittest.TestCase):
 
         block = result.block()
         tx = result.transaction()
-        json_res = self.node.get_tx(result.near_hash, implicit.account_id)
+        json_res = self.node.get_tx(result.unc_hash, implicit.account_id)
         json_res = json_res['result']
         receipt_ids = json_res['transaction_outcome']['outcome']['receipt_ids']
         receipt_id = {'hash': 'receipt:' + receipt_ids[0]}
@@ -513,7 +513,7 @@ class RosettaTestCase(unittest.TestCase):
 
             block = result.block()
             tx = result.transaction()
-            json_res = self.node.get_tx(result.near_hash, implicit.account_id)
+            json_res = self.node.get_tx(result.unc_hash, implicit.account_id)
             json_res = json_res['result']
             receipt_ids = json_res['transaction_outcome']['outcome'][
                 'receipt_ids']
@@ -668,7 +668,7 @@ class RosettaTestCase(unittest.TestCase):
         implicit = key.Key.implicit_account()
         contract_key = self.node.validator_key
         contract = load_binary_file(
-            '../../../runtime/near-test-contracts/res/fungible_token.wasm')
+            '../../../runtime/unc-test-contracts/res/fungible_token.wasm')
 
         ### 1. Deploy the ft smart contract
         latest_block_hash = self.node.get_latest_block().hash
@@ -709,7 +709,7 @@ class RosettaTestCase(unittest.TestCase):
         # logger.info(f'Ft_transfer result: {ft_result}')
         # tx = ft_result.transaction()
         # logger.info(f'Ft_transfer result: {tx}')
-        json_res = self.node.get_tx(ft_result.near_hash, implicit.account_id)
+        json_res = self.node.get_tx(ft_result.unc_hash, implicit.account_id)
         logger.info(f'Tx-result: {json_res}')
 
     def test_get_block_nonexistent(self) -> None:
@@ -793,7 +793,7 @@ class RosettaTestCase(unittest.TestCase):
         block = result.block()
         tx = result.transaction()
         # Also get it from JSON RPC to compare receipt ids.
-        json_res = self.node.get_tx(result.near_hash, implicit.account_id)
+        json_res = self.node.get_tx(result.unc_hash, implicit.account_id)
         json_res = json_res['result']
         receipt_ids = json_res['transaction_outcome']['outcome']['receipt_ids']
         self.assertEqual(1, len(receipt_ids))
@@ -941,7 +941,7 @@ class RosettaTestCase(unittest.TestCase):
                 for tx in result.block()['transactions']
                 for op in tx['operations']))
 
-        json_res = self.node.get_tx(result.near_hash, implicit.account_id)
+        json_res = self.node.get_tx(result.unc_hash, implicit.account_id)
         json_res = json_res['result']
         receipt_ids = json_res['transaction_outcome']['outcome']['receipt_ids']
         self.assertEqual(1, len(receipt_ids))

@@ -30,6 +30,6 @@ pub mod types;
 #[cfg(test)]
 pub(crate) mod testonly;
 
-// TODO(gprusak): these should be testonly, once all network integration tests are moved to near_network.
+// TODO(gprusak): these should be testonly, once all network integration tests are moved to unc_network.
 pub mod broadcast;
 pub mod sink;

@@ -34,7 +34,7 @@ from configured_logger import logger
 import prometheus_client
 
 balance_gauge = prometheus_client.Gauge(
-    'near_e2e_account_balance',
+    'unc_e2e_account_balance',
     'Balance of the test accounts running an end-to-end test. Measured in yoctonear.',
     ['account'])
 

@@ -1,27 +1,27 @@
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcStateChangesInBlockRequest {
     #[serde(flatten)]
-    pub block_reference: near_primitives::types::BlockReference,
+    pub block_reference: unc_primitives::types::BlockReference,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcStateChangesInBlockResponse {
-    pub block_hash: near_primitives::hash::CryptoHash,
-    pub changes: near_primitives::views::StateChangesView,
+    pub block_hash: unc_primitives::hash::CryptoHash,
+    pub changes: unc_primitives::views::StateChangesView,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcStateChangesInBlockByTypeRequest {
     #[serde(flatten)]
-    pub block_reference: near_primitives::types::BlockReference,
+    pub block_reference: unc_primitives::types::BlockReference,
     #[serde(flatten)]
-    pub state_changes_request: near_primitives::views::StateChangesRequestView,
+    pub state_changes_request: unc_primitives::views::StateChangesRequestView,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcStateChangesInBlockByTypeResponse {
-    pub block_hash: near_primitives::hash::CryptoHash,
-    pub changes: near_primitives::views::StateChangesKindsView,
+    pub block_hash: unc_primitives::hash::CryptoHash,
+    pub changes: unc_primitives::views::StateChangesKindsView,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]

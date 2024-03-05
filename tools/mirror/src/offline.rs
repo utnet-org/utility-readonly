@@ -1,20 +1,20 @@
 use crate::{ChainError, SourceBlock, SourceChunk};
 use anyhow::Context;
 use async_trait::async_trait;
-use near_chain::types::RuntimeAdapter;
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_chain_configs::GenesisValidationMode;
-use near_chain_primitives::error::EpochErrorResultToChainError;
-use near_crypto::PublicKey;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_primitives::block::BlockHeader;
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::Receipt;
-use near_primitives::types::{AccountId, BlockHeight, TransactionOrReceiptId};
-use near_primitives::views::{
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_chain_configs::GenesisValidationMode;
+use unc_chain_primitives::error::EpochErrorResultToChainError;
+use unc_crypto::PublicKey;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_primitives::block::BlockHeader;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::types::{AccountId, BlockHeight, TransactionOrReceiptId};
+use unc_primitives::views::{
     AccessKeyPermissionView, ExecutionOutcomeWithIdView, QueryRequest, QueryResponseKind,
 };
-use near_primitives_core::types::ShardId;
+use unc_primitives_core::types::ShardId;
 use framework::NightshadeRuntime;
 use std::path::Path;
 use std::sync::Arc;
@@ -22,7 +22,7 @@ use std::sync::Arc;
 fn is_on_current_chain(
     chain: &ChainStore,
     header: &BlockHeader,
-) -> Result<bool, near_chain_primitives::Error> {
+) -> Result<bool, unc_chain_primitives::Error> {
     let chain_header = chain.get_block_header_by_height(header.height())?;
     Ok(chain_header.hash() == header.hash())
 }
@@ -78,7 +78,7 @@ impl crate::ChainAccess for ChainAccess {
                     );
                     break;
                 }
-                Err(near_chain_primitives::Error::DBNotFoundErr(_)) => {
+                Err(unc_chain_primitives::Error::DBNotFoundErr(_)) => {
                     height += 1;
                 }
                 Err(e) => {

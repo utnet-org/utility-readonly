@@ -1,5 +1,5 @@
-use near_primitives::num_rational::Ratio;
-use near_primitives::version::{ProtocolFeature, ProtocolVersion};
+use unc_primitives::num_rational::Ratio;
+use unc_primitives::version::{ProtocolFeature, ProtocolVersion};
 
 use crate::tests::client::process_blocks::prepare_env_with_congestion;
 

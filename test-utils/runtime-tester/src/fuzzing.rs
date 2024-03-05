@@ -1,6 +1,6 @@
 use crate::run_test::{BlockConfig, NetworkConfig, RuntimeConfig, Scenario, TransactionConfig};
-use near_crypto::{InMemorySigner, KeyType, PublicKey};
-use near_primitives::{
+use unc_crypto::{InMemorySigner, KeyType, PublicKey};
+use unc_primitives::{
     account::{AccessKey, AccessKeyPermission, FunctionCallPermission},
     transaction::{
         Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
@@ -424,7 +424,7 @@ impl Scope {
     fn construct_available_contracts() -> Vec<Contract> {
         vec![
             Contract {
-                code: near_test_contracts::rs_contract().to_vec(),
+                code: unc_test_contracts::rs_contract().to_vec(),
                 functions: vec![
                     Function::StorageUsage,
                     Function::BlockIndex,
@@ -445,7 +445,7 @@ impl Scope {
                 ],
             },
             Contract {
-                code: near_test_contracts::fuzzing_contract().to_vec(),
+                code: unc_test_contracts::fuzzing_contract().to_vec(),
                 functions: vec![Function::SumOfNumbers, Function::DataReceipt],
             },
         ]

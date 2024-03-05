@@ -29,11 +29,11 @@ pub enum DBCol {
     BlockMisc,
     /// Column that stores Block content.
     /// - *Rows*: block hash (CryptHash)
-    /// - *Content type*: [near_primitives::block::Block]
+    /// - *Content type*: [unc_primitives::block::Block]
     Block,
     /// Column that stores Block headers.
     /// - *Rows*: block hash (CryptoHash)
-    /// - *Content type*: [near_primitives::block_header::BlockHeader]
+    /// - *Content type*: [unc_primitives::block_header::BlockHeader]
     BlockHeader,
     /// Column that stores mapping from block height to block hash on the current canonical chain.
     /// (if you want to see all the blocks that we got for a given height, for example due to double signing etc,
@@ -47,19 +47,19 @@ pub enum DBCol {
     State,
     /// Mapping from BlockChunk to ChunkExtra
     /// - *Rows*: BlockChunk (block_hash, shard_uid)
-    /// - *Content type*: [near_primitives::types::chunk_extra::ChunkExtra]
+    /// - *Content type*: [unc_primitives::types::chunk_extra::ChunkExtra]
     ChunkExtra,
     /// Deprecated.
     #[strum(serialize = "TransactionResult")]
     _TransactionResult,
     /// Mapping from Block + Shard to list of outgoing receipts.
     /// - *Rows*: block + shard
-    /// - *Content type*: Vec of [near_primitives::receipt::Receipt]
+    /// - *Content type*: Vec of [unc_primitives::receipt::Receipt]
     OutgoingReceipts,
     /// Mapping from Block + Shard to list of incoming receipt proofs.
     /// Each proof might prove multiple receipts.
     /// - *Rows*: (block, shard)
-    /// - *Content type*: Vec of [near_primitives::sharding::ReceiptProof]
+    /// - *Content type*: Vec of [unc_primitives::sharding::ReceiptProof]
     IncomingReceipts,
     /// Deprecated.
     #[strum(serialize = "Peers")]
@@ -71,19 +71,19 @@ pub enum DBCol {
     RecentOutboundConnections,
     /// Mapping from EpochId to EpochInfo
     /// - *Rows*: EpochId (CryptoHash)
-    /// - *Content type*: [near_primitives::epoch_manager::epoch_info::EpochInfo]
+    /// - *Content type*: [unc_primitives::epoch_manager::epoch_info::EpochInfo]
     EpochInfo,
     /// Mapping from BlockHash to BlockInfo
     /// - *Rows*: BlockHash (CryptoHash)
-    /// - *Content type*: [near_primitives::epoch_manager::block_info::BlockInfo]
+    /// - *Content type*: [unc_primitives::epoch_manager::block_info::BlockInfo]
     BlockInfo,
     /// Mapping from ChunkHash to ShardChunk.
     /// - *Rows*: ChunkHash (CryptoHash)
-    /// - *Content type*: [near_primitives::sharding::ShardChunk]
+    /// - *Content type*: [unc_primitives::sharding::ShardChunk]
     Chunks,
     /// Storage for  PartialEncodedChunk.
     /// - *Rows*: ChunkHash (CryptoHash)
-    /// - *Content type*: [near_primitives::sharding::PartialEncodedChunk]
+    /// - *Content type*: [unc_primitives::sharding::PartialEncodedChunk]
     PartialChunks,
     /// Blocks for which chunks need to be applied after the state is downloaded for a particular epoch
     /// - *Rows*: BlockHash (CryptoHash)
@@ -171,7 +171,7 @@ pub enum DBCol {
     /// Map component id  (a.k.a. nonce) with all edges in this component.
     /// These are all the edges that were purged and persisted to disk at the same time.
     /// - *Rows*: nonce
-    /// - *Column type*: `Vec<near_network::routing::Edge>`
+    /// - *Column type*: `Vec<unc_network::routing::Edge>`
     ComponentEdges,
     /// Biggest component id (a.k.a nonce) used.
     /// - *Rows*: single row (empty row name)
@@ -237,7 +237,7 @@ pub enum DBCol {
     Receipts,
     /// Precompiled machine code of the contract, used by StoreCompiledContractCache.
     /// - *Rows*: ContractCacheKey or code hash (not sure)
-    /// - *Column type*: near-vm-runner CacheRecord
+    /// - *Column type*: unc-vm-runner CacheRecord
     CachedContractCode,
     /// Epoch validator information used for rpc purposes.
     /// - *Rows*: epoch id (CryptoHash)

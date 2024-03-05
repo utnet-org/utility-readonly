@@ -1,15 +1,15 @@
 use crate::tests::client::process_blocks::deploy_test_contract_with_protocol_version;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_parameters::ExtCosts;
-use near_primitives::test_utils::encode;
-use near_primitives::transaction::{Action, ExecutionMetadata, FunctionCallAction, Transaction};
-use near_primitives::version::ProtocolFeature;
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::Gas;
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_parameters::ExtCosts;
+use unc_primitives::test_utils::encode;
+use unc_primitives::transaction::{Action, ExecutionMetadata, FunctionCallAction, Transaction};
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::Gas;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -20,7 +20,7 @@ use framework::test_utils::TestEnvNightshadeSetupExt;
 fn test_flat_storage_upgrade() {
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
     let epoch_length = 12;
@@ -29,7 +29,7 @@ fn test_flat_storage_upgrade() {
     genesis.config.epoch_length = epoch_length;
     genesis.config.protocol_version = old_protocol_version;
     let chain_genesis = ChainGenesis::new(&genesis);
-    let runtime_config = near_parameters::RuntimeConfigStore::new(None);
+    let runtime_config = unc_parameters::RuntimeConfigStore::new(None);
     let mut env = TestEnv::builder(chain_genesis)
         .real_epoch_managers(&genesis.config)
         .nightshade_runtimes_with_runtime_config_store(&genesis, vec![runtime_config])
@@ -47,7 +47,7 @@ fn test_flat_storage_upgrade() {
     deploy_test_contract_with_protocol_version(
         &mut env,
         "test0".parse().unwrap(),
-        near_test_contracts::backwards_compatible_rs_contract(),
+        unc_test_contracts::backwards_compatible_rs_contract(),
         blocks_to_process_txn,
         1,
         old_protocol_version,

@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
         rules::publishable_has_unified_license,
         rules::publishable_has_license_file,
         rules::publishable_has_description,
-        rules::publishable_has_near_link,
+        rules::publishable_has_unc_link,
         rules::recursively_publishable,
     ];
 

@@ -1,6 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use near_primitives_core::hash::{hash, CryptoHash};
+use unc_primitives_core::hash::{hash, CryptoHash};
 
 /// State value reference. Used to charge fees for value length before retrieving the value itself.
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Hash)]
@@ -47,7 +47,7 @@ impl std::fmt::Debug for ValueRef {
 #[cfg(test)]
 mod tests {
     use crate::state::ValueRef;
-    use near_primitives_core::hash::hash;
+    use unc_primitives_core::hash::hash;
 
     #[test]
     fn test_encode_decode() {

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use near_primitives::errors::EpochError;
+use unc_primitives::errors::EpochError;
 
 #[derive(Debug)]
 pub enum Error {
@@ -14,7 +14,7 @@ pub enum Error {
     DuplicateChunkHeight,
     UnknownChunk,
     KnownPart,
-    ChainError(near_chain_primitives::Error),
+    ChainError(unc_chain_primitives::Error),
     IOError(std::io::Error),
 }
 
@@ -32,8 +32,8 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<near_chain_primitives::Error> for Error {
-    fn from(err: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for Error {
+    fn from(err: unc_chain_primitives::Error) -> Self {
         Error::ChainError(err)
     }
 }

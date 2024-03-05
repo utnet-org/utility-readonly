@@ -1,26 +1,26 @@
 use assert_matches::assert_matches;
 
-use near_chain::near_chain_primitives::error::QueryError;
-use near_chain::{ChainGenesis, ChainStoreAccess, Provenance};
-use near_chain_configs::ExternalStorageLocation::Filesystem;
-use near_chain_configs::{DumpConfig, Genesis};
-use near_client::sync::external::external_storage_location;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_network::test_utils::wait_or_timeout;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::block::Tip;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::FlatStateValue;
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::StatePartKey;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::BlockHeight;
-use near_primitives::views::{QueryRequest, QueryResponseKind};
-use near_store::flat::store_helper;
-use near_store::DBCol;
-use near_store::Store;
+use unc_chain::unc_chain_primitives::error::QueryError;
+use unc_chain::{ChainGenesis, ChainStoreAccess, Provenance};
+use unc_chain_configs::ExternalStorageLocation::Filesystem;
+use unc_chain_configs::{DumpConfig, Genesis};
+use unc_client::sync::external::external_storage_location;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_network::test_utils::wait_or_timeout;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::block::Tip;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::StatePartKey;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::BlockHeight;
+use unc_primitives::views::{QueryRequest, QueryResponseKind};
+use unc_store::flat::store_helper;
+use unc_store::DBCol;
+use unc_store::Store;
 use framework::config::GenesisExt;
 use framework::state_sync::spawn_state_sync_dump;
 use framework::test_utils::TestEnvNightshadeSetupExt;
@@ -38,7 +38,7 @@ fn test_state_dump() {
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
     genesis.config.epoch_length = 25;
 
-    near_actix_test_utils::run_actix(async {
+    unc_actix_test_utils::run_actix(async {
         let chain_genesis = ChainGenesis::new(&genesis);
         let mut env = TestEnv::builder(chain_genesis.clone())
             .clients_count(1)
@@ -135,7 +135,7 @@ fn run_state_sync_with_dumped_parts(
     } else {
         tracing::info!("Testing for case when head is in new epoch, but final block isn't for the dumping node...");
     }
-    near_actix_test_utils::run_actix(async {
+    unc_actix_test_utils::run_actix(async {
         let mut genesis = Genesis::test(vec!["test0".parse().unwrap()], 1);
         genesis.config.epoch_length = epoch_length;
         let chain_genesis = ChainGenesis::new(&genesis);

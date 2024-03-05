@@ -1,6 +1,6 @@
 use crate::reload::TracingLayer;
-use near_crypto::PublicKey;
-use near_primitives_core::types::AccountId;
+use unc_crypto::PublicKey;
+use unc_primitives_core::types::AccountId;
 use opentelemetry::sdk::trace::{self, IdGenerator, Sampler};
 use opentelemetry::sdk::Resource;
 use opentelemetry::KeyValue;

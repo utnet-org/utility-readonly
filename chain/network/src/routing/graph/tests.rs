@@ -5,10 +5,10 @@ use crate::network_protocol::EDGE_MIN_TIMESTAMP_NONCE;
 use crate::store;
 use crate::store::testonly::Component;
 use crate::testonly::make_rng;
-use near_async::time;
-use near_crypto::SecretKey;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::network::PeerId;
+use unc_async::time;
+use unc_crypto::SecretKey;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::network::PeerId;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
@@ -36,7 +36,7 @@ impl Graph {
 }
 
 fn store() -> store::Store {
-    store::Store::from(near_store::db::TestDB::new())
+    store::Store::from(unc_store::db::TestDB::new())
 }
 
 fn peer_id(key: &SecretKey) -> PeerId {

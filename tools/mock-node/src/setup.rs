@@ -2,21 +2,21 @@
 
 use crate::{MockNetworkConfig, MockPeer};
 use anyhow::Context;
-use near_chain::types::RuntimeAdapter;
-use near_chain::ChainStoreUpdate;
-use near_chain::{Chain, ChainGenesis, ChainStore, ChainStoreAccess, DoomslugThresholdMode};
-use near_crypto::{KeyType, SecretKey};
-use near_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_jsonrpc_client::JsonRpcClient;
-use near_network::tcp;
-use near_network::types::PeerInfo;
-use near_primitives::network::PeerId;
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::get_num_state_parts;
-use near_primitives::types::{BlockHeight, NumShards, ShardId};
-use near_store::test_utils::create_test_store;
-use framework::{NearConfig, NightshadeRuntime};
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::ChainStoreUpdate;
+use unc_chain::{Chain, ChainGenesis, ChainStore, ChainStoreAccess, DoomslugThresholdMode};
+use unc_crypto::{KeyType, SecretKey};
+use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_jsonrpc_client::JsonRpcClient;
+use unc_network::tcp;
+use unc_network::types::PeerInfo;
+use unc_primitives::network::PeerId;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::get_num_state_parts;
+use unc_primitives::types::{BlockHeight, NumShards, ShardId};
+use unc_store::test_utils::create_test_store;
+use framework::{UncConfig, NightshadeRuntime};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::cmp::min;
 use std::path::Path;
@@ -25,13 +25,13 @@ use std::sync::Arc;
 
 fn setup_runtime(
     home_dir: &Path,
-    config: &NearConfig,
+    config: &UncConfig,
     in_memory_storage: bool,
 ) -> (Arc<EpochManagerHandle>, ShardTracker, Arc<NightshadeRuntime>) {
     let store = if in_memory_storage {
         create_test_store()
     } else {
-        near_store::NodeStorage::opener(home_dir, config.config.archive, &config.config.store, None)
+        unc_store::NodeStorage::opener(home_dir, config.config.archive, &config.config.store, None)
             .open()
             .unwrap()
             .get_hot_store()
@@ -45,7 +45,7 @@ fn setup_runtime(
 
 fn setup_mock_peer(
     chain: Chain,
-    config: &mut NearConfig,
+    config: &mut UncConfig,
     network_start_height: Option<BlockHeight>,
     network_config: MockNetworkConfig,
     target_height: BlockHeight,
@@ -108,7 +108,7 @@ pub struct MockNode {
 pub fn setup_mock_node(
     client_home_dir: &Path,
     network_home_dir: &Path,
-    mut config: NearConfig,
+    mut config: UncConfig,
     network_config: &MockNetworkConfig,
     client_start_height: BlockHeight,
     network_start_height: Option<BlockHeight>,
@@ -262,7 +262,7 @@ pub fn setup_mock_node(
         mock_listen_addr,
     );
 
-    let rpc_client = near_jsonrpc_client::new_client(&format!(
+    let rpc_client = unc_jsonrpc_client::new_client(&format!(
         "http://{}",
         &config.rpc_config.as_ref().expect("the JSON RPC config must be set").addr
     ));
@@ -277,18 +277,18 @@ mod tests {
     use crate::MockNetworkConfig;
     use actix::{Actor, System};
     use futures::{future, FutureExt};
-    use near_actix_test_utils::{run_actix, spawn_interruptible};
-    use near_chain::{ChainStore, ChainStoreAccess};
-    use near_chain_configs::Genesis;
-    use near_client::{GetBlock, ProcessTxRequest};
-    use near_crypto::{InMemorySigner, KeyType};
-    use near_epoch_manager::{EpochManager, EpochManagerAdapter};
-    use near_network::tcp;
-    use near_network::test_utils::{wait_or_timeout, WaitOrTimeoutActor};
-    use near_o11y::testonly::init_integration_logger;
-    use near_o11y::WithSpanContextExt;
-    use near_primitives::transaction::SignedTransaction;
-    use near_store::test_utils::gen_account_from_alphabet;
+    use unc_actix_test_utils::{run_actix, spawn_interruptible};
+    use unc_chain::{ChainStore, ChainStoreAccess};
+    use unc_chain_configs::Genesis;
+    use unc_client::{GetBlock, ProcessTxRequest};
+    use unc_crypto::{InMemorySigner, KeyType};
+    use unc_epoch_manager::{EpochManager, EpochManagerAdapter};
+    use unc_network::tcp;
+    use unc_network::test_utils::{wait_or_timeout, WaitOrTimeoutActor};
+    use unc_o11y::testonly::init_integration_logger;
+    use unc_o11y::WithSpanContextExt;
+    use unc_primitives::transaction::SignedTransaction;
+    use unc_store::test_utils::gen_account_from_alphabet;
     use framework::config::GenesisExt;
     use framework::{load_test_config, start_with_config, UNC_BASE};
     use rand::thread_rng;
@@ -312,17 +312,17 @@ mod tests {
             Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
         let epoch_length = 50;
         genesis.config.epoch_length = epoch_length;
-        let mut near_config =
+        let mut unc_config =
             load_test_config("test0", tcp::ListenerAddr::reserve_for_test(), genesis.clone());
-        near_config.client_config.min_num_peers = 0;
-        near_config.config.store.state_snapshot_enabled = true;
-        near_config.config.tracked_shards = vec![0]; // Track all shards.
+        unc_config.client_config.min_num_peers = 0;
+        unc_config.config.store.state_snapshot_enabled = true;
+        unc_config.config.tracked_shards = vec![0]; // Track all shards.
 
         let dir = tempfile::Builder::new().prefix("test0").tempdir().unwrap();
         let path1 = dir.path();
         run_actix(async move {
             let framework::NearNode { view_client, client, .. } =
-                start_with_config(path1, near_config).expect("start_with_config");
+                start_with_config(path1, unc_config).expect("start_with_config");
 
             let view_client1 = view_client;
             let nonce = Arc::new(RwLock::new(10));
@@ -400,29 +400,29 @@ mod tests {
         // start the mock network to simulate a new node "test1" to sync up
         // start the client at height 10 (end of the first epoch)
         let dir1 = tempfile::Builder::new().prefix("test1").tempdir().unwrap();
-        let mut near_config1 = load_test_config("", tcp::ListenerAddr::reserve_for_test(), genesis);
-        near_config1.client_config.min_num_peers = 1;
-        near_config1.client_config.tracked_shards = vec![0]; // Track all shards.
-        near_config1.config.store.state_snapshot_enabled = true;
+        let mut unc_config1 = load_test_config("", tcp::ListenerAddr::reserve_for_test(), genesis);
+        unc_config1.client_config.min_num_peers = 1;
+        unc_config1.client_config.tracked_shards = vec![0]; // Track all shards.
+        unc_config1.config.store.state_snapshot_enabled = true;
         let network_config = MockNetworkConfig::with_delay(Duration::from_millis(10));
 
         let client_start_height = {
             tracing::info!(target: "mock_node", store_path = ?dir.path(), "Opening the created store to get client_start_height");
-            let store = near_store::NodeStorage::opener(
+            let store = unc_store::NodeStorage::opener(
                 dir.path(),
-                near_config1.config.archive,
-                &near_config1.config.store,
+                unc_config1.config.archive,
+                &unc_config1.config.store,
                 None,
             )
             .open()
             .unwrap()
             .get_hot_store();
             let epoch_manager =
-                EpochManager::new_arc_handle(store.clone(), &near_config1.genesis.config);
+                EpochManager::new_arc_handle(store.clone(), &unc_config1.genesis.config);
             let chain_store = ChainStore::new(
                 store,
-                near_config1.genesis.config.genesis_height,
-                near_config1.client_config.save_trie_changes,
+                unc_config1.genesis.config.genesis_height,
+                unc_config1.client_config.save_trie_changes,
             );
             let network_head_hash = chain_store.head().unwrap().last_block_hash;
             let last_epoch_start_height =
@@ -437,7 +437,7 @@ mod tests {
             let MockNode { rpc_client, .. } = setup_mock_node(
                 dir1.path(),
                 dir.path(),
-                near_config1,
+                unc_config1,
                 &network_config,
                 client_start_height,
                 None,

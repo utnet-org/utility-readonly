@@ -1,10 +1,10 @@
 use crate::node::{Node, RuntimeNode};
-use near_chain_configs::Genesis;
-use near_parameters::{ExtCosts, RuntimeConfig, RuntimeConfigStore};
-use near_primitives::serialize::to_base64;
-use near_primitives::types::AccountId;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::{
+use unc_chain_configs::Genesis;
+use unc_parameters::{ExtCosts, RuntimeConfig, RuntimeConfigStore};
+use unc_primitives::serialize::to_base64;
+use unc_primitives::types::AccountId;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::{
     CostGasUsed, ExecutionOutcomeWithIdView, ExecutionStatusView, FinalExecutionStatus,
 };
 use framework::config::GenesisExt;
@@ -95,9 +95,9 @@ fn get_receipts_status_with_clear_hash(
 #[test]
 fn test_cost_sanity() {
     let test_contract = if cfg!(feature = "nightly") {
-        near_test_contracts::nightly_rs_contract()
+        unc_test_contracts::nightly_rs_contract()
     } else {
-        near_test_contracts::rs_contract()
+        unc_test_contracts::rs_contract()
     };
     let node = setup_runtime_node_with_contract(test_contract);
 
@@ -108,7 +108,7 @@ fn test_cost_sanity() {
             "method_args": "",
             "validator_id": {:?}
         }}"#,
-        to_base64(near_test_contracts::trivial_contract()),
+        to_base64(unc_test_contracts::trivial_contract()),
         bob_account().as_str()
     );
     eprintln!("{args}");
@@ -167,7 +167,7 @@ fn test_cost_sanity() {
 /// no such differences expected.
 #[test]
 fn test_cost_sanity_nondeterministic() {
-    let contract = near_test_contracts::wat_contract(
+    let contract = unc_test_contracts::wat_contract(
         r#"(module (func (export "main") (i32.const 92) (drop)))"#,
     );
     let node = setup_runtime_node_with_contract(&contract);
@@ -218,7 +218,7 @@ fn test_cost_sanity_nondeterministic() {
 /// [gas instrumentation]: https://nomicon.io/RuntimeSpec/Preparation#gas-instrumentation
 #[test]
 fn test_sanity_used_gas() {
-    use near_parameters::vm::ContractPrepareVersion;
+    use unc_parameters::vm::ContractPrepareVersion;
     let node = setup_runtime_node_with_contract(&contract_sanity_check_used_gas());
     let res = node
         .user()

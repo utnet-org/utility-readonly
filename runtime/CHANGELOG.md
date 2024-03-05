@@ -2,23 +2,23 @@
 
 ## Pending
 
-- Introduce `alt_bn128_g1_multiexp`, `alt_bn128_g1_sum` and `alt_bn128_pairing_check` host functions to `near-vm-logic`.
+- Introduce `alt_bn128_g1_multiexp`, `alt_bn128_g1_sum` and `alt_bn128_pairing_check` host functions to `unc-vm-logic`.
 
 ## 3.0.0
 
-- Dependency on `near-core-primitives`
+- Dependency on `unc-core-primitives`
 
 ## 2.3.0
 
-- Added disk cache to `near-vm-runner`
-- Contains a dependency on `near-primitives`, so it's impossible to publish to crates.io
+- Added disk cache to `unc-vm-runner`
+- Contains a dependency on `unc-primitives`, so it's impossible to publish to crates.io
 - Needed to differentiate from `2.2.0` to avoid patch conflicts.
 
 ## 2.2.0
 
 - Add ability to specify protocol version when initializing VMLogic.
 - Add implicit account creation logic for a new protocol version.
-- Add `near-runtime-utils` crate that is shared across runtime crates.
+- Add `unc-runtime-utils` crate that is shared across runtime crates.
 
 ## 2.1.1
 

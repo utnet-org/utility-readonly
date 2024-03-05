@@ -1,8 +1,8 @@
 use serde_json::Value;
 
-use near_client_primitives::types::GetProtocolConfigError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::config::{RpcProtocolConfigError, RpcProtocolConfigRequest};
+use unc_client_primitives::types::GetProtocolConfigError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::config::{RpcProtocolConfigError, RpcProtocolConfigRequest};
 
 use super::{Params, RpcFrom, RpcRequest};
 

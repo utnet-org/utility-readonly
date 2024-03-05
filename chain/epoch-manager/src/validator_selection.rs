@@ -1,20 +1,20 @@
 use crate::shard_assignment::assign_shards;
-use near_primitives::checked_feature;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{EpochConfig, RngSeed};
-use near_primitives::errors::{BlockError, EpochError};
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
-use near_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
+use unc_primitives::checked_feature;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::{EpochConfig, RngSeed};
+use unc_primitives::errors::{BlockError, EpochError};
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::{AccountId, Balance, NumShards, Power, ProtocolVersion, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
+use unc_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
 use num_rational::Ratio;
 use std::cmp::{self, Ordering};
 use std::collections::hash_map;
 use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::block_summary::BlockSummary;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::block_summary::BlockSummary;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 /// Select providers for next block and generate block info
 pub fn proposals_to_block_summary(
     epoch_config: &EpochConfig,
@@ -817,15 +817,15 @@ impl Ord for OrderedValidatorPower {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_crypto::{KeyType, PublicKey};
-    use near_primitives::account::id::AccountIdRef;
-    use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochInfoV3};
-    use near_primitives::epoch_manager::ValidatorSelectionConfig;
-    use near_primitives::shard_layout::ShardLayout;
-    use near_primitives::types::validator_power::ValidatorPower;
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_primitives::account::id::AccountIdRef;
+    use unc_primitives::epoch_manager::epoch_info::{EpochInfo, EpochInfoV3};
+    use unc_primitives::epoch_manager::ValidatorSelectionConfig;
+    use unc_primitives::shard_layout::ShardLayout;
+    use unc_primitives::types::validator_power::ValidatorPower;
     #[cfg(feature = "nightly")]
-    use near_primitives::validator_mandates::{AssignmentWeight, ValidatorMandatesAssignment};
-    use near_primitives::version::PROTOCOL_VERSION;
+    use unc_primitives::validator_mandates::{AssignmentWeight, ValidatorMandatesAssignment};
+    use unc_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
     use crate::test_utils::frozen;
 

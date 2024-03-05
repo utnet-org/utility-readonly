@@ -1,17 +1,17 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc, time::Instant};
 
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_epoch_manager::EpochManager;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::sharding::ShardChunkHeader;
-use near_primitives::state_record::{state_record_to_account_id, StateRecord};
-use near_primitives::trie_key::col;
-use near_primitives::trie_key::trie_key_parsers::{
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_epoch_manager::EpochManager;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::sharding::ShardChunkHeader;
+use unc_primitives::state_record::{state_record_to_account_id, StateRecord};
+use unc_primitives::trie_key::col;
+use unc_primitives::trie_key::trie_key_parsers::{
     parse_account_id_from_access_key_key, parse_account_id_from_trie_key_with_separator,
 };
-use near_primitives_core::types::ShardId;
-use near_store::{ShardUId, Store, Trie, TrieDBStorage};
-use framework::NearConfig;
+use unc_primitives_core::types::ShardId;
+use unc_store::{ShardUId, Store, Trie, TrieDBStorage};
+use framework::UncConfig;
 
 #[derive(Clone)]
 pub enum TrieIterationType {
@@ -100,12 +100,12 @@ pub struct TrieIterationBenchmarkCmd {
 }
 
 impl TrieIterationBenchmarkCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
-        let genesis_config = &near_config.genesis.config;
+    pub fn run(self, unc_config: UncConfig, store: Store) {
+        let genesis_config = &unc_config.genesis.config;
         let chain_store = ChainStore::new(
             store.clone(),
             genesis_config.genesis_height,
-            near_config.client_config.save_trie_changes,
+            unc_config.client_config.save_trie_changes,
         );
         let head = chain_store.head().unwrap();
         let block = chain_store.get_block(&head.last_block_hash).unwrap();

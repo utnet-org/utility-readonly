@@ -1,17 +1,17 @@
 //! Client is responsible for tracking the chain, chunks, and producing them when needed.
 //! This client works completely synchronously and must be operated by some async actor outside.
 
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_crypto::KeyType;
-use near_network::test_utils::MockPeerManagerAdapter;
-use near_primitives::block::{Approval, ApprovalInner};
-use near_primitives::block_header::ApprovalType;
-use near_primitives::hash::hash;
-use near_primitives::network::PeerId;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::validator_signer::InMemoryValidatorSigner;
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_crypto::KeyType;
+use unc_network::test_utils::MockPeerManagerAdapter;
+use unc_primitives::block::{Approval, ApprovalInner};
+use unc_primitives::block_header::ApprovalType;
+use unc_primitives::hash::hash;
+use unc_primitives::network::PeerId;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::validator_signer::InMemoryValidatorSigner;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::collections::HashMap;
@@ -64,8 +64,8 @@ fn test_invalid_approvals() {
 
 #[test]
 fn test_cap_max_gas_price() {
-    use near_chain::Provenance;
-    use near_primitives::version::ProtocolFeature;
+    use unc_chain::Provenance;
+    use unc_primitives::version::ProtocolFeature;
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
     let epoch_length = 5;
     genesis.config.min_gas_price = 1_000;

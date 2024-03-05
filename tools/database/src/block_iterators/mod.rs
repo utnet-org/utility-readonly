@@ -5,8 +5,8 @@ mod last_blocks;
 
 use std::rc::Rc;
 
-use near_chain::{Block, ChainStore};
-use near_primitives::types::BlockHeight;
+use unc_chain::{Block, ChainStore};
+use unc_primitives::types::BlockHeight;
 
 /// Iterate over blocks between two block heights.
 /// `from_height` and `to_height` are inclusive

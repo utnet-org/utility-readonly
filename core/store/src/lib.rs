@@ -8,7 +8,7 @@ use std::{fmt, io};
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use metadata::{DbKind, DbVersion, KIND_KEY, VERSION_KEY};
-use near_primitives::transaction::RegisterRsa2048KeysAction;
+use unc_primitives::transaction::RegisterRsa2048KeysAction;
 use once_cell::sync::Lazy;
 use strum;
 
@@ -18,17 +18,17 @@ pub use db::{
     GENESIS_STATE_ROOTS_KEY, HEADER_HEAD_KEY, HEAD_KEY, LARGEST_TARGET_HEIGHT_KEY,
     LATEST_KNOWN_KEY, STATE_SNAPSHOT_KEY, STATE_SYNC_DUMP_KEY, TAIL_KEY,
 };
-use near_crypto::PublicKey;
-use near_fmt::{AbbrBytes, StorageKey};
-use near_primitives::account::{AccessKey, Account};
-pub use near_primitives::errors::{MissingTrieValueContext, StorageError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{DelayedReceiptIndices, Receipt, ReceivedData};
-pub use near_primitives::shard_layout::ShardUId;
-use near_primitives::trie_key::{trie_key_parsers, TrieKey};
-use near_primitives::types::{AccountId, StateRoot};
-use near_vm_runner::logic::{CompiledContract, CompiledContractCache};
-use near_vm_runner::ContractCode;
+use unc_crypto::PublicKey;
+use unc_fmt::{AbbrBytes, StorageKey};
+use unc_primitives::account::{AccessKey, Account};
+pub use unc_primitives::errors::{MissingTrieValueContext, StorageError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{DelayedReceiptIndices, Receipt, ReceivedData};
+pub use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::trie_key::{trie_key_parsers, TrieKey};
+use unc_primitives::types::{AccountId, StateRoot};
+use unc_vm_runner::logic::{CompiledContract, CompiledContractCache};
+use unc_vm_runner::ContractCode;
 
 use crate::db::{refcount, DBIterator, DBOp, DBSlice, DBTransaction, Database, StoreStatistics};
 pub use crate::trie::iterator::{TrieIterator, TrieTraversalItem};
@@ -961,7 +961,7 @@ impl CompiledContractCache for StoreCompiledContractCache {
 
 #[cfg(test)]
 mod tests {
-    use near_primitives::hash::CryptoHash;
+    use unc_primitives::hash::CryptoHash;
 
     use super::{DBCol, NodeStorage, Store};
 
@@ -1075,7 +1075,7 @@ mod tests {
     /// Check StoreCompiledContractCache implementation.
     #[test]
     fn test_store_compiled_contract_cache() {
-        use near_vm_runner::logic::{CompiledContract, CompiledContractCache};
+        use unc_vm_runner::logic::{CompiledContract, CompiledContractCache};
         use std::str::FromStr;
 
         let store = crate::test_utils::create_test_store();

@@ -14,28 +14,28 @@ workspace = true
 [dependencies]
 once_cell.workspace = true
 
-near-chain-configs.workspace = true
-near-chain.workspace = true
-near-crypto.workspace = true
-near-parameters.workspace = true
-near-primitives.workspace = true
-near-test-contracts.workspace = true
+unc-chain-configs.workspace = true
+unc-chain.workspace = true
+unc-crypto.workspace = true
+unc-parameters.workspace = true
+unc-primitives.workspace = true
+unc-test-contracts.workspace = true
 node-runtime.workspace = true
 
 [features]
 nightly_protocol = [
-  "near-chain-configs/nightly_protocol",
-  "near-chain/nightly_protocol",
-  "near-parameters/nightly_protocol",
-  "near-primitives/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-chain/nightly_protocol",
+  "unc-parameters/nightly_protocol",
+  "unc-primitives/nightly_protocol",
   "node-runtime/nightly_protocol",
 ]
 nightly = [
   "nightly_protocol",
-  "near-chain-configs/nightly",
-  "near-chain/nightly",
-  "near-parameters/nightly",
-  "near-primitives/nightly",
+  "unc-chain-configs/nightly",
+  "unc-chain/nightly",
+  "unc-parameters/nightly",
+  "unc-primitives/nightly",
   "node-runtime/nightly",
 ]
 default = []

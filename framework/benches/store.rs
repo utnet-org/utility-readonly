@@ -2,12 +2,12 @@
 extern crate bencher;
 
 use bencher::Bencher;
-use near_chain::{types::RuntimeAdapter, ChainStore, ChainStoreAccess};
-use near_chain_configs::GenesisValidationMode;
-use near_epoch_manager::EpochManager;
-use near_o11y::testonly::init_integration_logger;
-use near_primitives::types::StateRoot;
-use near_store::Mode;
+use unc_chain::{types::RuntimeAdapter, ChainStore, ChainStoreAccess};
+use unc_chain_configs::GenesisValidationMode;
+use unc_epoch_manager::EpochManager;
+use unc_o11y::testonly::init_integration_logger;
+use unc_primitives::types::StateRoot;
+use unc_store::Mode;
 use framework::{get_default_home, load_config, NightshadeRuntime};
 use std::time::{Duration, Instant};
 
@@ -23,16 +23,16 @@ use std::time::{Duration, Instant};
 fn read_trie_items(bench: &mut Bencher, shard_id: usize, mode: Mode) {
     init_integration_logger();
     let home_dir = get_default_home();
-    let near_config = load_config(&home_dir, GenesisValidationMode::UnsafeFast)
+    let unc_config = load_config(&home_dir, GenesisValidationMode::UnsafeFast)
         .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
     let num_trie_items = 10_000;
 
     bench.iter(move || {
         tracing::info!(target: "uncd", "{:?}", home_dir);
-        let store = near_store::NodeStorage::opener(
+        let store = unc_store::NodeStorage::opener(
             &home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
+            unc_config.config.archive,
+            &unc_config.config.store,
             None,
         )
         .open_in_mode(mode)
@@ -40,11 +40,11 @@ fn read_trie_items(bench: &mut Bencher, shard_id: usize, mode: Mode) {
         .get_hot_store();
 
         let chain_store =
-            ChainStore::new(store.clone(), near_config.genesis.config.genesis_height, true);
+            ChainStore::new(store.clone(), unc_config.genesis.config.genesis_height, true);
 
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
-        let runtime = NightshadeRuntime::from_config(&home_dir, store, &near_config, epoch_manager);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
+        let runtime = NightshadeRuntime::from_config(&home_dir, store, &unc_config, epoch_manager);
         let head = chain_store.head().unwrap();
         let last_block = chain_store.get_block(&head.last_block_hash).unwrap();
         let state_roots: Vec<StateRoot> =

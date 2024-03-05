@@ -41,14 +41,14 @@
 //! in the prefetcher. Implementation details for most limits are in
 //! `core/store/src/trie/prefetching_trie_storage.rs`
 
-use near_o11y::metrics::prometheus;
-use near_o11y::metrics::prometheus::core::GenericCounter;
-use near_primitives::receipt::{Receipt, ReceiptEnum};
-use near_primitives::transaction::{Action, SignedTransaction};
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::AccountId;
-use near_primitives::types::StateRoot;
-use near_store::{PrefetchApi, PrefetchError, Trie};
+use unc_o11y::metrics::prometheus;
+use unc_o11y::metrics::prometheus::core::GenericCounter;
+use unc_primitives::receipt::{Receipt, ReceiptEnum};
+use unc_primitives::transaction::{Action, SignedTransaction};
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::AccountId;
+use unc_primitives::types::StateRoot;
+use unc_store::{PrefetchApi, PrefetchError, Trie};
 use sha2::Digest;
 use tracing::{debug, warn};
 
@@ -203,7 +203,7 @@ impl TriePrefetcher {
                                         account_id: account_id.clone(),
                                         key: key.to_vec(),
                                     };
-                                    near_o11y::io_trace!(count: "prefetch");
+                                    unc_o11y::io_trace!(count: "prefetch");
                                     self.prefetch_trie_key(trie_key)?;
                                 }
                             }
@@ -219,9 +219,9 @@ impl TriePrefetcher {
 #[cfg(test)]
 mod tests {
     use super::TriePrefetcher;
-    use near_primitives::{trie_key::TrieKey, types::AccountId};
-    use near_store::test_utils::{create_test_store, test_populate_trie};
-    use near_store::{ShardTries, ShardUId, StateSnapshotConfig, Trie, TrieConfig};
+    use unc_primitives::{trie_key::TrieKey, types::AccountId};
+    use unc_store::test_utils::{create_test_store, test_populate_trie};
+    use unc_store::{ShardTries, ShardUId, StateSnapshotConfig, Trie, TrieConfig};
     use std::str::FromStr;
     use std::time::{Duration, Instant};
 
@@ -308,7 +308,7 @@ mod tests {
         let shard_uids = vec![ShardUId::single_shard()];
         let trie_config = TrieConfig { enable_receipt_prefetching: true, ..TrieConfig::default() };
         let store = create_test_store();
-        let flat_storage_manager = near_store::flat::FlatStorageManager::new(store.clone());
+        let flat_storage_manager = unc_store::flat::FlatStorageManager::new(store.clone());
         let tries = ShardTries::new(
             store,
             trie_config,

@@ -1,4 +1,4 @@
-use near_chain_configs::{Genesis, GenesisValidationMode};
+use unc_chain_configs::{Genesis, GenesisValidationMode};
 
 #[test]
 fn test_load_genesis() {

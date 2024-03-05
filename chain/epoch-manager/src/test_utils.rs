@@ -1,33 +1,33 @@
 use std::collections::{BTreeMap, HashMap};
 
-use near_primitives::types::{EpochId, Power};
-use near_store::Store;
+use unc_primitives::types::{EpochId, Power};
+use unc_store::Store;
 use num_rational::Ratio;
 
 use crate::proposals::find_threshold;
 use crate::RewardCalculator;
 use crate::RngSeed;
 use crate::{BlockInfo, EpochManager};
-use near_crypto::{KeyType, SecretKey};
-use near_primitives::challenge::SlashedValidator;
-use near_primitives::epoch_manager::block_info::BlockInfoV2;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{AllEpochConfig, EpochConfig, ValidatorWeight};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{
+use unc_crypto::{KeyType, SecretKey};
+use unc_primitives::challenge::SlashedValidator;
+use unc_primitives::epoch_manager::block_info::BlockInfoV2;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::{AllEpochConfig, EpochConfig, ValidatorWeight};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::{
     AccountId, Balance, BlockHeight, BlockHeightDelta, EpochHeight, NumSeats, NumShards,
     ValidatorId, ValidatorKickoutReason,
 };
-use near_primitives::utils::get_num_seats_per_shard;
-use near_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::test_utils::create_test_store;
+use unc_primitives::utils::get_num_seats_per_shard;
+use unc_primitives::validator_mandates::{ValidatorMandates, ValidatorMandatesConfig};
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::test_utils::create_test_store;
 
-use near_primitives::shard_layout::ShardLayout;
+use unc_primitives::shard_layout::ShardLayout;
 use {crate::reward_calculator::NUM_NS_IN_SECOND, crate::NUM_SECONDS_IN_A_YEAR};
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 pub const DEFAULT_GAS_PRICE: u128 = 100;
 pub const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;

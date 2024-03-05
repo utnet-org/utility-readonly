@@ -1,15 +1,15 @@
 use chrono::Utc;
-use near_chain::types::RuntimeAdapter;
-use near_chain_configs::{Genesis, GenesisChangeConfig, GenesisConfig};
-use near_crypto::PublicKey;
-use near_epoch_manager::EpochManagerAdapter;
-use near_epoch_manager::EpochManagerHandle;
-use near_primitives::account::id::AccountId;
-use near_primitives::block::BlockHeader;
-use near_primitives::state_record::state_record_to_account_id;
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::{AccountInfo, Balance, StateRoot};
-use framework::config::NearConfig;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain_configs::{Genesis, GenesisChangeConfig, GenesisConfig};
+use unc_crypto::PublicKey;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_epoch_manager::EpochManagerHandle;
+use unc_primitives::account::id::AccountId;
+use unc_primitives::block::BlockHeader;
+use unc_primitives::state_record::state_record_to_account_id;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::{AccountInfo, Balance, StateRoot};
+use framework::config::UncConfig;
 use framework::NightshadeRuntime;
 use redis::Commands;
 use serde::ser::{SerializeSeq, Serializer};
@@ -20,20 +20,20 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
-use near_primitives_core::types::Power;
+use unc_primitives_core::types::Power;
 
-/// Returns a `NearConfig` with genesis records taken from the current state.
+/// Returns a `UncConfig` with genesis records taken from the current state.
 /// If `records_path` argument is provided, then records will be streamed into a separate file,
-/// otherwise the returned `NearConfig` will contain all the records within itself.
+/// otherwise the returned `UncConfig` will contain all the records within itself.
 pub fn state_dump(
     epoch_manager: &EpochManagerHandle,
     runtime: Arc<NightshadeRuntime>,
     state_roots: &[StateRoot],
     last_block_header: BlockHeader,
-    near_config: &NearConfig,
+    unc_config: &UncConfig,
     records_path: Option<&Path>,
     change_config: &GenesisChangeConfig,
-) -> NearConfig {
+) -> UncConfig {
     println!(
         "Generating genesis from state data of #{} / {}",
         last_block_header.height(),
@@ -55,9 +55,9 @@ pub fn state_dump(
         })
         .collect::<HashMap<_, _>>();
 
-    let mut near_config = near_config.clone();
+    let mut unc_config = unc_config.clone();
 
-    let mut genesis_config = near_config.genesis.config.clone();
+    let mut genesis_config = unc_config.genesis.config.clone();
     genesis_config.genesis_height = genesis_height;
     genesis_config.genesis_time = Utc::now();
     genesis_config.validators = validators
@@ -107,8 +107,8 @@ pub fn state_dump(
             // minting tokens every epoch.
             genesis_config.total_supply = total_supply;
             change_genesis_config(&mut genesis_config, change_config);
-            near_config.genesis = Genesis::new_with_path(genesis_config, records_path).unwrap();
-            near_config.config.genesis_records_file =
+            unc_config.genesis = Genesis::new_with_path(genesis_config, records_path).unwrap();
+            unc_config.config.genesis_records_file =
                 Some(records_path.file_name().unwrap().to_str().unwrap().to_string());
         }
         None => {
@@ -126,10 +126,10 @@ pub fn state_dump(
             // minting tokens every epoch.
             genesis_config.total_supply = total_supply;
             change_genesis_config(&mut genesis_config, change_config);
-            near_config.genesis = Genesis::new(genesis_config, records.into()).unwrap();
+            unc_config.genesis = Genesis::new(genesis_config, records.into()).unwrap();
         }
     }
-    near_config
+    unc_config
 }
 
 pub fn state_dump_redis(
@@ -296,39 +296,39 @@ mod test {
     use std::path::Path;
     use std::sync::Arc;
 
-    use near_chain::{ChainGenesis, ChainStoreAccess, Provenance};
-    use near_chain_configs::genesis_validate::validate_genesis;
-    use near_chain_configs::{Genesis, GenesisChangeConfig};
-    use near_client::test_utils::TestEnv;
-    use near_client::ProcessTxResponse;
-    use near_crypto::{InMemorySigner, KeyFile, KeyType, PublicKey, SecretKey};
-    use near_epoch_manager::EpochManager;
-    use near_primitives::account::id::AccountId;
-    use near_primitives::state_record::StateRecord;
-    use near_primitives::transaction::{Action, DeployContractAction, SignedTransaction};
-    use near_primitives::types::{
+    use unc_chain::{ChainGenesis, ChainStoreAccess, Provenance};
+    use unc_chain_configs::genesis_validate::validate_genesis;
+    use unc_chain_configs::{Genesis, GenesisChangeConfig};
+    use unc_client::test_utils::TestEnv;
+    use unc_client::ProcessTxResponse;
+    use unc_crypto::{InMemorySigner, KeyFile, KeyType, PublicKey, SecretKey};
+    use unc_epoch_manager::EpochManager;
+    use unc_primitives::account::id::AccountId;
+    use unc_primitives::state_record::StateRecord;
+    use unc_primitives::transaction::{Action, DeployContractAction, SignedTransaction};
+    use unc_primitives::types::{
         Balance, BlockHeight, BlockHeightDelta, NumBlocks, ProtocolVersion,
     };
-    use near_primitives::version::PROTOCOL_VERSION;
-    use near_store::genesis::initialize_genesis_state;
-    use near_store::test_utils::create_test_store;
-    use near_store::Store;
+    use unc_primitives::version::PROTOCOL_VERSION;
+    use unc_store::genesis::initialize_genesis_state;
+    use unc_store::test_utils::create_test_store;
+    use unc_store::Store;
     use framework::config::GenesisExt;
     use framework::config::TESTING_INIT_STAKE;
-    use framework::config::{Config, NearConfig};
+    use framework::config::{Config, UncConfig};
     use framework::test_utils::TestEnvNightshadeSetupExt;
     use framework::NightshadeRuntime;
 
     use crate::state_dump::state_dump;
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::validator_signer::InMemoryValidatorSigner;
-    use near_primitives_core::account::id::AccountIdRef;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::validator_signer::InMemoryValidatorSigner;
+    use unc_primitives_core::account::id::AccountIdRef;
 
     fn setup(
         epoch_length: NumBlocks,
         protocol_version: ProtocolVersion,
         test_resharding: bool,
-    ) -> (Store, Genesis, TestEnv, NearConfig) {
+    ) -> (Store, Genesis, TestEnv, UncConfig) {
         let mut genesis =
             Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
         genesis.config.num_block_producer_seats = 2;
@@ -353,7 +353,7 @@ mod test {
                 .build()
         };
 
-        let near_config = NearConfig::new(
+        let unc_config = UncConfig::new(
             Config::default(),
             genesis.clone(),
             KeyFile {
@@ -369,7 +369,7 @@ mod test {
         .unwrap();
 
         let store = env.clients[0].chain.chain_store().store().clone();
-        (store, genesis, env, near_config)
+        (store, genesis, env, unc_config)
     }
 
     /// Produces blocks, avoiding the potential failure where the client is not the
@@ -397,7 +397,7 @@ mod test {
     #[test]
     fn test_dump_state_preserve_validators() {
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) = setup(epoch_length, PROTOCOL_VERSION, false);
+        let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
         let tx = SignedTransaction::stake(
@@ -431,16 +431,16 @@ mod test {
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
         let records_file = tempfile::NamedTempFile::new().unwrap();
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             Some(records_file.path()),
             &GenesisChangeConfig::default(),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
         assert_eq!(new_genesis.config.validators.len(), 2);
         validate_genesis(&new_genesis).unwrap();
     }
@@ -449,7 +449,7 @@ mod test {
     #[test]
     fn test_dump_state_respect_select_account_ids() {
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) = setup(epoch_length, PROTOCOL_VERSION, false);
+        let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
 
         let signer0 =
@@ -460,7 +460,7 @@ mod test {
             "test0".parse().unwrap(),
             &signer0,
             vec![Action::DeployContract(DeployContractAction {
-                code: near_test_contracts::backwards_compatible_rs_contract().to_vec(),
+                code: unc_test_contracts::backwards_compatible_rs_contract().to_vec(),
             })],
             genesis_hash,
         );
@@ -508,17 +508,17 @@ mod test {
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
         let select_account_ids = vec!["test0".parse().unwrap()];
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             None,
             &GenesisChangeConfig::default()
                 .with_select_account_ids(Some(select_account_ids.clone())),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
         let mut expected_accounts: HashSet<AccountId> =
             new_genesis.config.validators.iter().map(|v| v.account_id.clone()).collect();
         expected_accounts.extend(select_account_ids);
@@ -537,7 +537,7 @@ mod test {
     #[test]
     fn test_dump_state_preserve_validators_inmemory() {
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) = setup(epoch_length, PROTOCOL_VERSION, false);
+        let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
         let tx = SignedTransaction::stake(
@@ -570,16 +570,16 @@ mod test {
         let epoch_manager = EpochManager::new_arc_handle(store.clone(), &genesis.config);
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             None,
             &GenesisChangeConfig::default(),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
         assert_eq!(new_genesis.config.validators.len(), 2);
         validate_genesis(&new_genesis).unwrap();
     }
@@ -588,7 +588,7 @@ mod test {
     #[test]
     fn test_dump_state_return_locked() {
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) = setup(epoch_length, PROTOCOL_VERSION, false);
+        let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
         let tx = SignedTransaction::stake(
@@ -614,16 +614,16 @@ mod test {
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
 
         let records_file = tempfile::NamedTempFile::new().unwrap();
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             Some(records_file.path()),
             &GenesisChangeConfig::default(),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
         assert_eq!(
             new_genesis
                 .config
@@ -639,12 +639,12 @@ mod test {
 
     #[test]
     fn test_dump_state_shard_upgrade() {
-        use near_client::test_utils::run_catchup;
-        use near_primitives::shard_layout::ShardLayout;
-        use near_primitives::version::ProtocolFeature::SimpleNightshade;
+        use unc_client::test_utils::run_catchup;
+        use unc_primitives::shard_layout::ShardLayout;
+        use unc_primitives::version::ProtocolFeature::SimpleNightshade;
 
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) =
+        let (store, genesis, mut env, unc_config) =
             setup(epoch_length, SimpleNightshade.protocol_version() - 1, true);
         for i in 1..=2 * epoch_length + 1 {
             let mut block = env.clients[0].produce_block(i).unwrap().unwrap();
@@ -666,16 +666,16 @@ mod test {
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
         let records_file = tempfile::NamedTempFile::new().unwrap();
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             Some(records_file.path()),
             &GenesisChangeConfig::default(),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
 
         assert_eq!(new_genesis.config.shard_layout, ShardLayout::get_simple_nightshade_layout());
         assert_eq!(new_genesis.config.num_block_producer_seats_per_shard, vec![2; 4]);
@@ -741,7 +741,7 @@ mod test {
             blocks.push(block);
         }
 
-        let near_config = NearConfig::new(
+        let unc_config = UncConfig::new(
             Config::default(),
             genesis,
             KeyFile {
@@ -766,7 +766,7 @@ mod test {
             runtime2,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             Some(records_file.path()),
             &GenesisChangeConfig::default(),
         );
@@ -811,7 +811,7 @@ mod test {
 
         safe_produce_blocks(&mut env, 1, epoch_length * 2 + 1);
 
-        let near_config = NearConfig::new(
+        let unc_config = UncConfig::new(
             Config::default(),
             genesis.clone(),
             KeyFile {
@@ -844,16 +844,16 @@ mod test {
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
         let records_file = tempfile::NamedTempFile::new().unwrap();
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             Some(records_file.path()),
             &GenesisChangeConfig::default(),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
 
         assert_eq!(new_genesis.config.validators.len(), 2);
         validate_genesis(&new_genesis).unwrap();
@@ -862,7 +862,7 @@ mod test {
     #[test]
     fn test_dump_state_respect_select_whitelist_validators() {
         let epoch_length = 4;
-        let (store, genesis, mut env, near_config) = setup(epoch_length, PROTOCOL_VERSION, false);
+        let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
 
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
@@ -900,16 +900,16 @@ mod test {
         let epoch_manager = EpochManager::new_arc_handle(store.clone(), &genesis.config);
         let runtime =
             NightshadeRuntime::test(Path::new("."), store, &genesis.config, epoch_manager.clone());
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             last_block.header().clone(),
-            &near_config,
+            &unc_config,
             None,
             &GenesisChangeConfig::default().with_whitelist_validators(Some(whitelist_validators)),
         );
-        let new_genesis = new_near_config.genesis;
+        let new_genesis = new_unc_config.genesis;
 
         assert_eq!(
             new_genesis

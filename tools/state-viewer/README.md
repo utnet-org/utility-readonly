@@ -47,7 +47,7 @@ number of rayon threads.
 As of today you need approximately 2TB of disk space for the whole history of `mainnet`, and the most practical way of
 obtaining this whole history is the following:
 
-* Patch <https://github.com/near/near-ops/pull/591> to define your own GCP instance in project `rpc-prod`.
+* Patch <https://github.com/near/unc-ops/pull/591> to define your own GCP instance in project `rpc-prod`.
 * Make sure to change `machine-name` and `role` to something unique.
 * Make a Pull Request and ask Mario (@mhalambek) or Sandi (@chefsale) for review.
 * Ask Mario or Sandi to grant you permissions to the GCP project `rpc-prod`.
@@ -58,7 +58,7 @@ obtaining this whole history is the following:
   [installation guide](https://cloud.google.com/sdk/docs/install) if needed.
 * It is recommended to run all the following commands as user `ubuntu`: `sudo su ubuntu`.
 * Install tools be able to compile `uncd`:
-  * Install development packages: <https://near-nodes.io/validator/compile-and-run-a-node>
+  * Install development packages: <https://unc-nodes.io/validator/compile-and-run-a-node>
   * Install Rust: <https://rustup.rs/>
   * Clone the git repository: `git clone http://github.com/utnet-org/utility`
   * `make uncd`

@@ -1,16 +1,16 @@
-use near_chain::{ChainGenesis, ChainStore, ChainStoreAccess, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_epoch_manager::EpochManagerAdapter;
-use near_o11y::testonly::init_test_logger;
-use near_store::test_utils::create_test_store;
-use near_store::Store;
-use near_undo_block::undo_block;
+use unc_chain::{ChainGenesis, ChainStore, ChainStoreAccess, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_o11y::testonly::init_test_logger;
+use unc_store::test_utils::create_test_store;
+use unc_store::Store;
+use unc_undo_block::undo_block;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::sync::Arc;
 
-/// Setup environment with one Near client for testing.
+/// Setup environment with one unc client for testing.
 fn setup_env(genesis: &Genesis, store: Store) -> (TestEnv, Arc<dyn EpochManagerAdapter>) {
     let chain_genesis = ChainGenesis::new(genesis);
     let env = TestEnv::builder(chain_genesis)
@@ -22,7 +22,7 @@ fn setup_env(genesis: &Genesis, store: Store) -> (TestEnv, Arc<dyn EpochManagerA
     (env, epoch_manager)
 }
 
-// Checks that Near client can successfully undo block on given height and then produce and process block normally after restart
+// Checks that unc client can successfully undo block on given height and then produce and process block normally after restart
 fn test_undo_block(epoch_length: u64, stop_height: u64) {
     init_test_logger();
 

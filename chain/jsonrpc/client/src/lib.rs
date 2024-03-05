@@ -1,18 +1,18 @@
 use awc::{Client, Connector};
 use futures::{future, future::LocalBoxFuture, FutureExt, TryFutureExt};
-use near_jsonrpc_primitives::errors::RpcError;
-use near_jsonrpc_primitives::message::{from_slice, Message};
-use near_jsonrpc_primitives::types::changes::{
+use unc_jsonrpc_primitives::errors::RpcError;
+use unc_jsonrpc_primitives::message::{from_slice, Message};
+use unc_jsonrpc_primitives::types::changes::{
     RpcStateChangesInBlockByTypeRequest, RpcStateChangesInBlockByTypeResponse,
 };
-use near_jsonrpc_primitives::types::transactions::{
+use unc_jsonrpc_primitives::types::transactions::{
     RpcTransactionResponse, RpcTransactionStatusRequest,
 };
-use near_jsonrpc_primitives::types::validator::RpcValidatorsOrderedRequest;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::{BlockId, BlockReference, EpochReference, MaybeBlockId, ShardId};
-use near_primitives::views::validator_power_view::ValidatorPowerView;
-use near_primitives::views::{
+use unc_jsonrpc_primitives::types::validator::RpcValidatorsOrderedRequest;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::{BlockId, BlockReference, EpochReference, MaybeBlockId, ShardId};
+use unc_primitives::views::validator_power_view::ValidatorPowerView;
+use unc_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, GasPriceView, StatusResponse,
 };
 use std::time::Duration;
@@ -197,14 +197,14 @@ impl JsonRpcClient {
         &self,
         path: String,
         data: String,
-    ) -> RpcRequest<near_jsonrpc_primitives::types::query::RpcQueryResponse> {
+    ) -> RpcRequest<unc_jsonrpc_primitives::types::query::RpcQueryResponse> {
         call_method(&self.client, &self.server_addr, "query", [path, data])
     }
 
     pub fn query(
         &self,
-        request: near_jsonrpc_primitives::types::query::RpcQueryRequest,
-    ) -> RpcRequest<near_jsonrpc_primitives::types::query::RpcQueryResponse> {
+        request: unc_jsonrpc_primitives::types::query::RpcQueryRequest,
+    ) -> RpcRequest<unc_jsonrpc_primitives::types::query::RpcQueryResponse> {
         call_method(&self.client, &self.server_addr, "query", request)
     }
 
@@ -239,24 +239,24 @@ impl JsonRpcClient {
     #[allow(non_snake_case)]
     pub fn EXPERIMENTAL_receipt(
         &self,
-        request: near_jsonrpc_primitives::types::receipts::RpcReceiptRequest,
-    ) -> RpcRequest<near_jsonrpc_primitives::types::receipts::RpcReceiptResponse> {
+        request: unc_jsonrpc_primitives::types::receipts::RpcReceiptRequest,
+    ) -> RpcRequest<unc_jsonrpc_primitives::types::receipts::RpcReceiptResponse> {
         call_method(&self.client, &self.server_addr, "EXPERIMENTAL_receipt", request)
     }
 
     #[allow(non_snake_case)]
     pub fn EXPERIMENTAL_protocol_config(
         &self,
-        request: near_jsonrpc_primitives::types::config::RpcProtocolConfigRequest,
-    ) -> RpcRequest<near_jsonrpc_primitives::types::config::RpcProtocolConfigResponse> {
+        request: unc_jsonrpc_primitives::types::config::RpcProtocolConfigRequest,
+    ) -> RpcRequest<unc_jsonrpc_primitives::types::config::RpcProtocolConfigResponse> {
         call_method(&self.client, &self.server_addr, "EXPERIMENTAL_protocol_config", request)
     }
 
     #[allow(non_snake_case)]
     pub fn EXPERIMENTAL_split_storage_info(
         &self,
-        request: near_jsonrpc_primitives::types::split_storage::RpcSplitStorageInfoRequest,
-    ) -> RpcRequest<near_jsonrpc_primitives::types::split_storage::RpcSplitStorageInfoResponse>
+        request: unc_jsonrpc_primitives::types::split_storage::RpcSplitStorageInfoRequest,
+    ) -> RpcRequest<unc_jsonrpc_primitives::types::split_storage::RpcSplitStorageInfoResponse>
     {
         call_method(&self.client, &self.server_addr, "EXPERIMENTAL_split_storage_info", request)
     }

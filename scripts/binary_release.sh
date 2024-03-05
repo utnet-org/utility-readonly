@@ -61,5 +61,5 @@ upload_binary uncd
 
 # if [ "$release" = "release" ]
 # then
-#   upload_binary near-sandbox
+#   upload_binary unc-sandbox
 # fi

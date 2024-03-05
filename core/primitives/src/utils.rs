@@ -17,12 +17,12 @@ use crate::version::{
     CREATE_RECEIPT_ID_SWITCH_TO_CURRENT_BLOCK_VERSION,
 };
 
-use near_crypto::{ED25519PublicKey, Secp256K1PublicKey};
-use near_primitives_core::account::id::{AccountId, AccountType};
+use unc_crypto::{ED25519PublicKey, Secp256K1PublicKey};
+use unc_primitives_core::account::id::{AccountId, AccountType};
 
 use std::mem::size_of;
 use std::ops::Deref;
-use near_primitives_core::types::BlockHeight;
+use unc_primitives_core::types::BlockHeight;
 
 pub mod min_heap;
 
@@ -71,7 +71,7 @@ impl<T> MaybeValidated<T> {
     /// # Example
     ///
     /// ```
-    /// use near_primitives::utils::MaybeValidated;
+    /// use unc_primitives::utils::MaybeValidated;
     ///
     /// let value = MaybeValidated::from_validated(42);
     /// assert!(value.is_validated());
@@ -90,7 +90,7 @@ impl<T> MaybeValidated<T> {
     /// # Example
     ///
     /// ```
-    /// use near_primitives::utils::MaybeValidated;
+    /// use unc_primitives::utils::MaybeValidated;
     ///
     /// let value = MaybeValidated::from(42);
     /// assert_eq!(Err(()), value.validate_with(|_| Err(())));
@@ -126,7 +126,7 @@ impl<T> MaybeValidated<T> {
     /// # Example
     ///
     /// ```
-    /// use near_primitives::utils::MaybeValidated;
+    /// use unc_primitives::utils::MaybeValidated;
     ///
     /// let value = MaybeValidated::from(42);
     /// assert_eq!("42", value.map(|v| v.to_string()).into_inner());
@@ -142,7 +142,7 @@ impl<T> MaybeValidated<T> {
     /// # Example
     ///
     /// ```
-    /// use near_primitives::utils::MaybeValidated;
+    /// use unc_primitives::utils::MaybeValidated;
     ///
     /// let value = MaybeValidated::from(42);
     /// let value_as_ref = value.as_ref();
@@ -475,7 +475,7 @@ where
     Serializable(object)
 }
 
-/// From `near-account-id` version `1.0.0-alpha.2`, `is_implicit` returns true for ETH-implicit accounts.
+/// From `unc-account-id` version `1.0.0-alpha.2`, `is_implicit` returns true for ETH-implicit accounts.
 /// This function is a wrapper for `is_implicit` method so that we can easily differentiate its behavior
 /// based on whether ETH-implicit accounts are enabled.
 pub fn account_is_implicit(account_id: &AccountId, eth_implicit_accounts_enabled: bool) -> bool {
@@ -488,7 +488,7 @@ pub fn account_is_implicit(account_id: &AccountId, eth_implicit_accounts_enabled
 
 /// Returns hex-encoded copy of the public key.
 /// This is a NEAR-implicit account ID which can be controlled by the corresponding ED25519 private key.
-pub fn derive_near_implicit_account_id(public_key: &ED25519PublicKey) -> AccountId {
+pub fn derive_unc_implicit_account_id(public_key: &ED25519PublicKey) -> AccountId {
     hex::encode(public_key).parse().unwrap()
 }
 
@@ -503,14 +503,14 @@ pub fn derive_eth_implicit_account_id(public_key: &Secp256K1PublicKey) -> Accoun
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_crypto::{KeyType, PublicKey};
+    use unc_crypto::{KeyType, PublicKey};
 
     #[test]
-    fn test_derive_near_implicit_account_id() {
+    fn test_derive_unc_implicit_account_id() {
         let public_key = PublicKey::from_seed(KeyType::ED25519, "test");
         let expected: AccountId =
             "bb4dc639b212e075a751685b26bdcea5920a504181ff2910e8549742127092a0".parse().unwrap();
-        let account_id = derive_near_implicit_account_id(public_key.unwrap_as_ed25519());
+        let account_id = derive_unc_implicit_account_id(public_key.unwrap_as_ed25519());
         assert_eq!(account_id, expected);
     }
 

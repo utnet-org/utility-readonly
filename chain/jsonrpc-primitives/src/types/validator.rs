@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 pub type RpcValidatorsOrderedResponse =
-    Vec<near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView>;
+    Vec<unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView>;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
@@ -17,18 +17,18 @@ pub enum RpcValidatorError {
 #[derive(serde::Serialize, serde::Deserialize, Debug, arbitrary::Arbitrary, PartialEq, Eq)]
 pub struct RpcValidatorRequest {
     #[serde(flatten)]
-    pub epoch_reference: near_primitives::types::EpochReference,
+    pub epoch_reference: unc_primitives::types::EpochReference,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcValidatorsOrderedRequest {
-    pub block_id: near_primitives::types::MaybeBlockId,
+    pub block_id: unc_primitives::types::MaybeBlockId,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcValidatorResponse {
     #[serde(flatten)]
-    pub validator_info: near_primitives::views::EpochValidatorInfo,
+    pub validator_info: unc_primitives::views::EpochValidatorInfo,
 }
 
 impl From<RpcValidatorError> for crate::errors::RpcError {

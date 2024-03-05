@@ -7,10 +7,10 @@ pub use self::private_non_delegate_action::NonDelegateAction;
 use super::Action;
 use crate::signable_message::{SignableMessage, SignableMessageType};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::{PublicKey, Signature};
-use near_primitives_core::hash::{hash, CryptoHash};
-use near_primitives_core::types::BlockHeight;
-use near_primitives_core::types::{AccountId, Nonce};
+use unc_crypto::{PublicKey, Signature};
+use unc_primitives_core::hash::{hash, CryptoHash};
+use unc_primitives_core::types::BlockHeight;
+use unc_primitives_core::types::{AccountId, Nonce};
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind, Read};
 
@@ -132,7 +132,7 @@ mod private_non_delegate_action {
 mod tests {
     use super::*;
     use crate::action::CreateAccountAction;
-    use near_crypto::KeyType;
+    use unc_crypto::KeyType;
 
     /// A serialized `Action::Delegate(SignedDelegateAction)` for testing.
     ///

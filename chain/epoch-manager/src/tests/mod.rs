@@ -9,17 +9,17 @@ use crate::test_utils::{
     record_with_block_info, reward, setup_default_epoch_manager, setup_epoch_manager, do_power,
     DEFAULT_TOTAL_SUPPLY,
 };
-use near_primitives::account::id::AccountIdRef;
-use near_primitives::challenge::SlashedValidator;
-use near_primitives::epoch_manager::EpochConfig;
-use near_primitives::hash::hash;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::ValidatorKickoutReason::{NotEnoughBlocks, NotEnoughChunks};
-use near_primitives::version::ProtocolFeature::SimpleNightshade;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::test_utils::create_test_store;
+use unc_primitives::account::id::AccountIdRef;
+use unc_primitives::challenge::SlashedValidator;
+use unc_primitives::epoch_manager::EpochConfig;
+use unc_primitives::hash::hash;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::types::ValidatorKickoutReason::{NotEnoughBlocks, NotEnoughChunks};
+use unc_primitives::version::ProtocolFeature::SimpleNightshade;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::test_utils::create_test_store;
 use num_rational::Ratio;
-use near_primitives::types::Power;
+use unc_primitives::types::Power;
 
 impl EpochManager {
     /// Returns number of produced and expected blocks by given validator.

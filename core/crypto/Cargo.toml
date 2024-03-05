@@ -1,5 +1,5 @@
 [package]
-name = "near-crypto"
+name = "unc-crypto"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -20,7 +20,7 @@ curve25519-dalek.workspace = true
 derive_more.workspace = true
 ed25519-dalek.workspace = true
 hex.workspace = true
-near-account-id.workspace = true
+unc-account-id.workspace = true
 once_cell.workspace = true
 primitive-types.workspace = true
 rand = "0.7" # TODO: this is probably wrong?
@@ -32,7 +32,7 @@ serde_json.workspace = true
 stdx.workspace = true
 subtle.workspace = true
 thiserror.workspace = true
-near-config-utils.workspace = true
+unc-config-utils.workspace = true
 
 [dev-dependencies]
 bolero.workspace = true

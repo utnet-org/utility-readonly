@@ -1,19 +1,19 @@
 use crate::tests::client::process_blocks::{deploy_test_contract, set_block_protocol_version};
 use assert_matches::assert_matches;
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_parameters::{ExtCosts, RuntimeConfigStore};
-use near_primitives::hash::CryptoHash;
-use near_primitives::test_utils::encode;
-use near_primitives::transaction::{
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_parameters::{ExtCosts, RuntimeConfigStore};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::test_utils::encode;
+use unc_primitives::transaction::{
     Action, ExecutionMetadata, FunctionCallAction, SignedTransaction,
 };
-use near_primitives::types::{BlockHeightDelta, Gas, TrieNodesCount};
-use near_primitives::version::{ProtocolFeature, ProtocolVersion};
-use near_primitives::views::FinalExecutionStatus;
+use unc_primitives::types::{BlockHeightDelta, Gas, TrieNodesCount};
+use unc_primitives::version::{ProtocolFeature, ProtocolVersion};
+use unc_primitives::views::FinalExecutionStatus;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -101,7 +101,7 @@ fn compare_node_counts() {
     deploy_test_contract(
         &mut env,
         "test0".parse().unwrap(),
-        near_test_contracts::backwards_compatible_rs_contract(),
+        unc_test_contracts::backwards_compatible_rs_contract(),
         num_blocks,
         1,
     );

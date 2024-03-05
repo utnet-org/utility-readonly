@@ -54,10 +54,10 @@ Prerequisites:
 
 Steps:
 
-1. Choose or upload a near binary here: https://console.cloud.google.com/storage/browser/nearprotocol_nearcore_release?project=near-core
+1. Choose or upload a near binary here: https://console.cloud.google.com/storage/browser/nearprotocol_nearcore_release?project=unc-core
 2. Fill the binary filename in remote.json.  Modify zones as needed,
    they’ll be used in round-robin manner.
-3. `NEAR_PYTEST_CONFIG=remote.json python tests/...`
+3. `unc_PYTEST_CONFIG=remote.json python tests/...`
 4. Run `python tests/delete_remote_nodes.py` to make sure the remote
    nodes are shut down properly (especially if tests failed early).
 
@@ -129,7 +129,7 @@ For example, a simple test for checking implementation of
 
         contract_key = nodes[0].signer_key
         contract = load_binary_file(
-            '../runtime/near-test-contracts/res/test_contract_rs.wasm')
+            '../runtime/unc-test-contracts/res/test_contract_rs.wasm')
 
         # Deploy the fib smart contract
         latest_block_hash = nodes[0].get_latest_block().hash
@@ -173,7 +173,7 @@ When executed on NayDuck, tests have access to `uncd`,
 `../target/release` directory (depending if the test has been
 scheduled with `--release` flag) just as if they were executed on
 local machine.  Similarly, freshly built NEAR test contracts will be
-located in `../runtime/near-test-contracts/res` directory.
+located in `../runtime/unc-test-contracts/res` directory.
 
 The `NAYDUCK=1`, `NIGHTLY_RUNNER=1` and `NAYDUCK_TIMEOUT=<timeout>`
 environment variables are set when tests are run on NayDuck.  If

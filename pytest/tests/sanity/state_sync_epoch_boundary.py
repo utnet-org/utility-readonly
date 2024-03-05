@@ -30,15 +30,15 @@ node_config_sync["tracked_shards"] = []
 node_config_sync["tracked_shard_schedule"] = [[0], [0], [1], [1]]
 
 config = load_config()
-near_root, node_dirs = init_cluster(1, 1, 2, config,
+unc_root, node_dirs = init_cluster(1, 1, 2, config,
                                     [["epoch_length", EPOCH_LENGTH]], {
                                         0: node_config_dump,
                                         1: node_config_sync
                                     })
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
 logger.info('started boot_node')
-node1 = spin_up_node(config, near_root, node_dirs[1], 1, boot_node=boot_node)
+node1 = spin_up_node(config, unc_root, node_dirs[1], 1, boot_node=boot_node)
 # State sync makes the storage look inconsistent.
 node1.stop_checking_store()
 logger.info('started node1')

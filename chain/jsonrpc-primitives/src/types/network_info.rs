@@ -1,5 +1,5 @@
-use near_primitives::network::PeerId;
-use near_primitives::types::AccountId;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::AccountId;
 use std::net::SocketAddr;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]

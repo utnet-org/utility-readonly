@@ -4,20 +4,20 @@ mod rpc;
 mod runtime;
 
 use assert_matches::assert_matches;
-use near_crypto::{InMemorySigner, KeyType, PublicKey};
-use near_jsonrpc_primitives::errors::ServerError;
-use near_parameters::{ActionCosts, ExtCosts};
-use near_primitives::account::{
+use unc_crypto::{InMemorySigner, KeyType, PublicKey};
+use unc_jsonrpc_primitives::errors::ServerError;
+use unc_parameters::{ActionCosts, ExtCosts};
+use unc_primitives::account::{
     id::AccountType, AccessKey, AccessKeyPermission, FunctionCallPermission,
 };
-use near_primitives::errors::{
+use unc_primitives::errors::{
     ActionError, ActionErrorKind, FunctionCallError, InvalidAccessKeyError, InvalidTxError,
     MethodResolveError, TxExecutionError,
 };
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::types::{AccountId, Balance, TrieNodesCount};
-use near_primitives::utils::{derive_eth_implicit_account_id, derive_near_implicit_account_id};
-use near_primitives::views::{
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::types::{AccountId, Balance, TrieNodesCount};
+use unc_primitives::utils::{derive_eth_implicit_account_id, derive_unc_implicit_account_id};
+use unc_primitives::views::{
     AccessKeyView, AccountView, ExecutionMetadataView, FinalExecutionOutcomeView,
     FinalExecutionStatus,
 };
@@ -25,10 +25,10 @@ use framework::config::{UNC_BASE, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
 
 use crate::node::Node;
 use crate::user::User;
-use near_parameters::RuntimeConfig;
-use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
-use near_primitives::test_utils;
-use near_primitives::transaction::{Action, DeployContractAction, FunctionCallAction};
+use unc_parameters::RuntimeConfig;
+use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
+use unc_primitives::test_utils;
+use unc_primitives::transaction::{Action, DeployContractAction, FunctionCallAction};
 use testlib::fees_utils::FeeHelper;
 use testlib::runtime_utils::{
     alice_account, bob_account, eve_dot_alice_account, x_dot_y_dot_alice_account,
@@ -338,7 +338,7 @@ pub fn transfer_tokens_to_implicit_account(node: impl Node, public_key: PublicKe
     let fee_helper = fee_helper(&node);
 
     let receiver_id = match public_key.key_type() {
-        KeyType::ED25519 => derive_near_implicit_account_id(public_key.unwrap_as_ed25519()),
+        KeyType::ED25519 => derive_unc_implicit_account_id(public_key.unwrap_as_ed25519()),
         KeyType::SECP256K1 => derive_eth_implicit_account_id(public_key.unwrap_as_secp256k1()),
         KeyType::RSA2048 => panic!("RSA keys not supported"),
     };
@@ -411,7 +411,7 @@ pub fn trying_to_create_implicit_account(node: impl Node, public_key: PublicKey)
     let fee_helper = fee_helper(&node);
 
     let receiver_id = match public_key.key_type() {
-        KeyType::ED25519 => derive_near_implicit_account_id(public_key.unwrap_as_ed25519()),
+        KeyType::ED25519 => derive_unc_implicit_account_id(public_key.unwrap_as_ed25519()),
         KeyType::SECP256K1 => derive_eth_implicit_account_id(public_key.unwrap_as_secp256k1()),
         KeyType::RSA2048 => panic!("RSA keys not supported"),
     };

@@ -1,5 +1,5 @@
 [package]
-name = "near-async"
+name = "unc-async"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -23,17 +23,17 @@ serde_json.workspace = true
 time.workspace = true
 tokio.workspace = true
 
-near-primitives.workspace = true
-near-o11y.workspace = true
-near-performance-metrics.workspace = true
+unc-primitives.workspace = true
+unc-o11y.workspace = true
+unc-performance-metrics.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-o11y/nightly",
-  "near-primitives/nightly",
+  "unc-o11y/nightly",
+  "unc-primitives/nightly",
 ]
 nightly_protocol = [
-  "near-o11y/nightly_protocol",
-  "near-primitives/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-primitives/nightly_protocol",
 ]

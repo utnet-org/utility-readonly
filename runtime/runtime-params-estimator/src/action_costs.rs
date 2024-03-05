@@ -10,12 +10,12 @@ use crate::estimator_context::{EstimatorContext, Testbed};
 use crate::gas_cost::{GasCost, NonNegativeTolerance};
 use crate::transaction_builder::AccountRequirement;
 use crate::utils::{average_cost, percentiles};
-use near_crypto::{KeyType, PublicKey};
-use near_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{ActionReceipt, Receipt};
-use near_primitives::transaction::Action;
-use near_primitives::types::{AccountId, Gas};
+use unc_crypto::{KeyType, PublicKey};
+use unc_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{ActionReceipt, Receipt};
+use unc_primitives::transaction::Action;
+use unc_primitives::types::{AccountId, Gas};
 use std::iter;
 
 const GAS_1_MICROSECOND: Gas = 1_000_000_000;
@@ -268,7 +268,7 @@ impl ActionEstimation {
             predecessor_id,
             receiver_id,
             receipt_id: CryptoHash::new(),
-            receipt: near_primitives::receipt::ReceiptEnum::Action(action_receipt),
+            receipt: unc_primitives::receipt::ReceiptEnum::Action(action_receipt),
         };
         testbed.apply_action_receipt(&receipt, self.metric)
     }
@@ -678,34 +678,34 @@ pub(crate) fn delegate_exec(ctx: &mut EstimatorContext) -> GasCost {
 }
 
 fn create_account_action() -> Action {
-    Action::CreateAccount(near_primitives::transaction::CreateAccountAction {})
+    Action::CreateAccount(unc_primitives::transaction::CreateAccountAction {})
 }
 
 fn create_transfer_action() -> Action {
-    Action::Transfer(near_primitives::transaction::TransferAction { deposit: 10u128.pow(24) })
+    Action::Transfer(unc_primitives::transaction::TransferAction { deposit: 10u128.pow(24) })
 }
 
 fn stake_action() -> Action {
-    Action::Stake(Box::new(near_primitives::transaction::StakeAction {
+    Action::Stake(Box::new(unc_primitives::transaction::StakeAction {
         stake: 5u128.pow(28), // some arbitrary positive number
         public_key: PublicKey::from_seed(KeyType::ED25519, "seed"),
     }))
 }
 
 fn delete_account_action() -> Action {
-    Action::DeleteAccount(near_primitives::transaction::DeleteAccountAction {
+    Action::DeleteAccount(unc_primitives::transaction::DeleteAccountAction {
         beneficiary_id: "bob.near".parse().unwrap(),
     })
 }
 
 fn deploy_action(size: ActionSize) -> Action {
-    Action::DeployContract(near_primitives::transaction::DeployContractAction {
-        code: near_test_contracts::sized_contract(size.deploy_contract() as usize),
+    Action::DeployContract(unc_primitives::transaction::DeployContractAction {
+        code: unc_test_contracts::sized_contract(size.deploy_contract() as usize),
     })
 }
 
 fn add_full_access_key_action() -> Action {
-    Action::AddKey(Box::new(near_primitives::transaction::AddKeyAction {
+    Action::AddKey(Box::new(unc_primitives::transaction::AddKeyAction {
         public_key: PublicKey::from_seed(KeyType::ED25519, "full-access-key-seed"),
         access_key: AccessKey { nonce: 0, permission: AccessKeyPermission::FullAccess },
     }))
@@ -716,7 +716,7 @@ fn add_fn_access_key_action(size: ActionSize) -> Action {
     let method_names = vec!["foo".to_owned(); size.key_methods_list() as usize / 4];
     // This is charged flat, therefore it should always be max len.
     let receiver_id = "a".repeat(AccountId::MAX_LEN).parse().unwrap();
-    Action::AddKey(Box::new(near_primitives::transaction::AddKeyAction {
+    Action::AddKey(Box::new(unc_primitives::transaction::AddKeyAction {
         public_key: PublicKey::from_seed(KeyType::ED25519, "seed"),
         access_key: AccessKey {
             nonce: 0,
@@ -730,13 +730,13 @@ fn add_fn_access_key_action(size: ActionSize) -> Action {
 }
 
 fn delete_key_action() -> Action {
-    Action::DeleteKey(Box::new(near_primitives::transaction::DeleteKeyAction {
+    Action::DeleteKey(Box::new(unc_primitives::transaction::DeleteKeyAction {
         public_key: PublicKey::from_seed(KeyType::ED25519, "seed"),
     }))
 }
 
 fn transfer_action() -> Action {
-    Action::Transfer(near_primitives::transaction::TransferAction { deposit: 77 })
+    Action::Transfer(unc_primitives::transaction::TransferAction { deposit: 77 })
 }
 
 fn function_call_action(size: ActionSize) -> Action {
@@ -744,7 +744,7 @@ fn function_call_action(size: ActionSize) -> Action {
     let method_len = 4.min(total_size) as usize;
     let method_name: String = "noop".chars().take(method_len).collect();
     let arg_len = total_size as usize - method_len;
-    Action::FunctionCall(Box::new(near_primitives::transaction::FunctionCallAction {
+    Action::FunctionCall(Box::new(unc_primitives::transaction::FunctionCallAction {
         method_name,
         args: vec![1u8; arg_len],
         gas: 3 * 10u64.pow(12), // 3 Tgas, to allow 100 copies in the same receipt
@@ -757,9 +757,9 @@ pub(crate) fn empty_delegate_action(
     receiver_id: AccountId,
     sender_id: AccountId,
 ) -> Action {
-    use near_primitives::action::delegate::DelegateAction;
-    use near_primitives::signable_message::{SignableMessage, SignableMessageType};
-    use near_primitives::test_utils::create_user_test_signer;
+    use unc_primitives::action::delegate::DelegateAction;
+    use unc_primitives::signable_message::{SignableMessage, SignableMessageType};
+    use unc_primitives::test_utils::create_user_test_signer;
 
     let signer = create_user_test_signer(&sender_id);
     let delegate_action = DelegateAction {
@@ -772,7 +772,7 @@ pub(crate) fn empty_delegate_action(
     };
     let signature =
         SignableMessage::new(&delegate_action, SignableMessageType::DelegateAction).sign(&signer);
-    Action::Delegate(Box::new(near_primitives::action::delegate::SignedDelegateAction {
+    Action::Delegate(Box::new(unc_primitives::action::delegate::SignedDelegateAction {
         delegate_action,
         signature,
     }))

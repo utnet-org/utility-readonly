@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use actix::Addr;
 use futures::{future, future::LocalBoxFuture, FutureExt, TryFutureExt};
-use near_chain_configs::GenesisConfig;
-use near_client::test_utils::setup_no_network_with_validity_period_and_no_epoch_sync;
-use near_client::ViewClientActor;
-use near_jsonrpc::{start_http, RpcConfig};
-use near_jsonrpc_primitives::{
+use unc_chain_configs::GenesisConfig;
+use unc_client::test_utils::setup_no_network_with_validity_period_and_no_epoch_sync;
+use unc_client::ViewClientActor;
+use unc_jsonrpc::{start_http, RpcConfig};
+use unc_jsonrpc_primitives::{
     message::{from_slice, Message},
     types::entity_debug::DummyEntityDebugHandler,
 };
-use near_network::tcp;
-use near_primitives::types::NumBlocks;
+use unc_network::tcp;
+use unc_primitives::types::NumBlocks;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
@@ -32,7 +32,7 @@ pub fn start_all_with_validity_period_and_no_epoch_sync(
     transaction_validity_period: NumBlocks,
     enable_doomslug: bool,
 ) -> (Addr<ViewClientActor>, tcp::ListenerAddr) {
-    let actor_handles: near_client::test_utils::ActorHandlesForTesting = setup_no_network_with_validity_period_and_no_epoch_sync(
+    let actor_handles: unc_client::test_utils::ActorHandlesForTesting = setup_no_network_with_validity_period_and_no_epoch_sync(
         vec!["test1".parse().unwrap()],
         if let NodeType::Validator = node_type {
             "test1".parse().unwrap()
@@ -61,7 +61,7 @@ macro_rules! test_with_client {
     ($node_type:expr, $client:ident, $block:expr) => {
         init_test_logger();
 
-        near_actix_test_utils::run_actix(async {
+        unc_actix_test_utils::run_actix(async {
             let (_view_client_addr, addr) = test_utils::start_all($node_type);
 
             let $client = new_client(&format!("http://{}", addr));
@@ -74,7 +74,7 @@ macro_rules! test_with_client {
     };
 }
 
-type RpcRequest<T> = LocalBoxFuture<'static, Result<T, near_jsonrpc_primitives::errors::RpcError>>;
+type RpcRequest<T> = LocalBoxFuture<'static, Result<T, unc_jsonrpc_primitives::errors::RpcError>>;
 
 /// Prepare a `RPCRequest` with a given client, server address, method and parameters.
 pub fn call_method<R>(
@@ -98,7 +98,7 @@ where
         .insert_header(("Content-Type", "application/json"))
         .send_json(&request)
         .map_err(|err| {
-            near_jsonrpc_primitives::errors::RpcError::new_internal_error(
+            unc_jsonrpc_primitives::errors::RpcError::new_internal_error(
                 None,
                 format!("{:?}", err),
             )
@@ -106,12 +106,12 @@ where
         .and_then(|mut response| {
             response.body().map(|body| match body {
                 Ok(bytes) => from_slice(&bytes).map_err(|err| {
-                    near_jsonrpc_primitives::errors::RpcError::parse_error(format!(
+                    unc_jsonrpc_primitives::errors::RpcError::parse_error(format!(
                         "Error {:?} in {:?}",
                         err, bytes
                     ))
                 }),
-                Err(err) => Err(near_jsonrpc_primitives::errors::RpcError::parse_error(format!(
+                Err(err) => Err(unc_jsonrpc_primitives::errors::RpcError::parse_error(format!(
                     "Failed to retrieve payload: {:?}",
                     err
                 ))),
@@ -121,13 +121,13 @@ where
             future::ready(match message {
                 Message::Response(resp) => resp.result.and_then(|x| {
                     serde_json::from_value(x).map_err(|err| {
-                        near_jsonrpc_primitives::errors::RpcError::parse_error(format!(
+                        unc_jsonrpc_primitives::errors::RpcError::parse_error(format!(
                             "Failed to parse: {:?}",
                             err
                         ))
                     })
                 }),
-                _ => Err(near_jsonrpc_primitives::errors::RpcError::parse_error(
+                _ => Err(unc_jsonrpc_primitives::errors::RpcError::parse_error(
                     "Failed to parse JSON RPC response".to_string(),
                 )),
             })

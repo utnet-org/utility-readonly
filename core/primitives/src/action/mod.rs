@@ -1,8 +1,8 @@
 pub mod delegate;
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::PublicKey;
-use near_primitives_core::{
+use unc_crypto::PublicKey;
+use unc_primitives_core::{
     account::AccessKey,
     serialize::dec_format,
     types::{AccountId, Balance, Gas},

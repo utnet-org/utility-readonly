@@ -20,7 +20,7 @@ set -euo pipefail
 # After that node is running in split storage mode
 # Legacy archival db can be removed
 
-NEAR_HOME=/home/ubuntu/.near
+unc_HOME=/home/ubuntu/.near
 chain=$1
 service_name=uncd
 
@@ -87,19 +87,19 @@ function check_aws() {
 # Prepare all configs
 function prepare_configs {
   # make archival config
-  jq '.archive = true | .save_trie_changes=true' <$NEAR_HOME/config.json >$NEAR_HOME/config.json.archival
+  jq '.archive = true | .save_trie_changes=true' <$unc_HOME/config.json >$unc_HOME/config.json.archival
 
   # create migration config that has cold_store part
-  jq '.cold_store = .store' <$NEAR_HOME/config.json.archival >$NEAR_HOME/config.json.migration
+  jq '.cold_store = .store' <$unc_HOME/config.json.archival >$unc_HOME/config.json.migration
 
   # create split storage config that points to the right hot storage
-  jq '.store.path = "hot-data"' <$NEAR_HOME/config.json.migration >$NEAR_HOME/config.json.split
+  jq '.store.path = "hot-data"' <$unc_HOME/config.json.migration >$unc_HOME/config.json.split
 }
 
 # Run for 10 minutes with TrieChanges
 function run_with_trie_changes {
   echo "Starting an archival run with TrieChanges"
-  cp $NEAR_HOME/config.json.archival $NEAR_HOME/config.json
+  cp $unc_HOME/config.json.archival $unc_HOME/config.json
   restart_neard
 
   echo "Waiting 10 minutes"
@@ -112,7 +112,7 @@ function init_cold_storage {
   lcho "Starting initial migration run"
   echo "Expect the migration to take a long time (>1 hour)."
   echo "Do not interrupt. Any interruption will undo the migration process."
-  cp $NEAR_HOME/config.json.migration $NEAR_HOME/config.json
+  cp $unc_HOME/config.json.migration $unc_HOME/config.json
 
   restart_neard
 
@@ -136,9 +136,9 @@ function init_cold_storage {
 # Download latest rpc backup
 function download_latest_rpc_backup {
   echo "Starting rpc download"
-  aws s3 --no-sign-request cp "s3://near-protocol-public/backups/$chain/rpc/latest" .
+  aws s3 --no-sign-request cp "s3://unc-protocol-public/backups/$chain/rpc/latest" .
   latest=$(cat latest)
-  aws s3 --no-sign-request cp --recursive "s3://near-protocol-public/backups/$chain/rpc/$latest" $NEAR_HOME/hot-data
+  aws s3 --no-sign-request cp --recursive "s3://unc-protocol-public/backups/$chain/rpc/$latest" $unc_HOME/hot-data
 }
 
 # Finish migration to split storage
@@ -164,7 +164,7 @@ function finish_split_storage_migration {
 
   # Switch to split storage mode
   echo "Starting split storage run"
-  cp $NEAR_HOME/config.json.split $NEAR_HOME/config.json
+  cp $unc_HOME/config.json.split $unc_HOME/config.json
   restart_neard
 
   echo "Waiting 5 minutes"
@@ -194,7 +194,7 @@ function finish_split_storage_migration {
 intro
 check_jq
 check_aws
-cp $NEAR_HOME/config.json $NEAR_HOME/config.json.init
+cp $unc_HOME/config.json $unc_HOME/config.json.init
 prepare_configs
 run_with_trie_changes
 init_cold_storage

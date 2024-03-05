@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::io;
 use std::sync::Arc;
 
-use near_o11y::log_assert_fail;
+use unc_o11y::log_assert_fail;
 
 use crate::db::{DBIterator, DBIteratorItem, DBSlice, DBTransaction, Database, StoreStatistics};
 use crate::DBCol;

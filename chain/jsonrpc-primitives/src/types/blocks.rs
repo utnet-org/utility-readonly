@@ -20,13 +20,13 @@ pub enum RpcBlockError {
 #[derive(Debug, serde::Serialize, serde::Deserialize, arbitrary::Arbitrary)]
 pub struct RpcBlockRequest {
     #[serde(flatten)]
-    pub block_reference: near_primitives::types::BlockReference,
+    pub block_reference: unc_primitives::types::BlockReference,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcBlockResponse {
     #[serde(flatten)]
-    pub block_view: near_primitives::views::BlockView,
+    pub block_view: unc_primitives::views::BlockView,
 }
 
 impl From<RpcBlockError> for crate::errors::RpcError {

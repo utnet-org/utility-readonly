@@ -53,7 +53,7 @@ def send_some_tx(node):
 
 def main():
     executables = branches.prepare_ab_test()
-    node_root = utils.get_near_tempdir('db_migration', clean=True)
+    node_root = utils.get_unc_tempdir('db_migration', clean=True)
 
     logging.info(f"The near root is {executables.stable.root}...")
     logging.info(f"The node root is {node_root}...")
@@ -96,7 +96,7 @@ def main():
     # Run new node and verify it runs for a few more blocks.
     logging.info("Starting the current node...")
     config = executables.current.node_config()
-    node.near_root = executables.current.root
+    node.unc_root = executables.current.root
     node.binary_name = executables.current.uncd
     node.start(boot_node=node)
 

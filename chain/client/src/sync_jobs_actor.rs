@@ -2,18 +2,18 @@ use crate::ClientActor;
 use actix::AsyncContext;
 use std::time::Duration;
 
-use near_chain::chain::{
+use unc_chain::chain::{
     do_apply_chunks, ApplyStatePartsRequest, ApplyStatePartsResponse, BlockCatchUpRequest,
     BlockCatchUpResponse,
 };
-use near_chain::resharding::ReshardingRequest;
-use near_chain::Chain;
-use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
-use near_performance_metrics_macros::perf;
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::StatePartKey;
-use near_primitives::types::ShardId;
-use near_store::DBCol;
+use unc_chain::resharding::ReshardingRequest;
+use unc_chain::Chain;
+use unc_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
+use unc_performance_metrics_macros::perf;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::StatePartKey;
+use unc_primitives::types::ShardId;
+use unc_store::DBCol;
 
 pub(crate) struct SyncJobsActor {
     pub(crate) client_addr: actix::Addr<ClientActor>,
@@ -45,7 +45,7 @@ impl SyncJobsActor {
     fn apply_parts(
         &mut self,
         msg: &ApplyStatePartsRequest,
-    ) -> Result<(), near_chain_primitives::error::Error> {
+    ) -> Result<(), unc_chain_primitives::error::Error> {
         let _span = tracing::debug_span!(target: "client", "apply_parts").entered();
         let store = msg.runtime_adapter.store();
 
@@ -71,7 +71,7 @@ impl SyncJobsActor {
     fn clear_flat_state(
         &mut self,
         msg: &ApplyStatePartsRequest,
-    ) -> Result<bool, near_chain_primitives::error::Error> {
+    ) -> Result<bool, unc_chain_primitives::error::Error> {
         let _span = tracing::debug_span!(target: "client", "clear_flat_state").entered();
         let mut store_update = msg.runtime_adapter.store().store_update();
         let success = msg

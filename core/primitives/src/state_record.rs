@@ -10,7 +10,7 @@ use crate::trie_key::trie_key_parsers::{
 use crate::trie_key::{col, TrieKey};
 use crate::types::{AccountId, StoreKey, StoreValue};
 use borsh::BorshDeserialize;
-use near_crypto::PublicKey;
+use unc_crypto::PublicKey;
 use serde_with::base64::Base64;
 use serde_with::serde_as;
 use std::fmt::{Display, Formatter};

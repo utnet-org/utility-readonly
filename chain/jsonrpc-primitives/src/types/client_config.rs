@@ -4,7 +4,7 @@ use serde_json::Value;
 #[derive(Serialize)]
 pub struct RpcClientConfigResponse {
     #[serde(flatten)]
-    pub client_config: near_chain_configs::ClientConfig,
+    pub client_config: unc_chain_configs::ClientConfig,
 }
 
 #[derive(thiserror::Error, Debug, Serialize)]

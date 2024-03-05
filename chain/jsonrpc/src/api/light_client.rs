@@ -2,15 +2,15 @@ use std::sync::Arc;
 
 use serde_json::Value;
 
-use near_client_primitives::types::{
+use unc_client_primitives::types::{
     GetBlockProofError, GetExecutionOutcomeError, GetNextLightClientBlockError,
 };
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::light_client::{
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::light_client::{
     RpcLightClientExecutionProofRequest, RpcLightClientNextBlockError,
     RpcLightClientNextBlockRequest, RpcLightClientNextBlockResponse, RpcLightClientProofError,
 };
-use near_primitives::views::LightClientBlockView;
+use unc_primitives::views::LightClientBlockView;
 
 use super::{Params, RpcFrom, RpcRequest};
 

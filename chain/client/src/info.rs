@@ -2,27 +2,27 @@ use crate::config_updater::ConfigUpdater;
 use crate::{metrics, SyncStatus};
 use actix::Addr;
 use itertools::Itertools;
-use near_chain_configs::{ClientConfig, LogSummaryStyle, SyncConfig};
-use near_client_primitives::types::StateSyncStatus;
-use near_network::types::NetworkInfo;
-use near_primitives::block::Tip;
-use near_primitives::network::PeerId;
-use near_primitives::static_clock::StaticClock;
-use near_primitives::telemetry::{
+use unc_chain_configs::{ClientConfig, LogSummaryStyle, SyncConfig};
+use unc_client_primitives::types::StateSyncStatus;
+use unc_network::types::NetworkInfo;
+use unc_primitives::block::Tip;
+use unc_primitives::network::PeerId;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::telemetry::{
     TelemetryAgentInfo, TelemetryChainInfo, TelemetryInfo, TelemetrySystemInfo,
 };
-use near_primitives::types::{
+use unc_primitives::types::{
     AccountId, Balance, BlockHeight, EpochHeight, EpochId, Gas, NumBlocks, ShardId, ValidatorId,
     ValidatorInfoIdentifier,
 };
-use near_primitives::unwrap_or_return;
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::version::Version;
-use near_primitives::views::{
+use unc_primitives::unwrap_or_return;
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::version::Version;
+use unc_primitives::views::{
     CatchupStatusView, ChunkProcessingStatus, CurrentEpochValidatorInfo, EpochValidatorInfo,
     ValidatorKickoutView,
 };
-use near_telemetry::{telemetry, TelemetryActor};
+use unc_telemetry::{telemetry, TelemetryActor};
 use std::cmp::min;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -503,7 +503,7 @@ impl InfoHelper {
     ) -> serde_json::Value {
         let info = TelemetryInfo {
             agent: TelemetryAgentInfo {
-                name: "near-rs".to_string(),
+                name: "unc-rs".to_string(),
                 version: self.nearcore_version.version.clone(),
                 build: self.nearcore_version.build.clone(),
             },
@@ -702,7 +702,7 @@ impl std::fmt::Display for FormatMillis {
 /// by a new line character.  There’s no final new line character.  This is
 /// meant to be used in logging where final new line is not desired.
 struct BlocksInfo {
-    blocks_info: Vec<near_primitives::views::BlockProcessingInfo>,
+    blocks_info: Vec<unc_primitives::views::BlockProcessingInfo>,
     use_color: bool,
 }
 
@@ -860,12 +860,12 @@ fn get_validator_epoch_stats(
 mod tests {
     use super::*;
     use assert_matches::assert_matches;
-    use near_chain::test_utils::{KeyValueRuntime, MockEpochManager, ValidatorSchedule};
-    use near_chain::types::ChainConfig;
-    use near_chain::{Chain, ChainGenesis, DoomslugThresholdMode};
-    use near_epoch_manager::shard_tracker::ShardTracker;
-    use near_network::test_utils::peer_id_from_seed;
-    use near_primitives::version::PROTOCOL_VERSION;
+    use unc_chain::test_utils::{KeyValueRuntime, MockEpochManager, ValidatorSchedule};
+    use unc_chain::types::ChainConfig;
+    use unc_chain::{Chain, ChainGenesis, DoomslugThresholdMode};
+    use unc_epoch_manager::shard_tracker::ShardTracker;
+    use unc_network::test_utils::peer_id_from_seed;
+    use unc_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
 
     #[test]
@@ -893,7 +893,7 @@ mod tests {
         let config = ClientConfig::test(false, 1230, 2340, 50, false, true, true, true);
         let info_helper = InfoHelper::new(None, &config, None);
 
-        let store = near_store::test_utils::create_test_store();
+        let store = unc_store::test_utils::create_test_store();
         let vs =
             ValidatorSchedule::new().block_producers_per_epoch(vec![vec!["test".parse().unwrap()]]);
         let epoch_manager = MockEpochManager::new_with_validators(store.clone(), vs, 123);

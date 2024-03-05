@@ -156,7 +156,7 @@ class TestSplitStorage(unittest.TestCase):
         with open(archival_dir / 'prepare-hot-stdout', 'w') as stdout, \
                 open(archival_dir / 'prepare-hot-stderr', 'w') as stderr:
             cmd = [
-                str(pathlib.Path(archival.near_root) / archival.binary_name),
+                str(pathlib.Path(archival.unc_root) / archival.binary_name),
                 f'--home={archival_dir}',
                 f'cold-store',
                 f'prepare-hot',
@@ -224,7 +224,7 @@ class TestSplitStorage(unittest.TestCase):
             ("epoch_length", epoch_length),
         ]
 
-        near_root, [node_dir] = init_cluster(
+        unc_root, [node_dir] = init_cluster(
             1,
             0,
             1,
@@ -236,7 +236,7 @@ class TestSplitStorage(unittest.TestCase):
 
         self._configure_cold_storage(node_dir)
 
-        node = spin_up_node(config, near_root, node_dir, 0, single_node=True)
+        node = spin_up_node(config, unc_root, node_dir, 0, single_node=True)
 
         # Wait until enough blocks are produced so that we're guaranteed that
         # cold head has enough time to move and initial migration is finished.
@@ -304,7 +304,7 @@ class TestSplitStorage(unittest.TestCase):
         }
 
         config = load_config()
-        near_root, [validator_dir, rpc_dir, archival_dir] = init_cluster(
+        unc_root, [validator_dir, rpc_dir, archival_dir] = init_cluster(
             num_nodes=2,
             num_observers=1,
             num_shards=1,
@@ -316,20 +316,20 @@ class TestSplitStorage(unittest.TestCase):
 
         validator = spin_up_node(
             config,
-            near_root,
+            unc_root,
             validator_dir,
             0,
         )
         rpc = spin_up_node(
             config,
-            near_root,
+            unc_root,
             rpc_dir,
             1,
             boot_node=validator,
         )
         archival = spin_up_node(
             config,
-            near_root,
+            unc_root,
             archival_dir,
             2,
             boot_node=validator,
@@ -385,7 +385,7 @@ class TestSplitStorage(unittest.TestCase):
             },
         }
         config = load_config()
-        near_root, [validator_dir, split_dir, archival_dir,
+        unc_root, [validator_dir, split_dir, archival_dir,
                     rpc_dir] = init_cluster(
                         num_nodes=1,
                         num_observers=3,
@@ -398,27 +398,27 @@ class TestSplitStorage(unittest.TestCase):
 
         validator = spin_up_node(
             config,
-            near_root,
+            unc_root,
             validator_dir,
             0,
         )
         split = spin_up_node(
             config,
-            near_root,
+            unc_root,
             split_dir,
             1,
             boot_node=validator,
         )
         archival = spin_up_node(
             config,
-            near_root,
+            unc_root,
             archival_dir,
             2,
             boot_node=split,
         )
         rpc = spin_up_node(
             config,
-            near_root,
+            unc_root,
             rpc_dir,
             3,
             boot_node=validator,

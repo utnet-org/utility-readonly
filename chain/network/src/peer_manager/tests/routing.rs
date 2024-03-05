@@ -17,9 +17,9 @@ use crate::tcp;
 use crate::testonly::{abort_on_panic, make_rng, Rng};
 use crate::types::PeerMessage;
 use crate::types::{PeerInfo, ReasonForBan};
-use near_async::time;
-use near_primitives::network::PeerId;
-use near_store::db::TestDB;
+use unc_async::time;
+use unc_primitives::network::PeerId;
+use unc_store::db::TestDB;
 use pretty_assertions::assert_eq;
 use rand::seq::IteratorRandom;
 use rand::Rng as _;
@@ -890,7 +890,7 @@ async fn ttl() {
     let chain = Arc::new(data::Chain::make(&mut clock, rng, 10));
     let mut pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -945,7 +945,7 @@ async fn repeated_data_in_sync_routing_table() {
     let chain = Arc::new(data::Chain::make(&mut clock, rng, 10));
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -1062,7 +1062,7 @@ async fn no_edge_broadcast_after_restart() {
     // We are preparing the initial storage by hand (rather than simulating the restart),
     // because semantics of the RoutingTable protocol are very poorly defined, and it
     // is hard to write a solid test for it without literally assuming the implementation details.
-    let store = near_store::db::TestDB::new();
+    let store = unc_store::db::TestDB::new();
     {
         let mut stored_peers = HashSet::new();
         for e in &stored_edges {

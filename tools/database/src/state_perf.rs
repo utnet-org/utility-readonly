@@ -6,14 +6,14 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use near_primitives::shard_layout::{ShardLayout, ShardUId};
-use near_primitives::state::ValueRef;
+use unc_primitives::shard_layout::{ShardLayout, ShardUId};
+use unc_primitives::state::ValueRef;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 
-use near_store::flat::store_helper::iter_flat_state_entries;
-use near_store::{Store, TrieStorage};
+use unc_store::flat::store_helper::iter_flat_state_entries;
+use unc_store::{Store, TrieStorage};
 
 use crate::utils::open_rocksdb;
 
@@ -32,15 +32,15 @@ pub(crate) struct StatePerfCommand {
 
 impl StatePerfCommand {
     pub(crate) fn run(&self, home: &Path) -> anyhow::Result<()> {
-        let rocksdb = Arc::new(open_rocksdb(home, near_store::Mode::ReadOnly)?);
-        let store = near_store::NodeStorage::new(rocksdb).get_hot_store();
+        let rocksdb = Arc::new(open_rocksdb(home, unc_store::Mode::ReadOnly)?);
+        let store = unc_store::NodeStorage::new(rocksdb).get_hot_store();
         eprintln!("Start State perf test");
         let mut perf_context = PerfContext::new();
         let total_samples = self.warmup_samples + self.samples;
         for (sample_i, (shard_uid, value_ref)) in
             generate_state_requests(store.clone(), total_samples).into_iter().enumerate().progress()
         {
-            let trie_storage = near_store::TrieDBStorage::new(store.clone(), shard_uid);
+            let trie_storage = unc_store::TrieDBStorage::new(store.clone(), shard_uid);
             let include_sample = sample_i >= self.warmup_samples;
             if include_sample {
                 perf_context.reset();

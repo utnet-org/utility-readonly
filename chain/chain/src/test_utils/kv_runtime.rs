@@ -5,39 +5,39 @@ use crate::types::{
 };
 use crate::BlockHeader;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_chain_configs::{ProtocolConfig, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
-use near_chain_primitives::Error;
-use near_crypto::{KeyType, PublicKey, SecretKey, Signature};
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::{EpochManagerAdapter, RngSeed};
-use near_pool::types::PoolIterator;
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::block_header::{Approval, ApprovalInner};
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::EpochConfig;
-use near_primitives::epoch_manager::ShardConfig;
-use near_primitives::epoch_manager::ValidatorSelectionConfig;
-use near_primitives::errors::{EpochError, InvalidTxError};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
-use near_primitives::shard_layout;
-use near_primitives::shard_layout::{ShardLayout, ShardUId};
-use near_primitives::sharding::ChunkHash;
-use near_primitives::state_part::PartId;
-use near_primitives::transaction::{
+use unc_chain_configs::{ProtocolConfig, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
+use unc_chain_primitives::Error;
+use unc_crypto::{KeyType, PublicKey, SecretKey, Signature};
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::{EpochManagerAdapter, RngSeed};
+use unc_pool::types::PoolIterator;
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::block_header::{Approval, ApprovalInner};
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::EpochConfig;
+use unc_primitives::epoch_manager::ShardConfig;
+use unc_primitives::epoch_manager::ValidatorSelectionConfig;
+use unc_primitives::errors::{EpochError, InvalidTxError};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
+use unc_primitives::shard_layout;
+use unc_primitives::shard_layout::{ShardLayout, ShardUId};
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::state_part::PartId;
+use unc_primitives::transaction::{
     Action, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus,
     SignedTransaction, TransferAction,
 };
-use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards, ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier};
-use near_primitives::validator_mandates::AssignmentWeight;
-use near_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
-use near_primitives::views::{
+use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards, ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier};
+use unc_primitives::validator_mandates::AssignmentWeight;
+use unc_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
+use unc_primitives::views::{
     AccessKeyInfoView, AccessKeyList, CallResult, ContractCodeView, EpochValidatorInfo,
     QueryRequest, QueryResponse, QueryResponseKind, ViewStateResult,
 };
-use near_store::test_utils::TestTriesBuilder;
-use near_store::{
+use unc_store::test_utils::TestTriesBuilder;
+use unc_store::{
     set_genesis_hash, set_genesis_state_roots, DBCol, ShardTries, StorageError, Store, StoreUpdate,
     Trie, TrieChanges, WrappedTrieChanges,
 };
@@ -46,7 +46,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// Simple key value runtime for tests.
 ///
@@ -813,8 +813,8 @@ impl EpochManagerAdapter for MockEpochManager {
         &self,
          _block_hash: &CryptoHash,
         _prev_random_value: &CryptoHash,
-        _vrf_value: &near_crypto::vrf::Value,
-        _vrf_proof: &near_crypto::vrf::Proof,
+        _vrf_value: &unc_crypto::vrf::Value,
+        _vrf_proof: &unc_crypto::vrf::Proof,
     ) -> Result<(), Error> {
         Ok(())
     }
@@ -995,7 +995,7 @@ impl RuntimeAdapter for KeyValueRuntime {
             .get_trie_for_shard(ShardUId { version: 0, shard_id: shard_id as u32 }, state_root))
     }
 
-    fn get_flat_storage_manager(&self) -> near_store::flat::FlatStorageManager {
+    fn get_flat_storage_manager(&self) -> unc_store::flat::FlatStorageManager {
         self.tries.get_flat_storage_manager()
     }
 
@@ -1215,7 +1215,7 @@ impl RuntimeAdapter for KeyValueRuntime {
         block_hash: &CryptoHash,
         _epoch_id: &EpochId,
         request: &QueryRequest,
-    ) -> Result<QueryResponse, near_chain_primitives::error::QueryError> {
+    ) -> Result<QueryResponse, unc_chain_primitives::error::QueryError> {
         match request {
             QueryRequest::ViewAccount { account_id, .. } => Ok(QueryResponse {
                 kind: QueryResponseKind::ViewAccount(

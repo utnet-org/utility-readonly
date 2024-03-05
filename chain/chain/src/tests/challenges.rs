@@ -1,7 +1,7 @@
 use crate::test_utils::setup;
 use crate::Error;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::test_utils::TestBlockBuilder;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::test_utils::TestBlockBuilder;
 
 #[test]
 fn test_no_challenge_on_same_header() {

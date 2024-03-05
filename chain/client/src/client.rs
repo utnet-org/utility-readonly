@@ -18,69 +18,69 @@ use chrono::DateTime;
 use chrono::Utc;
 use itertools::Itertools;
 use lru::LruCache;
-use near_async::messaging::IntoSender;
-use near_async::messaging::{CanSend, Sender};
-use near_chain::chain::VerifyBlockHashAndSignatureResult;
-use near_chain::chain::{
+use unc_async::messaging::IntoSender;
+use unc_async::messaging::{CanSend, Sender};
+use unc_chain::chain::VerifyBlockHashAndSignatureResult;
+use unc_chain::chain::{
     ApplyStatePartsRequest, BlockCatchUpRequest, BlockMissingChunks, BlocksCatchUpState,
 };
-use near_chain::flat_storage_creator::FlatStorageCreator;
-use near_chain::orphan::OrphanMissingChunks;
-use near_chain::resharding::ReshardingRequest;
-use near_chain::state_snapshot_actor::SnapshotCallbacks;
-use near_chain::test_utils::format_hash;
-use near_chain::types::RuntimeAdapter;
-use near_chain::types::{ChainConfig, LatestKnown};
-use near_chain::{
+use unc_chain::flat_storage_creator::FlatStorageCreator;
+use unc_chain::orphan::OrphanMissingChunks;
+use unc_chain::resharding::ReshardingRequest;
+use unc_chain::state_snapshot_actor::SnapshotCallbacks;
+use unc_chain::test_utils::format_hash;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::types::{ChainConfig, LatestKnown};
+use unc_chain::{
     BlockProcessingArtifact, BlockStatus, Chain, ChainGenesis, ChainStoreAccess,
     DoneApplyChunkCallback, Doomslug, DoomslugThresholdMode, Provenance,
 };
-use near_chain_configs::{ClientConfig, LogSummaryStyle, UpdateableClientConfig};
-use near_chunks::adapter::ShardsManagerRequestFromClient;
-use near_chunks::client::ShardedTransactionPool;
-use near_chunks::logic::{
+use unc_chain_configs::{ClientConfig, LogSummaryStyle, UpdateableClientConfig};
+use unc_chunks::adapter::ShardsManagerRequestFromClient;
+use unc_chunks::client::ShardedTransactionPool;
+use unc_chunks::logic::{
     cares_about_shard_this_or_next_epoch, decode_encoded_chunk, persist_chunk,
 };
-use near_chunks::ShardsManager;
-use near_client_primitives::debug::ChunkProduction;
-use near_client_primitives::types::{
+use unc_chunks::ShardsManager;
+use unc_client_primitives::debug::ChunkProduction;
+use unc_client_primitives::types::{
     format_shard_sync_phase_per_shard, Error, ShardSyncDownload, ShardSyncStatus,
 };
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_epoch_manager::EpochManagerAdapter;
-use near_network::types::{AccountKeys, ChainInfo, PeerManagerMessageRequest, SetChainInfo};
-use near_network::types::{
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_network::types::{AccountKeys, ChainInfo, PeerManagerMessageRequest, SetChainInfo};
+use unc_network::types::{
     HighestHeightPeerInfo, NetworkRequests, PeerManagerAdapter, ReasonForBan,
 };
-use near_o11y::log_assert;
-use near_o11y::WithSpanContextExt;
-use near_pool::InsertTransactionResult;
-use near_primitives::block::{Approval, ApprovalInner, ApprovalMessage, Block, BlockHeader, Tip};
-use near_primitives::block_header::ApprovalType;
-use near_primitives::challenge::{Challenge, ChallengeBody};
-use near_primitives::epoch_manager::RngSeed;
-use near_primitives::errors::EpochError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{merklize, MerklePath, PartialMerkleTree};
-use near_primitives::network::PeerId;
-use near_primitives::receipt::Receipt;
-use near_primitives::sharding::StateSyncInfo;
-use near_primitives::sharding::{
+use unc_o11y::log_assert;
+use unc_o11y::WithSpanContextExt;
+use unc_pool::InsertTransactionResult;
+use unc_primitives::block::{Approval, ApprovalInner, ApprovalMessage, Block, BlockHeader, Tip};
+use unc_primitives::block_header::ApprovalType;
+use unc_primitives::challenge::{Challenge, ChallengeBody};
+use unc_primitives::epoch_manager::RngSeed;
+use unc_primitives::errors::EpochError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{merklize, MerklePath, PartialMerkleTree};
+use unc_primitives::network::PeerId;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::sharding::StateSyncInfo;
+use unc_primitives::sharding::{
     ChunkHash, EncodedShardChunk, PartialEncodedChunk, ReedSolomonWrapper, ShardChunk,
     ShardChunkHeader, ShardInfo,
 };
-use near_primitives::static_clock::StaticClock;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{ApprovalFrozen, Gas};
-use near_primitives::types::StateRoot;
-use near_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ShardId};
-use near_primitives::unwrap_or_return;
-use near_primitives::utils::MaybeValidated;
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::{CatchupStatusView, DroppedReason};
-use near_store::metadata::DbKind;
-use near_store::ShardUId;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{ApprovalFrozen, Gas};
+use unc_primitives::types::StateRoot;
+use unc_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ShardId};
+use unc_primitives::unwrap_or_return;
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::{CatchupStatusView, DroppedReason};
+use unc_store::metadata::DbKind;
+use unc_store::ShardUId;
 use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -125,7 +125,7 @@ pub struct Client {
 
     /// Fast Forward accrued delta height used to calculate fast forwarded timestamps for each block.
     #[cfg(feature = "sandbox")]
-    pub(crate) accrued_fastforward_delta: near_primitives::types::BlockHeightDelta,
+    pub(crate) accrued_fastforward_delta: unc_primitives::types::BlockHeightDelta,
 
     /// count for not producing block times
     pub last_know_height: BlockHeight,
@@ -955,10 +955,10 @@ impl Client {
     ) -> Vec<SignedTransaction> {
         if insert {
             txs.push(SignedTransaction::new(
-                near_crypto::Signature::empty(near_crypto::KeyType::ED25519),
-                near_primitives::transaction::Transaction::new(
+                unc_crypto::Signature::empty(unc_crypto::KeyType::ED25519),
+                unc_primitives::transaction::Transaction::new(
                     "test".parse().unwrap(),
-                    near_crypto::PublicKey::empty(near_crypto::KeyType::SECP256K1),
+                    unc_crypto::PublicKey::empty(unc_crypto::KeyType::SECP256K1),
                     "other".parse().unwrap(),
                     3,
                     prev_block_hash,
@@ -1062,7 +1062,7 @@ impl Client {
             if err.is_bad_data() {
                 warn!(target: "client", ?err, "Receive bad block");
             } else if err.is_error() {
-                if let near_chain::Error::DBNotFoundErr(msg) = &err {
+                if let unc_chain::Error::DBNotFoundErr(msg) = &err {
                     debug_assert!(!msg.starts_with("BLOCK HEIGHT"), "{:?}", err);
                 }
                 if self.sync_status.is_syncing() {
@@ -1090,7 +1090,7 @@ impl Client {
         peer_id: PeerId,
         was_requested: bool,
         apply_chunks_done_callback: DoneApplyChunkCallback,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let _span =
             debug_span!(target: "chain", "receive_block_impl", was_requested, ?peer_id).entered();
         self.chain.blocks_delay_tracker.mark_block_received(
@@ -1114,17 +1114,17 @@ impl Client {
             == VerifyBlockHashAndSignatureResult::Incorrect
         {
             self.ban_peer(peer_id, ReasonForBan::BadBlockHeader);
-            return Err(near_chain::Error::InvalidSignature);
+            return Err(unc_chain::Error::InvalidSignature);
         }
 
         let prev_hash = *block.header().prev_hash();
         let block = block.into();
         self.verify_and_rebroadcast_block(&block, was_requested, &peer_id)?;
         let provenance =
-            if was_requested { near_chain::Provenance::SYNC } else { near_chain::Provenance::NONE };
+            if was_requested { unc_chain::Provenance::SYNC } else { unc_chain::Provenance::NONE };
         let res = self.start_process_block(block, provenance, apply_chunks_done_callback);
         match &res {
-            Err(near_chain::Error::Orphan) => {
+            Err(unc_chain::Error::Orphan) => {
                 debug!(target: "chain", ?prev_hash, "Orphan error");
                 if !self.chain.is_orphan(&prev_hash) {
                     debug!(target: "chain", "not orphan");
@@ -1144,7 +1144,7 @@ impl Client {
         &self,
         block: &Block,
         was_requested: bool,
-    ) -> Result<bool, near_chain::Error> {
+    ) -> Result<bool, unc_chain::Error> {
         let head = self.chain.head()?;
         let is_syncing = self.sync_status.is_syncing();
         if block.header().height() >= head.height + BLOCK_HORIZON && is_syncing && !was_requested {
@@ -1182,7 +1182,7 @@ impl Client {
         block: &MaybeValidated<Block>,
         was_requested: bool,
         peer_id: &PeerId,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let res = self.chain.process_block_header(block.header(), &mut vec![]);
         let res = res.and_then(|_| self.chain.validate_block(block));
         match res {
@@ -1202,7 +1202,7 @@ impl Client {
                 // We don't ban a peer if the block timestamp is too much in the future since it's possible
                 // that a block is considered valid in one machine and invalid in another machine when their
                 // clocks are not synced.
-                if !matches!(e, near_chain::Error::InvalidBlockFutureTime(_)) {
+                if !matches!(e, unc_chain::Error::InvalidBlockFutureTime(_)) {
                     self.ban_peer(peer_id.clone(), ReasonForBan::BadBlockHeader);
                 }
                 Err(e)
@@ -1227,7 +1227,7 @@ impl Client {
         block: MaybeValidated<Block>,
         provenance: Provenance,
         apply_chunks_done_callback: DoneApplyChunkCallback,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let _span = debug_span!(
                 target: "chain",
                 "start_process_block",
@@ -1256,7 +1256,7 @@ impl Client {
         if let Some(validator_signer) = self.validator_signer.as_ref() {
             if let Err(e) = &result {
                 match e {
-                    near_chain::Error::InvalidChunkProofs(chunk_proofs) => {
+                    unc_chain::Error::InvalidChunkProofs(chunk_proofs) => {
                         self.network_adapter.send(PeerManagerMessageRequest::NetworkRequests(
                             NetworkRequests::Challenge(Challenge::produce(
                                 ChallengeBody::ChunkProofs(*chunk_proofs.clone()),
@@ -1264,7 +1264,7 @@ impl Client {
                             )),
                         ));
                     }
-                    near_chain::Error::InvalidChunkState(chunk_state) => {
+                    unc_chain::Error::InvalidChunkState(chunk_state) => {
                         self.network_adapter.send(PeerManagerMessageRequest::NetworkRequests(
                             NetworkRequests::Challenge(Challenge::produce(
                                 ChallengeBody::ChunkState(*chunk_state.clone()),
@@ -1286,7 +1286,7 @@ impl Client {
         &mut self,
         apply_chunks_done_callback: DoneApplyChunkCallback,
         should_produce_chunk: bool,
-    ) -> (Vec<CryptoHash>, HashMap<CryptoHash, near_chain::Error>) {
+    ) -> (Vec<CryptoHash>, HashMap<CryptoHash, unc_chain::Error>) {
         let _span = debug_span!(target: "client", "postprocess_ready_blocks", should_produce_chunk)
             .entered();
         let me = self
@@ -1435,7 +1435,7 @@ impl Client {
     pub fn sync_block_headers(
         &mut self,
         headers: Vec<BlockHeader>,
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let mut challenges = vec![];
         self.chain.sync_block_headers(headers, &mut challenges)?;
         self.send_challenges(challenges);
@@ -1887,7 +1887,7 @@ impl Client {
         approval: &Approval,
         approval_type: ApprovalType,
         check_validator: bool,
-        error: near_chain::Error,
+        error: unc_chain::Error,
     ) {
         let is_validator =
             |epoch_id, block_hash, account_id, epoch_manager: &dyn EpochManagerAdapter| {
@@ -1896,7 +1896,7 @@ impl Client {
                     Err(_) => false,
                 }
             };
-        if let near_chain::Error::DBNotFoundErr(_) = error {
+        if let unc_chain::Error::DBNotFoundErr(_) = error {
             if check_validator {
                 let head = unwrap_or_return!(self.chain.head());
                 if !is_validator(
@@ -1950,7 +1950,7 @@ impl Client {
                                     approval,
                                     approval_type,
                                     true,
-                                    near_chain::Error::DBNotFoundErr(format!(
+                                    unc_chain::Error::DBNotFoundErr(format!(
                                         "Cannot find any block on height {}",
                                         parent_height
                                     )),
@@ -2494,7 +2494,7 @@ impl Client {
         Ok(result)
     }
 
-    fn clear_data(&mut self) -> Result<(), near_chain::Error> {
+    fn clear_data(&mut self) -> Result<(), unc_chain::Error> {
         // A RPC node should do regular garbage collection.
         if !self.config.archive {
             let tries = self.runtime_adapter.get_tries();
@@ -2649,7 +2649,7 @@ impl Client {
 }
 
 impl Client {
-    pub fn get_catchup_status(&self) -> Result<Vec<CatchupStatusView>, near_chain::Error> {
+    pub fn get_catchup_status(&self) -> Result<Vec<CatchupStatusView>, unc_chain::Error> {
         let mut ret = vec![];
         for (sync_hash, (_, shard_sync_state, block_catchup_state)) in
             self.catchup_state_syncs.iter()

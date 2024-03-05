@@ -46,7 +46,7 @@ class ReshardingTest(unittest.TestCase):
             self.epoch_length, self.binary_protocol_version, logger)
         client_config_changes = get_client_config_changes(num_nodes)
 
-        near_root, [node0_dir, node1_dir] = init_cluster(
+        unc_root, [node0_dir, node1_dir] = init_cluster(
             num_nodes=num_nodes,
             num_observers=0,
             num_shards=1,
@@ -57,13 +57,13 @@ class ReshardingTest(unittest.TestCase):
 
         node0 = spin_up_node(
             self.config,
-            near_root,
+            unc_root,
             node0_dir,
             0,
         )
         node1 = spin_up_node(
             self.config,
-            near_root,
+            unc_root,
             node1_dir,
             1,
             boot_node=node0,
@@ -73,9 +73,9 @@ class ReshardingTest(unittest.TestCase):
 
         for height, hash in poll_blocks(node0):
             version = metrics_tracker.get_int_metric_value(
-                "near_shard_layout_version")
+                "unc_shard_layout_version")
             num_shards = metrics_tracker.get_int_metric_value(
-                "near_shard_layout_num_shards")
+                "unc_shard_layout_num_shards")
 
             protocol_config = node0.json_rpc(
                 "EXPERIMENTAL_protocol_config",

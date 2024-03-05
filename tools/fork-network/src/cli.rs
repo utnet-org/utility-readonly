@@ -1,36 +1,36 @@
 use crate::single_shard_storage_mutator::SingleShardStorageMutator;
 use crate::storage_mutator::StorageMutator;
-use near_chain::types::{RuntimeAdapter, Tip};
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_chain_configs::{Genesis, GenesisConfig, GenesisValidationMode};
-use near_crypto::PublicKey;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_mirror::key_mapping::{map_account, map_key};
-use near_o11y::default_subscriber_with_opentelemetry;
-use near_o11y::env_filter::make_env_filter;
-use near_parameters::{RuntimeConfig, RuntimeConfigStore};
-use near_primitives::account::id::AccountType;
-use near_primitives::account::{AccessKey, AccessKeyPermission, Account};
-use near_primitives::borsh;
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::Receipt;
-use near_primitives::serialize::dec_format;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::FlatStateValue;
-use near_primitives::state_record::StateRecord;
-use near_primitives::trie_key::col;
-use near_primitives::trie_key::trie_key_parsers::parse_account_id_from_account_key;
-use near_primitives::types::{
+use unc_chain::types::{RuntimeAdapter, Tip};
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_chain_configs::{Genesis, GenesisConfig, GenesisValidationMode};
+use unc_crypto::PublicKey;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_mirror::key_mapping::{map_account, map_key};
+use unc_o11y::default_subscriber_with_opentelemetry;
+use unc_o11y::env_filter::make_env_filter;
+use unc_parameters::{RuntimeConfig, RuntimeConfigStore};
+use unc_primitives::account::id::AccountType;
+use unc_primitives::account::{AccessKey, AccessKeyPermission, Account};
+use unc_primitives::borsh;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::serialize::dec_format;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::trie_key::col;
+use unc_primitives::trie_key::trie_key_parsers::parse_account_id_from_account_key;
+use unc_primitives::types::{
     AccountId, AccountInfo, Balance, BlockHeight, EpochId, NumBlocks, ShardId, StateRoot, Power,
 };
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::db::RocksDB;
-use near_store::flat::{store_helper, BlockInfo, FlatStorageManager, FlatStorageStatus};
-use near_store::{
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::db::RocksDB;
+use unc_store::flat::{store_helper, BlockInfo, FlatStorageManager, FlatStorageStatus};
+use unc_store::{
     checkpoint_hot_storage_and_cleanup_columns, DBCol, Store, TrieDBStorage, TrieStorage,
     FINAL_HEAD_KEY,
 };
-use framework::{load_config, open_storage, NearConfig, NightshadeRuntime, UNC_BASE};
+use framework::{load_config, open_storage, UncConfig, NightshadeRuntime, UNC_BASE};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::Deserialize;
 use std::collections::HashSet;
@@ -132,15 +132,15 @@ impl ForkNetworkCommand {
         home_dir: &Path,
         genesis_validation: GenesisValidationMode,
         verbose_target: Option<&str>,
-        o11y_opts: &near_o11y::Options,
+        o11y_opts: &unc_o11y::Options,
     ) -> anyhow::Result<()> {
         // Load config and check flat storage param
-        let mut near_config = load_config(home_dir, genesis_validation)
+        let mut unc_config = load_config(home_dir, genesis_validation)
             .unwrap_or_else(|e| panic!("Error loading config: {e:#}"));
 
         let sys = actix::System::new();
         sys.block_on(async move {
-            self.run_impl(&mut near_config, verbose_target, o11y_opts, home_dir).await.unwrap();
+            self.run_impl(&mut unc_config, verbose_target, o11y_opts, home_dir).await.unwrap();
             actix::System::current().stop();
         });
         sys.run().unwrap();
@@ -152,9 +152,9 @@ impl ForkNetworkCommand {
 
     async fn run_impl(
         self,
-        near_config: &mut NearConfig,
+        unc_config: &mut UncConfig,
         verbose_target: Option<&str>,
-        o11y_opts: &near_o11y::Options,
+        o11y_opts: &unc_o11y::Options,
         home_dir: &Path,
     ) -> anyhow::Result<()> {
         // As we're running multiple threads, we need to initialize the logging
@@ -162,24 +162,24 @@ impl ForkNetworkCommand {
         let _subscriber_guard = default_subscriber_with_opentelemetry(
             make_env_filter(verbose_target).unwrap(),
             o11y_opts,
-            near_config.client_config.chain_id.clone(),
-            near_config.network_config.node_key.public_key().clone(),
+            unc_config.client_config.chain_id.clone(),
+            unc_config.network_config.node_key.public_key().clone(),
             None,
         )
         .await
         .global();
 
-        if !near_config.config.store.flat_storage_creation_enabled {
+        if !unc_config.config.store.flat_storage_creation_enabled {
             panic!("Flat storage must be enabled");
         }
-        near_config.config.store.state_snapshot_enabled = false;
+        unc_config.config.store.state_snapshot_enabled = false;
 
         match &self.command {
             SubCommand::Init(InitCmd) => {
-                self.init(near_config, home_dir)?;
+                self.init(unc_config, home_dir)?;
             }
             SubCommand::AmendAccessKeys(AmendAccessKeysCmd { batch_size }) => {
-                self.amend_access_keys(*batch_size, near_config, home_dir)?;
+                self.amend_access_keys(*batch_size, unc_config, home_dir)?;
             }
             SubCommand::SetValidators(SetValidatorsCmd {
                 validators,
@@ -190,15 +190,15 @@ impl ForkNetworkCommand {
                     validators,
                     *epoch_length,
                     chain_id_suffix,
-                    near_config,
+                    unc_config,
                     home_dir,
                 )?;
             }
             SubCommand::Finalize(FinalizeCmd) => {
-                self.finalize(near_config, home_dir)?;
+                self.finalize(unc_config, home_dir)?;
             }
             SubCommand::Reset(ResetCmd) => {
-                self.reset(near_config, home_dir)?;
+                self.reset(unc_config, home_dir)?;
             }
         };
         Ok(())
@@ -209,11 +209,11 @@ impl ForkNetworkCommand {
     fn snapshot_db(
         &self,
         store: Store,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         home_dir: &Path,
     ) -> anyhow::Result<bool> {
         let store_path =
-            home_dir.join(near_config.config.store.path.clone().unwrap_or(PathBuf::from("data")));
+            home_dir.join(unc_config.config.store.path.clone().unwrap_or(PathBuf::from("data")));
         let fork_snapshot_path = store_path.join("fork-snapshot");
 
         if fork_snapshot_path.exists() && fork_snapshot_path.is_dir() {
@@ -230,14 +230,14 @@ impl ForkNetworkCommand {
     // Snapshots the DB.
     // Determines parameters that will be used to initialize the new chain.
     // After this completes, almost every DB column can be removed, however this command doesn't delete anything itself.
-    fn init(&self, near_config: &mut NearConfig, home_dir: &Path) -> anyhow::Result<()> {
+    fn init(&self, unc_config: &mut UncConfig, home_dir: &Path) -> anyhow::Result<()> {
         // Open storage with migration
-        let storage = open_storage(&home_dir, near_config).unwrap();
+        let storage = open_storage(&home_dir, unc_config).unwrap();
         let store = storage.get_hot_store();
-        assert!(self.snapshot_db(store.clone(), near_config, home_dir)?);
+        assert!(self.snapshot_db(store.clone(), unc_config, home_dir)?);
 
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
         let head = store.get_ser::<Tip>(DBCol::BlockMisc, FINAL_HEAD_KEY)?.unwrap();
         let shard_layout = epoch_manager.get_shard_layout(&head.epoch_id)?;
         let all_shard_uids: Vec<_> = shard_layout.shard_uids().collect();
@@ -248,7 +248,7 @@ impl ForkNetworkCommand {
         tracing::info!(?fork_heads);
 
         let chain =
-            ChainStore::new(store.clone(), near_config.genesis.config.genesis_height, false);
+            ChainStore::new(store.clone(), unc_config.genesis.config.genesis_height, false);
 
         // Move flat storage to the max height for consistency across shards.
         let (block_height, desired_block_hash) =
@@ -305,12 +305,12 @@ impl ForkNetworkCommand {
     fn amend_access_keys(
         &self,
         batch_size: u64,
-        near_config: &mut NearConfig,
+        unc_config: &mut UncConfig,
         home_dir: &Path,
     ) -> anyhow::Result<Vec<StateRoot>> {
         // Open storage with migration
-        near_config.config.store.load_mem_tries_for_all_shards = true;
-        let storage = open_storage(&home_dir, near_config).unwrap();
+        unc_config.config.store.load_mem_tries_for_all_shards = true;
+        let storage = open_storage(&home_dir, unc_config).unwrap();
         let store = storage.get_hot_store();
 
         let (prev_state_roots, prev_hash, epoch_id, block_height) =
@@ -318,13 +318,13 @@ impl ForkNetworkCommand {
         tracing::info!(?prev_state_roots, ?epoch_id, ?prev_hash);
 
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
         let num_shards = prev_state_roots.len();
         let all_shard_uids: Vec<ShardUId> = (0..num_shards)
             .map(|shard_id| epoch_manager.shard_id_to_uid(shard_id as ShardId, &epoch_id).unwrap())
             .collect();
         let runtime =
-            NightshadeRuntime::from_config(home_dir, store.clone(), &near_config, epoch_manager);
+            NightshadeRuntime::from_config(home_dir, store.clone(), &unc_config, epoch_manager);
         runtime.load_mem_tries_on_startup(&all_shard_uids).unwrap();
 
         let make_storage_mutator: MakeSingleShardStorageMutatorFn =
@@ -352,21 +352,21 @@ impl ForkNetworkCommand {
         validators: &Path,
         epoch_length: u64,
         chain_id_suffix: &str,
-        near_config: &mut NearConfig,
+        unc_config: &mut UncConfig,
         home_dir: &Path,
     ) -> anyhow::Result<(Vec<StateRoot>, Vec<AccountInfo>)> {
         // Open storage with migration
-        let storage = open_storage(&home_dir, near_config).unwrap();
+        let storage = open_storage(&home_dir, unc_config).unwrap();
         let store = storage.get_hot_store();
 
         let (prev_state_roots, _prev_hash, epoch_id, block_height) =
             self.get_state_roots_and_hash(store.clone())?;
 
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
 
         let runtime =
-            NightshadeRuntime::from_config(home_dir, store, &near_config, epoch_manager.clone());
+            NightshadeRuntime::from_config(home_dir, store, &unc_config, epoch_manager.clone());
 
         let runtime_config_store = RuntimeConfigStore::new(None);
         let runtime_config = runtime_config_store.get_config(PROTOCOL_VERSION);
@@ -381,7 +381,7 @@ impl ForkNetworkCommand {
             self.add_validator_accounts(validators, runtime_config, home_dir, storage_mutator)?;
 
         tracing::info!("Creating a new genesis");
-        backup_genesis_file(home_dir, &near_config)?;
+        backup_genesis_file(home_dir, &unc_config)?;
         self.make_and_write_genesis(
             epoch_length,
             block_height,
@@ -391,7 +391,7 @@ impl ForkNetworkCommand {
             new_validator_accounts.clone(),
             epoch_manager,
             home_dir,
-            &near_config,
+            &unc_config,
         )?;
 
         tracing::info!("All Done! Run the node normally to start the forked network.");
@@ -399,9 +399,9 @@ impl ForkNetworkCommand {
     }
 
     /// Deletes DB columns that are not needed in the new chain.
-    fn finalize(&self, near_config: &mut NearConfig, home_dir: &Path) -> anyhow::Result<()> {
+    fn finalize(&self, unc_config: &mut UncConfig, home_dir: &Path) -> anyhow::Result<()> {
         // Open storage with migration
-        let storage = open_storage(&home_dir, near_config).unwrap();
+        let storage = open_storage(&home_dir, unc_config).unwrap();
         let store = storage.get_hot_store();
 
         tracing::info!("Delete unneeded columns in the original DB");
@@ -443,9 +443,9 @@ impl ForkNetworkCommand {
     /// Moves everything from `~/.near/data/fork-snapshot/data/` to `~/.near/data`.
     /// Deletes `~/.near/data/fork-snapshot/data`.
     /// Moves `~/.near/genesis.json.backup` to `~/.near/genesis.json`.
-    fn reset(self, near_config: &NearConfig, home_dir: &Path) -> anyhow::Result<()> {
+    fn reset(self, unc_config: &UncConfig, home_dir: &Path) -> anyhow::Result<()> {
         let store_path =
-            home_dir.join(near_config.config.store.path.clone().unwrap_or(PathBuf::from("data")));
+            home_dir.join(unc_config.config.store.path.clone().unwrap_or(PathBuf::from("data")));
         // '/data' prefix comes from the use of `checkpoint_hot_storage_and_cleanup_columns` fn
         let fork_snapshot_path = store_path.join("fork-snapshot/data");
         if !Path::new(&fork_snapshot_path).exists() {
@@ -466,7 +466,7 @@ impl ForkNetworkCommand {
         std::fs::remove_dir(&fork_snapshot_path)?;
 
         tracing::info!("Restoring genesis file");
-        restore_backup_genesis_file(home_dir, &near_config)?;
+        restore_backup_genesis_file(home_dir, &unc_config)?;
         tracing::info!("Reset complete");
         return Ok(());
     }
@@ -670,7 +670,7 @@ impl ForkNetworkCommand {
                     }
                     storage_mutator.set_access_key(
                         account_id,
-                        near_mirror::key_mapping::EXTRA_KEY.public_key(),
+                        unc_mirror::key_mapping::EXTRA_KEY.public_key(),
                         AccessKey::full_access(),
                     )?;
                     num_added += 1;
@@ -781,11 +781,11 @@ impl ForkNetworkCommand {
         new_validator_accounts: Vec<AccountInfo>,
         epoch_manager: Arc<EpochManagerHandle>,
         home_dir: &Path,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
     ) -> anyhow::Result<()> {
         let epoch_config = epoch_manager.get_epoch_config(epoch_id)?;
         let epoch_info = epoch_manager.get_epoch_info(epoch_id)?;
-        let original_config = near_config.genesis.config.clone();
+        let original_config = unc_config.genesis.config.clone();
 
         let new_config = GenesisConfig {
             chain_id: original_config.chain_id.clone() + chain_id_suffix,
@@ -828,7 +828,7 @@ impl ForkNetworkCommand {
         };
 
         let genesis = Genesis::new_from_state_roots(new_config, new_state_roots);
-        let genesis_file = &near_config.config.genesis_file;
+        let genesis_file = &unc_config.config.genesis_file;
         let original_genesis_file = home_dir.join(&genesis_file);
 
         tracing::info!(?original_genesis_file, "Writing new genesis");
@@ -860,8 +860,8 @@ fn get_fork_heads(all_shard_uids: &[ShardUId], store: Store) -> anyhow::Result<V
     Ok(flat_heads)
 }
 
-fn backup_genesis_file(home_dir: &Path, near_config: &NearConfig) -> anyhow::Result<()> {
-    let genesis_file = &near_config.config.genesis_file;
+fn backup_genesis_file(home_dir: &Path, unc_config: &UncConfig) -> anyhow::Result<()> {
+    let genesis_file = &unc_config.config.genesis_file;
     let original_genesis_file = home_dir.join(&genesis_file);
     let backup_genesis_file = backup_genesis_file_path(home_dir, &genesis_file);
     tracing::info!(?original_genesis_file, ?backup_genesis_file, "Backing up old genesis.");
@@ -869,8 +869,8 @@ fn backup_genesis_file(home_dir: &Path, near_config: &NearConfig) -> anyhow::Res
     Ok(())
 }
 
-fn restore_backup_genesis_file(home_dir: &Path, near_config: &NearConfig) -> anyhow::Result<()> {
-    let genesis_file = &near_config.config.genesis_file;
+fn restore_backup_genesis_file(home_dir: &Path, unc_config: &UncConfig) -> anyhow::Result<()> {
+    let genesis_file = &unc_config.config.genesis_file;
     let backup_genesis_file = backup_genesis_file_path(home_dir, &genesis_file);
     let original_genesis_file = home_dir.join(&genesis_file);
     tracing::info!(?backup_genesis_file, ?original_genesis_file, "Restoring genesis from a backup");

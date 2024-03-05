@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use actix::Message;
-use near_primitives::{hash::CryptoHash, sharding::PartialEncodedChunk};
+use unc_primitives::{hash::CryptoHash, sharding::PartialEncodedChunk};
 
 use crate::types::{
     PartialEncodedChunkForwardMsg, PartialEncodedChunkRequestMsg, PartialEncodedChunkResponseMsg,

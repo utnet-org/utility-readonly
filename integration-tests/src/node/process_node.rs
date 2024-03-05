@@ -8,17 +8,17 @@ use std::{env, thread};
 use rand::Rng;
 use tracing::error;
 
-use near_chain_configs::Genesis;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_primitives::types::AccountId;
-use framework::config::NearConfig;
+use unc_chain_configs::Genesis;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_primitives::types::AccountId;
+use framework::config::UncConfig;
 
 use crate::node::Node;
 use crate::user::rpc_user::RpcUser;
 use crate::user::User;
 use actix::System;
-use near_jsonrpc_client::new_client;
-use near_network::test_utils::wait_or_timeout;
+use unc_jsonrpc_client::new_client;
+use unc_network::test_utils::wait_or_timeout;
 
 pub enum ProcessNodeState {
     Stopped,
@@ -27,7 +27,7 @@ pub enum ProcessNodeState {
 
 pub struct ProcessNode {
     pub work_dir: PathBuf,
-    pub config: NearConfig,
+    pub config: UncConfig,
     pub state: ProcessNodeState,
     pub signer: Arc<InMemorySigner>,
 }
@@ -50,7 +50,7 @@ impl Node for ProcessNode {
                 self.state = ProcessNodeState::Running(child);
                 let client_addr = format!("http://{}", self.config.rpc_addr().unwrap());
                 thread::sleep(Duration::from_secs(3));
-                near_actix_test_utils::run_actix(async move {
+                unc_actix_test_utils::run_actix(async move {
                     wait_or_timeout(1000, 30000, || async {
                         let res = new_client(&client_addr).status().await;
                         if res.is_err() {
@@ -105,7 +105,7 @@ impl Node for ProcessNode {
 
 impl ProcessNode {
     /// Side effect: reset_storage
-    pub fn new(config: NearConfig) -> ProcessNode {
+    pub fn new(config: UncConfig) -> ProcessNode {
         let mut rng = rand::thread_rng();
         let work_dir = env::temp_dir().join(format!("process_node_{}", rng.gen::<u64>()));
         let signer = Arc::new(InMemorySigner::from_seed(

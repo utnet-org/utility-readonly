@@ -19,16 +19,16 @@ pub use crate::trie::trie_storage::{TrieCache, TrieCachingStorage, TrieDBStorage
 use crate::StorageError;
 use borsh::{BorshDeserialize, BorshSerialize};
 pub use from_flat::construct_trie_from_flat;
-use near_primitives::challenge::PartialState;
-use near_primitives::hash::{hash, CryptoHash};
-pub use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::{FlatStateValue, ValueRef};
-use near_primitives::state_record::StateRecord;
-use near_primitives::trie_key::trie_key_parsers::parse_account_id_prefix;
-use near_primitives::trie_key::TrieKey;
-pub use near_primitives::types::TrieNodesCount;
-use near_primitives::types::{AccountId, StateRoot, StateRootNode};
-use near_vm_runner::ContractCode;
+use unc_primitives::challenge::PartialState;
+use unc_primitives::hash::{hash, CryptoHash};
+pub use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::{FlatStateValue, ValueRef};
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::trie_key::trie_key_parsers::parse_account_id_prefix;
+use unc_primitives::trie_key::TrieKey;
+pub use unc_primitives::types::TrieNodesCount;
+use unc_primitives::types::{AccountId, StateRoot, StateRootNode};
+use unc_vm_runner::ContractCode;
 pub use raw_node::{Children, RawTrieNode, RawTrieNodeWithSize};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -1497,7 +1497,7 @@ impl TrieAccess for Trie {
 /// operations.
 pub mod estimator {
     use borsh::BorshDeserialize;
-    use near_primitives::hash::CryptoHash;
+    use unc_primitives::hash::CryptoHash;
 
     /// Create an encoded extension node with the given value as the key.
     /// This serves no purpose other than for the estimator.
@@ -1926,8 +1926,8 @@ mod tests {
 #[cfg(test)]
 mod borsh_compatibility_test {
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::types::StateRoot;
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::types::StateRoot;
 
     use crate::trie::{TrieRefcountAddition, TrieRefcountSubtraction};
     use crate::TrieChanges;

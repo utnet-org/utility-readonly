@@ -3,9 +3,9 @@
 /// All changes to this file should be reviewed.
 ///
 /// TODO: - document all types in this file
-use near_primitives::block::GenesisId;
-use near_primitives::network::PeerId;
-use near_primitives::types::{AccountId, BlockHeight, ShardId};
+use unc_primitives::block::GenesisId;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::{AccountId, BlockHeight, ShardId};
 use std::fmt;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::str::FromStr;
@@ -52,7 +52,7 @@ pub enum ParsePeerInfoError {
     #[error("invalid format: {0}")]
     InvalidFormat(String),
     #[error("PeerId: {0}")]
-    PeerId(#[source] near_crypto::ParseKeyError),
+    PeerId(#[source] unc_crypto::ParseKeyError),
 }
 
 impl FromStr for PeerInfo {

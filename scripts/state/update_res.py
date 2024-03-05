@@ -32,7 +32,7 @@ GENESIS_FULL_PATH = REPO_FULL_PATH / GENESIS_REPO_PATH
 SCRIPT_REPO_PATH = pathlib.Path(__file__).resolve().relative_to(REPO_FULL_PATH)
 
 
-def near_init_genesis():
+def unc_init_genesis():
     with tempfile.TemporaryDirectory() as tempdir:
         args = ['--home', tempdir, 'init', '--chain-id', 'sample']
         prebuilt_neard = os.environ.get("CURRENT_NEARD")
@@ -53,14 +53,14 @@ def near_init_genesis():
 
 
 def update_res():
-    genesis = near_init_genesis()
+    genesis = unc_init_genesis()
     with open(GENESIS_FULL_PATH, 'w') as wr:
         json.dump(genesis, wr, indent=2)
     print(f'{GENESIS_REPO_PATH} updated')
 
 
 def check_res():
-    want_genesis = near_init_genesis()
+    want_genesis = unc_init_genesis()
     with open(GENESIS_FULL_PATH) as rd:
         got_genesis = json.load(rd)
     if want_genesis != got_genesis:

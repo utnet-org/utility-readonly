@@ -5,12 +5,12 @@ use crate::snapshot_hosts::{Config, SnapshotHostInfoError, SnapshotHostsCache};
 use crate::testonly::assert_is_superset;
 use crate::testonly::{make_rng, AsSet as _};
 use crate::types::SnapshotHostInfo;
-use near_crypto::SecretKey;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
-use near_primitives::types::EpochHeight;
-use near_primitives::types::ShardId;
+use unc_crypto::SecretKey;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::EpochHeight;
+use unc_primitives::types::ShardId;
 use std::collections::HashSet;
 use std::sync::Arc;
 

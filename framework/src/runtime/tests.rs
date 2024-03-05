@@ -1,36 +1,36 @@
 use std::collections::BTreeSet;
 
-use near_chain::types::RuntimeStorageConfig;
-use near_chain::{Chain, ChainGenesis};
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::EpochManager;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
-use near_store::flat::{FlatStateChanges, FlatStateDelta, FlatStateDeltaMetadata};
-use near_store::genesis::initialize_genesis_state;
+use unc_chain::types::RuntimeStorageConfig;
+use unc_chain::{Chain, ChainGenesis};
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::EpochManager;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::validator_stake::{ValidatorStake, ValidatorStakeIter};
+use unc_store::flat::{FlatStateChanges, FlatStateDelta, FlatStateDeltaMetadata};
+use unc_store::genesis::initialize_genesis_state;
 use num_rational::Ratio;
 
 use crate::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
-use near_chain_configs::{Genesis, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_o11y::testonly::init_test_logger;
-use near_primitives::block::Tip;
-use near_primitives::challenge::{ChallengesResult, SlashedValidator};
-use near_primitives::transaction::{Action, DeleteAccountAction, StakeAction, TransferAction};
-use near_primitives::types::{
+use unc_chain_configs::{Genesis, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::block::Tip;
+use unc_primitives::challenge::{ChallengesResult, SlashedValidator};
+use unc_primitives::transaction::{Action, DeleteAccountAction, StakeAction, TransferAction};
+use unc_primitives::types::{
     BlockHeightDelta, Nonce, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason,
 };
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::views::{
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::views::{
     AccountView, CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo,
     ValidatorKickoutView,
 };
-use near_store::{get_genesis_state_roots, NodeStorage};
+use unc_store::{get_genesis_state_roots, NodeStorage};
 
 use super::*;
 
-use near_primitives::account::id::AccountIdRef;
-use near_primitives::trie_key::TrieKey;
+use unc_primitives::account::id::AccountIdRef;
+use unc_primitives::trie_key::TrieKey;
 use primitive_types::U256;
 
 fn stake(
@@ -102,7 +102,7 @@ impl NightshadeRuntime {
             let delta = FlatStateDelta {
                 changes: flat_state_changes,
                 metadata: FlatStateDeltaMetadata {
-                    block: near_store::flat::BlockInfo {
+                    block: unc_store::flat::BlockInfo {
                         hash: *block_hash,
                         height,
                         prev_hash: *prev_block_hash,
@@ -208,7 +208,7 @@ impl TestEnv {
             store_update.commit().unwrap();
             assert!(matches!(
                 flat_storage_manager.get_flat_storage_status(shard_uid),
-                near_store::flat::FlatStorageStatus::Ready(_)
+                unc_store::flat::FlatStorageStatus::Ready(_)
             ));
             flat_storage_manager.create_flat_storage_for_shard(shard_uid).unwrap();
         }
@@ -1411,9 +1411,9 @@ fn test_trie_and_flat_state_equality() {
 /// Check that mainnet genesis hash still matches, to make sure that we're still backwards compatible.
 #[test]
 fn test_genesis_hash() {
-    let genesis = near_mainnet_res::mainnet_genesis();
+    let genesis = unc_mainnet_res::mainnet_genesis();
     let chain_genesis = ChainGenesis::new(&genesis);
-    let store = near_store::test_utils::create_test_store();
+    let store = unc_store::test_utils::create_test_store();
 
     let tempdir = tempfile::tempdir().unwrap();
     initialize_genesis_state(store.clone(), &genesis, Some(tempdir.path()));

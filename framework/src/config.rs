@@ -1,7 +1,7 @@
 use crate::download_file::{run_download_file, FileDownloadError};
 use crate::dyn_config::LOG_CONFIG_FILENAME;
 use anyhow::{anyhow, bail, Context};
-use near_chain_configs::{
+use unc_chain_configs::{
     default_enable_multiline_logging, default_epoch_sync_enabled,
     default_header_sync_expected_height_per_second, default_header_sync_initial_timeout,
     default_header_sync_progress_timeout, default_header_sync_stall_ban_timeout,
@@ -14,29 +14,29 @@ use near_chain_configs::{
     GenesisConfig, GenesisValidationMode, LogSummaryStyle, MutableConfigValue, ReshardingConfig,
     StateSyncConfig,
 };
-use near_config_utils::{ValidationError, ValidationErrors};
-use near_crypto::{InMemorySigner, KeyFile, KeyType, PublicKey, Signer};
+use unc_config_utils::{ValidationError, ValidationErrors};
+use unc_crypto::{InMemorySigner, KeyFile, KeyType, PublicKey, Signer};
 #[cfg(feature = "json_rpc")]
-use near_jsonrpc::RpcConfig;
-use near_network::config::NetworkConfig;
-use near_network::tcp;
-use near_o11y::log_config::LogConfig;
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::hash::CryptoHash;
+use unc_jsonrpc::RpcConfig;
+use unc_network::config::NetworkConfig;
+use unc_network::tcp;
+use unc_o11y::log_config::LogConfig;
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::hash::CryptoHash;
 #[cfg(test)]
-use near_primitives::shard_layout::account_id_to_shard_id;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::state_record::StateRecord;
-use near_primitives::static_clock::StaticClock;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::{
+use unc_primitives::shard_layout::account_id_to_shard_id;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::{
     AccountId, AccountInfo, Balance, BlockHeight, BlockHeightDelta, Gas, NumBlocks, NumSeats,
     NumShards, ShardId, Power,
 };
-use near_primitives::utils::{generate_random_string, get_num_seats_per_shard};
-use near_primitives::validator_signer::{InMemoryValidatorSigner, ValidatorSigner};
-use near_primitives::version::PROTOCOL_VERSION;
-use near_telemetry::TelemetryConfig;
+use unc_primitives::utils::{generate_random_string, get_num_seats_per_shard};
+use unc_primitives::validator_signer::{InMemoryValidatorSigner, ValidatorSigner};
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_telemetry::TelemetryConfig;
 use num_rational::Rational32;
 use std::fs;
 use std::fs::File;
@@ -249,7 +249,7 @@ pub struct Config {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rpc: Option<RpcConfig>,
     pub telemetry: TelemetryConfig,
-    pub network: near_network::config_json::Config,
+    pub network: unc_network::config_json::Config,
     pub consensus: Consensus,
     pub tracked_accounts: Vec<AccountId>,
     pub tracked_shards: Vec<ShardId>,
@@ -280,11 +280,11 @@ pub struct Config {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_gas_burnt_view: Option<Gas>,
     /// Different parameters to configure underlying storage.
-    pub store: near_store::StoreConfig,
+    pub store: unc_store::StoreConfig,
     /// Different parameters to configure underlying cold storage.
     /// This feature is under development, do not use in production.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cold_store: Option<near_store::StoreConfig>,
+    pub cold_store: Option<unc_store::StoreConfig>,
     /// Configuration for the split storage.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub split_storage: Option<SplitStorageConfig>,
@@ -344,7 +344,7 @@ impl Default for Config {
             view_client_throttle_period: default_view_client_throttle_period(),
             trie_viewer_state_size_limit: default_trie_viewer_state_size_limit(),
             max_gas_burnt_view: None,
-            store: near_store::StoreConfig::default(),
+            store: unc_store::StoreConfig::default(),
             cold_store: None,
             split_storage: None,
             expected_shutdown: None,
@@ -423,7 +423,7 @@ impl Config {
                 error_message: format!("Failed to read config from {}", path.display()),
             })?;
         let mut unrecognised_fields = Vec::new();
-        let json_str_without_comments = near_config_utils::strip_comments_from_json_str(&json_str)
+        let json_str_without_comments = unc_config_utils::strip_comments_from_json_str(&json_str)
             .map_err(|_| ValidationError::ConfigFileError {
                 error_message: format!("Failed to strip comments from {}", path.display()),
             })?;
@@ -578,7 +578,7 @@ impl Genesis {
 }
 
 #[derive(Clone)]
-pub struct NearConfig {
+pub struct UncConfig {
     pub config: Config,
     pub client_config: ClientConfig,
     pub network_config: NetworkConfig,
@@ -589,14 +589,14 @@ pub struct NearConfig {
     pub validator_signer: Option<Arc<dyn ValidatorSigner>>,
 }
 
-impl NearConfig {
+impl UncConfig {
     pub fn new(
         config: Config,
         genesis: Genesis,
         network_key_pair: KeyFile,
         validator_signer: Option<Arc<dyn ValidatorSigner>>,
     ) -> anyhow::Result<Self> {
-        Ok(NearConfig {
+        Ok(UncConfig {
             config: config.clone(),
             client_config: ClientConfig {
                 version: Default::default(),
@@ -686,7 +686,7 @@ impl NearConfig {
     }
 }
 
-impl NearConfig {
+impl UncConfig {
     /// Test tool to save configs back to the folder.
     /// Useful for dynamic creating testnet configs and then saving them in different folders.
     pub fn save_to_dir(&self, dir: &Path) {
@@ -869,7 +869,7 @@ fn generate_or_load_keys(
 ) -> anyhow::Result<()> {
     generate_or_load_key(dir, &config.node_key_file, Some("node".parse().unwrap()), None)?;
     match chain_id {
-        near_primitives::chains::MAINNET | near_primitives::chains::TESTNET => {
+        unc_primitives::chains::MAINNET | unc_primitives::chains::TESTNET => {
             generate_or_load_key(dir, &config.validator_key_file, account_id, None)?;
         }
         _ => {
@@ -882,13 +882,13 @@ fn generate_or_load_keys(
 
 fn set_block_production_delay(chain_id: &str, fast: bool, config: &mut Config) {
     match chain_id {
-        near_primitives::chains::MAINNET => {
+        unc_primitives::chains::MAINNET => {
             config.consensus.min_block_production_delay =
                 Duration::from_millis(MAINNET_MIN_BLOCK_PRODUCTION_DELAY);
             config.consensus.max_block_production_delay =
                 Duration::from_millis(MAINNET_MAX_BLOCK_PRODUCTION_DELAY);
         }
-        near_primitives::chains::TESTNET => {
+        unc_primitives::chains::TESTNET => {
             config.consensus.min_block_production_delay =
                 Duration::from_millis(TESTNET_MIN_BLOCK_PRODUCTION_DELAY);
             config.consensus.max_block_production_delay =
@@ -984,7 +984,7 @@ pub fn init_configs(
     // Before finalizing the Config and Genesis, make sure the node and validator keys exist.
     generate_or_load_keys(dir, &config, &chain_id, account_id, test_seed)?;
     match chain_id.as_ref() {
-        near_primitives::chains::MAINNET | near_primitives::chains::TESTNET => {
+        unc_primitives::chains::MAINNET | unc_primitives::chains::TESTNET => {
             if test_seed.is_some() {
                 bail!("Test seed is not supported for {chain_id}");
             }
@@ -1001,12 +1001,12 @@ pub fn init_configs(
     })?;
 
     match chain_id.as_ref() {
-        near_primitives::chains::MAINNET => {
-            let genesis = near_mainnet_res::mainnet_genesis();
+        unc_primitives::chains::MAINNET => {
+            let genesis = unc_mainnet_res::mainnet_genesis();
             genesis.to_file(dir.join(config.genesis_file));
             info!(target: "near", "Generated mainnet genesis file in {}", dir.display());
         }
-        near_primitives::chains::TESTNET => {
+        unc_primitives::chains::TESTNET => {
             if let Some(ref filename) = config.genesis_records_file {
                 let records_path = dir.join(filename);
 
@@ -1266,7 +1266,7 @@ pub fn init_testnet_configs(
 
 pub fn get_genesis_url(chain_id: &str) -> String {
     format!(
-        "https://near-s3.jongun2038.win/{}/genesis.json.xz",
+        "https://unc-s3.jongun2038.win/{}/genesis.json.xz",
         chain_id,
     )
 }
@@ -1280,7 +1280,7 @@ pub fn get_records_url(chain_id: &str) -> String {
 
 pub fn get_config_url(chain_id: &str) -> String {
     format!(
-        "https://near-s3.jongun2038.win/{}/config.json.xz",
+        "https://unc-s3.jongun2038.win/{}/config.json.xz",
         chain_id,
     )
 }
@@ -1316,7 +1316,7 @@ pub fn download_config(url: &str, path: &Path) -> Result<(), FileDownloadError> 
 struct NodeKeyFile {
     account_id: String,
     public_key: PublicKey,
-    secret_key: near_crypto::SecretKey,
+    secret_key: unc_crypto::SecretKey,
 }
 
 impl NodeKeyFile {
@@ -1326,7 +1326,7 @@ impl NodeKeyFile {
         let mut json_str = String::new();
         file.read_to_string(&mut json_str)?;
 
-        let json_str_without_comments = near_config_utils::strip_comments_from_json_str(&json_str)?;
+        let json_str_without_comments = unc_config_utils::strip_comments_from_json_str(&json_str)?;
 
         Ok(serde_json::from_str(&json_str_without_comments)?)
     }
@@ -1351,7 +1351,7 @@ impl From<NodeKeyFile> for KeyFile {
 pub fn load_config(
     dir: &Path,
     genesis_validation: GenesisValidationMode,
-) -> anyhow::Result<NearConfig> {
+) -> anyhow::Result<UncConfig> {
     let mut validation_errors = ValidationErrors::new();
 
     // if config.json has file issues, the program will directly panic
@@ -1410,7 +1410,7 @@ pub fn load_config(
             if validator_signer.is_some()
                 && matches!(
                     genesis.config.chain_id.as_ref(),
-                    near_primitives::chains::MAINNET | near_primitives::chains::TESTNET
+                    unc_primitives::chains::MAINNET | unc_primitives::chains::TESTNET
                 )
                 && config.tracked_shards.is_empty()
             {
@@ -1432,16 +1432,16 @@ pub fn load_config(
     if genesis.is_none() || network_signer.is_none() {
         panic!("Genesis and network_signer should not be None by now.")
     }
-    let near_config = NearConfig::new(
+    let unc_config = UncConfig::new(
         config,
         genesis.unwrap(),
         network_signer.unwrap().into(),
         validator_signer,
     )?;
-    Ok(near_config)
+    Ok(unc_config)
 }
 
-pub fn load_test_config(seed: &str, addr: tcp::ListenerAddr, genesis: Genesis) -> NearConfig {
+pub fn load_test_config(seed: &str, addr: tcp::ListenerAddr, genesis: Genesis) -> UncConfig {
     let mut config = Config::default();
     config.network.addr = addr.to_string();
     config.set_rpc_addr(tcp::ListenerAddr::reserve_for_test());
@@ -1459,7 +1459,7 @@ pub fn load_test_config(seed: &str, addr: tcp::ListenerAddr, genesis: Genesis) -
         let validator_signer = Arc::new(create_test_signer(seed)) as Arc<dyn ValidatorSigner>;
         (signer, Some(validator_signer))
     };
-    NearConfig::new(config, genesis, signer.into(), validator_signer).unwrap()
+    UncConfig::new(config, genesis, signer.into(), validator_signer).unwrap()
 }
 
 #[test]

@@ -1,6 +1,6 @@
 use actix::Message;
-use near_chain::types::Tip;
-use near_primitives::{
+use unc_chain::types::Tip;
+use unc_primitives::{
     hash::CryptoHash,
     merkle::MerklePath,
     receipt::Receipt,

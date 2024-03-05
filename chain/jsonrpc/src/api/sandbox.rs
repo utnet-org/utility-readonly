@@ -1,7 +1,7 @@
 use serde_json::Value;
 
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::sandbox::{
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::sandbox::{
     RpcSandboxFastForwardError, RpcSandboxFastForwardRequest, RpcSandboxPatchStateError,
     RpcSandboxPatchStateRequest,
 };

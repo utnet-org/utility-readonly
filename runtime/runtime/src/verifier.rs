@@ -1,29 +1,29 @@
 use crate::config::{total_prepaid_gas, tx_cost, TransactionCost};
-use crate::near_primitives::account::Account;
+use crate::unc_primitives::account::Account;
 use crate::VerificationResult;
-use near_crypto::key_conversion::{is_valid_staking_key, is_valid_challenge_key};
-use near_parameters::RuntimeConfig;
-use near_primitives::account::AccessKeyPermission;
-use near_primitives::action::delegate::SignedDelegateAction;
-use near_primitives::checked_feature;
-use near_primitives::errors::{
+use unc_crypto::key_conversion::{is_valid_staking_key, is_valid_challenge_key};
+use unc_parameters::RuntimeConfig;
+use unc_primitives::account::AccessKeyPermission;
+use unc_primitives::action::delegate::SignedDelegateAction;
+use unc_primitives::checked_feature;
+use unc_primitives::errors::{
     ActionsValidationError, InvalidAccessKeyError, InvalidTxError, ReceiptValidationError,
     RuntimeError,
 };
-use near_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum};
-use near_primitives::transaction::DeleteAccountAction;
-use near_primitives::transaction::{
+use unc_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum};
+use unc_primitives::transaction::DeleteAccountAction;
+use unc_primitives::transaction::{
     Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction, StakeAction,
     RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
-use near_primitives::types::{AccountId, Balance};
-use near_primitives::types::{BlockHeight, StorageUsage};
-use near_primitives::version::ProtocolFeature;
-use near_primitives::version::ProtocolVersion;
-use near_store::{
+use unc_primitives::types::{AccountId, Balance};
+use unc_primitives::types::{BlockHeight, StorageUsage};
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives::version::ProtocolVersion;
+use unc_store::{
     get_access_key, get_account, set_access_key, set_account, StorageError, TrieUpdate,
 };
-use near_vm_runner::logic::LimitConfig;
+use unc_vm_runner::logic::LimitConfig;
 
 pub const ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT: StorageUsage = 770;
 
@@ -175,7 +175,7 @@ pub fn verify_and_charge_transaction(
     if checked_feature!("stable", AccessKeyNonceRange, current_protocol_version) {
         if let Some(height) = block_height {
             let upper_bound =
-                height * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+                height * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
             if transaction.nonce >= upper_bound {
                 return Err(InvalidTxError::NonceTooLarge {
                     tx_nonce: transaction.nonce,
@@ -283,7 +283,7 @@ pub(crate) fn validate_receipt(
 ) -> Result<(), ReceiptValidationError> {
     // We retain these checks here as to maintain backwards compatibility
     // with AccountId validation since we illegally parse an AccountId
-    // in near-vm-logic/logic.rs#fn(VMLogic::read_and_parse_account_id)
+    // in unc-vm-logic/logic.rs#fn(VMLogic::read_and_parse_account_id)
     AccountId::validate(receipt.predecessor_id.as_ref()).map_err(|_| {
         ReceiptValidationError::InvalidPredecessorId {
             account_id: receipt.predecessor_id.to_string(),
@@ -482,8 +482,8 @@ fn validate_add_key_action(
         // Check whether `receiver_id` is a valid account_id. Historically, we
         // allowed arbitrary strings there!
         match limit_config.account_id_validity_rules_version {
-            near_primitives_core::config::AccountIdValidityRulesVersion::V0 => (),
-            near_primitives_core::config::AccountIdValidityRulesVersion::V1 => {
+            unc_primitives_core::config::AccountIdValidityRulesVersion::V0 => (),
+            unc_primitives_core::config::AccountIdValidityRulesVersion::V1 => {
                 if let Err(_) = fc.receiver_id.parse::<AccountId>() {
                     return Err(ActionsValidationError::InvalidAccountId {
                         account_id: truncate_string(&fc.receiver_id, AccountId::MAX_LEN * 2),
@@ -559,25 +559,25 @@ fn truncate_string(s: &str, limit: usize) -> String {
 mod tests {
     use std::sync::Arc;
 
-    use near_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
-    use near_primitives::account::{AccessKey, FunctionCallPermission};
-    use near_primitives::action::delegate::{DelegateAction, NonDelegateAction};
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::test_utils::account_new;
-    use near_primitives::transaction::{
+    use unc_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
+    use unc_primitives::account::{AccessKey, FunctionCallPermission};
+    use unc_primitives::action::delegate::{DelegateAction, NonDelegateAction};
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::test_utils::account_new;
+    use unc_primitives::transaction::{
         CreateAccountAction, DeleteAccountAction, DeleteKeyAction, StakeAction, TransferAction,
     };
-    use near_primitives::types::{AccountId, Balance, MerkleHash, StateChangeCause};
-    use near_primitives::version::PROTOCOL_VERSION;
-    use near_store::test_utils::TestTriesBuilder;
+    use unc_primitives::types::{AccountId, Balance, MerkleHash, StateChangeCause};
+    use unc_primitives::version::PROTOCOL_VERSION;
+    use unc_store::test_utils::TestTriesBuilder;
     use testlib::runtime_utils::{alice_account, bob_account, eve_dot_alice_account};
 
-    use crate::near_primitives::shard_layout::ShardUId;
+    use crate::unc_primitives::shard_layout::ShardUId;
 
     use super::*;
-    use crate::near_primitives::trie_key::TrieKey;
-    use near_store::{set, set_code};
-    use near_vm_runner::ContractCode;
+    use crate::unc_primitives::trie_key::TrieKey;
+    use unc_store::{set, set_code};
+    use unc_vm_runner::ContractCode;
 
     /// Initial balance used in tests.
     const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * UNC_BASE;
@@ -586,7 +586,7 @@ mod tests {
     const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
     fn test_limit_config() -> LimitConfig {
-        let store = near_parameters::RuntimeConfigStore::test();
+        let store = unc_parameters::RuntimeConfigStore::test();
         store.get_config(PROTOCOL_VERSION).wasm_config.limit_config.clone()
     }
 
@@ -719,14 +719,14 @@ mod tests {
     }
 
     mod zero_balance_account_tests {
-        use crate::near_primitives::account::id::AccountId;
-        use crate::near_primitives::account::{
+        use crate::unc_primitives::account::id::AccountId;
+        use crate::unc_primitives::account::{
             AccessKeyPermission, Account, FunctionCallPermission,
         };
         use crate::verifier::tests::{setup_accounts, TESTING_INIT_BALANCE};
         use crate::verifier::{is_zero_balance_account, ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT};
-        use near_primitives::account::AccessKey;
-        use near_store::{get_account, TrieUpdate};
+        use unc_primitives::account::AccessKey;
+        use unc_store::{get_account, TrieUpdate};
         use testlib::runtime_utils::{alice_account, bob_account};
 
         fn set_up_test_account(

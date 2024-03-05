@@ -2,7 +2,7 @@ use super::{MemTrieNodePtr, MemTrieNodeView};
 use crate::trie::TRIE_COSTS;
 use crate::{RawTrieNode, RawTrieNodeWithSize};
 
-use near_primitives::hash::{hash, CryptoHash};
+use unc_primitives::hash::{hash, CryptoHash};
 
 impl<'a> MemTrieNodeView<'a> {
     /// Returns the node's hash. Requires that the hash is already computed.
@@ -21,7 +21,7 @@ impl<'a> MemTrieNodeView<'a> {
         }
     }
 
-    /// Returns the memory usage of the node, in Near's trie cost terms, not
+    /// Returns the memory usage of the node, in unc's trie cost terms, not
     /// in terms of the physical memory usage.
     pub fn memory_usage(&self) -> u64 {
         match self {

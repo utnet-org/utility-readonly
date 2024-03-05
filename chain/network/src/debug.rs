@@ -1,5 +1,5 @@
 use ::actix::Message;
-use near_primitives::views::{
+use unc_primitives::views::{
     NetworkGraphView, NetworkRoutesView, PeerStoreView, RecentOutboundConnectionsView,
     SnapshotHostsView,
 };

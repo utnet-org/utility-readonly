@@ -13,7 +13,7 @@ pub(crate) struct SpanDurationLogger {}
 
 pub(crate) static SPAN_BUSY_DURATIONS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_span_busy_duration",
+        "unc_span_busy_duration",
         "Busy duration of spans",
         &["name", "level", "target"],
         // Cover the range from 0.01s to 10s.

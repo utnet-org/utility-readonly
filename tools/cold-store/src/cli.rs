@@ -3,15 +3,15 @@ use anyhow;
 use anyhow::Context;
 use borsh::BorshDeserialize;
 use clap;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_primitives::block::Tip;
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::hash::CryptoHash;
-use near_store::cold_storage::{copy_all_data_to_cold, update_cold_db, update_cold_head};
-use near_store::metadata::DbKind;
-use near_store::{DBCol, NodeStorage, Store, StoreOpener};
-use near_store::{COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY, TAIL_KEY};
-use framework::NearConfig;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_primitives::block::Tip;
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::hash::CryptoHash;
+use unc_store::cold_storage::{copy_all_data_to_cold, update_cold_db, update_cold_head};
+use unc_store::metadata::DbKind;
+use unc_store::{DBCol, NodeStorage, Store, StoreOpener};
+use unc_store::{COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY, TAIL_KEY};
+use framework::UncConfig;
 use rand::seq::SliceRandom;
 use std::io::Result;
 use std::path::Path;
@@ -58,26 +58,26 @@ enum SubCommand {
 impl ColdStoreCommand {
     pub fn run(self, home_dir: &Path) -> anyhow::Result<()> {
         let mode =
-            if self.readwrite { near_store::Mode::ReadWrite } else { near_store::Mode::ReadOnly };
-        let mut near_config = framework::config::load_config(
+            if self.readwrite { unc_store::Mode::ReadWrite } else { unc_store::Mode::ReadOnly };
+        let mut unc_config = framework::config::load_config(
             &home_dir,
-            near_chain_configs::GenesisValidationMode::Full,
+            unc_chain_configs::GenesisValidationMode::Full,
         )
         .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
-        let opener = self.get_opener(home_dir, &mut near_config);
+        let opener = self.get_opener(home_dir, &mut unc_config);
 
         let storage =
             opener.open_in_mode(mode).unwrap_or_else(|e| panic!("Error opening storage: {:#}", e));
 
         let epoch_manager =
-            EpochManager::new_arc_handle(storage.get_hot_store(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(storage.get_hot_store(), &unc_config.genesis.config);
         match self.subcmd {
             SubCommand::Open => check_open(&storage),
             SubCommand::Head => print_heads(&storage),
             SubCommand::CopyNextBlocks(cmd) => {
                 for _ in 0..cmd.number_of_blocks {
-                    copy_next_block(&storage, &near_config, epoch_manager.as_ref());
+                    copy_next_block(&storage, &unc_config, epoch_manager.as_ref());
                 }
                 Ok(())
             }
@@ -85,40 +85,40 @@ impl ColdStoreCommand {
                 copy_all_blocks(&storage, cmd.batch_size, !cmd.no_check_after);
                 Ok(())
             }
-            SubCommand::PrepareHot(cmd) => cmd.run(&storage, &home_dir, &near_config),
+            SubCommand::PrepareHot(cmd) => cmd.run(&storage, &home_dir, &unc_config),
             SubCommand::CheckStateRoot(cmd) => cmd.run(&storage),
         }
     }
 
     /// Returns opener suitable for subcommand.
     /// If subcommand is  CheckStateRoot, creates checkpoint for cold db
-    /// and modifies `near_config.config.cold_store.path` to path to that checkpoint.
+    /// and modifies `unc_config.config.cold_store.path` to path to that checkpoint.
     /// Then returns opener for dbs at `store.path` and `cold_store.path`.
     pub fn get_opener<'a>(
         &'a self,
         home_dir: &Path,
-        near_config: &'a mut NearConfig,
+        unc_config: &'a mut UncConfig,
     ) -> StoreOpener<'a> {
-        if !near_config.config.archive {
+        if !unc_config.config.archive {
             tracing::warn!("Expected archive option in config to be set to true.");
         }
 
         let opener = NodeStorage::opener(
             home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
-            near_config.config.cold_store.as_ref(),
+            unc_config.config.archive,
+            &unc_config.config.store,
+            unc_config.config.cold_store.as_ref(),
         );
 
         match self.subcmd {
             CheckStateRoot(_) => {
                 let (hot_snapshot, cold_snapshot) = opener
-                    .create_snapshots(near_store::Mode::ReadOnly)
+                    .create_snapshots(unc_store::Mode::ReadOnly)
                     .expect("Failed to create snapshots");
                 if let Some(_) = &hot_snapshot.0 {
                     hot_snapshot.remove().expect("Failed to remove unnecessary hot snapshot");
                 }
-                if let Some(cold_store_config) = near_config.config.cold_store.as_mut() {
+                if let Some(cold_store_config) = unc_config.config.cold_store.as_mut() {
                     cold_store_config.path =
                         Some(cold_snapshot.0.clone().expect("cold_snapshot should be Some"));
                 }
@@ -128,9 +128,9 @@ impl ColdStoreCommand {
 
         NodeStorage::opener(
             home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
-            near_config.config.cold_store.as_ref(),
+            unc_config.config.archive,
+            &unc_config.config.store,
+            unc_config.config.cold_store.as_ref(),
         )
     }
 }
@@ -182,7 +182,7 @@ fn print_heads(store: &NodeStorage) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn copy_next_block(store: &NodeStorage, config: &NearConfig, epoch_manager: &EpochManagerHandle) {
+fn copy_next_block(store: &NodeStorage, config: &UncConfig, epoch_manager: &EpochManagerHandle) {
     // Cold HEAD can be not set in testing.
     // It should be set before the copying of a block in prod,
     // but we should default it to genesis height here.
@@ -272,8 +272,8 @@ fn copy_all_blocks(storage: &NodeStorage, batch_size: usize, check: bool) {
 }
 
 fn check_key(
-    first_store: &near_store::Store,
-    second_store: &near_store::Store,
+    first_store: &unc_store::Store,
+    second_store: &unc_store::Store,
     col: DBCol,
     key: &[u8],
 ) {
@@ -287,8 +287,8 @@ fn check_key(
 /// with same values for every key.
 /// Return number of checks performed == number of keys in column `col` of the `first_store`.
 fn check_iter(
-    first_store: &near_store::Store,
-    second_store: &near_store::Store,
+    first_store: &unc_store::Store,
+    second_store: &unc_store::Store,
     col: DBCol,
 ) -> u64 {
     let mut num_checks = 0;
@@ -301,7 +301,7 @@ fn check_iter(
 
 /// Calls get_ser on Store with provided temperature from provided NodeStorage.
 /// Expects read to not result in errors.
-fn get_ser_from_store<T: near_primitives::borsh::BorshDeserialize>(
+fn get_ser_from_store<T: unc_primitives::borsh::BorshDeserialize>(
     store: &Store,
     col: DBCol,
     key: &[u8],
@@ -322,7 +322,7 @@ impl PrepareHotCmd {
         &self,
         storage: &NodeStorage,
         home_dir: &Path,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
     ) -> anyhow::Result<()> {
         let _span = tracing::info_span!(target: "prepare-hot", "run");
 
@@ -335,8 +335,8 @@ impl PrepareHotCmd {
         let cold_store = cold_store.ok_or(anyhow::anyhow!("The cold store is not configured!"))?;
 
         tracing::info!(target : "prepare-hot", "Opening rpc.");
-        // Open the rpc_storage using the near_config with the path swapped.
-        let mut rpc_store_config = near_config.config.store.clone();
+        // Open the rpc_storage using the unc_config with the path swapped.
+        let mut rpc_store_config = unc_config.config.store.clone();
         rpc_store_config.path = Some(path.to_path_buf());
         let rpc_opener = NodeStorage::opener(home_dir, false, &rpc_store_config, None);
         let rpc_storage = rpc_opener.open()?;
@@ -461,7 +461,7 @@ impl PrepareHotCmd {
 /// The StateRootSelector is a subcommand that allows the user to select the state root either by block height or by the state root hash.
 #[derive(clap::Subcommand)]
 enum StateRootSelector {
-    Height { height: near_primitives::types::BlockHeight },
+    Height { height: unc_primitives::types::BlockHeight },
     Hash { hash: CryptoHash },
 }
 
@@ -487,13 +487,13 @@ impl StateRootSelector {
                         .to_vec()
                 };
                 let block = cold_store
-                    .get_ser::<near_primitives::block::Block>(DBCol::Block, &hash_key)?
+                    .get_ser::<unc_primitives::block::Block>(DBCol::Block, &hash_key)?
                     .ok_or(anyhow::anyhow!("Failed to find Block: {:?}", hash_key))?;
                 let mut hashes = vec![];
                 for chunk in block.chunks().iter() {
                     hashes.push(
                         cold_store
-                            .get_ser::<near_primitives::sharding::ShardChunk>(
+                            .get_ser::<unc_primitives::sharding::ShardChunk>(
                                 DBCol::Chunks,
                                 chunk.chunk_hash().as_bytes(),
                             )?
@@ -612,14 +612,14 @@ impl CheckStateRootCmd {
         let bytes = Self::read_state(store, hash.as_ref())
             .with_context(|| format!("Failed to read raw bytes for hash {:?}", hash))?
             .with_context(|| format!("Failed to find raw bytes for hash {:?}", hash))?;
-        let node = near_store::RawTrieNodeWithSize::try_from_slice(&bytes)?;
+        let node = unc_store::RawTrieNodeWithSize::try_from_slice(&bytes)?;
         match node.node {
-            near_store::RawTrieNode::Leaf(..) => {
+            unc_store::RawTrieNode::Leaf(..) => {
                 tracing::debug!(target: "check_trie", "Reached leaf node");
                 return Ok(());
             }
-            near_store::RawTrieNode::BranchNoValue(mut children)
-            | near_store::RawTrieNode::BranchWithValue(_, mut children) => {
+            unc_store::RawTrieNode::BranchNoValue(mut children)
+            | unc_store::RawTrieNode::BranchWithValue(_, mut children) => {
                 children.0.shuffle(&mut rand::thread_rng());
                 for (_, child) in children.iter() {
                     // Record in prune state that we are visiting a child node
@@ -630,7 +630,7 @@ impl CheckStateRootCmd {
                     prune_state.up();
                 }
             }
-            near_store::RawTrieNode::Extension(_, child) => {
+            unc_store::RawTrieNode::Extension(_, child) => {
                 // Record in prune state that we are visiting a child node
                 prune_state.down();
                 // Visit a child node
@@ -645,7 +645,7 @@ impl CheckStateRootCmd {
     fn read_state<'a>(
         store: &'a Store,
         trie_key: &'a [u8],
-    ) -> std::io::Result<Option<near_store::db::DBSlice<'a>>> {
+    ) -> std::io::Result<Option<unc_store::db::DBSlice<'a>>> {
         // As cold db strips shard_uid at the beginning of State key, we can add any 8 u8s as prefix.
         let cold_state_key = [&[1; 8], trie_key.as_ref()].concat();
         store.get(DBCol::State, &cold_state_key)

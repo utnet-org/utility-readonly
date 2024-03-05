@@ -1,32 +1,32 @@
 use crate::tests::client::process_blocks::set_block_protocol_version;
 use assert_matches::assert_matches;
-use near_chain::near_chain_primitives::Error;
-use near_chain::test_utils::wait_for_all_blocks_in_processing;
-use near_chain::{ChainGenesis, ChainStoreAccess, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::{run_catchup, TestEnv};
-use near_client::{Client, ProcessTxResponse};
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_o11y::testonly::init_test_logger;
-use near_primitives::account::id::AccountId;
-use near_primitives::block::{Block, Tip};
-use near_primitives::epoch_manager::{AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig};
-use near_primitives::hash::CryptoHash;
-use near_primitives::serialize::to_base64;
-use near_primitives::shard_layout::{account_id_to_shard_id, account_id_to_shard_uid, ShardLayout};
-use near_primitives::transaction::{
+use unc_chain::unc_chain_primitives::Error;
+use unc_chain::test_utils::wait_for_all_blocks_in_processing;
+use unc_chain::{ChainGenesis, ChainStoreAccess, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::{run_catchup, TestEnv};
+use unc_client::{Client, ProcessTxResponse};
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::account::id::AccountId;
+use unc_primitives::block::{Block, Tip};
+use unc_primitives::epoch_manager::{AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::serialize::to_base64;
+use unc_primitives::shard_layout::{account_id_to_shard_id, account_id_to_shard_uid, ShardLayout};
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
-use near_primitives::types::{BlockHeight, NumShards, ProtocolVersion, ShardId};
-use near_primitives::utils::MaybeValidated;
-use near_primitives::version::ProtocolFeature;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::{ExecutionStatusView, FinalExecutionStatus, QueryRequest};
-use near_primitives_core::num_rational::Rational32;
-use near_store::flat::FlatStorageStatus;
-use near_store::test_utils::{gen_account, gen_unique_accounts};
-use near_store::trie::SnapshotError;
-use near_store::{DBCol, ShardUId};
+use unc_primitives::types::{BlockHeight, NumShards, ProtocolVersion, ShardId};
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::{ExecutionStatusView, FinalExecutionStatus, QueryRequest};
+use unc_primitives_core::num_rational::Rational32;
+use unc_store::flat::FlatStorageStatus;
+use unc_store::test_utils::{gen_account, gen_unique_accounts};
+use unc_store::trie::SnapshotError;
+use unc_store::{DBCol, ShardUId};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use framework::UNC_BASE;
@@ -266,7 +266,7 @@ impl TestReshardingEnv {
         &mut self,
         drop_chunk_condition: &DropChunkCondition,
         protocol_version: ProtocolVersion,
-    ) -> Result<(), near_client::Error> {
+    ) -> Result<(), unc_client::Error> {
         let env = &mut self.env;
         let head = env.clients[0].chain.head().unwrap();
         let next_height = head.height + 1;
@@ -1111,7 +1111,7 @@ fn setup_test_env_with_cross_contract_txs(
                 account_id.clone(),
                 &signer,
                 vec![Action::DeployContract(DeployContractAction {
-                    code: near_test_contracts::backwards_compatible_rs_contract().to_vec(),
+                    code: unc_test_contracts::backwards_compatible_rs_contract().to_vec(),
                 })],
                 genesis_hash,
             )

@@ -1,5 +1,5 @@
 [package]
-name = "near-mirror"
+name = "unc-mirror"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -35,50 +35,50 @@ tokio.workspace = true
 tracing.workspace = true
 
 framework.workspace = true
-near-chain-configs.workspace = true
-near-chain.workspace = true
-near-chain-primitives.workspace = true
-near-client.workspace = true
-near-client-primitives.workspace = true
-near-epoch-manager.workspace = true
-near-indexer-primitives.workspace = true
-near-indexer.workspace = true
-near-network.workspace = true
-near-primitives.workspace = true
-near-primitives-core.workspace = true
-near-o11y.workspace = true
-near-store.workspace = true
-near-crypto.workspace = true
+unc-chain-configs.workspace = true
+unc-chain.workspace = true
+unc-chain-primitives.workspace = true
+unc-client.workspace = true
+unc-client-primitives.workspace = true
+unc-epoch-manager.workspace = true
+unc-indexer-primitives.workspace = true
+unc-indexer.workspace = true
+unc-network.workspace = true
+unc-primitives.workspace = true
+unc-primitives-core.workspace = true
+unc-o11y.workspace = true
+unc-store.workspace = true
+unc-crypto.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-chain-configs/nightly",
-  "near-chain/nightly",
-  "near-client-primitives/nightly",
-  "near-client/nightly",
-  "near-epoch-manager/nightly",
-  "near-indexer-primitives/nightly",
-  "near-indexer/nightly",
-  "near-network/nightly",
-  "near-o11y/nightly",
-  "near-primitives-core/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
+  "unc-chain-configs/nightly",
+  "unc-chain/nightly",
+  "unc-client-primitives/nightly",
+  "unc-client/nightly",
+  "unc-epoch-manager/nightly",
+  "unc-indexer-primitives/nightly",
+  "unc-indexer/nightly",
+  "unc-network/nightly",
+  "unc-o11y/nightly",
+  "unc-primitives-core/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
   "framework/nightly",
 ]
 nightly_protocol = [
-  "near-chain-configs/nightly_protocol",
-  "near-chain/nightly_protocol",
-  "near-client-primitives/nightly_protocol",
-  "near-client/nightly_protocol",
-  "near-epoch-manager/nightly_protocol",
-  "near-indexer-primitives/nightly_protocol",
-  "near-indexer/nightly_protocol",
-  "near-network/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-primitives-core/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-chain/nightly_protocol",
+  "unc-client-primitives/nightly_protocol",
+  "unc-client/nightly_protocol",
+  "unc-epoch-manager/nightly_protocol",
+  "unc-indexer-primitives/nightly_protocol",
+  "unc-indexer/nightly_protocol",
+  "unc-network/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
   "framework/nightly_protocol",
 ]

@@ -57,7 +57,7 @@ class Cluster:
         }
 
         self._config = cluster.load_config()
-        self._near_root, self._node_dirs = cluster.init_cluster(
+        self._unc_root, self._node_dirs = cluster.init_cluster(
             num_nodes=1,
             num_observers=2,
             num_shards=1,
@@ -78,7 +78,7 @@ class Cluster:
         assert self._nodes[ordinal] is None
         self._nodes[ordinal] = node = cluster.spin_up_node(
             self._config,
-            self._near_root,
+            self._unc_root,
             self._node_dirs[ordinal],
             ordinal,
             boot_node=boot_node,
@@ -107,14 +107,14 @@ def get_metrics(node_name: str,
     Returns:
         A `{key: count}` dictionary where key is in ‘method/success’ format.
         The values correspond to the
-        near_partial_encoded_chunk_request_processing_time_count Prometheus
+        unc_partial_encoded_chunk_request_processing_time_count Prometheus
         metric.
     """
     url = 'http://{}:{}/metrics'.format(*node.rpc_addr())
     response = requests.get(url)
     response.raise_for_status()
 
-    metric_name = 'near_partial_encoded_chunk_request_processing_time'
+    metric_name = 'unc_partial_encoded_chunk_request_processing_time'
     histogram = next(
         (metric
          for metric in prometheus_client.parser.text_string_to_metric_families(

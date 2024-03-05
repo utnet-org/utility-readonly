@@ -1,5 +1,5 @@
 use crate::{PublicKey, SecretKey};
-use near_account_id::AccountId;
+use unc_account_id::AccountId;
 use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
@@ -39,7 +39,7 @@ impl KeyFile {
         let mut json_config_str = String::new();
         file.read_to_string(&mut json_config_str)?;
         let json_str_without_comments: String =
-            near_config_utils::strip_comments_from_json_str(&json_config_str)?;
+            unc_config_utils::strip_comments_from_json_str(&json_config_str)?;
 
         Ok(serde_json::from_str(&json_str_without_comments)?)
     }

@@ -1,10 +1,10 @@
 //! Chain Client Configuration
 use crate::ExternalStorageLocation::GCS;
 use crate::MutableConfigValue;
-use near_primitives::types::{
+use unc_primitives::types::{
     AccountId, BlockHeight, BlockHeightDelta, Gas, NumBlocks, NumSeats, ShardId,
 };
-use near_primitives::version::Version;
+use unc_primitives::version::Version;
 use std::cmp::{max, min};
 use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;

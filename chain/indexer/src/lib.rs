@@ -3,12 +3,12 @@
 use anyhow::Context;
 use tokio::sync::mpsc;
 
-use near_chain_configs::GenesisValidationMode;
-pub use near_primitives;
-use near_primitives::types::Gas;
-pub use framework::{get_default_home, init_configs, NearConfig};
+use unc_chain_configs::GenesisValidationMode;
+pub use unc_primitives;
+use unc_primitives::types::Gas;
+pub use framework::{get_default_home, init_configs, UncConfig};
 
-pub use near_indexer_primitives::{
+pub use unc_indexer_primitives::{
     IndexerChunkView, IndexerExecutionOutcomeWithOptionalReceipt,
     IndexerExecutionOutcomeWithReceipt, IndexerShard, IndexerTransactionWithOutcome,
     StreamerMessage,
@@ -86,9 +86,9 @@ pub struct IndexerConfig {
 /// This is the core component, which handles `framework` and internal `streamer`.
 pub struct Indexer {
     indexer_config: IndexerConfig,
-    near_config: framework::NearConfig,
-    view_client: actix::Addr<near_client::ViewClientActor>,
-    client: actix::Addr<near_client::ClientActor>,
+    unc_config: framework::UncConfig,
+    view_client: actix::Addr<unc_client::ViewClientActor>,
+    client: actix::Addr<unc_client::ClientActor>,
 }
 
 impl Indexer {
@@ -105,46 +105,46 @@ impl Indexer {
         } else {
             GenesisValidationMode::UnsafeFast
         };
-        let near_config =
+        let unc_config =
             framework::config::load_config(&indexer_config.home_dir, genesis_validation_mode)
                 .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
         assert!(
-            !&near_config.client_config.tracked_shards.is_empty(),
+            !&unc_config.client_config.tracked_shards.is_empty(),
             "Indexer should track at least one shard. \n\
             Tip: You may want to update {} with `\"tracked_shards\": [0]`
             ",
             indexer_config.home_dir.join("config.json").display()
         );
         let framework::NearNode { client, view_client, .. } =
-            framework::start_with_config(&indexer_config.home_dir, near_config.clone())
+            framework::start_with_config(&indexer_config.home_dir, unc_config.clone())
                 .with_context(|| "start_with_config")?;
-        Ok(Self { view_client, client, near_config, indexer_config })
+        Ok(Self { view_client, client, unc_config, indexer_config })
     }
 
-    /// Boots up `near_indexer::streamer`, so it monitors the new blocks with chunks, transactions, receipts, and execution outcomes inside. The returned stream handler should be drained and handled on the user side.
+    /// Boots up `unc_indexer::streamer`, so it monitors the new blocks with chunks, transactions, receipts, and execution outcomes inside. The returned stream handler should be drained and handled on the user side.
     pub fn streamer(&self) -> mpsc::Receiver<StreamerMessage> {
         let (sender, receiver) = mpsc::channel(100);
         actix::spawn(streamer::start(
             self.view_client.clone(),
             self.client.clone(),
             self.indexer_config.clone(),
-            self.near_config.config.store.clone(),
-            self.near_config.config.archive,
+            self.unc_config.config.store.clone(),
+            self.unc_config.config.archive,
             sender,
         ));
         receiver
     }
 
     /// Expose uncd config
-    pub fn near_config(&self) -> &framework::NearConfig {
-        &self.near_config
+    pub fn unc_config(&self) -> &framework::UncConfig {
+        &self.unc_config
     }
 
     /// Internal client actors just in case. Use on your own risk, backward compatibility is not guaranteed
     pub fn client_actors(
         &self,
-    ) -> (actix::Addr<near_client::ViewClientActor>, actix::Addr<near_client::ClientActor>) {
+    ) -> (actix::Addr<unc_client::ViewClientActor>, actix::Addr<unc_client::ClientActor>) {
         (self.view_client.clone(), self.client.clone())
     }
 }

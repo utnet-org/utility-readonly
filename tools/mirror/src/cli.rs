@@ -1,5 +1,5 @@
 use anyhow::Context;
-use near_primitives::types::BlockHeight;
+use unc_primitives::types::BlockHeight;
 use std::cell::Cell;
 use std::path::PathBuf;
 
@@ -69,9 +69,9 @@ impl RunCmd {
         let system = new_actix_system(runtime);
         system
             .block_on(async move {
-                let _subscriber_guard = near_o11y::default_subscriber(
-                    near_o11y::EnvFilterBuilder::from_env().finish().unwrap(),
-                    &near_o11y::Options::default(),
+                let _subscriber_guard = unc_o11y::default_subscriber(
+                    unc_o11y::EnvFilterBuilder::from_env().finish().unwrap(),
+                    &unc_o11y::Options::default(),
                 )
                 .global();
                 actix::spawn(crate::run(

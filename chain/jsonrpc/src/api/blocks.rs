@@ -1,9 +1,9 @@
 use serde_json::Value;
 
-use near_client_primitives::types::GetBlockError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::blocks::{RpcBlockError, RpcBlockRequest};
-use near_primitives::types::BlockReference;
+use unc_client_primitives::types::GetBlockError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::blocks::{RpcBlockError, RpcBlockRequest};
+use unc_primitives::types::BlockReference;
 
 use super::{Params, RpcFrom, RpcRequest};
 

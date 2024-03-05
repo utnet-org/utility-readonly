@@ -1,6 +1,6 @@
 use crate::PartialStorage;
-use near_primitives::challenge::PartialState;
-use near_primitives::hash::CryptoHash;
+use unc_primitives::challenge::PartialState;
+use unc_primitives::hash::CryptoHash;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -34,12 +34,12 @@ mod trie_recording_tests {
     };
     use crate::trie::mem::metrics::MEM_TRIE_NUM_LOOKUPS;
     use crate::{DBCol, Store, Trie};
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::shard_layout::{get_block_shard_uid, get_block_shard_uid_rev, ShardUId};
-    use near_primitives::state::ValueRef;
-    use near_primitives::types::chunk_extra::ChunkExtra;
-    use near_primitives::types::StateRoot;
-    use near_vm_runner::logic::TrieNodesCount;
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::shard_layout::{get_block_shard_uid, get_block_shard_uid_rev, ShardUId};
+    use unc_primitives::state::ValueRef;
+    use unc_primitives::types::chunk_extra::ChunkExtra;
+    use unc_primitives::types::StateRoot;
+    use unc_vm_runner::logic::TrieNodesCount;
     use rand::{thread_rng, Rng};
     use std::collections::{HashMap, HashSet};
     use std::num::NonZeroU32;

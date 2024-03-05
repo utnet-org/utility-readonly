@@ -1,34 +1,34 @@
 use borsh::BorshDeserialize;
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType};
-use near_epoch_manager::EpochManager;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::block::Tip;
-use near_primitives::sharding::{PartialEncodedChunk, ShardChunk};
-use near_primitives::transaction::{
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_epoch_manager::EpochManager;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::block::Tip;
+use unc_primitives::sharding::{PartialEncodedChunk, ShardChunk};
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
-use near_primitives_core::types::AccountId;
-use near_store::cold_storage::{
+use unc_primitives_core::types::AccountId;
+use unc_store::cold_storage::{
     copy_all_data_to_cold, test_cold_genesis_update, test_get_store_initial_writes,
     test_get_store_reads, update_cold_db, update_cold_head,
 };
-use near_store::metadata::DbKind;
-use near_store::metadata::DB_VERSION;
-use near_store::test_utils::create_test_node_storage_with_cold;
-use near_store::{DBCol, Store, COLD_HEAD_KEY, HEAD_KEY};
+use unc_store::metadata::DbKind;
+use unc_store::metadata::DB_VERSION;
+use unc_store::test_utils::create_test_node_storage_with_cold;
+use unc_store::{DBCol, Store, COLD_HEAD_KEY, HEAD_KEY};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
-use framework::{cold_storage::spawn_cold_store_loop, NearConfig};
+use framework::{cold_storage::spawn_cold_store_loop, UncConfig};
 use std::collections::HashSet;
 use std::str::FromStr;
 use strum::IntoEnumIterator;
 
 fn check_key(first_store: &Store, second_store: &Store, col: DBCol, key: &[u8]) {
-    let pretty_key = near_fmt::StorageKey(key);
+    let pretty_key = unc_fmt::StorageKey(key);
     tracing::debug!("Checking {:?} {:?}", col, pretty_key);
 
     let first_res = first_store.get(col, key).unwrap();
@@ -105,7 +105,7 @@ fn test_storage_after_commit_of_cold_update() {
                 "test0".parse().unwrap(),
                 &signer,
                 vec![Action::DeployContract(DeployContractAction {
-                    code: near_test_contracts::rs_contract().to_vec(),
+                    code: unc_test_contracts::rs_contract().to_vec(),
                 })],
                 last_hash,
             );
@@ -557,10 +557,10 @@ fn test_cold_loop_on_gc_boundary() {
     let signer =
         InMemorySigner::from_random(AccountId::from_str("test").unwrap(), KeyType::ED25519);
 
-    let mut near_config = NearConfig::new(
+    let mut unc_config = UncConfig::new(
         framework::config::Config::default(),
         genesis.clone(),
-        near_crypto::KeyFile {
+        unc_crypto::KeyFile {
             account_id: signer.account_id,
             public_key: signer.public_key,
             secret_key: signer.secret_key,
@@ -568,11 +568,11 @@ fn test_cold_loop_on_gc_boundary() {
         None,
     )
     .unwrap();
-    near_config.client_config = env.clients[0].config.clone();
-    near_config.config.save_trie_changes = Some(true);
+    unc_config.client_config = env.clients[0].config.clone();
+    unc_config.config.save_trie_changes = Some(true);
 
     let epoch_manager = EpochManager::new_arc_handle(store.get_hot_store(), &genesis.config);
-    spawn_cold_store_loop(&near_config, &store, epoch_manager).unwrap();
+    spawn_cold_store_loop(&unc_config, &store, epoch_manager).unwrap();
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     let end_cold_head =

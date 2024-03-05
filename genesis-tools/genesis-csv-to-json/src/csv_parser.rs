@@ -2,14 +2,14 @@
 use chrono::DateTime;
 use chrono::Utc;
 use csv::ReaderBuilder;
-use near_crypto::{KeyType, PublicKey};
-use near_network::types::PeerInfo;
-use near_primitives::account::{AccessKey, AccessKeyPermission, Account, FunctionCallPermission};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
-use near_primitives::state_record::StateRecord;
-use near_primitives::transaction::{Action, FunctionCallAction};
-use near_primitives::types::{AccountId, AccountInfo, Balance, Gas, Power};
+use unc_crypto::{KeyType, PublicKey};
+use unc_network::types::PeerInfo;
+use unc_primitives::account::{AccessKey, AccessKeyPermission, Account, FunctionCallPermission};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::transaction::{Action, FunctionCallAction};
+use unc_primitives::types::{AccountId, AccountInfo, Balance, Gas, Power};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -282,10 +282,10 @@ mod tests {
     use csv::WriterBuilder;
     use tempfile::NamedTempFile;
 
-    use near_crypto::KeyType;
+    use unc_crypto::KeyType;
 
     use super::*;
-    use near_primitives::network::PeerId;
+    use unc_primitives::network::PeerId;
 
     #[test]
     fn test_with_file() {

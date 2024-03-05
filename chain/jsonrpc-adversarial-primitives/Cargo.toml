@@ -1,5 +1,5 @@
 [package]
-name = "near-jsonrpc-adversarial-primitives"
+name = "unc-jsonrpc-adversarial-primitives"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -14,17 +14,17 @@ workspace = true
 [dependencies]
 serde.workspace = true
 
-near-primitives.workspace = true
-near-network.workspace = true
+unc-primitives.workspace = true
+unc-network.workspace = true
 
 [features]
 nightly_protocol = [
-  "near-network/nightly_protocol",
-  "near-primitives/nightly_protocol",
+  "unc-network/nightly_protocol",
+  "unc-primitives/nightly_protocol",
 ]
 nightly = [
   "nightly_protocol",
-  "near-network/nightly",
-  "near-primitives/nightly",
+  "unc-network/nightly",
+  "unc-primitives/nightly",
 ]
-test_features = ["near-network/test_features"]
+test_features = ["unc-network/test_features"]

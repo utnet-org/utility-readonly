@@ -4,8 +4,8 @@ use crate::{
     types::{Balance, BlockHeight, EpochHeight, EpochId, Gas},
     version::ProtocolVersion,
 };
-use near_parameters::RuntimeConfig;
-use near_vm_runner::logic::CompiledContractCache;
+use unc_parameters::RuntimeConfig;
+use unc_vm_runner::logic::CompiledContractCache;
 use std::sync::Arc;
 
 #[derive(Debug)]

@@ -4,9 +4,9 @@ use crate::challenge::PartialState;
 use crate::sharding::{ChunkHash, ReceiptProof, ShardChunkHeader};
 use crate::transaction::SignedTransaction;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::Signature;
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::AccountId;
+use unc_crypto::Signature;
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::AccountId;
 
 /// The state witness for a chunk; proves the state transition that the
 /// chunk attests to.

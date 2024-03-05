@@ -185,7 +185,7 @@ impl Message {
     ///
     /// The ID is auto-generated.
     pub fn request(method: String, params: Value) -> Self {
-        let id = Value::from(near_primitives::utils::generate_random_string(9));
+        let id = Value::from(unc_primitives::utils::generate_random_string(9));
         Message::Request(Request { jsonrpc: Version, method, params, id })
     }
     /// Create a top-level error (without an ID).

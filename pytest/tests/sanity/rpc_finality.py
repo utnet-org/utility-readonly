@@ -83,7 +83,7 @@ class TestRpcFinality(unittest.TestCase):
             amounts = [
                 int(nodes[0].get_account(acc_id, finality)['result']['amount'])
                 - balances[acc_id]
-                for finality in ["optimistic", "near-final", "final"]
+                for finality in ["optimistic", "unc-final", "final"]
             ]
             print(f"Account amounts: {acc_id}: {amounts}")
 

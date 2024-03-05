@@ -137,7 +137,7 @@ class DockerNode(cluster.LocalNode):
     def __init__(self, ordinal: int, node_dir: pathlib.Path) -> None:
         super().__init__(port=24567 + 10 + ordinal,
                          rpc_port=3030 + 10 + ordinal,
-                         near_root='',
+                         unc_root='',
                          node_dir=str(node_dir),
                          blacklist=[])
         self._container_id = None

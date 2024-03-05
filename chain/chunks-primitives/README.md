@@ -1,3 +1,3 @@
-# near-chunk-primitives
+# unc-chunk-primitives
 
 This crate hosts NEAR chunks-related error types.

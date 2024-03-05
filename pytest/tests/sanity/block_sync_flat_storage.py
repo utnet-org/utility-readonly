@@ -26,14 +26,14 @@ config1 = {
 }
 
 config = load_config()
-near_root, node_dirs = init_cluster(1, 1, 4, config,
+unc_root, node_dirs = init_cluster(1, 1, 4, config,
                                     [["epoch_length", EPOCH_LENGTH]], {
                                         0: config0,
                                         1: config1
                                     })
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
-node1 = spin_up_node(config, near_root, node_dirs[1], 1, boot_node=boot_node)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
+node1 = spin_up_node(config, unc_root, node_dirs[1], 1, boot_node=boot_node)
 
 contract_key = boot_node.signer_key
 contract = utils.load_test_contract()

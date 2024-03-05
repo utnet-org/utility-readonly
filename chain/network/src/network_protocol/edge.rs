@@ -1,8 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_async::time;
-use near_crypto::{KeyType, SecretKey, Signature};
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
+use unc_async::time;
+use unc_crypto::{KeyType, SecretKey, Signature};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 
@@ -266,7 +266,7 @@ impl Edge {
     }
 }
 
-/// An `Edge` represents a direct connection between two peers in Near Protocol P2P network.
+/// An `Edge` represents a direct connection between two peers in unc Protocol P2P network.
 ///
 /// Note that edge might either in `Active` or `Removed` state.
 /// We need to keep explicitly `Removed` edges, in order to be able to proof, that given `Edge`

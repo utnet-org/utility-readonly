@@ -3,11 +3,11 @@ use crate::types as primitives;
 /// It is a concise definition of key and value types
 /// of the DB columns. For high level access see store.rs.
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_async::time;
-use near_crypto::Signature;
-use near_primitives::account::id::AccountId;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_store::DBCol;
+use unc_async::time;
+use unc_crypto::Signature;
+use unc_primitives::account::id::AccountId;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_store::DBCol;
 use std::io;
 use std::sync::Arc;
 
@@ -216,13 +216,13 @@ pub trait Column {
     type Value: Format;
 }
 
-/// A type-safe wrapper of the near_store::Store.
+/// A type-safe wrapper of the unc_store::Store.
 #[derive(Clone)]
-pub struct Store(std::sync::Arc<dyn near_store::db::Database>);
+pub struct Store(std::sync::Arc<dyn unc_store::db::Database>);
 
-/// A type-safe wrapper of the near_store::StoreUpdate.
+/// A type-safe wrapper of the unc_store::StoreUpdate.
 #[derive(Default)]
-pub struct StoreUpdate(near_store::db::DBTransaction);
+pub struct StoreUpdate(unc_store::db::DBTransaction);
 
 impl Store {
     pub fn new_update(&mut self) -> StoreUpdate {
@@ -245,8 +245,8 @@ impl Store {
     }
 }
 
-impl From<Arc<dyn near_store::db::Database>> for Store {
-    fn from(db: Arc<dyn near_store::db::Database>) -> Self {
+impl From<Arc<dyn unc_store::db::Database>> for Store {
+    fn from(db: Arc<dyn unc_store::db::Database>) -> Self {
         Self(db)
     }
 }

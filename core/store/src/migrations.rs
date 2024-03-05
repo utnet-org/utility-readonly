@@ -1,9 +1,9 @@
 use crate::metadata::DbKind;
 use crate::{DBCol, Store, StoreUpdate};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives::state::FlatStateValue;
-use near_primitives::transaction::{ExecutionOutcomeWithIdAndProof, ExecutionOutcomeWithProof};
-use near_primitives::utils::get_outcome_id_block_hash;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::transaction::{ExecutionOutcomeWithIdAndProof, ExecutionOutcomeWithProof};
+use unc_primitives::utils::get_outcome_id_block_hash;
 use std::collections::HashMap;
 use tracing::info;
 
@@ -187,7 +187,7 @@ pub fn migrate_34_to_35(store: &Store) -> anyhow::Result<()> {
 /// The size of that column should not exceed several dozens of entries.
 pub fn migrate_36_to_37(store: &Store) -> anyhow::Result<()> {
     #[derive(borsh::BorshDeserialize)]
-    struct LegacyFlatStateChanges(HashMap<Vec<u8>, Option<near_primitives::state::ValueRef>>);
+    struct LegacyFlatStateChanges(HashMap<Vec<u8>, Option<unc_primitives::state::ValueRef>>);
 
     let mut update = store.store_update();
     update.delete_all(DBCol::FlatStateChanges);

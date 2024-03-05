@@ -10,14 +10,14 @@ use crate::types::NetworkRequests;
 use crate::types::PeerManagerMessageRequest;
 use crate::types::PeerMessage;
 use crate::{network_protocol::testonly as data, peer::testonly::PeerHandle};
-use near_async::time;
-use near_crypto::SecretKey;
-use near_o11y::testonly::init_test_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
-use near_primitives::types::EpochHeight;
-use near_primitives::types::ShardId;
+use unc_async::time;
+use unc_crypto::SecretKey;
+use unc_o11y::testonly::init_test_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::EpochHeight;
+use unc_primitives::types::ShardId;
 use peer_manager::testonly::FDS_PER_PEER;
 use pretty_assertions::assert_eq;
 use rand::seq::IteratorRandom;
@@ -83,7 +83,7 @@ async fn broadcast() {
 
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -161,7 +161,7 @@ async fn invalid_signature_not_broadcast() {
 
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -186,7 +186,7 @@ async fn invalid_signature_not_broadcast() {
     assert_eq!(empty_sync_msg.hosts, vec![]);
 
     tracing::info!(target:"test", "Send an invalid SyncSnapshotHosts message from from peer1. One of the host infos has an invalid signature.");
-    let random_secret_key = SecretKey::from_random(near_crypto::KeyType::ED25519);
+    let random_secret_key = SecretKey::from_random(unc_crypto::KeyType::ED25519);
     let invalid_info = make_snapshot_host_info(&peer1_config.node_id(), &random_secret_key, rng);
 
     let ok_info_a = make_snapshot_host_info(&peer1_config.node_id(), &peer1_config.node_key, rng);
@@ -225,7 +225,7 @@ async fn too_many_shards_not_broadcast() {
 
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -310,7 +310,7 @@ async fn propagate() {
         pms.push(
             peer_manager::testonly::start(
                 clock.clock(),
-                near_store::db::TestDB::new(),
+                unc_store::db::TestDB::new(),
                 chain.make_config(rng),
                 chain.clone(),
             )
@@ -358,7 +358,7 @@ async fn large_shard_id_in_cache() {
     tracing::info!(target:"test", "Create a peer manager.");
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -404,7 +404,7 @@ async fn too_many_shards_truncate() {
     tracing::info!(target:"test", "Create a single peer manager.");
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )

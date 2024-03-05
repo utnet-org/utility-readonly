@@ -7,25 +7,25 @@ use std::sync::{Arc, RwLock};
 
 use actix::System;
 use futures::FutureExt;
-use near_async::messaging::CanSend;
-use near_network::shards_manager::ShardsManagerRequestFromNetwork;
+use unc_async::messaging::CanSend;
+use unc_network::shards_manager::ShardsManagerRequestFromNetwork;
 use rand::{thread_rng, Rng};
 
 use crate::adapter::{BlockApproval, BlockResponse, ProcessTxRequest};
 use crate::test_utils::{setup_mock_all_validators, ActorHandlesForTesting};
 use crate::GetBlock;
-use near_actix_test_utils::run_actix;
-use near_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::types::NetworkRequests::PartialEncodedChunkMessage;
-use near_network::types::PeerInfo;
-use near_network::types::{
+use unc_actix_test_utils::run_actix;
+use unc_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::types::NetworkRequests::PartialEncodedChunkMessage;
+use unc_network::types::PeerInfo;
+use unc_network::types::{
     NetworkRequests, NetworkResponses, PeerManagerMessageRequest, PeerManagerMessageResponse,
 };
-use near_o11y::testonly::init_test_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::Block;
-use near_primitives::transaction::SignedTransaction;
+use unc_o11y::testonly::init_test_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::Block;
+use unc_primitives::transaction::SignedTransaction;
 
 #[test]
 fn repro_1183() {
@@ -158,7 +158,7 @@ fn repro_1183() {
         );
         *connectors.write().unwrap() = conn;
 
-        near_network::test_utils::wait_or_panic(60000);
+        unc_network::test_utils::wait_or_panic(60000);
     });
 }
 
@@ -267,7 +267,7 @@ fn test_sync_from_archival_node() {
                 },
             ),
         );
-        near_network::test_utils::wait_or_panic(20000);
+        unc_network::test_utils::wait_or_panic(20000);
     });
 }
 
@@ -328,6 +328,6 @@ fn test_long_gap_between_blocks() {
             ),
         );
 
-        near_network::test_utils::wait_or_panic(60000);
+        unc_network::test_utils::wait_or_panic(60000);
     });
 }

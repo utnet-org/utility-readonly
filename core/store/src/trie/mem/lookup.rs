@@ -3,8 +3,8 @@ use std::sync::Arc;
 use super::metrics::MEM_TRIE_NUM_LOOKUPS;
 use super::node::{MemTrieNodePtr, MemTrieNodeView};
 use crate::NibbleSlice;
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::FlatStateValue;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::FlatStateValue;
 
 /// Performs a lookup in an in-memory trie, while taking care of cache
 /// accounting for gas calculation purposes.

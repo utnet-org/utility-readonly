@@ -1,16 +1,16 @@
 use assert_matches::assert_matches;
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_o11y::testonly::init_test_logger;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::errors::TxExecutionError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
-use near_primitives::types::BlockHeight;
-use near_primitives::views::FinalExecutionStatus;
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_o11y::testonly::init_test_logger;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::errors::TxExecutionError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::{Action, FunctionCallAction, Transaction};
+use unc_primitives::types::BlockHeight;
+use unc_primitives::views::FinalExecutionStatus;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -24,18 +24,18 @@ fn protocol_upgrade() {
     init_test_logger();
 
     let old_protocol_version =
-        near_primitives::version::ProtocolFeature::LowerStorageKeyLimit.protocol_version() - 1;
+        unc_primitives::version::ProtocolFeature::LowerStorageKeyLimit.protocol_version() - 1;
     let new_protocol_version = old_protocol_version + 1;
     let new_storage_key_limit = 2usize.pow(11); // 2 KB
     let args: Vec<u8> = vec![1u8; new_storage_key_limit + 1]
         .into_iter()
-        .chain(near_primitives::test_utils::encode(&[10u64]).into_iter())
+        .chain(unc_primitives::test_utils::encode(&[10u64]).into_iter())
         .collect();
     let epoch_length: BlockHeight = 5;
 
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
     // Prepare TestEnv with a contract at the old protocol version.
     let mut env = {
@@ -56,7 +56,7 @@ fn protocol_upgrade() {
         deploy_test_contract_with_protocol_version(
             &mut env,
             "test0".parse().unwrap(),
-            near_test_contracts::backwards_compatible_rs_contract(),
+            unc_test_contracts::backwards_compatible_rs_contract(),
             epoch_length,
             1,
             old_protocol_version,
@@ -123,7 +123,7 @@ fn protocol_upgrade() {
     {
         let args: Vec<u8> = vec![1u8; new_storage_key_limit]
             .into_iter()
-            .chain(near_primitives::test_utils::encode(&[20u64]).into_iter())
+            .chain(unc_primitives::test_utils::encode(&[20u64]).into_iter())
             .collect();
         let tx = Transaction {
             signer_id: "test0".parse().unwrap(),

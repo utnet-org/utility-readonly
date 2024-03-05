@@ -5,8 +5,8 @@ use crate::routing::{GraphConfigV2, GraphV2, NetworkTopologyChange};
 use crate::test_utils::expected_routing_tables;
 use crate::test_utils::random_peer_id;
 use crate::types::Edge;
-use near_async::time;
-use near_primitives::network::PeerId;
+use unc_async::time;
+use unc_primitives::network::PeerId;
 use std::collections::HashMap;
 use std::sync::Arc;
 

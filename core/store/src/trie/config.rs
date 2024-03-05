@@ -1,7 +1,7 @@
 use crate::config::TrieCacheConfig;
 use crate::StoreConfig;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::types::AccountId;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::types::AccountId;
 use std::str::FromStr;
 use tracing::error;
 

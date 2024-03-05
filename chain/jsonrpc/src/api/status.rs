@@ -1,8 +1,8 @@
-use near_client_primitives::types::StatusError;
-use near_jsonrpc_primitives::types::status::{
+use unc_client_primitives::types::StatusError;
+use unc_jsonrpc_primitives::types::status::{
     RpcHealthResponse, RpcStatusError, RpcStatusResponse,
 };
-use near_primitives::views::StatusResponse;
+use unc_primitives::views::StatusResponse;
 
 use super::RpcFrom;
 
@@ -18,34 +18,34 @@ impl RpcFrom<StatusResponse> for RpcStatusResponse {
     }
 }
 
-impl RpcFrom<near_client_primitives::debug::DebugStatusResponse>
-    for near_jsonrpc_primitives::types::status::DebugStatusResponse
+impl RpcFrom<unc_client_primitives::debug::DebugStatusResponse>
+    for unc_jsonrpc_primitives::types::status::DebugStatusResponse
 {
-    fn rpc_from(response: near_client_primitives::debug::DebugStatusResponse) -> Self {
+    fn rpc_from(response: unc_client_primitives::debug::DebugStatusResponse) -> Self {
         match response {
-            near_client_primitives::debug::DebugStatusResponse::SyncStatus(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::SyncStatus(x)
+            unc_client_primitives::debug::DebugStatusResponse::SyncStatus(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::SyncStatus(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::CatchupStatus(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::CatchupStatus(x)
+            unc_client_primitives::debug::DebugStatusResponse::CatchupStatus(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::CatchupStatus(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::RequestedStateParts(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::RequestedStateParts(x)
+            unc_client_primitives::debug::DebugStatusResponse::RequestedStateParts(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::RequestedStateParts(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::TrackedShards(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::TrackedShards(x)
+            unc_client_primitives::debug::DebugStatusResponse::TrackedShards(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::TrackedShards(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::EpochInfo(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::EpochInfo(x)
+            unc_client_primitives::debug::DebugStatusResponse::EpochInfo(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::EpochInfo(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::BlockStatus(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::BlockStatus(x)
+            unc_client_primitives::debug::DebugStatusResponse::BlockStatus(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::BlockStatus(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::ValidatorStatus(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::ValidatorStatus(x)
+            unc_client_primitives::debug::DebugStatusResponse::ValidatorStatus(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::ValidatorStatus(x)
             }
-            near_client_primitives::debug::DebugStatusResponse::ChainProcessingStatus(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::ChainProcessingStatus(
+            unc_client_primitives::debug::DebugStatusResponse::ChainProcessingStatus(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::ChainProcessingStatus(
                     x,
                 )
             }
@@ -53,25 +53,25 @@ impl RpcFrom<near_client_primitives::debug::DebugStatusResponse>
     }
 }
 
-impl RpcFrom<near_network::debug::DebugStatus>
-    for near_jsonrpc_primitives::types::status::DebugStatusResponse
+impl RpcFrom<unc_network::debug::DebugStatus>
+    for unc_jsonrpc_primitives::types::status::DebugStatusResponse
 {
-    fn rpc_from(response: near_network::debug::DebugStatus) -> Self {
+    fn rpc_from(response: unc_network::debug::DebugStatus) -> Self {
         match response {
-            near_network::debug::DebugStatus::PeerStore(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::PeerStore(x)
+            unc_network::debug::DebugStatus::PeerStore(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::PeerStore(x)
             }
-            near_network::debug::DebugStatus::Graph(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::NetworkGraph(x)
+            unc_network::debug::DebugStatus::Graph(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::NetworkGraph(x)
             }
-            near_network::debug::DebugStatus::RecentOutboundConnections(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::RecentOutboundConnections(x)
+            unc_network::debug::DebugStatus::RecentOutboundConnections(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::RecentOutboundConnections(x)
             }
-            near_network::debug::DebugStatus::Routes(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::Routes(x)
+            unc_network::debug::DebugStatus::Routes(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::Routes(x)
             }
-            near_network::debug::DebugStatus::SnapshotHosts(x) => {
-                near_jsonrpc_primitives::types::status::DebugStatusResponse::SnapshotHosts(x)
+            unc_network::debug::DebugStatus::SnapshotHosts(x) => {
+                unc_jsonrpc_primitives::types::status::DebugStatusResponse::SnapshotHosts(x)
             }
         }
     }

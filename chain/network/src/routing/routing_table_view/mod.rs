@@ -1,6 +1,6 @@
 use crate::routing;
 use lru::LruCache;
-use near_primitives::network::PeerId;
+use unc_primitives::network::PeerId;
 use parking_lot::Mutex;
 use std::sync::Arc;
 

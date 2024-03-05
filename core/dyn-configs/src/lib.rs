@@ -1,8 +1,8 @@
 #![doc = include_str!("../README.md")]
 
-use near_chain_configs::UpdateableClientConfig;
-use near_o11y::log_config::LogConfig;
-use near_primitives::static_clock::StaticClock;
+use unc_chain_configs::UpdateableClientConfig;
+use unc_o11y::log_config::LogConfig;
+use unc_primitives::static_clock::StaticClock;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -57,7 +57,7 @@ impl UpdateableConfigLoader {
     ) {
         match updateable_configs {
             Ok(updateable_configs) => {
-                near_o11y::reload_log_config(updateable_configs.log_config.as_ref());
+                unc_o11y::reload_log_config(updateable_configs.log_config.as_ref());
                 self.tx.as_ref().map(|tx| tx.send(Ok(updateable_configs.clone())));
                 Self::update_metrics();
             }

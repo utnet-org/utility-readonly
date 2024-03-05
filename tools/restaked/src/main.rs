@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
-use near_crypto::{InMemorySigner, KeyFile};
-use near_o11y::tracing::{error, info};
-use near_primitives::views::CurrentEpochValidatorInfo;
+use unc_crypto::{InMemorySigner, KeyFile};
+use unc_o11y::tracing::{error, info};
+use unc_primitives::views::CurrentEpochValidatorInfo;
 use framework::config::{Config, BLOCK_PRODUCER_KICKOUT_THRESHOLD, CONFIG_FILENAME};
 use framework::get_default_home;
 use std::path::PathBuf;
@@ -20,8 +20,8 @@ fn maybe_kicked_out(validator_info: &CurrentEpochValidatorInfo) -> bool {
 }
 
 fn main() {
-    let env_filter = near_o11y::EnvFilterBuilder::from_env().verbose(Some("")).finish().unwrap();
-    let _subscriber = near_o11y::default_subscriber(env_filter, &Default::default()).global();
+    let env_filter = unc_o11y::EnvFilterBuilder::from_env().verbose(Some("")).finish().unwrap();
+    let _subscriber = unc_o11y::default_subscriber(env_filter, &Default::default()).global();
 
     let matches = Command::new("Key-pairs generator")
         .about(

@@ -4,25 +4,25 @@
 //!
 //! We test `storage_write` and `storage_remove` because they can easily be
 //! tested through existing methods `insert_strings` and `delete_strings` in
-//! `near_test_contracts::rs_contract()`. This doesn't cover all the changed
+//! `unc_test_contracts::rs_contract()`. This doesn't cover all the changed
 //! costs individually but if it works for two parameters we can be reasonably
 //! confident that it works for the others as well.
 //! We also test unaffected cases to make sure compute costs only affect
 //! parameters they should.
 
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType};
-use near_parameters::RuntimeConfigStore;
-use near_parameters::{ActionCosts, RuntimeConfig};
-use near_primitives::sharding::ShardChunk;
-use near_primitives::transaction::{
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_parameters::RuntimeConfigStore;
+use unc_parameters::{ActionCosts, RuntimeConfig};
+use unc_primitives::sharding::ShardChunk;
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
-use near_primitives::types::AccountId;
-use near_primitives::version::ProtocolFeature;
+use unc_primitives::types::AccountId;
+use unc_primitives::version::ProtocolFeature;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -153,7 +153,7 @@ fn test_non_storage_gas_exceeded() {
 /// (This is a helper function called by all tests above)
 ///
 /// The function call is on the test contract
-/// (`near_test_contracts::rs_contract()`). The gas limit is tested at version
+/// (`unc_test_contracts::rs_contract()`). The gas limit is tested at version
 /// 60 (before compute costs) and the limit is checked again with version 61
 /// (with compute costs). The boolean `uses_storage` defines
 /// whether we expect the second limit to be more restrictive or if they should
@@ -173,8 +173,8 @@ fn assert_compute_limit_reached(
 ) {
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
-    near_o11y::testonly::init_test_logger();
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    unc_o11y::testonly::init_test_logger();
 
     let new_protocol_version = INCREASED_STORAGE_COSTS_PROTOCOL_VERSION;
     assert!(
@@ -205,7 +205,7 @@ fn assert_compute_limit_reached(
     // setup: deploy the contract
     {
         // This contract has a bunch of methods to invoke storage operations.
-        let code = near_test_contracts::backwards_compatible_rs_contract().to_vec();
+        let code = unc_test_contracts::backwards_compatible_rs_contract().to_vec();
         let actions = vec![Action::DeployContract(DeployContractAction { code })];
 
         let signer = InMemorySigner::from_seed(
@@ -406,7 +406,7 @@ fn produce_saturated_chunk(
 }
 
 /// fetch chunk for shard 0 and specified block height
-fn chunk_info(env: &TestEnv, height: u64) -> std::sync::Arc<near_primitives::sharding::ShardChunk> {
+fn chunk_info(env: &TestEnv, height: u64) -> std::sync::Arc<unc_primitives::sharding::ShardChunk> {
     let block = &env.clients[0].chain.get_block_by_height(height).unwrap();
     let chunks = &block.chunks();
     assert_eq!(chunks.len(), 1, "test assumes single shard");

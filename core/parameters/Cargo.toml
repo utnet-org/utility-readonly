@@ -1,5 +1,5 @@
 [package]
-name = "near-parameters"
+name = "unc-parameters"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -24,9 +24,9 @@ borsh.workspace = true
 clap = { workspace = true, optional = true }
 
 
-# FIXME: this ideally should not depend on near-primitives-core...
-near-primitives-core.workspace = true
-near-account-id.workspace = true
+# FIXME: this ideally should not depend on unc-primitives-core...
+unc-primitives-core.workspace = true
+unc-account-id.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
@@ -34,9 +34,9 @@ insta.workspace = true
 [features]
 nightly = [
   "nightly_protocol",
-  "near-primitives-core/nightly",
+  "unc-primitives-core/nightly",
 ]
 nightly_protocol = [
-  "near-primitives-core/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
 ]
 calimero_zero_storage = []

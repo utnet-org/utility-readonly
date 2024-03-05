@@ -2,14 +2,14 @@ use crate::flat::FlatStateChanges;
 use crate::{get, get_delayed_receipt_indices, set, ShardTries, StoreUpdate, Trie, TrieUpdate};
 use borsh::BorshDeserialize;
 use bytesize::ByteSize;
-use near_primitives::account::id::AccountId;
-use near_primitives::errors::StorageError;
-use near_primitives::receipt::Receipt;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state_part::PartId;
-use near_primitives::trie_key::trie_key_parsers::parse_account_id_from_raw_key;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{
+use unc_primitives::account::id::AccountId;
+use unc_primitives::errors::StorageError;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state_part::PartId;
+use unc_primitives::trie_key::trie_key_parsers::parse_account_id_from_raw_key;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{
     ConsolidatedStateChange, StateChangeCause, StateChangesForResharding, StateRoot,
 };
 use std::collections::HashMap;
@@ -323,12 +323,12 @@ mod tests {
     };
 
     use crate::{set, ShardTries, ShardUId, Trie};
-    use near_primitives::account::id::AccountId;
+    use unc_primitives::account::id::AccountId;
 
-    use near_primitives::hash::hash;
-    use near_primitives::receipt::{DelayedReceiptIndices, Receipt};
-    use near_primitives::trie_key::TrieKey;
-    use near_primitives::types::{NumShards, StateChangeCause, StateRoot};
+    use unc_primitives::hash::hash;
+    use unc_primitives::receipt::{DelayedReceiptIndices, Receipt};
+    use unc_primitives::trie_key::TrieKey;
+    use unc_primitives::types::{NumShards, StateChangeCause, StateRoot};
     use rand::Rng;
     use std::collections::HashMap;
 

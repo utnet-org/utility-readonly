@@ -1,5 +1,5 @@
 use derive_enum_from_into::{EnumFrom, EnumTryInto};
-use near_async::{
+use unc_async::{
     messaging::IntoSender,
     test_loop::{
         adhoc::{handle_adhoc_events, AdhocEvent, AdhocEventSender},
@@ -7,14 +7,14 @@ use near_async::{
     },
     time,
 };
-use near_chain::chunks_store::ReadOnlyChunksStore;
-use near_epoch_manager::EpochManagerAdapter;
-use near_network::{
+use unc_chain::chunks_store::ReadOnlyChunksStore;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_network::{
     shards_manager::ShardsManagerRequestFromNetwork, test_loop::SupportsRoutingLookup,
     types::PeerManagerMessageRequest,
 };
-use near_primitives::types::{AccountId, NumShards};
-use near_store::test_utils::create_test_store;
+use unc_primitives::types::{AccountId, NumShards};
+use unc_store::test_utils::create_test_store;
 
 use crate::{
     adapter::ShardsManagerRequestFromClient,
@@ -45,8 +45,8 @@ enum TestEvent {
     OutboundNetwork(PeerManagerMessageRequest),
 }
 
-type ShardsManagerTestLoop = near_async::test_loop::TestLoop<Vec<TestData>, (usize, TestEvent)>;
-type ShardsManagerTestLoopBuilder = near_async::test_loop::TestLoopBuilder<(usize, TestEvent)>;
+type ShardsManagerTestLoop = unc_async::test_loop::TestLoop<Vec<TestData>, (usize, TestEvent)>;
+type ShardsManagerTestLoopBuilder = unc_async::test_loop::TestLoopBuilder<(usize, TestEvent)>;
 
 struct BasicSetupConfig {
     block_producers: Vec<AccountId>,

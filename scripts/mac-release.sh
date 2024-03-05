@@ -71,5 +71,5 @@ upload_binary store-validator
 
 if [ "$release" == "release" ]
 then
-  upload_binary near-sandbox
+  upload_binary unc-sandbox
 fi

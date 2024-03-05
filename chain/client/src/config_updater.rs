@@ -1,5 +1,5 @@
-use near_chain_configs::UpdateableClientConfig;
-use near_dyn_configs::{UpdateableConfigLoaderError, UpdateableConfigs};
+use unc_chain_configs::UpdateableClientConfig;
+use unc_dyn_configs::{UpdateableConfigLoaderError, UpdateableConfigs};
 use std::sync::Arc;
 use tokio::sync::broadcast::Receiver;
 

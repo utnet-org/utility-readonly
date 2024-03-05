@@ -36,7 +36,7 @@ It requires nextest harness which can be installed by running `cargo install car
    such tests is to enable all the features by passing `--all-features` to
    `cargo nextest run`, e.g:
 
-`cargo nextest run --package near-client -E 'test(=tests::cross_shard_tx::test_cross_shard_tx)' --all-features`
+`cargo nextest run --package unc-client -E 'test(=tests::cross_shard_tx::test_cross_shard_tx)' --all-features`
 
 3. **Python tests:** We have an infrastructure to spin up nodes, both locally and
    remotely, in python, and interact with them using RPC. The infrastructure and
@@ -78,7 +78,7 @@ in
    tests generally expect a particular message to occur, in this case, the tests
    expect two blocks to be produced. `System::current().stop();` is the way to
    stop the test and mark it as passed.
-2. `near_network::test_utils::wait_or_panic(5000);` is how the timeout for the
+2. `unc_network::test_utils::wait_or_panic(5000);` is how the timeout for the
    test is set (in milliseconds).
 
 For an example of a test that launches multiple nodes, see
@@ -117,7 +117,7 @@ For example, see tests for doomslug
 for network cache
 [here](https://github.com/utnet-org/utility/blob/master/chain/network/src/routing/edge_cache/tests.rs),
 or for promises in runtime
-[here](https://github.com/utnet-org/utility/blob/master/runtime/near-vm-runner/src/logic/tests/promises.rs).
+[here](https://github.com/utnet-org/utility/blob/master/runtime/unc-vm-runner/src/logic/tests/promises.rs).
 
 ## Python tests
 

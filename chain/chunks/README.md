@@ -1,4 +1,4 @@
-# near-chunks
+# unc-chunks
 
 This crate cotains functions to handle chunks. In NEAR - the block consists of multiple chunks - at most one per shard.
 

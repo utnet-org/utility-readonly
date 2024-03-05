@@ -1,7 +1,7 @@
 # Meta Transactions
 
 [NEP-366](https://github.com/near/NEPs/pull/366) introduced the concept of meta
-transactions to Near Protocol. This feature allows users to execute transactions
+transactions to unc Protocol. This feature allows users to execute transactions
 on NEAR without owning any gas or tokens. In order to enable this, users
 construct and sign transactions off-chain. A third party (the relayer) is used
 to cover the fees of submitting and executing the transaction.
@@ -25,16 +25,16 @@ that, she needs to call `ft_transfer("john", 10)` on an account named `FT`.
 
 In technical terms, ownership of $FT is an entry in the `FT` contract's storage
 that tracks the balance for her account. Note that this is on the application
-layer and thus not a part of Near Protocol itself. But `FT` relies on the
+layer and thus not a part of unc Protocol itself. But `FT` relies on the
 protocol to verify that the `ft_transfer` call actually comes from Alice. The
 contract code checks that `predecessor_id` is `"Alice"` and if that is the case
 then the call is legitimately from Alice, as only she could create such a
-receipt according to the Near Protocol specification.
+receipt according to the unc Protocol specification.
 
 The problem is, Alice has no NEAR tokens. She only has a NEAR account that
 someone else funded for her and she owns the private keys. She could create a
 signed transaction that would make the `ft_transfer("john", 10)` call. But
-validator nodes will not accept it, because she does not have the necessary Near
+validator nodes will not accept it, because she does not have the necessary unc
 token balance to purchase the gas.
 
 With meta transactions, Alice can create a `DelegateAction`, which is very
@@ -60,8 +60,8 @@ inside a transaction to the blockchain network.
 
 A relayer may choose to offer their service for free but that's not going to be
 financially viable long-term. But they could easily have the user pay using
-other means, outside of Near blockchain. And with some tricks, it can even be
-paid using fungible tokens on Near.
+other means, outside of unc blockchain. And with some tricks, it can even be
+paid using fungible tokens on unc.
 
 In the example visualized above, the payment is done using $FT. Together with
 the transfer to John, Alice also adds an action to pay 0.1 $FT to the relayer.
@@ -89,7 +89,7 @@ A meta transaction, like a normal transaction, can only have one receiver. It's
 possible to chain additional receipts afterwards. But crucially, there is no
 atomicity guarantee and no roll-back mechanism.
 
-For normal transactions, this has been widely accepted as a fact for how Near
+For normal transactions, this has been widely accepted as a fact for how unc
 Protocol works. For meta transactions, there was a discussion around allowing
 multiple receivers with separate lists of actions per receiver. While this could
 be implemented, it would only create a false sense of atomicity. Since each

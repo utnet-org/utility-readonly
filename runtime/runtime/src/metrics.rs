@@ -1,4 +1,4 @@
-use near_o11y::metrics::{
+use unc_o11y::metrics::{
     try_create_histogram_vec, try_create_int_counter, try_create_int_counter_vec, HistogramVec,
     IntCounter, IntCounterVec,
 };
@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 
 pub static ACTION_CALLED_COUNT: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_action_called_count",
+        "unc_action_called_count",
         "Number of times given action has been called since starting this node",
         &["action"],
     )
@@ -15,28 +15,28 @@ pub static ACTION_CALLED_COUNT: Lazy<IntCounterVec> = Lazy::new(|| {
 
 pub static TRANSACTION_PROCESSED_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
     try_create_int_counter(
-        "near_transaction_processed_total",
+        "unc_transaction_processed_total",
         "The number of transactions processed since starting this node",
     )
     .unwrap()
 });
 pub static TRANSACTION_PROCESSED_SUCCESSFULLY_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
     try_create_int_counter(
-        "near_transaction_processed_successfully_total",
+        "unc_transaction_processed_successfully_total",
         "The number of transactions processed successfully since starting this node",
     )
     .unwrap()
 });
 pub static TRANSACTION_PROCESSED_FAILED_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
     try_create_int_counter(
-        "near_transaction_processed_failed_total",
+        "unc_transaction_processed_failed_total",
         "The number of transactions processed and failed since starting this node",
     )
     .unwrap()
 });
 pub static PREFETCH_ENQUEUED: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_prefetch_enqueued",
+        "unc_prefetch_enqueued",
         "Prefetch requests queued up",
         &["shard_id"],
     )
@@ -44,7 +44,7 @@ pub static PREFETCH_ENQUEUED: Lazy<IntCounterVec> = Lazy::new(|| {
 });
 pub static PREFETCH_QUEUE_FULL: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_prefetch_queue_full",
+        "unc_prefetch_queue_full",
         "Prefetch requests failed to queue up",
         &["shard_id"],
     )
@@ -52,7 +52,7 @@ pub static PREFETCH_QUEUE_FULL: Lazy<IntCounterVec> = Lazy::new(|| {
 });
 pub static FUNCTION_CALL_PROCESSED: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed",
+        "unc_function_call_processed",
         "The number of function calls processed since starting this node",
         &["result"],
     )
@@ -60,7 +60,7 @@ pub static FUNCTION_CALL_PROCESSED: Lazy<IntCounterVec> = Lazy::new(|| {
 });
 pub static FUNCTION_CALL_PROCESSED_FUNCTION_CALL_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_function_call_errors",
+        "unc_function_call_processed_function_call_errors",
         "The number of function calls resulting in function call errors, since starting this node",
         &["error_type"],
     )
@@ -68,7 +68,7 @@ pub static FUNCTION_CALL_PROCESSED_FUNCTION_CALL_ERRORS: Lazy<IntCounterVec> = L
 });
 pub static FUNCTION_CALL_PROCESSED_COMPILATION_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_compilation_errors",
+        "unc_function_call_processed_compilation_errors",
         "The number of function calls resulting in compilation errors, since starting this node",
         &["error_type"],
     )
@@ -76,7 +76,7 @@ pub static FUNCTION_CALL_PROCESSED_COMPILATION_ERRORS: Lazy<IntCounterVec> = Laz
 });
 pub static FUNCTION_CALL_PROCESSED_METHOD_RESOLVE_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_method_resolve_errors",
+        "unc_function_call_processed_method_resolve_errors",
         "The number of function calls resulting in method resolve errors, since starting this node",
         &["error_type"],
     )
@@ -84,7 +84,7 @@ pub static FUNCTION_CALL_PROCESSED_METHOD_RESOLVE_ERRORS: Lazy<IntCounterVec> = 
 });
 pub static FUNCTION_CALL_PROCESSED_WASM_TRAP_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_wasm_trap_errors",
+        "unc_function_call_processed_wasm_trap_errors",
         "The number of function calls resulting in wasm trap errors, since starting this node",
         &["error_type"],
     )
@@ -92,7 +92,7 @@ pub static FUNCTION_CALL_PROCESSED_WASM_TRAP_ERRORS: Lazy<IntCounterVec> = Lazy:
 });
 pub static FUNCTION_CALL_PROCESSED_HOST_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_host_errors",
+        "unc_function_call_processed_host_errors",
         "The number of function calls resulting in host errors, since starting this node",
         &["error_type"],
     )
@@ -100,7 +100,7 @@ pub static FUNCTION_CALL_PROCESSED_HOST_ERRORS: Lazy<IntCounterVec> = Lazy::new(
 });
 pub static FUNCTION_CALL_PROCESSED_CACHE_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_function_call_processed_cache_errors",
+        "unc_function_call_processed_cache_errors",
         "The number of function calls resulting in VM cache errors, since starting this node",
         &["error_type"],
     )
@@ -108,7 +108,7 @@ pub static FUNCTION_CALL_PROCESSED_CACHE_ERRORS: Lazy<IntCounterVec> = Lazy::new
 });
 static CHUNK_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_compute",
+        "unc_chunk_compute",
         "Compute time by chunk, as a histogram in ms. Reported for all applied chunks, even when not included in a block.",
         &["shard_id"],
         buckets_for_compute(),
@@ -117,7 +117,7 @@ static CHUNK_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_tgas",
+        "unc_chunk_tgas",
         "Tgas burnt by chunk, as a histogram in ms. Reported for all applied chunks, even when not included in a block.",
         &["shard_id"],
         buckets_for_gas(),
@@ -126,7 +126,7 @@ static CHUNK_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_LOCAL_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_local_receipt_compute",
+        "unc_chunk_local_receipt_compute",
         "Compute time for applying local receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_compute(),
@@ -135,7 +135,7 @@ static CHUNK_LOCAL_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_LOCAL_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_local_receipt_tgas",
+        "unc_chunk_local_receipt_tgas",
         "Tgas burnt for applying local receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_gas(),
@@ -144,7 +144,7 @@ static CHUNK_LOCAL_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_DELAYED_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_delayed_receipt_compute",
+        "unc_chunk_delayed_receipt_compute",
         "Compute time for applying delayed receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_compute(),
@@ -153,7 +153,7 @@ static CHUNK_DELAYED_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_DELAYED_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_delayed_receipt_tgas",
+        "unc_chunk_delayed_receipt_tgas",
         "Tgas burnt for applying delayed receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_gas(),
@@ -162,7 +162,7 @@ static CHUNK_DELAYED_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_INC_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_inc_receipt_compute",
+        "unc_chunk_inc_receipt_compute",
         "Compute time for applying incoming receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_compute(),
@@ -171,7 +171,7 @@ static CHUNK_INC_RECEIPTS_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_INC_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_inc_receipt_tgas",
+        "unc_chunk_inc_receipt_tgas",
         "Tgas burnt for applying incoming receipts by chunk, as a histogram in ms",
         &["shard_id"],
         buckets_for_gas(),
@@ -180,7 +180,7 @@ static CHUNK_INC_RECEIPTS_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_TX_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_tx_compute",
+        "unc_chunk_tx_compute",
         "Compute time for transaction validation by chunk, as a histogram in ms",
         &["shard_id"],
         Some(vec![0., 50., 100., 200., 300., 400., 500., 600.0]),
@@ -189,7 +189,7 @@ static CHUNK_TX_COMPUTE: Lazy<HistogramVec> = Lazy::new(|| {
 });
 static CHUNK_TX_TGAS: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_chunk_tx_tgas",
+        "unc_chunk_tx_tgas",
         "Tgas burnt for transaction validation by chunk, as a histogram",
         &["shard_id"],
         Some(vec![0., 50., 100., 200., 300., 400., 500.]),

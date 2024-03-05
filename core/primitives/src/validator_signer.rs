@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use near_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
+use unc_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
 
 use crate::block::{Approval, ApprovalInner, BlockHeader};
 use crate::challenge::ChallengeBody;
@@ -67,7 +67,7 @@ pub trait ValidatorSigner: Sync + Send {
     fn compute_vrf_with_proof(
         &self,
         data: &[u8],
-    ) -> (near_crypto::vrf::Value, near_crypto::vrf::Proof);
+    ) -> (unc_crypto::vrf::Value, unc_crypto::vrf::Proof);
 
     /// Used by test infrastructure, only implement if make sense for testing otherwise raise `unimplemented`.
     fn write_to_file(&self, path: &Path) -> std::io::Result<()>;
@@ -136,7 +136,7 @@ impl ValidatorSigner for EmptyValidatorSigner {
     fn compute_vrf_with_proof(
         &self,
         _data: &[u8],
-    ) -> (near_crypto::vrf::Value, near_crypto::vrf::Proof) {
+    ) -> (unc_crypto::vrf::Value, unc_crypto::vrf::Proof) {
         unimplemented!()
     }
 
@@ -234,7 +234,7 @@ impl ValidatorSigner for InMemoryValidatorSigner {
     fn compute_vrf_with_proof(
         &self,
         data: &[u8],
-    ) -> (near_crypto::vrf::Value, near_crypto::vrf::Proof) {
+    ) -> (unc_crypto::vrf::Value, unc_crypto::vrf::Proof) {
         self.signer.compute_vrf_with_proof(data)
     }
 

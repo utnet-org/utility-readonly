@@ -1,11 +1,11 @@
-use near_chain::near_chain_primitives::error::QueryError;
+use unc_chain::unc_chain_primitives::error::QueryError;
 
 #[easy_ext::ext(FromStateViewerErrors)]
 impl QueryError {
     pub fn from_call_function_error(
         error: node_runtime::state_viewer::errors::CallFunctionError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         match error {
             node_runtime::state_viewer::errors::CallFunctionError::InvalidAccountId {
@@ -25,8 +25,8 @@ impl QueryError {
 
     pub fn from_view_account_error(
         error: node_runtime::state_viewer::errors::ViewAccountError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         match error {
             node_runtime::state_viewer::errors::ViewAccountError::InvalidAccountId {
@@ -43,8 +43,8 @@ impl QueryError {
 
     pub fn from_view_contract_code_error(
         error: node_runtime::state_viewer::errors::ViewContractCodeError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         match error {
             node_runtime::state_viewer::errors::ViewContractCodeError::InvalidAccountId {
@@ -64,8 +64,8 @@ impl QueryError {
 
     pub fn from_view_state_error(
         error: node_runtime::state_viewer::errors::ViewStateError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         match error {
             node_runtime::state_viewer::errors::ViewStateError::InvalidAccountId {
@@ -85,8 +85,8 @@ impl QueryError {
 
     pub fn from_view_access_key_error(
         error: node_runtime::state_viewer::errors::ViewAccessKeyError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         match error {
             node_runtime::state_viewer::errors::ViewAccessKeyError::InvalidAccountId {
@@ -102,9 +102,9 @@ impl QueryError {
     }
 
     pub fn from_epoch_error(
-        error: near_primitives::errors::EpochError,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        error: unc_primitives::errors::EpochError,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     ) -> Self {
         Self::InternalError { error_message: error.to_string(), block_height, block_hash }
     }

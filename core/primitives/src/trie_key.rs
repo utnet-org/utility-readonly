@@ -2,7 +2,7 @@ use std::mem::size_of;
 
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use near_crypto::PublicKey;
+use unc_crypto::PublicKey;
 
 use crate::hash::CryptoHash;
 use crate::types::AccountId;
@@ -501,7 +501,7 @@ pub mod trie_key_parsers {
 
 #[cfg(test)]
 mod tests {
-    use near_crypto::KeyType;
+    use unc_crypto::KeyType;
 
     use super::*;
 

@@ -5,19 +5,19 @@ use actix::System;
 use futures::{future, FutureExt};
 use serde_json::json;
 
-use near_actix_test_utils::run_actix;
-use near_crypto::{KeyType, PublicKey, Signature};
-use near_jsonrpc::client::{new_client, ChunkId};
-use near_jsonrpc_primitives::types::query::QueryResponseKind;
-use near_jsonrpc_primitives::types::validator::RpcValidatorsOrderedRequest;
-use near_network::test_utils::wait_or_timeout;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::account::{AccessKey, AccessKeyPermission};
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::{BlockId, BlockReference, EpochId, SyncCheckpoint};
-use near_primitives::views::QueryRequest;
+use unc_actix_test_utils::run_actix;
+use unc_crypto::{KeyType, PublicKey, Signature};
+use unc_jsonrpc::client::{new_client, ChunkId};
+use unc_jsonrpc_primitives::types::query::QueryResponseKind;
+use unc_jsonrpc_primitives::types::validator::RpcValidatorsOrderedRequest;
+use unc_network::test_utils::wait_or_timeout;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::account::{AccessKey, AccessKeyPermission};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::{BlockId, BlockReference, EpochId, SyncCheckpoint};
+use unc_primitives::views::QueryRequest;
 
-use near_jsonrpc_tests::{self as test_utils, test_with_client};
+use unc_jsonrpc_tests::{self as test_utils, test_with_client};
 
 /// Retrieve blocks via json rpc
 #[test]
@@ -157,21 +157,21 @@ fn test_query_account() {
         let status = client.status().await.unwrap();
         let block_hash = status.sync_info.latest_block_hash;
         let query_response_1 = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::ViewAccount { account_id: "test".parse().unwrap() },
             })
             .await
             .unwrap();
         let query_response_2 = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::BlockId(BlockId::Height(0)),
                 request: QueryRequest::ViewAccount { account_id: "test".parse().unwrap() },
             })
             .await
             .unwrap();
         let query_response_3 = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::BlockId(BlockId::Hash(block_hash)),
                 request: QueryRequest::ViewAccount { account_id: "test".parse().unwrap() },
             })
@@ -220,7 +220,7 @@ fn test_query_by_path_access_keys() {
 fn test_query_access_keys() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::ViewAccessKeyList { account_id: "test".parse().unwrap() },
             })
@@ -266,7 +266,7 @@ fn test_query_by_path_access_key() {
 fn test_query_access_key() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::ViewAccessKey {
                     account_id: "test".parse().unwrap(),
@@ -293,7 +293,7 @@ fn test_query_access_key() {
 fn test_query_state() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::ViewState {
                     account_id: "test".parse().unwrap(),
@@ -318,7 +318,7 @@ fn test_query_state() {
 fn test_query_call_function() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::CallFunction {
                     account_id: "test".parse().unwrap(),
@@ -347,7 +347,7 @@ fn test_query_call_function() {
 fn test_query_contract_code() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
         let query_response = client
-            .query(near_jsonrpc_primitives::types::query::RpcQueryRequest {
+            .query(unc_jsonrpc_primitives::types::query::RpcQueryRequest {
                 block_reference: BlockReference::latest(),
                 request: QueryRequest::ViewCode { account_id: "test".parse().unwrap() },
             })
@@ -468,7 +468,7 @@ fn test_genesis_config() {
         if !cfg!(feature = "nightly_protocol") {
             assert_eq!(
                 genesis_config["protocol_version"].as_u64().unwrap(),
-                near_primitives::version::PROTOCOL_VERSION as u64
+                unc_primitives::version::PROTOCOL_VERSION as u64
             );
         }
         assert!(!genesis_config["chain_id"].as_str().unwrap().is_empty());
@@ -549,7 +549,7 @@ fn test_invalid_methods() {
 #[test]
 fn test_get_chunk_with_object_in_params() {
     test_with_client!(test_utils::NodeType::NonValidator, client, async move {
-        let chunk: near_primitives::views::ChunkView = test_utils::call_method(
+        let chunk: unc_primitives::views::ChunkView = test_utils::call_method(
             &client.client,
             &client.server_addr,
             "chunk",

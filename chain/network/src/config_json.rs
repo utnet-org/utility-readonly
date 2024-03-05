@@ -210,16 +210,16 @@ pub struct ExperimentalConfig {
     // compatibility.
     pub skip_sending_tombstones_seconds: i64,
 
-    /// See `near_network::config::Tier1::enable_inbound`.
+    /// See `unc_network::config::Tier1::enable_inbound`.
     pub tier1_enable_inbound: bool,
 
-    /// See `near_network::config::Tier1::enable_outbound`.
+    /// See `unc_network::config::Tier1::enable_outbound`.
     pub tier1_enable_outbound: bool,
 
-    /// See `near_network::config::Tier1::connect_interval`.
+    /// See `unc_network::config::Tier1::connect_interval`.
     pub tier1_connect_interval: Duration,
 
-    /// See `near_network::config::Tier1::new_connections_per_attempt`.
+    /// See `unc_network::config::Tier1::new_connections_per_attempt`.
     pub tier1_new_connections_per_attempt: u64,
 
     /// See `NetworkConfig`.

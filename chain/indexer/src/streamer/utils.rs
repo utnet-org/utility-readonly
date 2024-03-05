@@ -1,15 +1,15 @@
 use actix::Addr;
 
-use near_indexer_primitives::IndexerTransactionWithOutcome;
-use near_parameters::RuntimeConfig;
-use near_primitives::views;
+use unc_indexer_primitives::IndexerTransactionWithOutcome;
+use unc_parameters::RuntimeConfig;
+use unc_primitives::views;
 use node_runtime::config::tx_cost;
 
 use super::errors::FailedToFetchData;
 use super::fetchers::fetch_block;
 
 pub(crate) async fn convert_transactions_sir_into_local_receipts(
-    client: &Addr<near_client::ViewClientActor>,
+    client: &Addr<unc_client::ViewClientActor>,
     runtime_config: &RuntimeConfig,
     txs: Vec<&IndexerTransactionWithOutcome>,
     block: &views::BlockView,
@@ -25,7 +25,7 @@ pub(crate) async fn convert_transactions_sir_into_local_receipts(
             .map(|tx| {
                 let cost = tx_cost(
                     &runtime_config,
-                    &near_primitives::transaction::Transaction {
+                    &unc_primitives::transaction::Transaction {
                         signer_id: tx.transaction.signer_id.clone(),
                         public_key: tx.transaction.public_key.clone(),
                         nonce: tx.transaction.nonce,
@@ -37,7 +37,7 @@ pub(crate) async fn convert_transactions_sir_into_local_receipts(
                             .clone()
                             .into_iter()
                             .map(|action| {
-                                near_primitives::transaction::Action::try_from(action).unwrap()
+                                unc_primitives::transaction::Action::try_from(action).unwrap()
                             })
                             .collect(),
                     },

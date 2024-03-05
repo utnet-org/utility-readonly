@@ -3,14 +3,14 @@ use crate::contract_accounts::ContractAccountFilter;
 use crate::rocksdb_stats::get_rocksdb_stats;
 use crate::trie_iteration_benchmark::TrieIterationBenchmarkCmd;
 
-use near_chain_configs::{GenesisChangeConfig, GenesisValidationMode};
-use near_primitives::account::id::AccountId;
-use near_primitives::hash::CryptoHash;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::trie_key::col;
-use near_primitives::types::{BlockHeight, ShardId};
-use near_store::{Mode, NodeStorage, Store, Temperature};
-use framework::{load_config, NearConfig};
+use unc_chain_configs::{GenesisChangeConfig, GenesisValidationMode};
+use unc_primitives::account::id::AccountId;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::trie_key::col;
+use unc_primitives::types::{BlockHeight, ShardId};
+use unc_store::{Mode, NodeStorage, Store, Temperature};
+use framework::{load_config, UncConfig};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -104,14 +104,14 @@ impl StateViewerSubCommand {
         mode: Mode,
         temperature: Temperature,
     ) {
-        let near_config = load_config(home_dir, genesis_validation)
+        let unc_config = load_config(home_dir, genesis_validation)
             .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
-        let cold_config: Option<&near_store::StoreConfig> = near_config.config.cold_store.as_ref();
+        let cold_config: Option<&unc_store::StoreConfig> = unc_config.config.cold_store.as_ref();
         let store_opener = NodeStorage::opener(
             home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
+            unc_config.config.archive,
+            &unc_config.config.store,
             cold_config,
         );
 
@@ -123,34 +123,34 @@ impl StateViewerSubCommand {
         };
 
         match self {
-            StateViewerSubCommand::Apply(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::ApplyChunk(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::ApplyRange(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::ApplyReceipt(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::ApplyTx(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::Chain(cmd) => cmd.run(near_config, store),
-            StateViewerSubCommand::CheckBlock => check_block_chunk_existence(near_config, store),
-            StateViewerSubCommand::Chunks(cmd) => cmd.run(near_config, store),
+            StateViewerSubCommand::Apply(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::ApplyChunk(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::ApplyRange(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::ApplyReceipt(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::ApplyTx(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::Chain(cmd) => cmd.run(unc_config, store),
+            StateViewerSubCommand::CheckBlock => check_block_chunk_existence(unc_config, store),
+            StateViewerSubCommand::Chunks(cmd) => cmd.run(unc_config, store),
             StateViewerSubCommand::ClearCache => clear_cache(store),
-            StateViewerSubCommand::ContractAccounts(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::DumpAccountStorage(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::DumpCode(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::DumpState(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::DumpStateRedis(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::DumpTx(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::EpochInfo(cmd) => cmd.run(near_config, store),
-            StateViewerSubCommand::PartialChunks(cmd) => cmd.run(near_config, store),
-            StateViewerSubCommand::Receipts(cmd) => cmd.run(near_config, store),
-            StateViewerSubCommand::Replay(cmd) => cmd.run(near_config, store),
+            StateViewerSubCommand::ContractAccounts(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::DumpAccountStorage(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::DumpCode(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::DumpState(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::DumpStateRedis(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::DumpTx(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::EpochInfo(cmd) => cmd.run(unc_config, store),
+            StateViewerSubCommand::PartialChunks(cmd) => cmd.run(unc_config, store),
+            StateViewerSubCommand::Receipts(cmd) => cmd.run(unc_config, store),
+            StateViewerSubCommand::Replay(cmd) => cmd.run(unc_config, store),
             StateViewerSubCommand::RocksDBStats(cmd) => cmd.run(store_opener.path()),
             StateViewerSubCommand::ScanDbColumn(cmd) => cmd.run(store),
-            StateViewerSubCommand::State => state(home_dir, near_config, store),
-            StateViewerSubCommand::StateChanges(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::StateParts(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::StateStats(cmd) => cmd.run(home_dir, near_config, store),
-            StateViewerSubCommand::ViewChain(cmd) => cmd.run(near_config, store),
+            StateViewerSubCommand::State => state(home_dir, unc_config, store),
+            StateViewerSubCommand::StateChanges(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::StateParts(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::StateStats(cmd) => cmd.run(home_dir, unc_config, store),
+            StateViewerSubCommand::ViewChain(cmd) => cmd.run(unc_config, store),
             StateViewerSubCommand::ViewTrie(cmd) => cmd.run(store),
-            StateViewerSubCommand::TrieIterationBenchmark(cmd) => cmd.run(near_config, store),
+            StateViewerSubCommand::TrieIterationBenchmark(cmd) => cmd.run(unc_config, store),
         }
     }
 }
@@ -166,13 +166,13 @@ pub struct ApplyCmd {
 }
 
 impl ApplyCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         apply_block_at_height(
             self.height,
             self.shard_id,
             self.use_flat_storage,
             home_dir,
-            near_config,
+            unc_config,
             store,
         )
         .unwrap();
@@ -190,9 +190,9 @@ pub struct ApplyChunkCmd {
 }
 
 impl ApplyChunkCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         let hash = ChunkHash::from(CryptoHash::from_str(&self.chunk_hash).unwrap());
-        apply_chunk(home_dir, near_config, store, hash, self.target_height, self.use_flat_storage)
+        apply_chunk(home_dir, unc_config, store, hash, self.target_height, self.use_flat_storage)
             .unwrap()
     }
 }
@@ -218,7 +218,7 @@ pub struct ApplyRangeCmd {
 }
 
 impl ApplyRangeCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         apply_range(
             self.start_index,
             self.end_index,
@@ -226,7 +226,7 @@ impl ApplyRangeCmd {
             self.verbose_output,
             self.csv_file,
             home_dir,
-            near_config,
+            unc_config,
             store,
             self.only_contracts,
             self.sequential,
@@ -244,9 +244,9 @@ pub struct ApplyReceiptCmd {
 }
 
 impl ApplyReceiptCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         let hash = CryptoHash::from_str(&self.hash).unwrap();
-        apply_receipt(home_dir, near_config, store, hash, self.use_flat_storage).unwrap();
+        apply_receipt(home_dir, unc_config, store, hash, self.use_flat_storage).unwrap();
     }
 }
 
@@ -259,9 +259,9 @@ pub struct ApplyTxCmd {
 }
 
 impl ApplyTxCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         let hash = CryptoHash::from_str(&self.hash).unwrap();
-        apply_tx(home_dir, near_config, store, hash, self.use_flat_storage).unwrap();
+        apply_tx(home_dir, unc_config, store, hash, self.use_flat_storage).unwrap();
     }
 }
 
@@ -278,8 +278,8 @@ pub struct ChainCmd {
 }
 
 impl ChainCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
-        print_chain(self.start_index, self.end_index, near_config, store, self.show_full_hashes);
+    pub fn run(self, unc_config: UncConfig, store: Store) {
+        print_chain(self.start_index, self.end_index, unc_config, store, self.show_full_hashes);
     }
 }
 
@@ -290,9 +290,9 @@ pub struct ChunksCmd {
 }
 
 impl ChunksCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
+    pub fn run(self, unc_config: UncConfig, store: Store) {
         let chunk_hash = ChunkHash::from(CryptoHash::from_str(&self.chunk_hash).unwrap());
-        get_chunk(chunk_hash, near_config, store)
+        get_chunk(chunk_hash, unc_config, store)
     }
 }
 
@@ -303,8 +303,8 @@ pub struct ContractAccountsCmd {
 }
 
 impl ContractAccountsCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
-        contract_accounts(home_dir, store, near_config, self.filter).unwrap();
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
+        contract_accounts(home_dir, store, unc_config, self.filter).unwrap();
     }
 }
 
@@ -321,14 +321,14 @@ pub struct DumpAccountStorageCmd {
 }
 
 impl DumpAccountStorageCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         dump_account_storage(
             self.account_id,
             self.storage_key,
             &self.output,
             self.block_height,
             home_dir,
-            near_config,
+            unc_config,
             store,
         );
     }
@@ -343,8 +343,8 @@ pub struct DumpCodeCmd {
 }
 
 impl DumpCodeCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
-        dump_code(self.account_id, &self.output, home_dir, near_config, store);
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
+        dump_code(self.account_id, &self.output, home_dir, unc_config, store);
     }
 }
 
@@ -377,13 +377,13 @@ pub struct DumpStateCmd {
 }
 
 impl DumpStateCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         dump_state(
             self.height,
             self.stream,
             self.file,
             home_dir,
-            near_config,
+            unc_config,
             store,
             &GenesisChangeConfig::default()
                 .with_select_account_ids(self.account_ids)
@@ -400,8 +400,8 @@ pub struct DumpStateRedisCmd {
 }
 
 impl DumpStateRedisCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
-        dump_state_redis(self.height, home_dir, near_config, store);
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
+        dump_state_redis(self.height, home_dir, unc_config, store);
     }
 }
 
@@ -423,12 +423,12 @@ pub struct DumpTxCmd {
 }
 
 impl DumpTxCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         dump_tx(
             self.start_height,
             self.end_height,
             home_dir,
-            near_config,
+            unc_config,
             store,
             self.account_ids.as_deref(),
             self.output_path,
@@ -451,12 +451,12 @@ pub struct EpochInfoCmd {
 }
 
 impl EpochInfoCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
+    pub fn run(self, unc_config: UncConfig, store: Store) {
         print_epoch_info(
             self.epoch_selection,
             self.validator_account_id.map(|s| AccountId::from_str(&s).unwrap()),
             self.kickouts_summary,
-            near_config,
+            unc_config,
             store,
         );
     }
@@ -469,10 +469,10 @@ pub struct PartialChunksCmd {
 }
 
 impl PartialChunksCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
+    pub fn run(self, unc_config: UncConfig, store: Store) {
         let partial_chunk_hash =
             ChunkHash::from(CryptoHash::from_str(&self.partial_chunk_hash).unwrap());
-        get_partial_chunk(partial_chunk_hash, near_config, store)
+        get_partial_chunk(partial_chunk_hash, unc_config, store)
     }
 }
 
@@ -483,8 +483,8 @@ pub struct ReceiptsCmd {
 }
 
 impl ReceiptsCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
-        get_receipt(CryptoHash::from_str(&self.receipt_id).unwrap(), near_config, store)
+    pub fn run(self, unc_config: UncConfig, store: Store) {
+        get_receipt(CryptoHash::from_str(&self.receipt_id).unwrap(), unc_config, store)
     }
 }
 
@@ -497,8 +497,8 @@ pub struct ReplayCmd {
 }
 
 impl ReplayCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
-        replay_chain(self.start_index, self.end_index, near_config, store);
+    pub fn run(self, unc_config: UncConfig, store: Store) {
+        replay_chain(self.start_index, self.end_index, unc_config, store);
     }
 }
 
@@ -580,8 +580,8 @@ pub struct StateChangesCmd {
 }
 
 impl StateChangesCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
-        self.command.run(home_dir, near_config, store)
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
+        self.command.run(home_dir, unc_config, store)
     }
 }
 
@@ -608,7 +608,7 @@ pub struct StatePartsCmd {
 }
 
 impl StatePartsCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         self.command.run(
             self.shard_id,
             self.root_dir,
@@ -616,7 +616,7 @@ impl StatePartsCmd {
             self.s3_region,
             self.gcs_bucket,
             home_dir,
-            near_config,
+            unc_config,
             store,
         );
     }
@@ -626,8 +626,8 @@ impl StatePartsCmd {
 pub struct StateStatsCmd {}
 
 impl StateStatsCmd {
-    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
-        print_state_stats(home_dir, store, near_config);
+    pub fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
+        print_state_stats(home_dir, store, unc_config);
     }
 }
 
@@ -642,8 +642,8 @@ pub struct ViewChainCmd {
 }
 
 impl ViewChainCmd {
-    pub fn run(self, near_config: NearConfig, store: Store) {
-        view_chain(self.height, self.block, self.chunk, near_config, store);
+    pub fn run(self, unc_config: UncConfig, store: Store) {
+        view_chain(self.height, self.block, self.chunk, unc_config, store);
     }
 }
 
@@ -734,7 +734,7 @@ pub struct ViewTrieCmd {
     shard_id: u32,
     /// The current shard version based on the shard layout.
     /// You can find the shard version by using the `view-state view-chain` command.
-    /// It's typically equal to 0 for single shard localnet or the most recent near_primitives::shard_layout::ShardLayout for prod.
+    /// It's typically equal to 0 for single shard localnet or the most recent unc_primitives::shard_layout::ShardLayout for prod.
     #[clap(long)]
     shard_version: u32,
     /// The max depth of trie iteration. It's recommended to keep that value small,

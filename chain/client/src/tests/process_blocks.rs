@@ -1,16 +1,16 @@
 use crate::test_utils::TestEnv;
 use assert_matches::assert_matches;
-use near_chain::{test_utils, ChainGenesis, Provenance};
-use near_crypto::vrf::Value;
-use near_crypto::{KeyType, PublicKey, Signature};
-use near_network::types::{NetworkRequests, PeerManagerMessageRequest};
-use near_primitives::block::Block;
-use near_primitives::network::PeerId;
-use near_primitives::sharding::ShardChunkHeader;
-use near_primitives::sharding::ShardChunkHeaderV3;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::validator_stake::ValidatorStake;
-use near_primitives::utils::MaybeValidated;
+use unc_chain::{test_utils, ChainGenesis, Provenance};
+use unc_crypto::vrf::Value;
+use unc_crypto::{KeyType, PublicKey, Signature};
+use unc_network::types::{NetworkRequests, PeerManagerMessageRequest};
+use unc_primitives::block::Block;
+use unc_primitives::network::PeerId;
+use unc_primitives::sharding::ShardChunkHeader;
+use unc_primitives::sharding::ShardChunkHeaderV3;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::validator_stake::ValidatorStake;
+use unc_primitives::utils::MaybeValidated;
 use std::sync::Arc;
 
 /// Only process one block per height
@@ -92,7 +92,7 @@ fn test_bad_shard_id() {
     let err = env.clients[0]
         .process_block_test(MaybeValidated::from(block), Provenance::NONE)
         .unwrap_err();
-    assert_matches!(err, near_chain::Error::InvalidShardId(1));
+    assert_matches!(err, unc_chain::Error::InvalidShardId(1));
 }
 
 /// Test that if a block's content (vrf_value) is corrupted, the invalid block will not affect the node's block processing
@@ -113,7 +113,7 @@ fn test_bad_block_content_vrf() {
             Arc::new(|_| {}),
         )
         .unwrap_err();
-    assert_matches!(err, near_chain::Error::InvalidSignature);
+    assert_matches!(err, unc_chain::Error::InvalidSignature);
 
     let _ =
         env.clients[0].process_block_test(MaybeValidated::from(block), Provenance::NONE).unwrap();
@@ -137,7 +137,7 @@ fn test_bad_block_signature() {
             Arc::new(|_| {}),
         )
         .unwrap_err();
-    assert_matches!(err, near_chain::Error::InvalidSignature);
+    assert_matches!(err, unc_chain::Error::InvalidSignature);
 
     let _ =
         env.clients[0].process_block_test(MaybeValidated::from(block), Provenance::NONE).unwrap();

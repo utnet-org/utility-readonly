@@ -58,7 +58,7 @@ class SimpleTest(unittest.TestCase):
             },
         }
 
-        near_root, [node_dir] = init_cluster(
+        unc_root, [node_dir] = init_cluster(
             num_nodes=1,
             num_observers=0,
             num_shards=1,
@@ -70,7 +70,7 @@ class SimpleTest(unittest.TestCase):
 
         node = spin_up_node(
             test_config,
-            near_root,
+            unc_root,
             node_dir,
             0,
         )

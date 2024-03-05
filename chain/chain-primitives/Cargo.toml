@@ -1,5 +1,5 @@
 [package]
-name = "near-chain-primitives"
+name = "unc-chain-primitives"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -16,8 +16,8 @@ chrono.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 
-near-primitives.workspace = true
-near-crypto.workspace = true
+unc-primitives.workspace = true
+unc-crypto.workspace = true
 
 [features]
 new_epoch_sync = []

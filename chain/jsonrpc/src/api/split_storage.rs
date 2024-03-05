@@ -1,5 +1,5 @@
-use near_client_primitives::types::GetSplitStorageInfoError;
-use near_jsonrpc_primitives::{
+use unc_client_primitives::types::GetSplitStorageInfoError;
+use unc_jsonrpc_primitives::{
     errors::RpcParseError,
     types::split_storage::{RpcSplitStorageInfoError, RpcSplitStorageInfoRequest},
 };

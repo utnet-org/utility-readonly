@@ -4,7 +4,7 @@ Shows md5sum of /home/ubuntu/.near/config.json on provided google cloud machines
 
 Usage: ./show_config_hash.py project host1 host2 host3 ...
 Example for testnet canaries:
-    ./show_config_hash.py near-core testnet-canary-rpc-01-europe-north1-a-1f3e1e97 \
+    ./show_config_hash.py unc-core testnet-canary-rpc-01-europe-north1-a-1f3e1e97 \
     testnet-canary-rpc-02-europe-west2-a-031e15e8 testnet-canary-rpc-archive-01-asia-east2-a-b25465d1 \
     testnet-canary-validator-01-us-west1-a-f160e149
 """

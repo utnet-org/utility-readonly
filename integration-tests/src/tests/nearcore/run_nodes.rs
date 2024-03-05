@@ -1,9 +1,9 @@
 use crate::tests::framework::node_cluster::NodeCluster;
 use actix::System;
-use near_client::GetBlock;
-use near_network::test_utils::wait_or_timeout;
-use near_o11y::WithSpanContextExt;
-use near_primitives::types::{BlockHeightDelta, NumSeats, NumShards};
+use unc_client::GetBlock;
+use unc_network::test_utils::wait_or_timeout;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::types::{BlockHeightDelta, NumSeats, NumShards};
 use rand::{thread_rng, Rng};
 use std::ops::ControlFlow;
 

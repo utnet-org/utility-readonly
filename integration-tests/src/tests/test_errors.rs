@@ -1,18 +1,18 @@
 use std::sync::Arc;
 
 use crate::node::{Node, ThreadNode};
-use near_chain_configs::Genesis;
-use near_crypto::{InMemorySigner, KeyType};
-use near_jsonrpc::RpcInto;
-use near_network::tcp;
-use near_o11y::testonly::init_integration_logger;
-use near_parameters::{RuntimeConfig, RuntimeConfigStore};
-use near_primitives::account::AccessKey;
-use near_primitives::errors::{InvalidAccessKeyError, InvalidTxError};
-use near_primitives::transaction::{
+use unc_chain_configs::Genesis;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_jsonrpc::RpcInto;
+use unc_network::tcp;
+use unc_o11y::testonly::init_integration_logger;
+use unc_parameters::{RuntimeConfig, RuntimeConfigStore};
+use unc_primitives::account::AccessKey;
+use unc_primitives::errors::{InvalidAccessKeyError, InvalidTxError};
+use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, SignedTransaction, TransferAction,
 };
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::version::PROTOCOL_VERSION;
 use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
 use framework::load_test_config;
 use testlib::runtime_utils::{alice_account, bob_account};
@@ -20,11 +20,11 @@ use testlib::runtime_utils::{alice_account, bob_account};
 fn start_node() -> ThreadNode {
     init_integration_logger();
     let genesis = Genesis::test(vec![alice_account(), bob_account()], 1);
-    let mut near_config =
+    let mut unc_config =
         load_test_config("alice.near", tcp::ListenerAddr::reserve_for_test(), genesis);
-    near_config.client_config.skip_sync_wait = true;
+    unc_config.client_config.skip_sync_wait = true;
 
-    let mut node = ThreadNode::new(near_config);
+    let mut node = ThreadNode::new(unc_config);
     node.start();
     node
 }

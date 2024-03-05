@@ -1,6 +1,6 @@
 use clap::Parser;
-use near_store::db::{Database, RocksDB};
-use near_store::DBCol;
+use unc_store::db::{Database, RocksDB};
+use unc_store::DBCol;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -191,7 +191,7 @@ fn get_column_families(input_col: &Option<String>) -> anyhow::Result<Vec<DBCol>>
 
 impl AnalyseDataSizeDistributionCommand {
     pub(crate) fn run(&self, home: &PathBuf) -> anyhow::Result<()> {
-        let db = open_rocksdb(home, near_store::Mode::ReadOnly)?;
+        let db = open_rocksdb(home, unc_store::Mode::ReadOnly)?;
         let column_families = get_column_families(&self.column)?;
         let results = read_all_pairs(&db, &column_families);
         results.print_results(self.top_k);

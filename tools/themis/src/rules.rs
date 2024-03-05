@@ -171,7 +171,7 @@ pub fn has_unified_rust_edition(workspace: &Workspace) -> anyhow::Result<()> {
     Ok(())
 }
 
-const EXPECTED_AUTHOR: &str = "Near Inc <hello@nearprotocol.com>";
+const EXPECTED_AUTHOR: &str = "unc Inc <hello@nearprotocol.com>";
 
 /// Ensure all crates have the appropriate author, non-exclusively of course.
 pub fn author_is_near(workspace: &Workspace) -> anyhow::Result<()> {
@@ -264,8 +264,8 @@ pub fn publishable_has_unified_license(workspace: &Workspace) -> anyhow::Result<
         .filter(|pkg| {
             utils::is_publishable(pkg)
                 && matches!(pkg.parsed.license, Some(ref l) if l != EXPECTED_LICENSE)
-                // near-vm is a wasmer fork, so we don’t control the license
-                && !pkg.parsed.name.starts_with("near-vm")
+                // unc-vm is a wasmer fork, so we don’t control the license
+                && !pkg.parsed.name.starts_with("unc-vm")
         })
         .map(|pkg| Outlier {
             path: pkg.parsed.manifest_path.clone(),
@@ -336,7 +336,7 @@ pub fn publishable_has_readme(workspace: &Workspace) -> anyhow::Result<()> {
 const EXPECTED_LINK: &str = "https://github.com/utnet-org/utility";
 
 /// Ensure all non-private crates have appropriate repository links
-pub fn publishable_has_near_link(workspace: &Workspace) -> anyhow::Result<()> {
+pub fn publishable_has_unc_link(workspace: &Workspace) -> anyhow::Result<()> {
     let outliers = workspace
         .members
         .iter()

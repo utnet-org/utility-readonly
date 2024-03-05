@@ -1,6 +1,6 @@
-use near_account_id::AccountId;
-use near_chain_configs::Genesis;
-use near_primitives::receipt::ReceiptResult;
+use unc_account_id::AccountId;
+use unc_chain_configs::Genesis;
+use unc_primitives::receipt::ReceiptResult;
 
 pub fn mainnet_restored_receipts() -> ReceiptResult {
     let data = include_bytes!("../res/mainnet_restored_receipts.json");

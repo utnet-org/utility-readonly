@@ -35,51 +35,51 @@ thiserror.workspace = true
 tracing.workspace = true
 yansi.workspace = true
 
-near-chain-configs.workspace = true
-near-chain.workspace = true
-near-client.workspace = true
-near-crypto.workspace = true
-near-epoch-manager.workspace = true
-near-network.workspace = true
-near-o11y.workspace = true
-near-primitives-core.workspace = true
-near-primitives.workspace = true
-near-store.workspace = true
-near-test-contracts.workspace = true
+unc-chain-configs.workspace = true
+unc-chain.workspace = true
+unc-client.workspace = true
+unc-crypto.workspace = true
+unc-epoch-manager.workspace = true
+unc-network.workspace = true
+unc-o11y.workspace = true
+unc-primitives-core.workspace = true
+unc-primitives.workspace = true
+unc-store.workspace = true
+unc-test-contracts.workspace = true
 framework.workspace = true
 node-runtime.workspace = true
 
 [dev-dependencies]
-near-client.workspace = true
+unc-client.workspace = true
 testlib.workspace = true
 insta.workspace = true
 
 [features]
-sandbox = ["node-runtime/sandbox", "near-chain/sandbox", "near-client/sandbox"]
+sandbox = ["node-runtime/sandbox", "unc-chain/sandbox", "unc-client/sandbox"]
 nightly = [
   "nightly_protocol",
-  "near-chain-configs/nightly",
-  "near-chain/nightly",
-  "near-client/nightly",
-  "near-epoch-manager/nightly",
-  "near-network/nightly",
-  "near-o11y/nightly",
-  "near-primitives-core/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
+  "unc-chain-configs/nightly",
+  "unc-chain/nightly",
+  "unc-client/nightly",
+  "unc-epoch-manager/nightly",
+  "unc-network/nightly",
+  "unc-o11y/nightly",
+  "unc-primitives-core/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
   "framework/nightly",
   "node-runtime/nightly",
 ]
 nightly_protocol = [
-  "near-chain-configs/nightly_protocol",
-  "near-chain/nightly_protocol",
-  "near-client/nightly_protocol",
-  "near-epoch-manager/nightly_protocol",
-  "near-network/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-primitives-core/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-chain/nightly_protocol",
+  "unc-client/nightly_protocol",
+  "unc-epoch-manager/nightly_protocol",
+  "unc-network/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
   "framework/nightly_protocol",
   "node-runtime/nightly_protocol",
 ]

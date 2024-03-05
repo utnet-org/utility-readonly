@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 pub type RpcMaintenanceWindowsResponse =
-    Vec<(near_primitives::types::BlockHeight, near_primitives::types::BlockHeight)>;
+    Vec<(unc_primitives::types::BlockHeight, unc_primitives::types::BlockHeight)>;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
@@ -12,7 +12,7 @@ pub enum RpcMaintenanceWindowsError {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcMaintenanceWindowsRequest {
-    pub account_id: near_primitives::types::AccountId,
+    pub account_id: unc_primitives::types::AccountId,
 }
 
 impl From<RpcMaintenanceWindowsError> for crate::errors::RpcError {

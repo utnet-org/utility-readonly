@@ -1,7 +1,7 @@
 use serde_json::Value;
 
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::errors::{RpcError, ServerError};
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::errors::{RpcError, ServerError};
 
 mod blocks;
 mod changes;
@@ -74,9 +74,9 @@ impl RpcFrom<actix::MailboxError> for ServerError {
     }
 }
 
-impl RpcFrom<near_primitives::errors::InvalidTxError> for ServerError {
-    fn rpc_from(e: near_primitives::errors::InvalidTxError) -> ServerError {
-        ServerError::TxExecutionError(near_primitives::errors::TxExecutionError::InvalidTxError(e))
+impl RpcFrom<unc_primitives::errors::InvalidTxError> for ServerError {
+    fn rpc_from(e: unc_primitives::errors::InvalidTxError) -> ServerError {
+        ServerError::TxExecutionError(unc_primitives::errors::TxExecutionError::InvalidTxError(e))
     }
 }
 
@@ -84,7 +84,7 @@ mod params {
     use serde::de::DeserializeOwned;
     use serde_json::Value;
 
-    use near_jsonrpc_primitives::errors::RpcParseError;
+    use unc_jsonrpc_primitives::errors::RpcParseError;
 
     /// Helper wrapper for parsing JSON value into expected request format.
     ///

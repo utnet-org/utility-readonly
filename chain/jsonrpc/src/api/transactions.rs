@@ -1,12 +1,12 @@
 use serde_json::Value;
 
-use near_client_primitives::types::TxStatusError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::transactions::{
+use unc_client_primitives::types::TxStatusError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::transactions::{
     RpcSendTransactionRequest, RpcTransactionError, RpcTransactionStatusRequest, TransactionInfo,
 };
-use near_primitives::borsh::BorshDeserialize;
-use near_primitives::transaction::SignedTransaction;
+use unc_primitives::borsh::BorshDeserialize;
+use unc_primitives::transaction::SignedTransaction;
 
 use super::{Params, RpcFrom, RpcRequest};
 
@@ -74,7 +74,7 @@ impl RpcFrom<TxStatusError> for RpcTransactionError {
 }
 
 fn decode_signed_transaction(value: String) -> Result<SignedTransaction, RpcParseError> {
-    let bytes = near_primitives::serialize::from_base64(&value)
+    let bytes = unc_primitives::serialize::from_base64(&value)
         .map_err(|err| RpcParseError(format!("Failed to decode transaction: {}", err)))?;
     SignedTransaction::try_from_slice(&bytes)
         .map_err(|err| RpcParseError(format!("Failed to decode transaction: {}", err)))
@@ -83,13 +83,13 @@ fn decode_signed_transaction(value: String) -> Result<SignedTransaction, RpcPars
 #[cfg(test)]
 mod tests {
     use crate::api::RpcRequest;
-    use near_jsonrpc_primitives::types::transactions::{
+    use unc_jsonrpc_primitives::types::transactions::{
         RpcSendTransactionRequest, RpcTransactionStatusRequest,
     };
-    use near_primitives::borsh;
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::serialize::to_base64;
-    use near_primitives::transaction::SignedTransaction;
+    use unc_primitives::borsh;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::serialize::to_base64;
+    use unc_primitives::transaction::SignedTransaction;
 
     #[test]
     fn test_serialize_tx_status_params_as_vec() {

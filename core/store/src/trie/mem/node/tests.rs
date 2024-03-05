@@ -2,8 +2,8 @@ use crate::trie::mem::arena::Arena;
 use crate::trie::mem::node::{InputMemTrieNode, MemTrieNodeId, MemTrieNodeView};
 use crate::trie::Children;
 use crate::{RawTrieNode, RawTrieNodeWithSize};
-use near_primitives::hash::hash;
-use near_primitives::state::{FlatStateValue, ValueRef};
+use unc_primitives::hash::hash;
+use unc_primitives::state::{FlatStateValue, ValueRef};
 
 #[test]
 fn test_basic_leaf_node_inlined() {

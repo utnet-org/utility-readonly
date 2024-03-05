@@ -85,7 +85,7 @@ pub fn run_actix<F: std::future::Future>(f: F) {
         *value -= 1;
         if *value == 0 {
             // If we're the last instance - make sure to wait for all RocksDB handles to be dropped.
-            near_store::db::RocksDB::block_until_all_instances_are_dropped();
+            unc_store::db::RocksDB::block_until_all_instances_are_dropped();
         }
     }
 }

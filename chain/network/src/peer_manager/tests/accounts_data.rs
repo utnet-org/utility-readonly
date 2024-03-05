@@ -10,9 +10,9 @@ use crate::tcp;
 use crate::testonly::{make_rng, AsSet as _};
 use crate::types::PeerMessage;
 use itertools::Itertools;
-use near_async::time;
-use near_o11y::testonly::init_test_logger;
-use near_store::db::TestDB;
+use unc_async::time;
+use unc_o11y::testonly::init_test_logger;
+use unc_store::db::TestDB;
 use peer_manager::testonly::FDS_PER_PEER;
 use pretty_assertions::assert_eq;
 use rand::seq::SliceRandom as _;
@@ -31,7 +31,7 @@ async fn broadcast() {
 
     let pm = peer_manager::testonly::start(
         clock.clone(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -117,7 +117,7 @@ async fn gradual_epoch_change() {
         pms.push(
             peer_manager::testonly::start(
                 clock.clock(),
-                near_store::db::TestDB::new(),
+                unc_store::db::TestDB::new(),
                 chain.make_config(rng),
                 chain.clone(),
             )
@@ -190,7 +190,7 @@ async fn rate_limiting() {
         pms.push(
             peer_manager::testonly::start(
                 clock.clock(),
-                near_store::db::TestDB::new(),
+                unc_store::db::TestDB::new(),
                 cfg,
                 chain.clone(),
             )

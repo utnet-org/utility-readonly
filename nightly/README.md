@@ -86,7 +86,7 @@ profile.  In other words, all `cargo` invocations are passed
 additional `--release` argument.  This is supported but currently not
 used by any of the nightly tests.
 
-`--remote` configures pytest tests to use Near test nodes started on
+`--remote` configures pytest tests to use unc test nodes started on
 spot GCP machines rather than executing a small cluster on host where
 the test is running.  No nightly test uses this feature and to be
 honest I can’t vouch whether it even works.

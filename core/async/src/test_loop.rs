@@ -72,7 +72,7 @@ use self::{
 };
 use crate::test_loop::event_handler::LoopHandlerContext;
 use crate::time;
-use near_o11y::{testonly::init_test_logger, tracing::log::info};
+use unc_o11y::{testonly::init_test_logger, tracing::log::info};
 use serde::Serialize;
 use std::{
     collections::BinaryHeap,

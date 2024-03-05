@@ -4,33 +4,33 @@ use std::sync::Arc;
 
 use actix::{Actor, Addr, System};
 use futures::{future, FutureExt};
-use near_primitives::num_rational::Ratio;
+use unc_primitives::num_rational::Ratio;
 use rand::Rng;
 
 use crate::genesis_helpers::genesis_hash;
 use crate::test_helpers::heavy_test;
-use near_actix_test_utils::run_actix;
-use near_chain_configs::Genesis;
-use near_client::{ClientActor, GetBlock, ProcessTxRequest, Query, Status, ViewClientActor};
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::tcp;
-use near_network::test_utils::{convert_boot_nodes, WaitOrTimeoutActor};
-use near_o11y::testonly::init_integration_logger;
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, BlockHeightDelta, BlockReference, NumSeats};
-use near_primitives::views::{QueryRequest, QueryResponseKind, ValidatorInfo};
+use unc_actix_test_utils::run_actix;
+use unc_chain_configs::Genesis;
+use unc_client::{ClientActor, GetBlock, ProcessTxRequest, Query, Status, ViewClientActor};
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::tcp;
+use unc_network::test_utils::{convert_boot_nodes, WaitOrTimeoutActor};
+use unc_o11y::testonly::init_integration_logger;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, BlockHeightDelta, BlockReference, NumSeats};
+use unc_primitives::views::{QueryRequest, QueryResponseKind, ValidatorInfo};
 use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
-use framework::{load_test_config, start_with_config, NearConfig, UNC_BASE};
+use framework::{load_test_config, start_with_config, UncConfig, UNC_BASE};
 
-use near_o11y::WithSpanContextExt;
-use {near_primitives::types::BlockId, primitive_types::U256};
+use unc_o11y::WithSpanContextExt;
+use {unc_primitives::types::BlockId, primitive_types::U256};
 
 #[derive(Clone)]
 struct TestNode {
     account_id: AccountId,
     signer: Arc<InMemorySigner>,
-    config: NearConfig,
+    config: UncConfig,
     client: Addr<ClientActor>,
     view_client: Addr<ViewClientActor>,
     genesis_hash: CryptoHash,

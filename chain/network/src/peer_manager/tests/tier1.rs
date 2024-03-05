@@ -8,11 +8,11 @@ use crate::peer_manager::testonly::Event;
 use crate::stun;
 use crate::tcp;
 use crate::testonly::{make_rng, Rng};
-use near_async::time;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::block_header::{Approval, ApprovalInner};
-use near_primitives::validator_signer::ValidatorSigner;
-use near_store::db::TestDB;
+use unc_async::time;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::block_header::{Approval, ApprovalInner};
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_store::db::TestDB;
 use rand::Rng as _;
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -122,7 +122,7 @@ async fn first_proxy_advertisement() {
     let chain = Arc::new(data::Chain::make(&mut clock, rng, 10));
     let pm = start_pm(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -153,7 +153,7 @@ async fn direct_connections() {
         pms.push(
             start_pm(
                 clock.clock(),
-                near_store::db::TestDB::new(),
+                unc_store::db::TestDB::new(),
                 chain.make_config(rng),
                 chain.clone(),
             )
@@ -199,7 +199,7 @@ async fn proxy_connections() {
         proxies.push(
             start_pm(
                 clock.clock(),
-                near_store::db::TestDB::new(),
+                unc_store::db::TestDB::new(),
                 chain.make_config(rng),
                 chain.clone(),
             )
@@ -217,14 +217,14 @@ async fn proxy_connections() {
                 addr: **proxies[i].cfg.node_addr.as_ref().unwrap(),
             }]);
         validators
-            .push(start_pm(clock.clock(), near_store::db::TestDB::new(), cfg, chain.clone()).await);
+            .push(start_pm(clock.clock(), unc_store::db::TestDB::new(), cfg, chain.clone()).await);
     }
     let validators: Vec<_> = validators.iter().collect();
 
     // Connect validators and proxies in a star topology. Any connected graph would do.
     let hub = start_pm(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )

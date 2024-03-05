@@ -1081,17 +1081,17 @@ dependencies = [
  "framework",
  "futures",
  "log",
- "near-async",
- "near-chain-configs",
- "near-crypto",
- "near-network",
- "near-o11y",
- "near-primitives",
- "near-store",
  "openssl-probe",
  "parking_lot 0.12.1",
  "rand 0.8.5",
  "tokio",
+ "unc-async",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-store",
 ]
 
 [[package]]
@@ -1236,13 +1236,13 @@ dependencies = [
  "borsh 1.3.1",
  "clap",
  "framework",
- "near-chain-configs",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
  "rand 0.8.5",
  "strum",
  "tracing",
+ "unc-chain-configs",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
 ]
 
 [[package]]
@@ -2188,29 +2188,6 @@ dependencies = [
  "hyper",
  "hyper-tls",
  "indicatif",
- "near-actix-test-utils",
- "near-async",
- "near-chain",
- "near-chain-configs",
- "near-chunks",
- "near-client",
- "near-client-primitives",
- "near-config-utils",
- "near-crypto",
- "near-dyn-configs",
- "near-epoch-manager",
- "near-jsonrpc",
- "near-jsonrpc-primitives",
- "near-mainnet-res",
- "near-network",
- "near-o11y",
- "near-parameters",
- "near-performance-metrics",
- "near-pool",
- "near-primitives",
- "near-store",
- "near-telemetry",
- "near-vm-runner",
  "node-runtime",
  "num-rational",
  "once_cell",
@@ -2231,6 +2208,29 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "unc-actix-test-utils",
+ "unc-async",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chunks",
+ "unc-client",
+ "unc-client-primitives",
+ "unc-config-utils",
+ "unc-crypto",
+ "unc-dyn-configs",
+ "unc-epoch-manager",
+ "unc-jsonrpc",
+ "unc-jsonrpc-primitives",
+ "unc-mainnet-res",
+ "unc-network",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-performance-metrics",
+ "unc-pool",
+ "unc-primitives",
+ "unc-store",
+ "unc-telemetry",
+ "unc-vm-runner",
  "xz2",
 ]
 
@@ -2388,13 +2388,13 @@ dependencies = [
  "clap",
  "csv",
  "framework",
- "near-chain-configs",
- "near-crypto",
- "near-network",
- "near-primitives",
  "serde",
  "serde_json",
  "tempfile",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-network",
+ "unc-primitives",
 ]
 
 [[package]]
@@ -2405,15 +2405,15 @@ dependencies = [
  "clap",
  "framework",
  "indicatif",
- "near-chain",
- "near-chain-configs",
- "near-crypto",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
- "near-test-contracts",
- "near-vm-runner",
  "tempfile",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
+ "unc-test-contracts",
+ "unc-vm-runner",
 ]
 
 [[package]]
@@ -2775,12 +2775,12 @@ dependencies = [
  "actix",
  "anyhow",
  "clap",
- "near-indexer",
- "near-o11y",
  "openssl-probe",
  "serde_json",
  "tokio",
  "tracing",
+ "unc-indexer",
+ "unc-o11y",
 ]
 
 [[package]]
@@ -2859,32 +2859,6 @@ dependencies = [
  "hex",
  "insta",
  "itertools",
- "near-actix-test-utils",
- "near-async",
- "near-chain",
- "near-chain-configs",
- "near-chunks",
- "near-client",
- "near-client-primitives",
- "near-crypto",
- "near-epoch-manager",
- "near-fmt",
- "near-jsonrpc",
- "near-jsonrpc-client",
- "near-jsonrpc-primitives",
- "near-network",
- "near-o11y",
- "near-parameters",
- "near-performance-metrics",
- "near-primitives",
- "near-primitives-core",
- "near-stdx",
- "near-store",
- "near-telemetry",
- "near-test-contracts",
- "near-undo-block",
- "near-vm-runner",
- "near-wallet-contract",
  "node-runtime",
  "once_cell",
  "parking_lot 0.12.1",
@@ -2899,6 +2873,32 @@ dependencies = [
  "testlib",
  "tokio",
  "tracing",
+ "unc-actix-test-utils",
+ "unc-async",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chunks",
+ "unc-client",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-fmt",
+ "unc-jsonrpc",
+ "unc-jsonrpc-client",
+ "unc-jsonrpc-primitives",
+ "unc-network",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-performance-metrics",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-stdx",
+ "unc-store",
+ "unc-telemetry",
+ "unc-test-contracts",
+ "unc-undo-block",
+ "unc-vm-runner",
+ "unc-wallet-contract",
  "wat",
 ]
 
@@ -2998,7 +2998,7 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "framework",
- "near-crypto",
+ "unc-crypto",
 ]
 
 [[package]]
@@ -3379,22 +3379,6 @@ dependencies = [
  "clap",
  "framework",
  "futures",
- "near-actix-test-utils",
- "near-async",
- "near-chain",
- "near-chain-configs",
- "near-chunks",
- "near-client",
- "near-crypto",
- "near-epoch-manager",
- "near-jsonrpc",
- "near-jsonrpc-client",
- "near-network",
- "near-o11y",
- "near-performance-metrics",
- "near-primitives",
- "near-store",
- "near-telemetry",
  "pin-project",
  "rand 0.8.5",
  "rayon",
@@ -3403,6 +3387,22 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
+ "unc-actix-test-utils",
+ "unc-async",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chunks",
+ "unc-client",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-jsonrpc",
+ "unc-jsonrpc-client",
+ "unc-network",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-primitives",
+ "unc-store",
+ "unc-telemetry",
 ]
 
 [[package]]
@@ -3433,1259 +3433,6 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
-]
-
-[[package]]
-name = "near-account-id"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35cbb989542587b47205e608324ddd391f0cee1c22b4b64ae49f458334b95907"
-dependencies = [
- "borsh 1.3.1",
- "serde",
-]
-
-[[package]]
-name = "near-actix-test-utils"
-version = "0.0.0"
-dependencies = [
- "actix-rt",
- "futures",
- "near-store",
- "once_cell",
-]
-
-[[package]]
-name = "near-amend-genesis"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "borsh 1.3.1",
- "clap",
- "framework",
- "near-chain",
- "near-chain-configs",
- "near-crypto",
- "near-epoch-manager",
- "near-network",
- "near-primitives",
- "near-primitives-core",
- "near-store",
- "near-test-contracts",
- "node-runtime",
- "num-rational",
- "serde",
- "serde_json",
- "tempfile",
- "tracing",
-]
-
-[[package]]
-name = "near-async"
-version = "0.0.0"
-dependencies = [
- "actix",
- "derive-enum-from-into",
- "derive_more",
- "futures",
- "near-o11y",
- "near-performance-metrics",
- "near-primitives",
- "once_cell",
- "serde",
- "serde_json",
- "time",
- "tokio",
-]
-
-[[package]]
-name = "near-cache"
-version = "0.0.0"
-dependencies = [
- "bencher",
- "lru",
- "rand 0.8.5",
-]
-
-[[package]]
-name = "near-chain"
-version = "0.0.0"
-dependencies = [
- "actix",
- "assert_matches",
- "borsh 1.3.1",
- "bytesize",
- "chrono",
- "crossbeam-channel",
- "enum-map",
- "insta",
- "itertools",
- "itoa",
- "lru",
- "near-async",
- "near-cache",
- "near-chain-configs",
- "near-chain-primitives",
- "near-client-primitives",
- "near-crypto",
- "near-epoch-manager",
- "near-network",
- "near-o11y",
- "near-performance-metrics",
- "near-performance-metrics-macros",
- "near-pool",
- "near-primitives",
- "near-store",
- "num-rational",
- "once_cell",
- "rand 0.8.5",
- "rand_chacha 0.3.1",
- "rayon",
- "strum",
- "thiserror",
- "tracing",
- "yansi",
-]
-
-[[package]]
-name = "near-chain-configs"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytesize",
- "chrono",
- "derive_more",
- "near-config-utils",
- "near-crypto",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "num-rational",
- "once_cell",
- "serde",
- "serde_json",
- "sha2 0.10.8",
- "smart-default",
- "tracing",
-]
-
-[[package]]
-name = "near-chain-primitives"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "near-crypto",
- "near-primitives",
- "thiserror",
- "tracing",
-]
-
-[[package]]
-name = "near-chunks"
-version = "0.0.0"
-dependencies = [
- "actix",
- "assert_matches",
- "borsh 1.3.1",
- "chrono",
- "derive-enum-from-into",
- "derive_more",
- "futures",
- "itertools",
- "lru",
- "near-async",
- "near-chain",
- "near-chain-configs",
- "near-chunks-primitives",
- "near-crypto",
- "near-epoch-manager",
- "near-network",
- "near-o11y",
- "near-performance-metrics",
- "near-performance-metrics-macros",
- "near-pool",
- "near-primitives",
- "near-store",
- "once_cell",
- "rand 0.8.5",
- "reed-solomon-erasure",
- "strum",
- "time",
- "tracing",
-]
-
-[[package]]
-name = "near-chunks-primitives"
-version = "0.0.0"
-dependencies = [
- "near-chain-primitives",
- "near-primitives",
-]
-
-[[package]]
-name = "near-client"
-version = "0.0.0"
-dependencies = [
- "actix",
- "actix-rt",
- "anyhow",
- "assert_matches",
- "async-trait",
- "borsh 1.3.1",
- "chrono",
- "cloud-storage",
- "derive_more",
- "futures",
- "itertools",
- "lru",
- "near-actix-test-utils",
- "near-async",
- "near-chain",
- "near-chain-configs",
- "near-chain-primitives",
- "near-chunks",
- "near-client-primitives",
- "near-crypto",
- "near-dyn-configs",
- "near-epoch-manager",
- "near-network",
- "near-o11y",
- "near-parameters",
- "near-performance-metrics",
- "near-performance-metrics-macros",
- "near-pool",
- "near-primitives",
- "near-store",
- "near-telemetry",
- "num-rational",
- "once_cell",
- "percent-encoding",
- "rand 0.8.5",
- "rayon",
- "reed-solomon-erasure",
- "regex",
- "reqwest",
- "rust-s3",
- "serde",
- "serde_json",
- "strum",
- "sysinfo",
- "tempfile",
- "thiserror",
- "tokio",
- "tracing",
- "yansi",
-]
-
-[[package]]
-name = "near-client-primitives"
-version = "0.0.0"
-dependencies = [
- "actix",
- "chrono",
- "near-chain-configs",
- "near-chain-primitives",
- "near-chunks-primitives",
- "near-crypto",
- "near-primitives",
- "serde",
- "serde_json",
- "strum",
- "thiserror",
- "tracing",
- "yansi",
-]
-
-[[package]]
-name = "near-config-utils"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "json_comments",
- "thiserror",
- "tracing",
-]
-
-[[package]]
-name = "near-crypto"
-version = "0.0.0"
-dependencies = [
- "blake2",
- "bolero",
- "borsh 1.3.1",
- "bs58",
- "c2-chacha",
- "curve25519-dalek",
- "derive_more",
- "ed25519-dalek",
- "hex",
- "hex-literal",
- "near-account-id",
- "near-config-utils",
- "near-stdx",
- "once_cell",
- "primitive-types",
- "rand 0.7.3",
- "rsa 0.9.6",
- "rsa-export",
- "secp256k1",
- "serde",
- "serde_json",
- "sha2 0.10.8",
- "subtle",
- "tempfile",
- "thiserror",
-]
-
-[[package]]
-name = "near-database-tool"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "borsh 1.3.1",
- "clap",
- "framework",
- "indicatif",
- "near-chain",
- "near-chain-configs",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
- "rand 0.8.5",
- "rayon",
- "rocksdb",
- "strum",
- "tempfile",
-]
-
-[[package]]
-name = "near-dyn-configs"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "near-chain-configs",
- "near-o11y",
- "near-primitives",
- "once_cell",
- "prometheus",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-epoch-manager"
-version = "0.0.0"
-dependencies = [
- "borsh 1.3.1",
- "chrono",
- "itertools",
- "near-cache",
- "near-chain-configs",
- "near-chain-primitives",
- "near-crypto",
- "near-primitives",
- "near-store",
- "num-bigint 0.3.3",
- "num-rational",
- "num-traits",
- "primitive-types",
- "protobuf 3.4.0",
- "rand 0.8.5",
- "rand_hc 0.3.2",
- "serde_json",
- "smart-default",
- "tracing",
-]
-
-[[package]]
-name = "near-epoch-sync-tool"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "framework",
- "near-chain",
- "near-chain-configs",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
- "tracing",
-]
-
-[[package]]
-name = "near-flat-storage"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "borsh 1.3.1",
- "clap",
- "framework",
- "near-chain",
- "near-chain-configs",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
- "rayon",
- "tqdm",
- "tracing",
-]
-
-[[package]]
-name = "near-fmt"
-version = "0.0.0"
-dependencies = [
- "near-primitives-core",
-]
-
-[[package]]
-name = "near-fork-network"
-version = "0.0.0"
-dependencies = [
- "actix",
- "anyhow",
- "chrono",
- "clap",
- "framework",
- "hex",
- "near-chain",
- "near-chain-configs",
- "near-crypto",
- "near-epoch-manager",
- "near-mirror",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-store",
- "rayon",
- "serde",
- "serde_json",
- "strum",
- "tracing",
-]
-
-[[package]]
-name = "near-indexer"
-version = "0.0.0"
-dependencies = [
- "actix",
- "anyhow",
- "async-recursion",
- "framework",
- "futures",
- "near-chain-configs",
- "near-client",
- "near-crypto",
- "near-dyn-configs",
- "near-indexer-primitives",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-store",
- "node-runtime",
- "once_cell",
- "rocksdb",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-indexer-primitives"
-version = "0.0.0"
-dependencies = [
- "near-primitives",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "near-jsonrpc"
-version = "0.0.0"
-dependencies = [
- "actix",
- "actix-cors",
- "actix-web",
- "bs58",
- "easy-ext",
- "futures",
- "hex",
- "near-chain-configs",
- "near-client",
- "near-client-primitives",
- "near-jsonrpc-adversarial-primitives",
- "near-jsonrpc-client",
- "near-jsonrpc-primitives",
- "near-network",
- "near-o11y",
- "near-primitives",
- "near-rpc-error-macro",
- "once_cell",
- "serde",
- "serde_json",
- "serde_with",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "near-jsonrpc-adversarial-primitives"
-version = "0.0.0"
-dependencies = [
- "near-network",
- "near-primitives",
- "serde",
-]
-
-[[package]]
-name = "near-jsonrpc-client"
-version = "0.0.0"
-dependencies = [
- "actix-http",
- "awc",
- "futures",
- "near-jsonrpc-primitives",
- "near-primitives",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "near-jsonrpc-fuzz"
-version = "0.0.0"
-dependencies = [
- "actix",
- "arbitrary",
- "awc",
- "libfuzzer-sys",
- "near-jsonrpc",
- "near-jsonrpc-primitives",
- "near-jsonrpc-tests",
- "near-primitives",
- "once_cell",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "near-jsonrpc-primitives"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "near-chain-configs",
- "near-client-primitives",
- "near-crypto",
- "near-primitives",
- "near-rpc-error-macro",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "near-jsonrpc-tests"
-version = "0.0.0"
-dependencies = [
- "actix",
- "awc",
- "borsh 1.3.1",
- "futures",
- "near-actix-test-utils",
- "near-chain-configs",
- "near-client",
- "near-crypto",
- "near-jsonrpc",
- "near-jsonrpc-primitives",
- "near-network",
- "near-o11y",
- "near-primitives",
- "near-store",
- "once_cell",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "near-mainnet-res"
-version = "0.0.0"
-dependencies = [
- "near-account-id",
- "near-chain-configs",
- "near-primitives",
- "serde_json",
-]
-
-[[package]]
-name = "near-mirror"
-version = "0.0.0"
-dependencies = [
- "actix",
- "anyhow",
- "async-trait",
- "borsh 1.3.1",
- "bs58",
- "clap",
- "ed25519-dalek",
- "framework",
- "hex",
- "hkdf",
- "near-chain",
- "near-chain-configs",
- "near-chain-primitives",
- "near-client",
- "near-client-primitives",
- "near-crypto",
- "near-epoch-manager",
- "near-indexer",
- "near-indexer-primitives",
- "near-network",
- "near-o11y",
- "near-primitives",
- "near-primitives-core",
- "near-store",
- "once_cell",
- "openssl-probe",
- "rand_core 0.5.1",
- "rocksdb",
- "secp256k1",
- "serde",
- "serde_json",
- "sha2 0.10.8",
- "strum",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-network"
-version = "0.0.0"
-dependencies = [
- "actix",
- "anyhow",
- "arc-swap",
- "assert_matches",
- "async-trait",
- "borsh 1.3.1",
- "bytes",
- "bytesize",
- "chrono",
- "criterion",
- "crossbeam-channel",
- "derive_more",
- "futures",
- "futures-util",
- "im",
- "itertools",
- "lru",
- "near-async",
- "near-crypto",
- "near-fmt",
- "near-o11y",
- "near-performance-metrics",
- "near-performance-metrics-macros",
- "near-primitives",
- "near-stable-hasher",
- "near-store",
- "once_cell",
- "opentelemetry",
- "parking_lot 0.12.1",
- "pin-project",
- "pretty_assertions",
- "protobuf 3.4.0",
- "protobuf-codegen",
- "rand 0.8.5",
- "rand_xorshift",
- "rayon",
- "rlimit",
- "serde",
- "smart-default",
- "strum",
- "stun",
- "tempfile",
- "thiserror",
- "time",
- "tokio",
- "tokio-stream",
- "tokio-util 0.7.10",
- "tracing",
- "turn",
- "webrtc-util",
-]
-
-[[package]]
-name = "near-o11y"
-version = "0.0.0"
-dependencies = [
- "actix",
- "base64 0.21.7",
- "bencher",
- "clap",
- "itoa",
- "near-crypto",
- "near-fmt",
- "near-primitives-core",
- "once_cell",
- "opentelemetry",
- "opentelemetry-otlp",
- "opentelemetry-semantic-conventions",
- "prometheus",
- "serde",
- "serde_json",
- "smartstring",
- "strum",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-opentelemetry",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "near-parameters"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "borsh 1.3.1",
- "clap",
- "enum-map",
- "insta",
- "near-account-id",
- "near-primitives-core",
- "num-rational",
- "serde",
- "serde_repr",
- "serde_yaml",
- "strum",
- "thiserror",
-]
-
-[[package]]
-name = "near-performance-metrics"
-version = "0.0.0"
-dependencies = [
- "actix",
- "bitflags 1.3.2",
- "bytes",
- "bytesize",
- "futures",
- "libc",
- "once_cell",
- "strum",
- "tokio",
- "tokio-util 0.7.10",
- "tracing",
-]
-
-[[package]]
-name = "near-performance-metrics-macros"
-version = "0.0.0"
-dependencies = [
- "quote",
- "syn 2.0.52",
-]
-
-[[package]]
-name = "near-ping"
-version = "0.0.0"
-dependencies = [
- "actix-web",
- "anyhow",
- "chrono",
- "clap",
- "near-async",
- "near-jsonrpc",
- "near-network",
- "near-o11y",
- "near-primitives",
- "once_cell",
- "prometheus",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-pool"
-version = "0.0.0"
-dependencies = [
- "borsh 1.3.1",
- "near-crypto",
- "near-o11y",
- "near-primitives",
- "once_cell",
- "rand 0.8.5",
-]
-
-[[package]]
-name = "near-primitives"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "assert_matches",
- "base64 0.21.7",
- "bencher",
- "borsh 1.3.1",
- "bytesize",
- "cfg-if 1.0.0",
- "chrono",
- "derive_more",
- "easy-ext",
- "enum-map",
- "hex",
- "insta",
- "near-crypto",
- "near-fmt",
- "near-o11y",
- "near-parameters",
- "near-primitives-core",
- "near-rpc-error-macro",
- "near-stdx",
- "near-vm-runner",
- "num-rational",
- "once_cell",
- "primitive-types",
- "rand 0.8.5",
- "rand_chacha 0.3.1",
- "reed-solomon-erasure",
- "serde",
- "serde_json",
- "serde_with",
- "serde_yaml",
- "sha3",
- "smart-default",
- "strum",
- "thiserror",
- "time",
- "tracing",
-]
-
-[[package]]
-name = "near-primitives-core"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "base64 0.21.7",
- "borsh 1.3.1",
- "bs58",
- "derive_more",
- "enum-map",
- "insta",
- "near-account-id",
- "num-rational",
- "serde",
- "serde_json",
- "serde_repr",
- "serde_with",
- "sha2 0.10.8",
- "strum",
- "thiserror",
-]
-
-[[package]]
-name = "near-rpc-error-core"
-version = "0.0.0"
-dependencies = [
- "quote",
- "serde",
- "serde_json",
- "syn 2.0.52",
-]
-
-[[package]]
-name = "near-rpc-error-macro"
-version = "0.0.0"
-dependencies = [
- "fs2",
- "near-rpc-error-core",
- "serde",
- "serde_json",
- "syn 2.0.52",
-]
-
-[[package]]
-name = "near-stable-hasher"
-version = "0.0.0"
-
-[[package]]
-name = "near-state-parts"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "near-async",
- "near-jsonrpc",
- "near-network",
- "near-o11y",
- "near-ping",
- "near-primitives",
- "once_cell",
- "sha2 0.10.8",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-state-parts-dump-check"
-version = "0.0.0"
-dependencies = [
- "actix",
- "actix-web",
- "anyhow",
- "borsh 1.3.1",
- "clap",
- "cloud-storage",
- "framework",
- "near-client",
- "near-jsonrpc",
- "near-o11y",
- "near-primitives",
- "near-primitives-core",
- "near-store",
- "once_cell",
- "reqwest",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-stdx"
-version = "0.0.0"
-
-[[package]]
-name = "near-store"
-version = "0.0.0"
-dependencies = [
- "actix",
- "actix-rt",
- "anyhow",
- "assert_matches",
- "bencher",
- "borsh 1.3.1",
- "bytesize",
- "crossbeam",
- "derive_more",
- "elastic-array",
- "enum-map",
- "fs2",
- "hex",
- "insta",
- "itertools",
- "itoa",
- "lru",
- "near-chain",
- "near-chain-configs",
- "near-chunks",
- "near-crypto",
- "near-fmt",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-stdx",
- "near-vm-runner",
- "num_cpus",
- "once_cell",
- "rand 0.8.5",
- "rayon",
- "rlimit",
- "rocksdb",
- "serde",
- "serde_json",
- "strum",
- "tempfile",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "near-telemetry"
-version = "0.0.0"
-dependencies = [
- "actix",
- "awc",
- "futures",
- "near-o11y",
- "near-performance-metrics",
- "near-performance-metrics-macros",
- "near-primitives",
- "once_cell",
- "openssl",
- "serde",
- "serde_json",
- "tracing",
-]
-
-[[package]]
-name = "near-test-contracts"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "once_cell",
- "rand 0.8.5",
- "wasm-encoder 0.27.0",
- "wasm-smith",
- "wat",
-]
-
-[[package]]
-name = "near-undo-block"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "framework",
- "near-chain",
- "near-chain-configs",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
- "tracing",
-]
-
-[[package]]
-name = "near-vm-compiler"
-version = "0.0.0"
-dependencies = [
- "enumset",
- "finite-wasm",
- "hashbrown 0.14.3",
- "near-vm-types",
- "near-vm-vm",
- "rkyv",
- "smallvec",
- "target-lexicon 0.12.14",
- "thiserror",
- "tracing",
- "wasmparser 0.99.0",
-]
-
-[[package]]
-name = "near-vm-compiler-singlepass"
-version = "0.0.0"
-dependencies = [
- "dynasm 2.0.0",
- "dynasmrt 2.0.0",
- "enumset",
- "finite-wasm",
- "hashbrown 0.14.3",
- "lazy_static",
- "memoffset 0.8.0",
- "more-asserts",
- "near-vm-compiler",
- "near-vm-types",
- "near-vm-vm",
- "rayon",
- "smallvec",
- "strum",
- "target-lexicon 0.12.14",
- "tracing",
-]
-
-[[package]]
-name = "near-vm-compiler-test-derive"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "proc-macro2",
- "quote",
- "syn 2.0.52",
- "trybuild",
-]
-
-[[package]]
-name = "near-vm-engine"
-version = "0.0.0"
-dependencies = [
- "backtrace",
- "cfg-if 1.0.0",
- "crossbeam-queue",
- "enumset",
- "finite-wasm",
- "lazy_static",
- "memmap2",
- "more-asserts",
- "near-vm-compiler",
- "near-vm-types",
- "near-vm-vm",
- "region",
- "rkyv",
- "rustc-demangle",
- "rustix 0.37.27",
- "target-lexicon 0.12.14",
- "thiserror",
- "tracing",
-]
-
-[[package]]
-name = "near-vm-runner"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arbitrary",
- "assert_matches",
- "base64 0.21.7",
- "bolero",
- "borsh 1.3.1",
- "ed25519-dalek",
- "enum-map",
- "expect-test",
- "finite-wasm",
- "hex",
- "loupe",
- "memoffset 0.8.0",
- "near-crypto",
- "near-parameters",
- "near-primitives-core",
- "near-stdx",
- "near-test-contracts",
- "near-vm-compiler",
- "near-vm-compiler-singlepass",
- "near-vm-engine",
- "near-vm-types",
- "near-vm-vm",
- "num-rational",
- "once_cell",
- "parity-wasm 0.41.0",
- "parity-wasm 0.42.2",
- "prefix-sum-vec",
- "pwasm-utils",
- "rand 0.8.5",
- "ripemd",
- "serde",
- "serde_json",
- "serde_repr",
- "serde_with",
- "sha2 0.10.8",
- "sha3",
- "strum",
- "thiserror",
- "tracing",
- "wasm-encoder 0.27.0",
- "wasm-smith",
- "wasmer-compiler-near",
- "wasmer-compiler-singlepass-near",
- "wasmer-engine-near",
- "wasmer-engine-universal-near",
- "wasmer-runtime-core-near",
- "wasmer-runtime-near",
- "wasmer-types-near",
- "wasmer-vm-near",
- "wasmparser 0.78.2",
- "wasmprinter",
- "wasmtime",
- "wat",
- "zeropool-bn",
-]
-
-[[package]]
-name = "near-vm-runner-fuzz"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "libfuzzer-sys",
- "near-parameters",
- "near-primitives",
- "near-test-contracts",
- "near-vm-runner",
- "wasm-smith",
- "wasmprinter",
-]
-
-[[package]]
-name = "near-vm-test-api"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "cfg-if 1.0.0",
- "finite-wasm",
- "indexmap 1.9.3",
- "more-asserts",
- "near-vm-compiler",
- "near-vm-compiler-singlepass",
- "near-vm-compiler-test-derive",
- "near-vm-engine",
- "near-vm-test-generator",
- "near-vm-types",
- "near-vm-vm",
- "near-vm-wast",
- "prefix-sum-vec",
- "serial_test",
- "target-lexicon 0.12.14",
- "tempfile",
- "test-log",
- "thiserror",
- "tracing",
- "tracing-subscriber",
- "wat",
- "winapi",
-]
-
-[[package]]
-name = "near-vm-test-generator"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "target-lexicon 0.12.14",
-]
-
-[[package]]
-name = "near-vm-types"
-version = "0.0.0"
-dependencies = [
- "bolero",
- "indexmap 1.9.3",
- "num-traits",
- "rkyv",
- "thiserror",
-]
-
-[[package]]
-name = "near-vm-vm"
-version = "0.0.0"
-dependencies = [
- "backtrace",
- "cc",
- "cfg-if 1.0.0",
- "finite-wasm",
- "indexmap 1.9.3",
- "libc",
- "memoffset 0.8.0",
- "more-asserts",
- "near-vm-types",
- "region",
- "rkyv",
- "thiserror",
- "tracing",
- "wasmparser 0.99.0",
- "winapi",
-]
-
-[[package]]
-name = "near-vm-wast"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "near-vm-test-api",
- "tempfile",
- "thiserror",
- "wast 40.0.0",
-]
-
-[[package]]
-name = "near-wallet-contract"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "near-primitives-core",
- "near-vm-runner",
 ]
 
 [[package]]
@@ -4722,16 +3469,6 @@ dependencies = [
  "enum-map",
  "hex",
  "indicatif",
- "near-chain-configs",
- "near-crypto",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-primitives-core",
- "near-store",
- "near-test-contracts",
- "near-vm-runner",
- "near-wallet-contract",
  "num-bigint 0.3.3",
  "num-rational",
  "num-traits",
@@ -4745,6 +3482,16 @@ dependencies = [
  "testlib",
  "thiserror",
  "tracing",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-store",
+ "unc-test-contracts",
+ "unc-vm-runner",
+ "unc-wallet-contract",
 ]
 
 [[package]]
@@ -5915,11 +4662,11 @@ dependencies = [
  "clap",
  "framework",
  "integration-tests",
- "near-crypto",
- "near-jsonrpc-client",
- "near-o11y",
- "near-primitives",
  "tokio",
+ "unc-crypto",
+ "unc-jsonrpc-client",
+ "unc-o11y",
+ "unc-primitives",
 ]
 
 [[package]]
@@ -6077,15 +4824,6 @@ dependencies = [
  "indicatif",
  "insta",
  "libc",
- "near-chain-configs",
- "near-crypto",
- "near-fmt",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-store",
- "near-test-contracts",
- "near-vm-runner",
  "node-runtime",
  "num-rational",
  "num-traits",
@@ -6097,6 +4835,15 @@ dependencies = [
  "tracing",
  "tracing-span-tree",
  "tracing-subscriber",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-fmt",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-store",
+ "unc-test-contracts",
+ "unc-vm-runner",
  "wat",
 ]
 
@@ -6108,22 +4855,22 @@ dependencies = [
  "cpu-time",
  "framework",
  "libfuzzer-sys",
- "near-chain",
- "near-chain-configs",
- "near-client",
- "near-client-primitives",
- "near-crypto",
- "near-epoch-manager",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-store",
- "near-test-contracts",
  "serde",
  "serde_json",
  "tempfile",
  "testlib",
  "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-store",
+ "unc-test-contracts",
 ]
 
 [[package]]
@@ -6776,14 +5523,14 @@ dependencies = [
  "borsh 1.3.1",
  "clap",
  "framework",
- "near-chain",
- "near-chain-configs",
- "near-chain-primitives",
- "near-epoch-manager",
- "near-primitives",
- "near-store",
  "serde",
  "serde_json",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
 ]
 
 [[package]]
@@ -6828,17 +5575,6 @@ dependencies = [
  "framework",
  "insta",
  "itertools",
- "near-chain",
- "near-chain-configs",
- "near-client",
- "near-crypto",
- "near-epoch-manager",
- "near-network",
- "near-o11y",
- "near-primitives",
- "near-primitives-core",
- "near-store",
- "near-test-contracts",
  "node-runtime",
  "once_cell",
  "rand 0.8.5",
@@ -6854,6 +5590,17 @@ dependencies = [
  "testlib",
  "thiserror",
  "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-store",
+ "unc-test-contracts",
  "yansi",
 ]
 
@@ -6868,15 +5615,15 @@ name = "storage-usage-delta-calculator"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "near-chain-configs",
- "near-o11y",
- "near-parameters",
- "near-primitives",
- "near-store",
  "node-runtime",
  "serde_json",
  "tokio",
  "tracing",
+ "unc-chain-configs",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-store",
 ]
 
 [[package]]
@@ -6885,15 +5632,15 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "framework",
- "near-chain",
- "near-chain-configs",
- "near-client",
- "near-epoch-manager",
- "near-o11y",
- "near-primitives",
- "near-store",
  "serde_json",
  "testlib",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-epoch-manager",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-store",
  "yansi",
 ]
 
@@ -7100,14 +5847,14 @@ dependencies = [
 name = "testlib"
 version = "0.0.0"
 dependencies = [
- "near-chain",
- "near-chain-configs",
- "near-crypto",
- "near-parameters",
- "near-primitives",
- "near-test-contracts",
  "node-runtime",
  "once_cell",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-test-contracts",
 ]
 
 [[package]]
@@ -7633,6 +6380,1258 @@ dependencies = [
 ]
 
 [[package]]
+name = "unc-account-id"
+version = "1.0.0"
+source = "git+https://github.com/zwong91/unc-account-id-rs?branch=main#26b78f66fc68b484eae9f822da093b10dba4545d"
+dependencies = [
+ "borsh 1.3.1",
+ "serde",
+]
+
+[[package]]
+name = "unc-actix-test-utils"
+version = "0.0.0"
+dependencies = [
+ "actix-rt",
+ "futures",
+ "once_cell",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-amend-genesis"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "borsh 1.3.1",
+ "clap",
+ "framework",
+ "node-runtime",
+ "num-rational",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-network",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-store",
+ "unc-test-contracts",
+]
+
+[[package]]
+name = "unc-async"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "derive-enum-from-into",
+ "derive_more",
+ "futures",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "time",
+ "tokio",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-cache"
+version = "0.0.0"
+dependencies = [
+ "bencher",
+ "lru",
+ "rand 0.8.5",
+]
+
+[[package]]
+name = "unc-chain"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "assert_matches",
+ "borsh 1.3.1",
+ "bytesize",
+ "chrono",
+ "crossbeam-channel",
+ "enum-map",
+ "insta",
+ "itertools",
+ "itoa",
+ "lru",
+ "num-rational",
+ "once_cell",
+ "rand 0.8.5",
+ "rand_chacha 0.3.1",
+ "rayon",
+ "strum",
+ "thiserror",
+ "tracing",
+ "unc-async",
+ "unc-cache",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-network",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-performance-metrics-macros",
+ "unc-pool",
+ "unc-primitives",
+ "unc-store",
+ "yansi",
+]
+
+[[package]]
+name = "unc-chain-configs"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytesize",
+ "chrono",
+ "derive_more",
+ "num-rational",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8",
+ "smart-default",
+ "tracing",
+ "unc-config-utils",
+ "unc-crypto",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-chain-primitives"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "thiserror",
+ "tracing",
+ "unc-crypto",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-chunks"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "assert_matches",
+ "borsh 1.3.1",
+ "chrono",
+ "derive-enum-from-into",
+ "derive_more",
+ "futures",
+ "itertools",
+ "lru",
+ "once_cell",
+ "rand 0.8.5",
+ "reed-solomon-erasure",
+ "strum",
+ "time",
+ "tracing",
+ "unc-async",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chunks-primitives",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-network",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-performance-metrics-macros",
+ "unc-pool",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-chunks-primitives"
+version = "0.0.0"
+dependencies = [
+ "unc-chain-primitives",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-client"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "actix-rt",
+ "anyhow",
+ "assert_matches",
+ "async-trait",
+ "borsh 1.3.1",
+ "chrono",
+ "cloud-storage",
+ "derive_more",
+ "futures",
+ "itertools",
+ "lru",
+ "num-rational",
+ "once_cell",
+ "percent-encoding",
+ "rand 0.8.5",
+ "rayon",
+ "reed-solomon-erasure",
+ "regex",
+ "reqwest",
+ "rust-s3",
+ "serde",
+ "serde_json",
+ "strum",
+ "sysinfo",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "unc-actix-test-utils",
+ "unc-async",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-chunks",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-dyn-configs",
+ "unc-epoch-manager",
+ "unc-network",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-performance-metrics",
+ "unc-performance-metrics-macros",
+ "unc-pool",
+ "unc-primitives",
+ "unc-store",
+ "unc-telemetry",
+ "yansi",
+]
+
+[[package]]
+name = "unc-client-primitives"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "chrono",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror",
+ "tracing",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-chunks-primitives",
+ "unc-crypto",
+ "unc-primitives",
+ "yansi",
+]
+
+[[package]]
+name = "unc-config-utils"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "json_comments",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "unc-crypto"
+version = "0.0.0"
+dependencies = [
+ "blake2",
+ "bolero",
+ "borsh 1.3.1",
+ "bs58",
+ "c2-chacha",
+ "curve25519-dalek",
+ "derive_more",
+ "ed25519-dalek",
+ "hex",
+ "hex-literal",
+ "once_cell",
+ "primitive-types",
+ "rand 0.7.3",
+ "rsa 0.9.6",
+ "rsa-export",
+ "secp256k1",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8",
+ "subtle",
+ "tempfile",
+ "thiserror",
+ "unc-account-id",
+ "unc-config-utils",
+ "unc-stdx",
+]
+
+[[package]]
+name = "unc-database-tool"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "borsh 1.3.1",
+ "clap",
+ "framework",
+ "indicatif",
+ "rand 0.8.5",
+ "rayon",
+ "rocksdb",
+ "strum",
+ "tempfile",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-dyn-configs"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "once_cell",
+ "prometheus",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "unc-chain-configs",
+ "unc-o11y",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-epoch-manager"
+version = "0.0.0"
+dependencies = [
+ "borsh 1.3.1",
+ "chrono",
+ "itertools",
+ "num-bigint 0.3.3",
+ "num-rational",
+ "num-traits",
+ "primitive-types",
+ "protobuf 3.4.0",
+ "rand 0.8.5",
+ "rand_hc 0.3.2",
+ "serde_json",
+ "smart-default",
+ "tracing",
+ "unc-cache",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-crypto",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-epoch-sync-tool"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "framework",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-flat-storage"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "borsh 1.3.1",
+ "clap",
+ "framework",
+ "rayon",
+ "tqdm",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-fmt"
+version = "0.0.0"
+dependencies = [
+ "unc-primitives-core",
+]
+
+[[package]]
+name = "unc-fork-network"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "anyhow",
+ "chrono",
+ "clap",
+ "framework",
+ "hex",
+ "rayon",
+ "serde",
+ "serde_json",
+ "strum",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-mirror",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-indexer"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "anyhow",
+ "async-recursion",
+ "framework",
+ "futures",
+ "node-runtime",
+ "once_cell",
+ "rocksdb",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-crypto",
+ "unc-dyn-configs",
+ "unc-indexer-primitives",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-indexer-primitives"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-jsonrpc"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "actix-cors",
+ "actix-web",
+ "bs58",
+ "easy-ext",
+ "futures",
+ "hex",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-client-primitives",
+ "unc-jsonrpc-adversarial-primitives",
+ "unc-jsonrpc-client",
+ "unc-jsonrpc-primitives",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-rpc-error-macro",
+]
+
+[[package]]
+name = "unc-jsonrpc-adversarial-primitives"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "unc-network",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-jsonrpc-client"
+version = "0.0.0"
+dependencies = [
+ "actix-http",
+ "awc",
+ "futures",
+ "serde",
+ "serde_json",
+ "unc-jsonrpc-primitives",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-jsonrpc-fuzz"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "arbitrary",
+ "awc",
+ "libfuzzer-sys",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "tokio",
+ "unc-jsonrpc",
+ "unc-jsonrpc-primitives",
+ "unc-jsonrpc-tests",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-jsonrpc-primitives"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "unc-chain-configs",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-primitives",
+ "unc-rpc-error-macro",
+]
+
+[[package]]
+name = "unc-jsonrpc-tests"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "awc",
+ "borsh 1.3.1",
+ "futures",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "unc-actix-test-utils",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-crypto",
+ "unc-jsonrpc",
+ "unc-jsonrpc-primitives",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-mainnet-res"
+version = "0.0.0"
+dependencies = [
+ "serde_json",
+ "unc-account-id",
+ "unc-chain-configs",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-mirror"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "anyhow",
+ "async-trait",
+ "borsh 1.3.1",
+ "bs58",
+ "clap",
+ "ed25519-dalek",
+ "framework",
+ "hex",
+ "hkdf",
+ "once_cell",
+ "openssl-probe",
+ "rand_core 0.5.1",
+ "rocksdb",
+ "secp256k1",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8",
+ "strum",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chain-primitives",
+ "unc-client",
+ "unc-client-primitives",
+ "unc-crypto",
+ "unc-epoch-manager",
+ "unc-indexer",
+ "unc-indexer-primitives",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-network"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "anyhow",
+ "arc-swap",
+ "assert_matches",
+ "async-trait",
+ "borsh 1.3.1",
+ "bytes",
+ "bytesize",
+ "chrono",
+ "criterion",
+ "crossbeam-channel",
+ "derive_more",
+ "futures",
+ "futures-util",
+ "im",
+ "itertools",
+ "lru",
+ "once_cell",
+ "opentelemetry",
+ "parking_lot 0.12.1",
+ "pin-project",
+ "pretty_assertions",
+ "protobuf 3.4.0",
+ "protobuf-codegen",
+ "rand 0.8.5",
+ "rand_xorshift",
+ "rayon",
+ "rlimit",
+ "serde",
+ "smart-default",
+ "strum",
+ "stun",
+ "tempfile",
+ "thiserror",
+ "time",
+ "tokio",
+ "tokio-stream",
+ "tokio-util 0.7.10",
+ "tracing",
+ "turn",
+ "unc-async",
+ "unc-crypto",
+ "unc-fmt",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-performance-metrics-macros",
+ "unc-primitives",
+ "unc-stable-hasher",
+ "unc-store",
+ "webrtc-util",
+]
+
+[[package]]
+name = "unc-o11y"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "base64 0.21.7",
+ "bencher",
+ "clap",
+ "itoa",
+ "once_cell",
+ "opentelemetry",
+ "opentelemetry-otlp",
+ "opentelemetry-semantic-conventions",
+ "prometheus",
+ "serde",
+ "serde_json",
+ "smartstring",
+ "strum",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "unc-crypto",
+ "unc-fmt",
+ "unc-primitives-core",
+]
+
+[[package]]
+name = "unc-parameters"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "borsh 1.3.1",
+ "clap",
+ "enum-map",
+ "insta",
+ "num-rational",
+ "serde",
+ "serde_repr",
+ "serde_yaml",
+ "strum",
+ "thiserror",
+ "unc-account-id",
+ "unc-primitives-core",
+]
+
+[[package]]
+name = "unc-performance-metrics"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "bitflags 1.3.2",
+ "bytes",
+ "bytesize",
+ "futures",
+ "libc",
+ "once_cell",
+ "strum",
+ "tokio",
+ "tokio-util 0.7.10",
+ "tracing",
+]
+
+[[package]]
+name = "unc-performance-metrics-macros"
+version = "0.0.0"
+dependencies = [
+ "quote",
+ "syn 2.0.52",
+]
+
+[[package]]
+name = "unc-ping"
+version = "0.0.0"
+dependencies = [
+ "actix-web",
+ "anyhow",
+ "chrono",
+ "clap",
+ "once_cell",
+ "prometheus",
+ "tokio",
+ "tracing",
+ "unc-async",
+ "unc-jsonrpc",
+ "unc-network",
+ "unc-o11y",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-pool"
+version = "0.0.0"
+dependencies = [
+ "borsh 1.3.1",
+ "once_cell",
+ "rand 0.8.5",
+ "unc-crypto",
+ "unc-o11y",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-primitives"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "assert_matches",
+ "base64 0.21.7",
+ "bencher",
+ "borsh 1.3.1",
+ "bytesize",
+ "cfg-if 1.0.0",
+ "chrono",
+ "derive_more",
+ "easy-ext",
+ "enum-map",
+ "hex",
+ "insta",
+ "num-rational",
+ "once_cell",
+ "primitive-types",
+ "rand 0.8.5",
+ "rand_chacha 0.3.1",
+ "reed-solomon-erasure",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "serde_yaml",
+ "sha3",
+ "smart-default",
+ "strum",
+ "thiserror",
+ "time",
+ "tracing",
+ "unc-crypto",
+ "unc-fmt",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives-core",
+ "unc-rpc-error-macro",
+ "unc-stdx",
+ "unc-vm-runner",
+]
+
+[[package]]
+name = "unc-primitives-core"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "base64 0.21.7",
+ "borsh 1.3.1",
+ "bs58",
+ "derive_more",
+ "enum-map",
+ "insta",
+ "num-rational",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
+ "sha2 0.10.8",
+ "strum",
+ "thiserror",
+ "unc-account-id",
+]
+
+[[package]]
+name = "unc-rpc-error-core"
+version = "0.0.0"
+dependencies = [
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 2.0.52",
+]
+
+[[package]]
+name = "unc-rpc-error-macro"
+version = "0.0.0"
+dependencies = [
+ "fs2",
+ "serde",
+ "serde_json",
+ "syn 2.0.52",
+ "unc-rpc-error-core",
+]
+
+[[package]]
+name = "unc-stable-hasher"
+version = "0.0.0"
+
+[[package]]
+name = "unc-state-parts"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "once_cell",
+ "sha2 0.10.8",
+ "tokio",
+ "tracing",
+ "unc-async",
+ "unc-jsonrpc",
+ "unc-network",
+ "unc-o11y",
+ "unc-ping",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-state-parts-dump-check"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "actix-web",
+ "anyhow",
+ "borsh 1.3.1",
+ "clap",
+ "cloud-storage",
+ "framework",
+ "once_cell",
+ "reqwest",
+ "tokio",
+ "tracing",
+ "unc-client",
+ "unc-jsonrpc",
+ "unc-o11y",
+ "unc-primitives",
+ "unc-primitives-core",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-stdx"
+version = "0.0.0"
+
+[[package]]
+name = "unc-store"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "actix-rt",
+ "anyhow",
+ "assert_matches",
+ "bencher",
+ "borsh 1.3.1",
+ "bytesize",
+ "crossbeam",
+ "derive_more",
+ "elastic-array",
+ "enum-map",
+ "fs2",
+ "hex",
+ "insta",
+ "itertools",
+ "itoa",
+ "lru",
+ "num_cpus",
+ "once_cell",
+ "rand 0.8.5",
+ "rayon",
+ "rlimit",
+ "rocksdb",
+ "serde",
+ "serde_json",
+ "strum",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-chunks",
+ "unc-crypto",
+ "unc-fmt",
+ "unc-o11y",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-stdx",
+ "unc-vm-runner",
+]
+
+[[package]]
+name = "unc-telemetry"
+version = "0.0.0"
+dependencies = [
+ "actix",
+ "awc",
+ "futures",
+ "once_cell",
+ "openssl",
+ "serde",
+ "serde_json",
+ "tracing",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-performance-metrics-macros",
+ "unc-primitives",
+]
+
+[[package]]
+name = "unc-test-contracts"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "once_cell",
+ "rand 0.8.5",
+ "wasm-encoder 0.27.0",
+ "wasm-smith",
+ "wat",
+]
+
+[[package]]
+name = "unc-undo-block"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "framework",
+ "tracing",
+ "unc-chain",
+ "unc-chain-configs",
+ "unc-epoch-manager",
+ "unc-primitives",
+ "unc-store",
+]
+
+[[package]]
+name = "unc-vm-compiler"
+version = "0.0.0"
+dependencies = [
+ "enumset",
+ "finite-wasm",
+ "hashbrown 0.14.3",
+ "rkyv",
+ "smallvec",
+ "target-lexicon 0.12.14",
+ "thiserror",
+ "tracing",
+ "unc-vm-types",
+ "unc-vm-vm",
+ "wasmparser 0.99.0",
+]
+
+[[package]]
+name = "unc-vm-compiler-singlepass"
+version = "0.0.0"
+dependencies = [
+ "dynasm 2.0.0",
+ "dynasmrt 2.0.0",
+ "enumset",
+ "finite-wasm",
+ "hashbrown 0.14.3",
+ "lazy_static",
+ "memoffset 0.8.0",
+ "more-asserts",
+ "rayon",
+ "smallvec",
+ "strum",
+ "target-lexicon 0.12.14",
+ "tracing",
+ "unc-vm-compiler",
+ "unc-vm-types",
+ "unc-vm-vm",
+]
+
+[[package]]
+name = "unc-vm-compiler-test-derive"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.52",
+ "trybuild",
+]
+
+[[package]]
+name = "unc-vm-engine"
+version = "0.0.0"
+dependencies = [
+ "backtrace",
+ "cfg-if 1.0.0",
+ "crossbeam-queue",
+ "enumset",
+ "finite-wasm",
+ "lazy_static",
+ "memmap2",
+ "more-asserts",
+ "region",
+ "rkyv",
+ "rustc-demangle",
+ "rustix 0.37.27",
+ "target-lexicon 0.12.14",
+ "thiserror",
+ "tracing",
+ "unc-vm-compiler",
+ "unc-vm-types",
+ "unc-vm-vm",
+]
+
+[[package]]
+name = "unc-vm-runner"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arbitrary",
+ "assert_matches",
+ "base64 0.21.7",
+ "bolero",
+ "borsh 1.3.1",
+ "ed25519-dalek",
+ "enum-map",
+ "expect-test",
+ "finite-wasm",
+ "hex",
+ "loupe",
+ "memoffset 0.8.0",
+ "num-rational",
+ "once_cell",
+ "parity-wasm 0.41.0",
+ "parity-wasm 0.42.2",
+ "prefix-sum-vec",
+ "pwasm-utils",
+ "rand 0.8.5",
+ "ripemd",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
+ "sha2 0.10.8",
+ "sha3",
+ "strum",
+ "thiserror",
+ "tracing",
+ "unc-crypto",
+ "unc-parameters",
+ "unc-primitives-core",
+ "unc-stdx",
+ "unc-test-contracts",
+ "unc-vm-compiler",
+ "unc-vm-compiler-singlepass",
+ "unc-vm-engine",
+ "unc-vm-types",
+ "unc-vm-vm",
+ "wasm-encoder 0.27.0",
+ "wasm-smith",
+ "wasmer-compiler-near",
+ "wasmer-compiler-singlepass-near",
+ "wasmer-engine-near",
+ "wasmer-engine-universal-near",
+ "wasmer-runtime-core-near",
+ "wasmer-runtime-near",
+ "wasmer-types-near",
+ "wasmer-vm-near",
+ "wasmparser 0.78.2",
+ "wasmprinter",
+ "wasmtime",
+ "wat",
+ "zeropool-bn",
+]
+
+[[package]]
+name = "unc-vm-runner-fuzz"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "libfuzzer-sys",
+ "unc-parameters",
+ "unc-primitives",
+ "unc-test-contracts",
+ "unc-vm-runner",
+ "wasm-smith",
+ "wasmprinter",
+]
+
+[[package]]
+name = "unc-vm-test-api"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cfg-if 1.0.0",
+ "finite-wasm",
+ "indexmap 1.9.3",
+ "more-asserts",
+ "prefix-sum-vec",
+ "serial_test",
+ "target-lexicon 0.12.14",
+ "tempfile",
+ "test-log",
+ "thiserror",
+ "tracing",
+ "tracing-subscriber",
+ "unc-vm-compiler",
+ "unc-vm-compiler-singlepass",
+ "unc-vm-compiler-test-derive",
+ "unc-vm-engine",
+ "unc-vm-test-generator",
+ "unc-vm-types",
+ "unc-vm-vm",
+ "unc-vm-wast",
+ "wat",
+ "winapi",
+]
+
+[[package]]
+name = "unc-vm-test-generator"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "target-lexicon 0.12.14",
+]
+
+[[package]]
+name = "unc-vm-types"
+version = "0.0.0"
+dependencies = [
+ "bolero",
+ "indexmap 1.9.3",
+ "num-traits",
+ "rkyv",
+ "thiserror",
+]
+
+[[package]]
+name = "unc-vm-vm"
+version = "0.0.0"
+dependencies = [
+ "backtrace",
+ "cc",
+ "cfg-if 1.0.0",
+ "finite-wasm",
+ "indexmap 1.9.3",
+ "libc",
+ "memoffset 0.8.0",
+ "more-asserts",
+ "region",
+ "rkyv",
+ "thiserror",
+ "tracing",
+ "unc-vm-types",
+ "wasmparser 0.99.0",
+ "winapi",
+]
+
+[[package]]
+name = "unc-vm-wast"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "tempfile",
+ "thiserror",
+ "unc-vm-test-api",
+ "wast 40.0.0",
+]
+
+[[package]]
+name = "unc-wallet-contract"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "unc-primitives-core",
+ "unc-vm-runner",
+]
+
+[[package]]
 name = "uncd"
 version = "0.0.0"
 dependencies = [
@@ -7642,27 +7641,6 @@ dependencies = [
  "cold-store-tool",
  "framework",
  "futures",
- "near-amend-genesis",
- "near-chain-configs",
- "near-client",
- "near-config-utils",
- "near-crypto",
- "near-database-tool",
- "near-dyn-configs",
- "near-epoch-sync-tool",
- "near-flat-storage",
- "near-fork-network",
- "near-jsonrpc-primitives",
- "near-mirror",
- "near-network",
- "near-o11y",
- "near-performance-metrics",
- "near-ping",
- "near-primitives",
- "near-state-parts",
- "near-state-parts-dump-check",
- "near-store",
- "near-undo-block",
  "once_cell",
  "openssl-probe",
  "opentelemetry",
@@ -7677,6 +7655,27 @@ dependencies = [
  "tikv-jemallocator",
  "tokio",
  "tracing",
+ "unc-amend-genesis",
+ "unc-chain-configs",
+ "unc-client",
+ "unc-config-utils",
+ "unc-crypto",
+ "unc-database-tool",
+ "unc-dyn-configs",
+ "unc-epoch-sync-tool",
+ "unc-flat-storage",
+ "unc-fork-network",
+ "unc-jsonrpc-primitives",
+ "unc-mirror",
+ "unc-network",
+ "unc-o11y",
+ "unc-performance-metrics",
+ "unc-ping",
+ "unc-primitives",
+ "unc-state-parts",
+ "unc-state-parts-dump-check",
+ "unc-store",
+ "unc-undo-block",
  "yansi",
 ]
 

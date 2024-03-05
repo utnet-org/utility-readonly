@@ -3,7 +3,7 @@ use std::panic::Location;
 use std::time::{Duration, Instant};
 use std::{fmt, iter, ops};
 
-use near_primitives::types::Gas;
+use unc_primitives::types::Gas;
 use num_rational::Ratio;
 use num_traits::ToPrimitive;
 use serde_json::json;
@@ -515,7 +515,7 @@ mod tests {
     use super::{least_squares_method_gas_cost_pos_neg, GasCost, LeastSquaresTolerance};
     use crate::estimator_params::{GAS_IN_INSTR, GAS_IN_NS, IO_READ_BYTE_COST, IO_WRITE_BYTE_COST};
     use crate::qemu::QemuMeasurement;
-    use near_primitives::types::Gas;
+    use unc_primitives::types::Gas;
     use num_rational::Ratio;
     use num_traits::{ToPrimitive, Zero};
 

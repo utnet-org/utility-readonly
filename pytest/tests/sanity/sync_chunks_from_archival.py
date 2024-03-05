@@ -127,7 +127,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
     config = load_config()
-    near_root, node_dirs = init_cluster(
+    unc_root, node_dirs = init_cluster(
         2,
         3,
         2,
@@ -179,9 +179,9 @@ if __name__ == '__main__':
             }
         })
 
-    boot_node = spin_up_node(config, near_root, node_dirs[0], 0, proxy=proxy)
+    boot_node = spin_up_node(config, unc_root, node_dirs[0], 0, proxy=proxy)
     node1 = spin_up_node(config,
-                         near_root,
+                         unc_root,
                          node_dirs[1],
                          1,
                          boot_node=boot_node,
@@ -196,13 +196,13 @@ if __name__ == '__main__':
                           timeout=timeout.left_seconds())
 
     node2 = spin_up_node(config,
-                         near_root,
+                         unc_root,
                          node_dirs[2],
                          2,
                          boot_node=boot_node,
                          proxy=proxy)
     node3 = spin_up_node(config,
-                         near_root,
+                         unc_root,
                          node_dirs[3],
                          3,
                          boot_node=boot_node,
@@ -249,7 +249,7 @@ if __name__ == '__main__':
                                                  timeout=timeout.left_seconds())
 
     logging.info("Spinning up one more node")
-    node4 = spin_up_node(config, near_root, node_dirs[4], 4, boot_node=node2)
+    node4 = spin_up_node(config, unc_root, node_dirs[4], 4, boot_node=node2)
 
     logging.info('Waiting for the new node to sync.  '
                  f'We are {timeout.elapsed_seconds()} seconds in')

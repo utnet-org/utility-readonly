@@ -198,11 +198,11 @@ INFO uncd: version="trunk" build="1.1.0-3091-ga8964d200-modified" latest_protoco
 INFO near: Creating a new RocksDB database path=/home/matklad/.near/data
 INFO db: Created a new RocksDB instance. num_instances=1
 INFO stats: #       0 4xecSHqTKx2q8JNQNapVEi5jxzewjxAnVFhMd4v5LqNh Validator | 1 validator 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s CPU: 0%, Mem: 50.8 MB
-INFO near_chain::doomslug: ready to produce block @ 1, has enough approvals for 59.907µs, has enough chunks
-INFO near_chain::doomslug: ready to produce block @ 2, has enough approvals for 40.732µs, has enough chunks
-INFO near_chain::doomslug: ready to produce block @ 3, has enough approvals for 65.341µs, has enough chunks
-INFO near_chain::doomslug: ready to produce block @ 4, has enough approvals for 51.916µs, has enough chunks
-INFO near_chain::doomslug: ready to produce block @ 5, has enough approvals for 37.155µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 1, has enough approvals for 59.907µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 2, has enough approvals for 40.732µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 3, has enough approvals for 65.341µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 4, has enough approvals for 51.916µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 5, has enough approvals for 37.155µs, has enough chunks
 ...
 ```
 
@@ -218,7 +218,7 @@ means that our network grows.
 Let's stop the node with `^C` and look around
 
 ```console
-INFO near_chain::doomslug: ready to produce block @ 42, has enough approvals for 56.759µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 42, has enough approvals for 56.759µs, has enough chunks
 ^C WARN uncd: SIGINT, stopping... this may take a few minutes.
 INFO uncd: Waiting for RocksDB to gracefully shutdown
 INFO db: Waiting for remaining RocksDB instances to shut down num_instances=1
@@ -253,13 +253,13 @@ INFO db: Dropped a RocksDB instance. num_instances=0
 INFO near: Opening an existing RocksDB database path=/home/matklad/.near/data
 INFO db: Created a new RocksDB instance. num_instances=1
 INFO stats: #       5 Cfba39eH7cyNfKn9GoKTyRg8YrhoY1nQxQs66tLBYwRH Validator | 1 validator 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s CPU: 0%, Mem: 49.4 MB
-INFO near_chain::doomslug: not ready to produce block @ 43, need to wait 366.58789ms, has enough approvals for 78.776µs
-INFO near_chain::doomslug: not ready to produce block @ 43, need to wait 265.547148ms, has enough approvals for 101.119518ms
-INFO near_chain::doomslug: not ready to produce block @ 43, need to wait 164.509153ms, has enough approvals for 202.157513ms
-INFO near_chain::doomslug: not ready to produce block @ 43, need to wait 63.176926ms, has enough approvals for 303.48974ms
-INFO near_chain::doomslug: ready to produce block @ 43, has enough approvals for 404.41498ms, does not have enough chunks
-INFO near_chain::doomslug: ready to produce block @ 44, has enough approvals for 50.07µs, has enough chunks
-INFO near_chain::doomslug: ready to produce block @ 45, has enough approvals for 45.093µs, has enough chunks
+INFO unc_chain::doomslug: not ready to produce block @ 43, need to wait 366.58789ms, has enough approvals for 78.776µs
+INFO unc_chain::doomslug: not ready to produce block @ 43, need to wait 265.547148ms, has enough approvals for 101.119518ms
+INFO unc_chain::doomslug: not ready to produce block @ 43, need to wait 164.509153ms, has enough approvals for 202.157513ms
+INFO unc_chain::doomslug: not ready to produce block @ 43, need to wait 63.176926ms, has enough approvals for 303.48974ms
+INFO unc_chain::doomslug: ready to produce block @ 43, has enough approvals for 404.41498ms, does not have enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 44, has enough approvals for 50.07µs, has enough chunks
+INFO unc_chain::doomslug: ready to produce block @ 45, has enough approvals for 45.093µs, has enough chunks
 ```
 
 ## Interacting With the Node
@@ -363,12 +363,12 @@ to bytes, then signed, then encoded in base64 for JSON.
 
 So we will use the official [NEAR CLI] utility.
 
-[NEAR CLI]: https://docs.near.org/tools/near-cli
+[NEAR CLI]: https://docs.near.org/tools/unc-cli
 
 Install it via `npm`:
 
 ```console
-$ npm install -g near-cli
+$ npm install -g unc-cli
 $ near -h
 Usage: near <command> [options]
 
@@ -377,13 +377,13 @@ Commands:
 ....
 ```
 
-Note that, although you install `near-cli`, the name of the utility is `near`.
+Note that, although you install `unc-cli`, the name of the utility is `near`.
 
 As a first step, let's redo the `view_account` call we did with raw `httpie`
-with `near-cli`:
+with `unc-cli`:
 
 ```console
-$ NEAR_ENV=local near state test.near
+$ unc_ENV=local near state test.near
 Loaded master account test.near key from ~/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Account test.near
 {
@@ -398,25 +398,25 @@ Account test.near
 }
 ```
 
-`NEAR_ENV=local` tells `near-cli` to use our local network, rather than the
+`unc_ENV=local` tells `unc-cli` to use our local network, rather than the
 `mainnet`.
 
 Now, let's create a couple of accounts and send tokes between them:
 
 ```
-$ NEAR_ENV=local near create-account alice.test.near --masterAccount test.near
+$ unc_ENV=local near create-account alice.test.near --masterAccount test.near
 NOTE: In most cases, when connected to network "local", masterAccount will end in ".node0"
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Saving key to 'undefined/local/alice.test.near.json'
 Account alice.test.near for network "local" was created.
 
-$ NEAR_ENV=local near create-account bob.test.near --masterAccount test.near
+$ unc_ENV=local near create-account bob.test.near --masterAccount test.near
 NOTE: In most cases, when connected to network "local", masterAccount will end in ".node0"
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Saving key to 'undefined/local/bob.test.near.json'
 Account bob.test.near for network "local" was created.
 
-$ NEAR_ENV=local near send alice.test.near bob.test.near 10
+$ unc_ENV=local near send alice.test.near bob.test.near 10
 Sending 10 NEAR to bob.test.near from alice.test.near
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Transaction Id BBPndo6gR4X8pzoDK7UQfoUXp5J8WDxkf8Sq75tK5FFT
@@ -424,26 +424,26 @@ To see the transaction in the transaction explorer, please open this url in your
 http://localhost:9001/transactions/BBPndo6gR4X8pzoDK7UQfoUXp5J8WDxkf8Sq75tK5FFT
 ```
 
-**Note:** You can export the variable `NEAR_ENV` in your shell if you are planning
+**Note:** You can export the variable `unc_ENV` in your shell if you are planning
 to do multiple commands to avoid repetition:
 
 ```console
-$ export NEAR_ENV=local
+$ export unc_ENV=local
 ```
 
 NEAR CLI printouts are not always the most useful or accurate, but this seems to
 work.
 
 Note that `near` automatically creates keypairs and stores them at
-`.near-credentials`:
+`.unc-credentials`:
 
 ```console
-$ ls ~/.near-credentials/local
+$ ls ~/.unc-credentials/local
   alice.test.near.json
   bob.test.near.json
 ```
 
-To verify that this did work, and that `near-cli` didn't cheat us, let's
+To verify that this did work, and that `unc-cli` didn't cheat us, let's
 query the state of accounts manually:
 
 ```console
@@ -470,8 +470,8 @@ binary we've built from source. The steps are:
 - Create configs with `cargo run --profile dev-release -p uncd -- init`
 - Run the node with `cargo run --profile dev-release -p uncd -- run`
 - Poke the node with `httpie` or
-- Install `near-cli` via `npm install -g near-cli`
-- Submit transactions via `NEAR_ENV=local near create-account ...`
+- Install `unc-cli` via `npm install -g unc-cli`
+- Submit transactions via `unc_ENV=local near create-account ...`
 
 In the [next chapter](./deploy_a_contract.md), we'll learn how to deploy a simple
 WASM contract.

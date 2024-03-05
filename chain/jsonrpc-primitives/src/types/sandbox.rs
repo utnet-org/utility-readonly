@@ -1,5 +1,5 @@
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::BlockHeightDelta;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::BlockHeightDelta;
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct RpcSandboxPatchStateRequest {

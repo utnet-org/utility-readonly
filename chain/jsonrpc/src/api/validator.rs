@@ -1,11 +1,11 @@
 use serde_json::Value;
 
-use near_client_primitives::types::GetValidatorInfoError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::validator::{
+use unc_client_primitives::types::GetValidatorInfoError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::validator::{
     RpcValidatorError, RpcValidatorRequest, RpcValidatorsOrderedRequest,
 };
-use near_primitives::types::EpochReference;
+use unc_primitives::types::EpochReference;
 
 use super::{Params, RpcFrom, RpcRequest};
 
@@ -53,9 +53,9 @@ impl RpcFrom<GetValidatorInfoError> for RpcValidatorError {
 #[cfg(test)]
 mod tests {
     use crate::api::RpcRequest;
-    use near_jsonrpc_primitives::types::validator::RpcValidatorRequest;
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::types::{BlockId, EpochId, EpochReference};
+    use unc_jsonrpc_primitives::types::validator::RpcValidatorRequest;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::types::{BlockId, EpochId, EpochReference};
 
     #[test]
     fn test_serialize_validators_params_as_vec() {

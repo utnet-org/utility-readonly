@@ -5,8 +5,8 @@ use crate::peer_manager::connection;
 use crate::private_actix::RegisterPeerError;
 use crate::tcp;
 use crate::testonly::make_rng;
-use near_async::time;
-use near_o11y::testonly::init_test_logger;
+use unc_async::time;
+use unc_o11y::testonly::init_test_logger;
 use std::sync::Arc;
 
 #[tokio::test]
@@ -22,7 +22,7 @@ async fn connection_tie_break() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         cfgs[1].clone(),
         chain.clone(),
     )
@@ -64,7 +64,7 @@ async fn duplicate_connections() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )

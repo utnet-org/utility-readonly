@@ -34,7 +34,7 @@ config = load_config()
 
 node_config = state_sync_lib.get_state_sync_config_combined()
 
-near_root, node_dirs = init_cluster(
+unc_root, node_dirs = init_cluster(
     2, 1, 1, config,
     [["min_gas_price", 0], ["max_inflation_rate", [0, 1]], ["epoch_length", 10],
      ["block_producer_kickout_threshold", 80]],
@@ -42,8 +42,8 @@ near_root, node_dirs = init_cluster(
 
 started = time.time()
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
-node1 = spin_up_node(config, near_root, node_dirs[1], 1, boot_node=boot_node)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
+node1 = spin_up_node(config, unc_root, node_dirs[1], 1, boot_node=boot_node)
 
 ctx = utils.TxContext([0, 0], [boot_node, node1])
 
@@ -68,7 +68,7 @@ for height, block_hash in utils.poll_blocks(boot_node,
 if mode == 'onetx':
     assert ctx.get_balances() == ctx.expected_balances
 
-node2 = spin_up_node(config, near_root, node_dirs[2], 2, boot_node=boot_node)
+node2 = spin_up_node(config, unc_root, node_dirs[2], 2, boot_node=boot_node)
 tracker = utils.LogTracker(node2)
 time.sleep(3)
 

@@ -1,5 +1,5 @@
 [package]
-name = "near-amend-genesis"
+name = "unc-amend-genesis"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -21,14 +21,14 @@ serde_json.workspace = true
 tempfile.workspace = true
 tracing.workspace = true
 
-near-chain.workspace = true
-near-chain-configs.workspace = true
-near-crypto.workspace = true
-near-epoch-manager.workspace = true
-near-network.workspace = true
-near-primitives.workspace = true
-near-primitives-core.workspace = true
-near-store.workspace = true
-near-test-contracts.workspace = true
+unc-chain.workspace = true
+unc-chain-configs.workspace = true
+unc-crypto.workspace = true
+unc-epoch-manager.workspace = true
+unc-network.workspace = true
+unc-primitives.workspace = true
+unc-primitives-core.workspace = true
+unc-store.workspace = true
+unc-test-contracts.workspace = true
 framework.workspace = true
 node-runtime.workspace = true

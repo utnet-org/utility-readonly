@@ -7,12 +7,12 @@ use crate::flat::{FlatStorageError, FlatStorageStatus};
 use crate::trie::mem::construction::TrieConstructor;
 use crate::trie::mem::updating::apply_memtrie_changes;
 use crate::{DBCol, Store};
-use near_primitives::errors::StorageError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::{get_block_shard_uid, ShardUId};
-use near_primitives::state::FlatStateValue;
-use near_primitives::types::chunk_extra::ChunkExtra;
-use near_primitives::types::BlockHeight;
+use unc_primitives::errors::StorageError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::{get_block_shard_uid, ShardUId};
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::types::chunk_extra::ChunkExtra;
+use unc_primitives::types::BlockHeight;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use std::collections::BTreeSet;
 use std::time::Instant;
@@ -186,12 +186,12 @@ mod tests {
     use crate::trie::mem::lookup::memtrie_lookup;
     use crate::trie::OptimizedValueRef;
     use crate::{DBCol, KeyLookupMode, NibbleSlice, ShardTries, Store, Trie, TrieUpdate};
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::shard_layout::{get_block_shard_uid, ShardUId};
-    use near_primitives::state::FlatStateValue;
-    use near_primitives::trie_key::TrieKey;
-    use near_primitives::types::chunk_extra::ChunkExtra;
-    use near_primitives::types::StateChangeCause;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::shard_layout::{get_block_shard_uid, ShardUId};
+    use unc_primitives::state::FlatStateValue;
+    use unc_primitives::trie_key::TrieKey;
+    use unc_primitives::types::chunk_extra::ChunkExtra;
+    use unc_primitives::types::StateChangeCause;
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
 
@@ -226,7 +226,7 @@ mod tests {
             &CryptoHash::default(),
             false,
         ));
-        trie_update.set_trie_cache_mode(near_primitives::types::TrieCacheMode::CachingChunk);
+        trie_update.set_trie_cache_mode(unc_primitives::types::TrieCacheMode::CachingChunk);
         let trie = trie_update.trie();
         let root = in_memory_trie.get_root(&state_root).unwrap();
 

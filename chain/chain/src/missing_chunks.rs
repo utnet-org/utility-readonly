@@ -1,6 +1,6 @@
-use near_primitives::hash::CryptoHash;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::types::BlockHeight;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::types::BlockHeight;
 use std::cmp::Ordering;
 use std::collections::{
     btree_map::{self, BTreeMap},
@@ -191,9 +191,9 @@ impl<Block: BlockLike> MissingChunksPool<Block> {
 #[cfg(test)]
 mod test {
     use super::{BlockHash, BlockLike, MissingChunksPool, MAX_BLOCKS_MISSING_CHUNKS};
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::sharding::ChunkHash;
-    use near_primitives::types::BlockHeight;
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::sharding::ChunkHash;
+    use unc_primitives::types::BlockHeight;
 
     fn get_hash(idx: u64) -> CryptoHash {
         hash(&idx.to_le_bytes())

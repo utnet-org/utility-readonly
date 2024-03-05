@@ -16,22 +16,22 @@ extern crate bencher;
 
 use bencher::{black_box, Bencher};
 use borsh::BorshSerialize;
-use near_chain::Chain;
-use near_chunks::ShardsManager;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{merklize, MerklePathItem};
-use near_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum};
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::sharding::{
+use unc_chain::Chain;
+use unc_chunks::ShardsManager;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{merklize, MerklePathItem};
+use unc_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum};
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::sharding::{
     ChunkHash, EncodedShardChunk, PartialEncodedChunk, PartialEncodedChunkPart,
     PartialEncodedChunkV2, ReceiptProof, ReedSolomonWrapper, ShardChunk, ShardChunkHeader,
     ShardChunkHeaderV3, ShardChunkV2, ShardProof,
 };
-use near_primitives::transaction::{Action, FunctionCallAction, SignedTransaction};
-use near_primitives::types::AccountId;
-use near_primitives::validator_signer::InMemoryValidatorSigner;
-use near_store::DBCol;
+use unc_primitives::transaction::{Action, FunctionCallAction, SignedTransaction};
+use unc_primitives::types::AccountId;
+use unc_primitives::validator_signer::InMemoryValidatorSigner;
+use unc_store::DBCol;
 use rand::prelude::SliceRandom;
 
 /// `ShardChunk` -> `StoreUpdate::insert_ser`.
@@ -45,7 +45,7 @@ fn benchmark_write_shard_chunk(bench: &mut Bencher) {
 
     let chunks = spread_in_memory(chunk);
 
-    let store = near_store::test_utils::create_test_store();
+    let store = unc_store::test_utils::create_test_store();
     bench.iter(|| {
         let mut update = store.store_update();
         update
@@ -68,7 +68,7 @@ fn benchmark_write_partial_encoded_chunk(bench: &mut Bencher) {
         encoded_chunk_to_partial_encoded_chunk(encoded_chunk, receipts, merkle_paths);
     let chunks = spread_in_memory(partial_chunk);
 
-    let store = near_store::test_utils::create_test_store();
+    let store = unc_store::test_utils::create_test_store();
     bench.iter(|| {
         let mut update = store.store_update();
         update

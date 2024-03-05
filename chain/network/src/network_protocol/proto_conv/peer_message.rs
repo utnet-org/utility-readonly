@@ -11,10 +11,10 @@ use crate::network_protocol::{
 use crate::network_protocol::{RoutedMessage, RoutedMessageV2};
 use crate::types::StateResponseInfo;
 use borsh::BorshDeserialize as _;
-use near_async::time::error::ComponentRange;
-use near_primitives::block::{Block, BlockHeader};
-use near_primitives::challenge::Challenge;
-use near_primitives::transaction::SignedTransaction;
+use unc_async::time::error::ComponentRange;
+use unc_primitives::block::{Block, BlockHeader};
+use unc_primitives::challenge::Challenge;
+use unc_primitives::transaction::SignedTransaction;
 use protobuf::MessageField as MF;
 use std::sync::Arc;
 

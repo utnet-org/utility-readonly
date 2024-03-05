@@ -2,13 +2,13 @@
 //! deployed.
 
 use borsh::BorshDeserialize;
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{Receipt, ReceiptEnum};
-use near_primitives::transaction::{Action, ExecutionOutcomeWithProof};
-use near_primitives::trie_key::trie_key_parsers::parse_account_id_from_contract_code_key;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::AccountId;
-use near_store::{DBCol, NibbleSlice, StorageError, Store, Trie, TrieTraversalItem};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{Receipt, ReceiptEnum};
+use unc_primitives::transaction::{Action, ExecutionOutcomeWithProof};
+use unc_primitives::trie_key::trie_key_parsers::parse_account_id_from_contract_code_key;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::AccountId;
+use unc_store::{DBCol, NibbleSlice, StorageError, Store, Trie, TrieTraversalItem};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 type Result<T> = std::result::Result<T, ContractAccountError>;
@@ -251,7 +251,7 @@ impl<T: Iterator<Item = Result<ContractAccount>>> Summary for T {
         if iterate_receipts {
             eprintln!("Iterating all receipts in the database. This might take a while...");
             let mut receipts_done = 0;
-            for pair in store.iter(near_store::DBCol::Receipts) {
+            for pair in store.iter(unc_store::DBCol::Receipts) {
                 if let Err(e) =
                     try_find_actions_spawned_by_receipt(pair, &mut contracts, store, filter)
                 {
@@ -322,7 +322,7 @@ fn try_find_actions_spawned_by_receipt(
             if filter.actions {
                 for outgoing_receipt_id in &outcome.outcome.receipt_ids {
                     let maybe_outgoing_receipt: Option<Receipt> = store
-                        .get_ser(near_store::DBCol::Receipts, outgoing_receipt_id.as_bytes())
+                        .get_ser(unc_store::DBCol::Receipts, outgoing_receipt_id.as_bytes())
                         .map_err(|e| ContractAccountError::UnparsableValue(e, DBCol::Receipts))?;
                     let outgoing_receipt = maybe_outgoing_receipt.ok_or_else(|| {
                         ContractAccountError::MissingOutgoingReceipt(*outgoing_receipt_id)
@@ -486,20 +486,20 @@ impl ContractAccountFilter {
 mod tests {
     use super::{ContractAccount, ContractAccountFilter, Summary};
     use borsh::BorshSerialize;
-    use near_crypto::{InMemorySigner, Signer};
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
-    use near_primitives::transaction::{
+    use unc_crypto::{InMemorySigner, Signer};
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
+    use unc_primitives::transaction::{
         Action, CreateAccountAction, DeployContractAction, ExecutionMetadata, ExecutionOutcome,
         ExecutionOutcomeWithProof, ExecutionStatus, FunctionCallAction, TransferAction,
     };
-    use near_primitives::trie_key::TrieKey;
-    use near_primitives::types::AccountId;
-    use near_store::test_utils::{
+    use unc_primitives::trie_key::TrieKey;
+    use unc_primitives::types::AccountId;
+    use unc_store::test_utils::{
         create_test_store, test_populate_store, test_populate_store_rc, test_populate_trie,
         TestTriesBuilder,
     };
-    use near_store::{DBCol, ShardUId, Store, Trie};
+    use unc_store::{DBCol, ShardUId, Store, Trie};
     use std::fmt::Write;
 
     #[test]
@@ -665,7 +665,7 @@ mod tests {
         (
             TrieKey::AccessKey {
                 account_id: account.parse().unwrap(),
-                public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
+                public_key: unc_crypto::PublicKey::empty(unc_crypto::KeyType::ED25519),
             }
             .to_vec(),
             Some(vec![num, num, num, num]),
@@ -716,7 +716,7 @@ mod tests {
     fn create_receipt_with_actions(sender: &str, receiver: &str, actions: Vec<Action>) -> Receipt {
         let sender_id: AccountId = sender.parse().unwrap();
         let signer =
-            InMemorySigner::from_seed(sender_id.clone(), near_crypto::KeyType::ED25519, "seed");
+            InMemorySigner::from_seed(sender_id.clone(), unc_crypto::KeyType::ED25519, "seed");
         Receipt {
             predecessor_id: sender_id.clone(),
             receiver_id: receiver.parse().unwrap(),

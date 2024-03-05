@@ -1,6 +1,6 @@
 /// Provides structs used for getting time.
 ///
-/// DEPRECATION WARNING: This module is DEPRECATED. Use `near_primitives::time` instead.
+/// DEPRECATION WARNING: This module is DEPRECATED. Use `unc_primitives::time` instead.
 ///
 /// WARNING WARNING WARNING
 /// WARNING WARNING WARNING

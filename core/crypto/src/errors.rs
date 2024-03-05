@@ -1,4 +1,4 @@
-use near_account_id::AccountId;
+use unc_account_id::AccountId;
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum ParseKeyTypeError {

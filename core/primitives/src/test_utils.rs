@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use near_crypto::{EmptySigner, InMemorySigner, KeyType, PublicKey, SecretKey, Signature, Signer};
-use near_primitives_core::account::id::AccountIdRef;
-use near_primitives_core::types::{Power, ProtocolVersion};
+use unc_crypto::{EmptySigner, InMemorySigner, KeyType, PublicKey, SecretKey, Signature, Signer};
+use unc_primitives_core::account::id::AccountIdRef;
+use unc_primitives_core::types::{Power, ProtocolVersion};
 
 use crate::account::{AccessKey, AccessKeyPermission, Account};
 use crate::block::Block;
@@ -577,20 +577,20 @@ pub fn create_test_signer(account_name: &str) -> InMemoryValidatorSigner {
 /// Should be used only in tests.
 pub fn create_user_test_signer(account_name: &AccountIdRef) -> InMemorySigner {
     let account_id = account_name.to_owned();
-    if account_id == near_implicit_test_account() {
-        InMemorySigner::from_secret_key(account_id, near_implicit_test_account_secret())
+    if account_id == unc_implicit_test_account() {
+        InMemorySigner::from_secret_key(account_id, unc_implicit_test_account_secret())
     } else {
         InMemorySigner::from_seed(account_id, KeyType::ED25519, account_name.as_str())
     }
 }
 
 /// A fixed NEAR-implicit account for which tests can know the private key.
-pub fn near_implicit_test_account() -> AccountId {
+pub fn unc_implicit_test_account() -> AccountId {
     "061b1dd17603213b00e1a1e53ba060ad427cef4887bd34a5e0ef09010af23b0a".parse().unwrap()
 }
 
 /// Private key for the fixed NEAR-implicit test account.
-pub fn near_implicit_test_account_secret() -> SecretKey {
+pub fn unc_implicit_test_account_secret() -> SecretKey {
     "ed25519:5roj6k68kvZu3UEJFyXSfjdKGrodgZUfFLZFpzYXWtESNsLWhYrq3JGi4YpqeVKuw1m9R2TEHjfgWT1fjUqB1DNy".parse().unwrap()
 }
 

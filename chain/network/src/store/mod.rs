@@ -3,8 +3,8 @@
 /// in particular schema::StoreUpdate is not exported.
 use crate::network_protocol::Edge;
 use crate::types::ConnectionInfo;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::types::AccountId;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::types::AccountId;
 use std::collections::HashSet;
 use std::sync::Arc;
 use tracing::debug;
@@ -137,16 +137,16 @@ impl Store {
     }
 }
 
-impl From<Arc<dyn near_store::db::Database>> for Store {
-    fn from(store: Arc<dyn near_store::db::Database>) -> Self {
+impl From<Arc<dyn unc_store::db::Database>> for Store {
+    fn from(store: Arc<dyn unc_store::db::Database>) -> Self {
         Self(schema::Store::from(store))
     }
 }
 
 #[cfg(test)]
-impl From<Arc<near_store::db::TestDB>> for Store {
-    fn from(store: Arc<near_store::db::TestDB>) -> Self {
-        let database: Arc<dyn near_store::db::Database> = store;
+impl From<Arc<unc_store::db::TestDB>> for Store {
+    fn from(store: Arc<unc_store::db::TestDB>) -> Self {
+        let database: Arc<dyn unc_store::db::Database> = store;
         Self(schema::Store::from(database))
     }
 }

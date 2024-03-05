@@ -1,5 +1,5 @@
 [package]
-name = "near-rpc-error-core"
+name = "unc-rpc-error-core"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

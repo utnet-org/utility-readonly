@@ -11,9 +11,9 @@ use crate::types::{
 };
 use crate::version::PROTOCOL_VERSION;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::checked_feature;
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::{BlockHeight, Power};
+use unc_primitives_core::checked_feature;
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::{BlockHeight, Power};
 use smart_default::SmartDefault;
 use std::collections::{BTreeMap, HashMap};
 use crate::validator_mandates::ValidatorMandates;
@@ -212,7 +212,7 @@ impl AllEpochConfig {
 
         // Adjust the number of block and chunk producers for all chains except
         // mainnet, to make it easier to test the change.
-        if chain_id != near_primitives_core::chains::MAINNET
+        if chain_id != unc_primitives_core::chains::MAINNET
             && checked_feature!("stable", TestnetFewerBlockProducers, protocol_version)
         {
             let shard_ids = config.shard_layout.shard_ids();
@@ -264,8 +264,8 @@ pub struct ValidatorSelectionConfig {
 pub mod block_summary {
     use std::collections::{BTreeMap, HashMap};
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::{Balance, Power, ValidatorId};
+    use unc_primitives_core::hash::CryptoHash;
+    use unc_primitives_core::types::{Balance, Power, ValidatorId};
     use crate::types::{AccountId, ValidatorKickoutReason};
     use crate::types::validator_frozen::ValidatorFrozen;
     use crate::types::validator_power::ValidatorPower;
@@ -530,8 +530,8 @@ pub mod block_info {
     use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
     use crate::types::{EpochId, ValidatorKickoutReason};
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::{AccountId, Balance, BlockHeight, Power, ProtocolVersion, ValidatorId};
+    use unc_primitives_core::hash::CryptoHash;
+    use unc_primitives_core::types::{AccountId, Balance, BlockHeight, Power, ProtocolVersion, ValidatorId};
     use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
     use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
     use crate::validator_mandates::ValidatorMandates;
@@ -1139,8 +1139,8 @@ use crate::epoch_manager::ValidatorWeight;
     use crate::validator_mandates::{ValidatorMandates, ValidatorMandatesAssignment};
     use crate::version::PROTOCOL_VERSION;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::{
+    use unc_primitives_core::hash::CryptoHash;
+    use unc_primitives_core::types::{
         AccountId, Balance, EpochHeight, ProtocolVersion, ValidatorId, Power,
     };
     use rand::SeedableRng;
@@ -1149,7 +1149,7 @@ use crate::epoch_manager::ValidatorWeight;
     use std::collections::{BTreeMap, HashMap};
 
     use crate::{epoch_manager::RngSeed, rand::WeightedIndex};
-    use near_primitives_core::{
+    use unc_primitives_core::{
         checked_feature,
         hash::hash,
         types::{BlockHeight, ShardId},
@@ -1876,8 +1876,8 @@ pub mod epoch_sync {
     use crate::errors::epoch_sync::{EpochSyncHashType, EpochSyncInfoError};
     use crate::types::EpochId;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_o11y::log_assert;
-    use near_primitives_core::hash::CryptoHash;
+    use unc_o11y::log_assert;
+    use unc_primitives_core::hash::CryptoHash;
     use std::collections::{HashMap, HashSet};
     use crate::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 

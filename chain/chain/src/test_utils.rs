@@ -16,18 +16,18 @@ use crate::store::ChainStoreAccess;
 use crate::types::{AcceptedBlock, ChainConfig, ChainGenesis};
 use crate::DoomslugThresholdMode;
 use crate::{BlockProcessingArtifact, Provenance};
-use near_chain_primitives::Error;
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_primitives::block::Block;
-use near_primitives::hash::CryptoHash;
-use near_primitives::static_clock::StaticClock;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::{AccountId, NumBlocks, NumShards};
-use near_primitives::utils::MaybeValidated;
-use near_primitives::validator_signer::InMemoryValidatorSigner;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::test_utils::create_test_store;
-use near_store::DBCol;
+use unc_chain_primitives::Error;
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_primitives::block::Block;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::{AccountId, NumBlocks, NumShards};
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives::validator_signer::InMemoryValidatorSigner;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::test_utils::create_test_store;
+use unc_store::DBCol;
 use tracing::debug;
 
 pub fn get_chain() -> Chain {
@@ -342,15 +342,15 @@ mod test {
 
     use rand::Rng;
 
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::receipt::Receipt;
-    use near_primitives::sharding::ReceiptList;
-    use near_primitives::static_clock::StaticClock;
-    use near_primitives::types::{AccountId, NumShards};
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::receipt::Receipt;
+    use unc_primitives::sharding::ReceiptList;
+    use unc_primitives::static_clock::StaticClock;
+    use unc_primitives::types::{AccountId, NumShards};
 
     use crate::Chain;
 
-    use near_primitives::shard_layout::{account_id_to_shard_id, ShardLayout};
+    use unc_primitives::shard_layout::{account_id_to_shard_id, ShardLayout};
 
     fn naive_build_receipt_hashes(
         receipts: &[Receipt],

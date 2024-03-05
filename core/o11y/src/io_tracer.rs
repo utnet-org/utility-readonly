@@ -183,7 +183,7 @@ impl IoTraceLayer {
     ///
     /// IO events are:
     ///   - DB operations, emitted in core/store/src/lib.rs
-    ///   - Storage operations, emitted in runtime/near-vm-logic/src/logic.rs
+    ///   - Storage operations, emitted in runtime/unc-vm-logic/src/logic.rs
     fn record_io_event<S: Subscriber + for<'span> LookupSpan<'span>>(
         &self,
         event: &tracing::Event,
@@ -226,7 +226,7 @@ impl IoTraceLayer {
                 });
                 let key = key_bytes
                     .as_ref()
-                    .map(|k| format!("{}", near_fmt::Bytes(&*k)))
+                    .map(|k| format!("{}", unc_fmt::Bytes(&*k)))
                     .unwrap_or_else(|| String::from("?"));
                 let size = FormattedSize(visitor.size);
                 let tn_db_reads = visitor.tn_db_reads.unwrap();

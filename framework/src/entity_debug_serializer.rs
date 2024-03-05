@@ -10,7 +10,7 @@
 /// do exist, but they all have serious limitations at the moment.) Also,
 /// it is discouraging if in order to support a new query one has to also
 /// write TypeScript type definitions.
-use near_jsonrpc_primitives::types::entity_debug::{
+use unc_jsonrpc_primitives::types::entity_debug::{
     EntityDataEntry, EntityDataStruct, EntityDataValue,
 };
 use serde::{
@@ -489,7 +489,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::serialize_entity;
-    use near_jsonrpc_primitives::types::entity_debug::{
+    use unc_jsonrpc_primitives::types::entity_debug::{
         EntityDataEntry, EntityDataStruct, EntityDataValue,
     };
     use serde::Serialize;

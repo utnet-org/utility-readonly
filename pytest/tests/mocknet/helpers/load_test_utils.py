@@ -136,8 +136,8 @@ def meta_transaction_transfer(alice_account, test_state, base_block_hash,
     relayer_account = test_state.random_account()
     receiver_account = test_state.random_account()
 
-    yocto_near_amount = 1
-    transfer_action = transaction.create_payment_action(yocto_near_amount)
+    yocto_unc_amount = 1
+    transfer_action = transaction.create_payment_action(yocto_unc_amount)
     # Use (relayer_account.nonce + 2) as a nonce to deal with the case of Alice
     # and Relayer being the same account. The outer transaction needs to have
     # a lower nonce.
@@ -160,7 +160,7 @@ def meta_transaction_transfer(alice_account, test_state, base_block_hash,
     relayer_account.nonce += 2
 
     logger.info(
-        f'meta-transaction from {alice_account.key.account_id} to transfer {yocto_near_amount} yoctoNear from {relayer_account.key.account_id} to {receiver_account.key.account_id}'
+        f'meta-transaction from {alice_account.key.account_id} to transfer {yocto_unc_amount} yoctoNear from {relayer_account.key.account_id} to {receiver_account.key.account_id}'
     )
 
 

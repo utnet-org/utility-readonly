@@ -8,10 +8,10 @@ use crate::tcp;
 use crate::testonly::make_rng;
 use crate::testonly::stream;
 use crate::types::Edge;
-use near_async::time;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::network::PeerId;
-use near_primitives::version;
+use unc_async::time;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::network::PeerId;
+use unc_primitives::version;
 use std::sync::Arc;
 
 // Nonces must be odd (as even ones are reserved for tombstones).
@@ -54,7 +54,7 @@ async fn test_nonces() {
         // Start a PeerManager and connect a peer to it.
         let pm = peer_manager::testonly::start(
             clock.clock(),
-            near_store::db::TestDB::new(),
+            unc_store::db::TestDB::new(),
             chain.make_config(rng),
             chain.clone(),
         )
@@ -115,7 +115,7 @@ async fn test_nonce_refresh() {
     // Start a PeerManager.
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -124,7 +124,7 @@ async fn test_nonce_refresh() {
     // Start another peer manager.
     let mut pm2 = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )

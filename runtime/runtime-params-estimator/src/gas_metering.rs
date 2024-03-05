@@ -1,13 +1,13 @@
 use crate::config::Config;
 use crate::gas_cost::{GasCost, LeastSquaresTolerance};
 use crate::vm_estimator::create_context;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::StoreCompiledContractCache;
-use near_vm_runner::internal::VMKindExt;
-use near_vm_runner::logic::mocks::mock_external::MockedExternal;
-use near_vm_runner::logic::CompiledContractCache;
-use near_vm_runner::ContractCode;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::StoreCompiledContractCache;
+use unc_vm_runner::internal::VMKindExt;
+use unc_vm_runner::logic::mocks::mock_external::MockedExternal;
+use unc_vm_runner::logic::CompiledContractCache;
+use unc_vm_runner::ContractCode;
 use std::fmt::Write;
 
 pub(crate) fn gas_metering_cost(config: &Config) -> (GasCost, GasCost) {
@@ -127,7 +127,7 @@ pub(crate) fn compute_gas_metering_cost(config: &Config, contract: &ContractCode
     let vm_kind = config.vm_kind;
     let warmup_repeats = config.warmup_iters_per_block;
 
-    let store = near_store::test_utils::create_test_store();
+    let store = unc_store::test_utils::create_test_store();
     let cache_store = StoreCompiledContractCache::new(&store);
     let cache: Option<&dyn CompiledContractCache> = Some(&cache_store);
     let config_store = RuntimeConfigStore::new(None);

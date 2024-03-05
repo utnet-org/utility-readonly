@@ -5,7 +5,7 @@ use crate::store;
 use crate::testonly::make_rng;
 use crate::testonly::AsSet;
 use crate::types::ConnectionInfo;
-use near_async::time;
+use unc_async::time;
 use rand::Rng;
 
 /// Returns a ConnectionInfo with the given value for time_connected_until,
@@ -33,7 +33,7 @@ fn test_reload_from_storage() {
     let mut rng = make_rng(921853233);
     let rng = &mut rng;
     let clock = time::FakeClock::default();
-    let store = store::Store::from(near_store::db::TestDB::new());
+    let store = store::Store::from(unc_store::db::TestDB::new());
 
     let conn_info = make_connection_info(rng, clock.now_utc());
     {
@@ -53,7 +53,7 @@ fn test_overwrite_stored_connection() {
     let mut rng = make_rng(921853233);
     let rng = &mut rng;
     let clock = time::FakeClock::default();
-    let store = store::Store::from(near_store::db::TestDB::new());
+    let store = store::Store::from(unc_store::db::TestDB::new());
     let connection_store = ConnectionStore::new(store).unwrap();
 
     tracing::debug!(target:"test", "create and store a connection");
@@ -77,7 +77,7 @@ fn test_evict_longest_disconnected() {
     let mut rng = make_rng(921853233);
     let rng = &mut rng;
     let clock = time::FakeClock::default();
-    let store = store::Store::from(near_store::db::TestDB::new());
+    let store = store::Store::from(unc_store::db::TestDB::new());
     let connection_store = ConnectionStore::new(store).unwrap();
 
     tracing::debug!(target:"test", "create and store live connections up to the ConnectionStore limit");
@@ -108,7 +108,7 @@ fn test_recovery_from_clock_rewind() {
     let mut rng = make_rng(921853233);
     let rng = &mut rng;
     let clock = time::FakeClock::default();
-    let store = store::Store::from(near_store::db::TestDB::new());
+    let store = store::Store::from(unc_store::db::TestDB::new());
     let connection_store = ConnectionStore::new(store).unwrap();
 
     tracing::debug!(target:"test", "create and store live connections up to the ConnectionStore limit");

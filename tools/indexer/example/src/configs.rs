@@ -1,9 +1,9 @@
-use near_indexer::near_primitives::types::Gas;
+use unc_indexer::unc_primitives::types::Gas;
 
 /// NEAR Indexer Example
 /// Watches for stream of blocks from the chain
 #[derive(clap::Parser, Debug)]
-#[clap(version = "0.1", author = "Near Inc. <hello@nearprotocol.com>")]
+#[clap(version = "0.1", author = "unc Inc. <hello@nearprotocol.com>")]
 #[clap(subcommand_required = true, arg_required_else_help = true)]
 pub(crate) struct Opts {
     /// Sets a custom config dir. Defaults to ~/.near/
@@ -64,7 +64,7 @@ pub(crate) struct InitConfigArgs {
     pub max_gas_burnt_view: Option<Gas>,
 }
 
-impl From<InitConfigArgs> for near_indexer::InitConfigArgs {
+impl From<InitConfigArgs> for unc_indexer::InitConfigArgs {
     fn from(config_args: InitConfigArgs) -> Self {
         Self {
             chain_id: config_args.chain_id,

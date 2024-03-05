@@ -106,7 +106,7 @@ pub enum ProtocolFeature {
     /// Enables preparation V2. Note that this setting is not supported in production settings
     /// without NearVmRuntime enabled alongside it, as the VM runner would be too slow.
     PreparationV2,
-    /// Enables Near-Vm. Note that this setting is not at all supported without PreparationV2,
+    /// Enables unc-Vm. Note that this setting is not at all supported without PreparationV2,
     /// as it hardcodes preparation v2 code into the generated assembly.
     NearVmRuntime,
     BlockHeaderV4,

@@ -1,7 +1,7 @@
 use super::{Params, RpcFrom, RpcRequest};
-use near_client_primitives::types::{GetReceipt, GetReceiptError};
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::receipts::{
+use unc_client_primitives::types::{GetReceipt, GetReceiptError};
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::receipts::{
     ReceiptReference, RpcReceiptError, RpcReceiptRequest,
 };
 use serde_json::Value;

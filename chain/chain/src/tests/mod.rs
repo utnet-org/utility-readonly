@@ -7,8 +7,8 @@ mod sync_chain;
 use crate::block_processing_utils::BlockProcessingArtifact;
 use crate::test_utils::process_block_sync;
 use crate::{Block, Chain, Error, Provenance};
-use near_primitives::account::id::AccountId;
-use near_primitives::utils::MaybeValidated;
+use unc_primitives::account::id::AccountId;
+use unc_primitives::utils::MaybeValidated;
 
 impl Chain {
     /// A wrapper function around process_block that doesn't trigger all the callbacks

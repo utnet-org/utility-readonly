@@ -1,6 +1,6 @@
 use super::BlockInfo;
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::types::BlockHeight;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::types::BlockHeight;
 use std::collections::HashMap;
 
 pub struct MockChain {
@@ -41,13 +41,13 @@ impl MockChain {
     }
 
     // Create a chain with no forks with length n.
-    pub fn linear_chain(n: usize) -> MockChain {
+    pub fn liunc_chain(n: usize) -> MockChain {
         Self::build((0..n as BlockHeight).collect(), |i| if i == 0 { None } else { Some(i - 1) })
     }
 
     // Create a linear chain of length n where blocks with odd numbers are skipped:
     // 0 -> 2 -> 4 -> ...
-    pub fn linear_chain_with_skips(n: usize) -> MockChain {
+    pub fn liunc_chain_with_skips(n: usize) -> MockChain {
         Self::build((0..n as BlockHeight).map(|i| i * 2).collect(), |i| {
             if i == 0 {
                 None

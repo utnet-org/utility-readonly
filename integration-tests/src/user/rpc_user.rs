@@ -4,21 +4,21 @@ use std::time::Duration;
 
 use futures::{Future, TryFutureExt};
 
-use near_client::StatusResponse;
-use near_crypto::{PublicKey, Signer};
-use near_jsonrpc::client::{new_client, JsonRpcClient};
-use near_jsonrpc_client::ChunkId;
-use near_jsonrpc_primitives::errors::ServerError;
-use near_jsonrpc_primitives::types::query::{QueryResponseKind, RpcQueryRequest, RpcQueryResponse};
-use near_jsonrpc_primitives::types::transactions::{RpcTransactionStatusRequest, TransactionInfo};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::Receipt;
-use near_primitives::serialize::to_base64;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{
+use unc_client::StatusResponse;
+use unc_crypto::{PublicKey, Signer};
+use unc_jsonrpc::client::{new_client, JsonRpcClient};
+use unc_jsonrpc_client::ChunkId;
+use unc_jsonrpc_primitives::errors::ServerError;
+use unc_jsonrpc_primitives::types::query::{QueryResponseKind, RpcQueryRequest, RpcQueryResponse};
+use unc_jsonrpc_primitives::types::transactions::{RpcTransactionStatusRequest, TransactionInfo};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::serialize::to_base64;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{
     AccountId, BlockHeight, BlockId, BlockReference, EpochReference, ShardId,
 };
-use near_primitives::views::{
+use unc_primitives::views::{
     AccessKeyView, AccountView, BlockView, CallResult, ChunkView, ContractCodeView,
     EpochValidatorInfo, ExecutionOutcomeView, FinalExecutionOutcomeView, QueryRequest,
     TxExecutionStatus, ViewStateResult,

@@ -7,13 +7,13 @@ use crate::test_utils::{
     hash_range, record_block_with_slashes, setup_default_epoch_manager, do_power,
 };
 use crate::EpochManager;
-use near_primitives::challenge::SlashedValidator;
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::SlashState;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{AccountId, Balance, EpochId, ValidatorKickoutReason};
+use unc_primitives::challenge::SlashedValidator;
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::SlashState;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::{AccountId, Balance, EpochId, ValidatorKickoutReason};
 
 const DEBUG_PRINT: bool = false;
 

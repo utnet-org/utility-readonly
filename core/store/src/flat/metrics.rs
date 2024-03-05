@@ -1,6 +1,6 @@
 use crate::metrics::flat_state_metrics;
-use near_o11y::metrics::{IntCounter, IntGauge};
-use near_primitives::types::{BlockHeight, ShardId};
+use unc_o11y::metrics::{IntCounter, IntGauge};
+use unc_primitives::types::{BlockHeight, ShardId};
 
 use super::FlatStorageStatus;
 

@@ -1,17 +1,17 @@
 use std::sync::{atomic::AtomicBool, Arc};
 
-use near_chain::types::Tip;
-use near_epoch_manager::{EpochManagerAdapter, EpochManagerHandle};
-use near_primitives::{hash::CryptoHash, types::BlockHeight};
-use near_store::cold_storage::{copy_all_data_to_cold, CopyAllDataToColdStatus};
-use near_store::{
+use unc_chain::types::Tip;
+use unc_epoch_manager::{EpochManagerAdapter, EpochManagerHandle};
+use unc_primitives::{hash::CryptoHash, types::BlockHeight};
+use unc_store::cold_storage::{copy_all_data_to_cold, CopyAllDataToColdStatus};
+use unc_store::{
     cold_storage::{update_cold_db, update_cold_head},
     db::ColdDB,
     DBCol, NodeStorage, Store, FINAL_HEAD_KEY, HEAD_KEY, TAIL_KEY,
 };
 
 use crate::config::SplitStorageConfig;
-use crate::{metrics, NearConfig};
+use crate::{metrics, UncConfig};
 
 /// A handle that keeps the state of the cold store loop and can be used to stop it.
 pub struct ColdStoreLoopHandle {
@@ -174,7 +174,7 @@ fn cold_store_initial_migration(
     cold_db: &Arc<ColdDB>,
 ) -> anyhow::Result<ColdStoreInitialMigrationResult> {
     // We only need to perform the migration if hot store is of kind Archive and cold store doesn't have a head yet
-    if hot_store.get_db_kind()? != Some(near_store::metadata::DbKind::Archive)
+    if hot_store.get_db_kind()? != Some(unc_store::metadata::DbKind::Archive)
         || cold_store.get(DBCol::BlockMisc, HEAD_KEY)?.is_some()
     {
         return Ok(ColdStoreInitialMigrationResult::NoNeedForMigration);
@@ -309,7 +309,7 @@ fn cold_store_loop(
 /// environment would just hog a thread while synchronously waiting for the IO operations
 /// to finish.
 pub fn spawn_cold_store_loop(
-    config: &NearConfig,
+    config: &UncConfig,
     storage: &NodeStorage,
     epoch_manager: Arc<EpochManagerHandle>,
 ) -> anyhow::Result<Option<ColdStoreLoopHandle>> {

@@ -4,27 +4,27 @@ use std::sync::Arc;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcLightClientExecutionProofRequest {
     #[serde(flatten)]
-    pub id: near_primitives::types::TransactionOrReceiptId,
-    pub light_client_head: near_primitives::hash::CryptoHash,
+    pub id: unc_primitives::types::TransactionOrReceiptId,
+    pub light_client_head: unc_primitives::hash::CryptoHash,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcLightClientNextBlockRequest {
-    pub last_block_hash: near_primitives::hash::CryptoHash,
+    pub last_block_hash: unc_primitives::hash::CryptoHash,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcLightClientExecutionProofResponse {
-    pub outcome_proof: near_primitives::views::ExecutionOutcomeWithIdView,
-    pub outcome_root_proof: near_primitives::merkle::MerklePath,
-    pub block_header_lite: near_primitives::views::LightClientBlockLiteView,
-    pub block_proof: near_primitives::merkle::MerklePath,
+    pub outcome_proof: unc_primitives::views::ExecutionOutcomeWithIdView,
+    pub outcome_root_proof: unc_primitives::merkle::MerklePath,
+    pub block_header_lite: unc_primitives::views::LightClientBlockLiteView,
+    pub block_proof: unc_primitives::merkle::MerklePath,
 }
 
 #[derive(Debug, serde::Serialize)]
 pub struct RpcLightClientNextBlockResponse {
     #[serde(flatten)]
-    pub light_client_block: Option<Arc<near_primitives::views::LightClientBlockView>>,
+    pub light_client_block: Option<Arc<unc_primitives::views::LightClientBlockView>>,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
@@ -38,16 +38,16 @@ pub enum RpcLightClientProofError {
     #[error("Inconsistent state. Total number of shards is {number_or_shards} but the execution outcome is in shard {execution_outcome_shard_id}")]
     InconsistentState {
         number_or_shards: usize,
-        execution_outcome_shard_id: near_primitives::types::ShardId,
+        execution_outcome_shard_id: unc_primitives::types::ShardId,
     },
     #[error("{transaction_or_receipt_id} has not been confirmed")]
-    NotConfirmed { transaction_or_receipt_id: near_primitives::hash::CryptoHash },
+    NotConfirmed { transaction_or_receipt_id: unc_primitives::hash::CryptoHash },
     #[error("{transaction_or_receipt_id} does not exist")]
-    UnknownTransactionOrReceipt { transaction_or_receipt_id: near_primitives::hash::CryptoHash },
+    UnknownTransactionOrReceipt { transaction_or_receipt_id: unc_primitives::hash::CryptoHash },
     #[error("Node doesn't track the shard where {transaction_or_receipt_id} is executed")]
     UnavailableShard {
-        transaction_or_receipt_id: near_primitives::hash::CryptoHash,
-        shard_id: near_primitives::types::ShardId,
+        transaction_or_receipt_id: unc_primitives::hash::CryptoHash,
+        shard_id: unc_primitives::types::ShardId,
     },
     #[error("Internal error: {error_message}")]
     InternalError { error_message: String },
@@ -64,7 +64,7 @@ pub enum RpcLightClientNextBlockError {
         error_message: String,
     },
     #[error("Epoch Out Of Bounds {epoch_id:?}")]
-    EpochOutOfBounds { epoch_id: near_primitives::types::EpochId },
+    EpochOutOfBounds { epoch_id: unc_primitives::types::EpochId },
 }
 
 impl From<RpcLightClientProofError> for crate::errors::RpcError {

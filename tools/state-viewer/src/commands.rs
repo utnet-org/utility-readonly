@@ -9,37 +9,37 @@ use crate::{apply_chunk, epoch_info};
 use bytesize::ByteSize;
 use itertools::GroupBy;
 use itertools::Itertools;
-use near_chain::chain::collect_receipts_from_response;
-use near_chain::migrations::check_if_block_is_first_with_chunk_of_version;
-use near_chain::types::ApplyChunkBlockContext;
-use near_chain::types::ApplyChunkResult;
-use near_chain::types::ApplyChunkShardContext;
-use near_chain::types::RuntimeAdapter;
-use near_chain::types::RuntimeStorageConfig;
-use near_chain::{ChainStore, ChainStoreAccess, ChainStoreUpdate, Error};
-use near_chain_configs::GenesisChangeConfig;
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::EpochManagerHandle;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter};
-use near_primitives::account::id::AccountId;
-use near_primitives::block::{Block, BlockHeader};
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::state::FlatStateValue;
-use near_primitives::state_record::state_record_to_account_id;
-use near_primitives::state_record::StateRecord;
-use near_primitives::trie_key::col::NON_DELAYED_RECEIPT_COLUMNS;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{chunk_extra::ChunkExtra, BlockHeight, ShardId, StateRoot};
-use near_primitives_core::types::Gas;
-use near_store::flat::FlatStorageChunkView;
-use near_store::flat::FlatStorageManager;
-use near_store::test_utils::create_test_store;
-use near_store::TrieStorage;
-use near_store::{DBCol, Store, Trie, TrieCache, TrieCachingStorage, TrieConfig, TrieDBStorage};
-use framework::{NearConfig, NightshadeRuntime};
+use unc_chain::chain::collect_receipts_from_response;
+use unc_chain::migrations::check_if_block_is_first_with_chunk_of_version;
+use unc_chain::types::ApplyChunkBlockContext;
+use unc_chain::types::ApplyChunkResult;
+use unc_chain::types::ApplyChunkShardContext;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::types::RuntimeStorageConfig;
+use unc_chain::{ChainStore, ChainStoreAccess, ChainStoreUpdate, Error};
+use unc_chain_configs::GenesisChangeConfig;
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::EpochManagerHandle;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter};
+use unc_primitives::account::id::AccountId;
+use unc_primitives::block::{Block, BlockHeader};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::state_record::state_record_to_account_id;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::trie_key::col::NON_DELAYED_RECEIPT_COLUMNS;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{chunk_extra::ChunkExtra, BlockHeight, ShardId, StateRoot};
+use unc_primitives_core::types::Gas;
+use unc_store::flat::FlatStorageChunkView;
+use unc_store::flat::FlatStorageManager;
+use unc_store::test_utils::create_test_store;
+use unc_store::TrieStorage;
+use unc_store::{DBCol, Store, Trie, TrieCache, TrieCachingStorage, TrieConfig, TrieDBStorage};
+use framework::{UncConfig, NightshadeRuntime};
 use node_runtime::adapter::ViewRuntimeAdapter;
 use serde_json::json;
 use std::collections::BinaryHeap;
@@ -139,17 +139,17 @@ pub(crate) fn apply_block_at_height(
     shard_id: ShardId,
     use_flat_storage: bool,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) -> anyhow::Result<()> {
     let mut chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime =
-        NightshadeRuntime::from_config(home_dir, store, &near_config, epoch_manager.clone());
+        NightshadeRuntime::from_config(home_dir, store, &unc_config, epoch_manager.clone());
     let block_hash = chain_store.get_block_hash_by_height(height).unwrap();
     let (block, apply_result) = apply_block(
         block_hash,
@@ -170,23 +170,23 @@ pub(crate) fn apply_block_at_height(
 
 pub(crate) fn apply_chunk(
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     chunk_hash: ChunkHash,
     target_height: Option<u64>,
     use_flat_storage: bool,
 ) -> anyhow::Result<()> {
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
     let mut chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let (apply_result, gas_limit) = apply_chunk::apply_chunk(
         epoch_manager.as_ref(),
@@ -208,7 +208,7 @@ pub(crate) fn apply_range(
     verbose_output: bool,
     csv_file: Option<PathBuf>,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     only_contracts: bool,
     sequential: bool,
@@ -216,16 +216,16 @@ pub(crate) fn apply_range(
 ) {
     let mut csv_file = csv_file.map(|filename| std::fs::File::create(filename).unwrap());
 
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
     apply_chain_range(
         store,
-        &near_config.genesis,
+        &unc_config.genesis,
         start_index,
         end_index,
         shard_id,
@@ -241,20 +241,20 @@ pub(crate) fn apply_range(
 
 pub(crate) fn apply_receipt(
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     hash: CryptoHash,
     use_flat_storage: bool,
 ) -> anyhow::Result<()> {
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
     apply_chunk::apply_receipt(
-        near_config.genesis.config.genesis_height,
+        unc_config.genesis.config.genesis_height,
         epoch_manager.as_ref(),
         runtime.as_ref(),
         store,
@@ -266,20 +266,20 @@ pub(crate) fn apply_receipt(
 
 pub(crate) fn apply_tx(
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     hash: CryptoHash,
     use_flat_storage: bool,
 ) -> anyhow::Result<()> {
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
     apply_chunk::apply_tx(
-        near_config.genesis.config.genesis_height,
+        unc_config.genesis.config.genesis_height,
         epoch_manager.as_ref(),
         runtime.as_ref(),
         store,
@@ -295,7 +295,7 @@ pub(crate) fn dump_account_storage(
     output: &Path,
     block_height: String,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     let block_height = if block_height == "latest" {
@@ -306,7 +306,7 @@ pub(crate) fn dump_account_storage(
         panic!("block_height should be either number or \"latest\"")
     };
     let (_, runtime, state_roots, header) =
-        load_trie_stop_at_height(store, home_dir, &near_config, block_height);
+        load_trie_stop_at_height(store, home_dir, &unc_config, block_height);
     for (shard_id, state_root) in state_roots.iter().enumerate() {
         let trie = runtime
             .get_trie_for_shard(shard_id as u64, header.prev_hash(), *state_root, false)
@@ -342,10 +342,10 @@ pub(crate) fn dump_code(
     account_id: String,
     output: &Path,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
-    let (epoch_manager, runtime, state_roots, header) = load_trie(store, home_dir, &near_config);
+    let (epoch_manager, runtime, state_roots, header) = load_trie(store, home_dir, &unc_config);
     let epoch_id = &epoch_manager.get_epoch_id(header.hash()).unwrap();
 
     for (shard_id, state_root) in state_roots.iter().enumerate() {
@@ -371,7 +371,7 @@ pub(crate) fn dump_state(
     stream: bool,
     file: Option<PathBuf>,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     change_config: &GenesisChangeConfig,
 ) {
@@ -380,44 +380,44 @@ pub(crate) fn dump_state(
         None => LoadTrieMode::Latest,
     };
     let (epoch_manager, runtime, state_roots, header) =
-        load_trie_stop_at_height(store, home_dir, &near_config, mode);
+        load_trie_stop_at_height(store, home_dir, &unc_config, mode);
     let height = header.height();
     let home_dir = PathBuf::from(&home_dir);
 
     if stream {
         let output_dir = file.unwrap_or(home_dir.join("output"));
         let records_path = output_dir.join("records.json");
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             header,
-            &near_config,
+            &unc_config,
             Some(&records_path),
             change_config,
         );
         println!("Saving state at {:?} @ {} into {}", state_roots, height, output_dir.display(),);
-        new_near_config.save_to_dir(&output_dir);
+        new_unc_config.save_to_dir(&output_dir);
     } else {
-        let new_near_config = state_dump(
+        let new_unc_config = state_dump(
             epoch_manager.as_ref(),
             runtime,
             &state_roots,
             header,
-            &near_config,
+            &unc_config,
             None,
             change_config,
         );
         let output_file = file.unwrap_or(home_dir.join("output.json"));
         println!("Saving state at {:?} @ {} into {}", state_roots, height, output_file.display(),);
-        new_near_config.genesis.to_file(&output_file);
+        new_unc_config.genesis.to_file(&output_file);
     }
 }
 
 pub(crate) fn dump_state_redis(
     height: Option<BlockHeight>,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     let mode = match height {
@@ -425,7 +425,7 @@ pub(crate) fn dump_state_redis(
         None => LoadTrieMode::Latest,
     };
     let (_, runtime, state_roots, header) =
-        load_trie_stop_at_height(store, home_dir, &near_config, mode);
+        load_trie_stop_at_height(store, home_dir, &unc_config, mode);
 
     let res = state_dump_redis(runtime, &state_roots, header);
     assert_eq!(res, Ok(()));
@@ -435,15 +435,15 @@ pub(crate) fn dump_tx(
     start_height: BlockHeight,
     end_height: BlockHeight,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     select_account_ids: Option<&[AccountId]>,
     output_path: Option<String>,
 ) -> Result<(), Error> {
     let chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let mut txs = vec![];
     for height in start_height..=end_height {
@@ -463,11 +463,11 @@ pub(crate) fn dump_tx(
     Ok(())
 }
 
-pub(crate) fn get_chunk(chunk_hash: ChunkHash, near_config: NearConfig, store: Store) {
+pub(crate) fn get_chunk(chunk_hash: ChunkHash, unc_config: UncConfig, store: Store) {
     let chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let chunk = chain_store.get_chunk(&chunk_hash);
     println!("Chunk: {:#?}", chunk);
@@ -475,23 +475,23 @@ pub(crate) fn get_chunk(chunk_hash: ChunkHash, near_config: NearConfig, store: S
 
 pub(crate) fn get_partial_chunk(
     partial_chunk_hash: ChunkHash,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     let chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let partial_chunk = chain_store.get_partial_chunk(&partial_chunk_hash);
     println!("Partial chunk: {:#?}", partial_chunk);
 }
 
-pub(crate) fn get_receipt(receipt_id: CryptoHash, near_config: NearConfig, store: Store) {
+pub(crate) fn get_receipt(receipt_id: CryptoHash, unc_config: UncConfig, store: Store) {
     let chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let receipt = chain_store.get_receipt(&receipt_id);
     println!("Receipt: {:#?}", receipt);
@@ -564,16 +564,16 @@ pub(crate) fn check_apply_block_result(
 pub(crate) fn print_chain(
     start_height: BlockHeight,
     end_height: BlockHeight,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     show_full_hashes: bool,
 ) {
     let chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
-    let epoch_manager = EpochManager::new_arc_handle(store, &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store, &unc_config.genesis.config);
     let mut account_id_to_blocks = HashMap::new();
     let mut cur_epoch_id = None;
     // TODO: Split into smaller functions.
@@ -689,16 +689,16 @@ pub(crate) fn print_chain(
 pub(crate) fn replay_chain(
     start_height: BlockHeight,
     end_height: BlockHeight,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     let chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let new_store = create_test_store();
-    let epoch_manager = EpochManager::new_arc_handle(new_store, &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(new_store, &unc_config.genesis.config);
     for height in start_height..=end_height {
         if let Ok(block_hash) = chain_store.get_block_hash_by_height(height) {
             let header = chain_store.get_block_header(&block_hash).unwrap().clone();
@@ -728,8 +728,8 @@ pub(crate) fn resulting_chunk_extra(result: &ApplyChunkResult, gas_limit: Gas) -
     )
 }
 
-pub(crate) fn state(home_dir: &Path, near_config: NearConfig, store: Store) {
-    let (_, runtime, state_roots, header) = load_trie(store, home_dir, &near_config);
+pub(crate) fn state(home_dir: &Path, unc_config: UncConfig, store: Store) {
+    let (_, runtime, state_roots, header) = load_trie(store, home_dir, &unc_config);
     println!("Storage roots are {:?}, block height is {}", state_roots, header.height());
     for (shard_id, state_root) in state_roots.iter().enumerate() {
         let trie = runtime
@@ -748,13 +748,13 @@ pub(crate) fn view_chain(
     height: Option<BlockHeight>,
     view_block: bool,
     view_chunks: bool,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     let chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let block = {
         match height {
@@ -769,7 +769,7 @@ pub(crate) fn view_chain(
             }
         }
     };
-    let epoch_manager = EpochManager::new_from_genesis_config(store, &near_config.genesis.config)
+    let epoch_manager = EpochManager::new_from_genesis_config(store, &unc_config.genesis.config)
         .expect("Failed to start Epoch Manager");
     let shard_layout = epoch_manager.get_shard_layout(block.header().epoch_id()).unwrap();
 
@@ -819,10 +819,10 @@ pub(crate) fn view_chain(
     }
 }
 
-pub(crate) fn check_block_chunk_existence(near_config: NearConfig, store: Store) {
-    let genesis_height = near_config.genesis.config.genesis_height;
+pub(crate) fn check_block_chunk_existence(unc_config: UncConfig, store: Store) {
+    let genesis_height = unc_config.genesis.config.genesis_height;
     let chain_store =
-        ChainStore::new(store, genesis_height, near_config.client_config.save_trie_changes);
+        ChainStore::new(store, genesis_height, unc_config.client_config.save_trie_changes);
     let head = chain_store.head().unwrap();
     let mut cur_block = chain_store.get_block(&head.last_block_hash).unwrap();
     while cur_block.header().height() > genesis_height {
@@ -850,14 +850,14 @@ pub(crate) fn print_epoch_info(
     epoch_selection: epoch_info::EpochSelection,
     validator_account_id: Option<AccountId>,
     kickouts_summary: bool,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
-    let genesis_height = near_config.genesis.config.genesis_height;
+    let genesis_height = unc_config.genesis.config.genesis_height;
     let mut chain_store =
-        ChainStore::new(store.clone(), genesis_height, near_config.client_config.save_trie_changes);
+        ChainStore::new(store.clone(), genesis_height, unc_config.client_config.save_trie_changes);
     let epoch_manager =
-        EpochManager::new_from_genesis_config(store.clone(), &near_config.genesis.config)
+        EpochManager::new_from_genesis_config(store.clone(), &unc_config.genesis.config)
             .expect("Failed to start Epoch Manager")
             .into_handle();
 
@@ -938,26 +938,26 @@ enum LoadTrieMode {
 fn load_trie(
     store: Store,
     home_dir: &Path,
-    near_config: &NearConfig,
+    unc_config: &UncConfig,
 ) -> (Arc<EpochManagerHandle>, Arc<NightshadeRuntime>, Vec<StateRoot>, BlockHeader) {
-    load_trie_stop_at_height(store, home_dir, near_config, LoadTrieMode::Latest)
+    load_trie_stop_at_height(store, home_dir, unc_config, LoadTrieMode::Latest)
 }
 
 fn load_trie_stop_at_height(
     store: Store,
     home_dir: &Path,
-    near_config: &NearConfig,
+    unc_config: &UncConfig,
     mode: LoadTrieMode,
 ) -> (Arc<EpochManagerHandle>, Arc<NightshadeRuntime>, Vec<StateRoot>, BlockHeader) {
     let chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
 
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime =
-        NightshadeRuntime::from_config(home_dir, store, near_config, epoch_manager.clone());
+        NightshadeRuntime::from_config(home_dir, store, unc_config, epoch_manager.clone());
     let head = chain_store.head().unwrap();
     let last_block = match mode {
         LoadTrieMode::LastFinalFromHeight(height) => {
@@ -1025,10 +1025,10 @@ pub fn chunk_mask_to_str(mask: &[bool]) -> String {
 pub(crate) fn contract_accounts(
     home_dir: &Path,
     store: Store,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     filter: ContractAccountFilter,
 ) -> anyhow::Result<()> {
-    let (_, _runtime, state_roots, _header) = load_trie(store.clone(), home_dir, &near_config);
+    let (_, _runtime, state_roots, _header) = load_trie(store.clone(), home_dir, &unc_config);
 
     let tries = state_roots.iter().enumerate().map(|(shard_id, &state_root)| {
         // TODO: This assumes simple nightshade layout, it will need an update when we reshard.
@@ -1078,9 +1078,9 @@ pub(crate) fn clear_cache(store: Store) {
 
 /// Prints the state statistics for all shards. Please note that it relies on
 /// the live flat storage and may break if the node is not stopped.
-pub(crate) fn print_state_stats(home_dir: &Path, store: Store, near_config: NearConfig) {
+pub(crate) fn print_state_stats(home_dir: &Path, store: Store, unc_config: UncConfig) {
     let (epoch_manager, runtime, _, block_header) =
-        load_trie(store.clone(), home_dir, &near_config);
+        load_trie(store.clone(), home_dir, &unc_config);
 
     let block_hash = *block_header.hash();
     let shard_layout = epoch_manager.get_shard_layout_from_prev_block(&block_hash).unwrap();
@@ -1323,19 +1323,19 @@ impl std::fmt::Debug for StateStatsAccount {
 
 #[cfg(test)]
 mod tests {
-    use near_chain::types::RuntimeAdapter;
-    use near_chain::ChainGenesis;
-    use near_chain_configs::Genesis;
-    use near_client::test_utils::TestEnv;
-    use near_crypto::{InMemorySigner, KeyFile, KeyType};
-    use near_epoch_manager::EpochManager;
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::types::chunk_extra::ChunkExtra;
-    use near_primitives::types::AccountId;
-    use near_store::genesis::initialize_genesis_state;
+    use unc_chain::types::RuntimeAdapter;
+    use unc_chain::ChainGenesis;
+    use unc_chain_configs::Genesis;
+    use unc_client::test_utils::TestEnv;
+    use unc_crypto::{InMemorySigner, KeyFile, KeyType};
+    use unc_epoch_manager::EpochManager;
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::types::chunk_extra::ChunkExtra;
+    use unc_primitives::types::AccountId;
+    use unc_store::genesis::initialize_genesis_state;
     use framework::config::Config;
     use framework::config::GenesisExt;
-    use framework::{NearConfig, NightshadeRuntime};
+    use framework::{UncConfig, NightshadeRuntime};
     use std::sync::Arc;
 
     #[test]
@@ -1343,7 +1343,7 @@ mod tests {
     /// Adds a transaction and waits for it to be included in a block.
     /// Checks that the change of state caused by that transaction is visible to `load_trie()`.
     fn test_latest_trie_state() {
-        near_o11y::testonly::init_test_logger();
+        unc_o11y::testonly::init_test_logger();
         let validators = vec!["test0".parse::<AccountId>().unwrap()];
         let genesis = Genesis::test_sharded_new_version(validators, 1, vec![1]);
         let chain_genesis = ChainGenesis::test();
@@ -1351,7 +1351,7 @@ mod tests {
         let tmp_dir = tempfile::tempdir().unwrap();
         let home_dir = tmp_dir.path();
 
-        let store = near_store::test_utils::create_test_store();
+        let store = unc_store::test_utils::create_test_store();
         initialize_genesis_state(store.clone(), &genesis, Some(home_dir));
         let epoch_manager = EpochManager::new_arc_handle(store.clone(), &genesis.config);
         let runtime = NightshadeRuntime::test(
@@ -1372,7 +1372,7 @@ mod tests {
             .build();
 
         let signer = InMemorySigner::from_seed("test0".parse().unwrap(), KeyType::ED25519, "test0");
-        assert_eq!(env.send_money(0), near_client::ProcessTxResponse::ValidTx);
+        assert_eq!(env.send_money(0), unc_client::ProcessTxResponse::ValidTx);
 
         // It takes 2 blocks to record a transaction on chain and apply the receipts.
         env.produce_block(0, 1);
@@ -1393,10 +1393,10 @@ mod tests {
         // Check that `send_money()` actually changed state.
         assert_ne!(chunk_extras[0].state_root(), chunk_extras[1].state_root());
 
-        let near_config =
-            NearConfig::new(Config::default(), genesis, KeyFile::from(&signer), None).unwrap();
+        let unc_config =
+            UncConfig::new(Config::default(), genesis, KeyFile::from(&signer), None).unwrap();
         let (_epoch_manager, _runtime, state_roots, block_header) =
-            crate::commands::load_trie(store, home_dir, &near_config);
+            crate::commands::load_trie(store, home_dir, &unc_config);
         assert_eq!(&state_roots[0], chunk_extras[1].state_root());
         assert_eq!(block_header.height(), 2);
     }

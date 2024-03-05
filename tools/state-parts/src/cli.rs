@@ -1,7 +1,7 @@
-use near_network::types::PeerInfo;
-use near_ping::cli::CHAIN_INFO;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::ShardId;
+use unc_network::types::PeerInfo;
+use unc_ping::cli::CHAIN_INFO;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::ShardId;
 use std::str::FromStr;
 
 #[derive(clap::Parser)]

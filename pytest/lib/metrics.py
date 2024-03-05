@@ -39,10 +39,10 @@ class Metrics:
         fold_sample = lambda key: fold(prometheus_metrics, key, lambda m: int(
             m.samples[0].value), 0)
 
-        total_blocks = fold_sample('near_block_processed')
-        memory_usage = fold_sample('near_memory_usage_bytes')
-        total_transactions = fold_sample('near_transaction_processed')
-        blocks_per_second = fold_sample('near_blocks_per_minute') / 60.0
+        total_blocks = fold_sample('unc_block_processed')
+        memory_usage = fold_sample('unc_memory_usage_bytes')
+        total_transactions = fold_sample('unc_transaction_processed')
+        blocks_per_second = fold_sample('unc_blocks_per_minute') / 60.0
 
         def extract_block_processing_time(m):
             block_processing_time_samples = m.samples
@@ -54,7 +54,7 @@ class Metrics:
             return block_processing_time
 
         block_processing_time = fold(
-            prometheus_metrics, 'near_block_processing_time',
+            prometheus_metrics, 'unc_block_processing_time',
             extract_block_processing_time,
             dict(map(lambda bin: ('le ' + bin, 0), BLOCK_TIME_BINS)))
 

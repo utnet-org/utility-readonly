@@ -7,8 +7,8 @@ macro_rules! handler_span {
             target: $target,
             $lvl,
             "handle",
-            handler = near_o11y::macros::type_name_of(&msg),
-            actor = near_o11y::macros::last_component_of_name(std::any::type_name::<Self>()),
+            handler = unc_o11y::macros::type_name_of(&msg),
+            actor = unc_o11y::macros::last_component_of_name(std::any::type_name::<Self>()),
             $($extra_fields)*)
         .entered();
         span.set_parent(context);

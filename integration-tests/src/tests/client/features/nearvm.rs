@@ -1,24 +1,24 @@
 #![cfg_attr(not(feature = "nightly"), allow(unused_imports))]
 
 use crate::tests::client::process_blocks::deploy_test_contract;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_parameters::RuntimeConfigStore;
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::{Action, FunctionCallAction, Transaction};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
 #[cfg_attr(all(target_arch = "aarch64", target_vendor = "apple"), ignore)]
 #[test]
 fn test_nearvm_upgrade() {
-    let mut capture = near_o11y::testonly::TracingCapture::enable();
+    let mut capture = unc_o11y::testonly::TracingCapture::enable();
 
     let old_protocol_version =
-        near_primitives::version::ProtocolFeature::NearVmRuntime.protocol_version() - 1;
+        unc_primitives::version::ProtocolFeature::NearVmRuntime.protocol_version() - 1;
     let new_protocol_version = old_protocol_version + 1;
 
     // Prepare TestEnv with a contract at the old protocol version.
@@ -40,7 +40,7 @@ fn test_nearvm_upgrade() {
         deploy_test_contract(
             &mut env,
             "test0".parse().unwrap(),
-            near_test_contracts::backwards_compatible_rs_contract(),
+            unc_test_contracts::backwards_compatible_rs_contract(),
             epoch_length,
             1,
         );

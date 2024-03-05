@@ -10,50 +10,50 @@ pub use crate::verifier::{
     validate_transaction, verify_and_charge_transaction, ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT,
 };
 use config::total_prepaid_send_fees;
-pub use near_crypto;
-use near_parameters::{ActionCosts, RuntimeConfig};
-pub use near_primitives;
-use near_primitives::account::Account;
-use near_primitives::checked_feature;
-use near_primitives::errors::{ActionError, ActionErrorKind, RuntimeError, TxExecutionError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{
+pub use unc_crypto;
+use unc_parameters::{ActionCosts, RuntimeConfig};
+pub use unc_primitives;
+use unc_primitives::account::Account;
+use unc_primitives::checked_feature;
+use unc_primitives::errors::{ActionError, ActionErrorKind, RuntimeError, TxExecutionError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{
     ActionReceipt, DataReceipt, DelayedReceiptIndices, Receipt, ReceiptEnum, ReceivedData,
 };
-pub use near_primitives::runtime::apply_state::ApplyState;
-use near_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
-use near_primitives::sandbox::state_patch::SandboxStatePatch;
-use near_primitives::state_record::StateRecord;
-use near_primitives::transaction::ExecutionMetadata;
-use near_primitives::transaction::{
+pub use unc_primitives::runtime::apply_state::ApplyState;
+use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
+use unc_primitives::sandbox::state_patch::SandboxStatePatch;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::transaction::ExecutionMetadata;
+use unc_primitives::transaction::{
     Action, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus, LogEntry, SignedTransaction,
 };
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{
     validator_power::ValidatorPower, AccountId, Balance, Compute, EpochInfoProvider, Gas,
     RawStateChangesWithTrieKey, StateChangeCause, StateRoot,
 };
-use near_primitives::utils::{
+use unc_primitives::utils::{
     create_action_hash, create_receipt_id_from_receipt, create_receipt_id_from_transaction,
 };
-use near_primitives::version::{ProtocolFeature, ProtocolVersion};
-use near_store::{
+use unc_primitives::version::{ProtocolFeature, ProtocolVersion};
+use unc_store::{
     get, get_account, get_postponed_receipt, get_received_data, remove_postponed_receipt, set,
     set_account, set_delayed_receipt, set_postponed_receipt, set_received_data, PartialStorage,
     StorageError, Trie, TrieChanges, TrieUpdate,
 };
-use near_store::{set_access_key, set_code};
-use near_vm_runner::logic::types::PromiseResult;
-use near_vm_runner::logic::ReturnData;
-pub use near_vm_runner::with_ext_cost_counter;
-use near_vm_runner::ContractCode;
-use near_vm_runner::ProfileDataV3;
+use unc_store::{set_access_key, set_code};
+use unc_vm_runner::logic::types::PromiseResult;
+use unc_vm_runner::logic::ReturnData;
+pub use unc_vm_runner::with_ext_cost_counter;
+use unc_vm_runner::ContractCode;
+use unc_vm_runner::ProfileDataV3;
 use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::debug;
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives_core::types::Power;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives_core::types::Power;
 
 mod actions;
 pub mod adapter;
@@ -1597,19 +1597,19 @@ impl Runtime {
 #[cfg(test)]
 mod tests {
     use assert_matches::assert_matches;
-    use near_crypto::{InMemorySigner, KeyType, PublicKey, Signer};
-    use near_parameters::{ExtCosts, ParameterCost, RuntimeConfig};
-    use near_primitives::account::AccessKey;
-    use near_primitives::hash::hash;
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::test_utils::{account_new, MockEpochInfoProvider};
-    use near_primitives::transaction::{
+    use unc_crypto::{InMemorySigner, KeyType, PublicKey, Signer};
+    use unc_parameters::{ExtCosts, ParameterCost, RuntimeConfig};
+    use unc_primitives::account::AccessKey;
+    use unc_primitives::hash::hash;
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::test_utils::{account_new, MockEpochInfoProvider};
+    use unc_primitives::transaction::{
         AddKeyAction, DeleteKeyAction, DeployContractAction, FunctionCallAction, TransferAction,
     };
-    use near_primitives::types::MerkleHash;
-    use near_primitives::version::PROTOCOL_VERSION;
-    use near_store::test_utils::TestTriesBuilder;
-    use near_store::{set_access_key, ShardTries, StoreCompiledContractCache};
+    use unc_primitives::types::MerkleHash;
+    use unc_primitives::version::PROTOCOL_VERSION;
+    use unc_store::test_utils::TestTriesBuilder;
+    use unc_store::{set_access_key, ShardTries, StoreCompiledContractCache};
     use testlib::runtime_utils::{alice_account, bob_account};
 
     use super::*;
@@ -2532,7 +2532,7 @@ mod tests {
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, gas_limit);
 
-        let wasm_code = near_test_contracts::rs_contract().to_vec();
+        let wasm_code = unc_test_contracts::rs_contract().to_vec();
         let actions =
             vec![Action::DeployContract(DeployContractAction { code: wasm_code.clone() })];
 
@@ -2553,9 +2553,9 @@ mod tests {
         tries.apply_all(&apply_result.trie_changes, ShardUId::single_shard(), &mut store_update);
         store_update.commit().unwrap();
 
-        let contract_code = near_vm_runner::ContractCode::new(wasm_code, None);
+        let contract_code = unc_vm_runner::ContractCode::new(wasm_code, None);
         let key =
-            near_vm_runner::get_contract_cache_key(&contract_code, &apply_state.config.wasm_config);
+            unc_vm_runner::get_contract_cache_key(&contract_code, &apply_state.config.wasm_config);
         apply_state
             .cache
             .unwrap()
@@ -2583,7 +2583,7 @@ mod tests {
             alice_account(),
             signer.clone(),
             vec![Action::DeployContract(DeployContractAction {
-                code: near_test_contracts::rs_contract().to_vec(),
+                code: unc_test_contracts::rs_contract().to_vec(),
             })],
         );
 
@@ -2670,7 +2670,7 @@ mod tests {
             alice_account(),
             signer.clone(),
             vec![Action::DeployContract(DeployContractAction {
-                code: near_test_contracts::rs_contract().to_vec(),
+                code: unc_test_contracts::rs_contract().to_vec(),
             })],
         );
 
@@ -2709,14 +2709,14 @@ mod tests {
 
 /// Interface provided for gas cost estimations.
 pub mod estimator {
-    use near_primitives::errors::RuntimeError;
-    use near_primitives::receipt::Receipt;
-    use near_primitives::runtime::apply_state::ApplyState;
-    use near_primitives::transaction::ExecutionOutcomeWithId;
-    use near_primitives::types::validator_power::ValidatorPower;
-    use near_primitives::types::EpochInfoProvider;
-    use near_primitives::types::validator_frozen::ValidatorFrozen;
-    use near_store::TrieUpdate;
+    use unc_primitives::errors::RuntimeError;
+    use unc_primitives::receipt::Receipt;
+    use unc_primitives::runtime::apply_state::ApplyState;
+    use unc_primitives::transaction::ExecutionOutcomeWithId;
+    use unc_primitives::types::validator_power::ValidatorPower;
+    use unc_primitives::types::EpochInfoProvider;
+    use unc_primitives::types::validator_frozen::ValidatorFrozen;
+    use unc_store::TrieUpdate;
 
     use crate::ApplyStats;
 

@@ -1,7 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::{Signature, Signer};
-use near_primitives_core::hash::hash;
-use near_primitives_core::types::AccountId;
+use unc_crypto::{Signature, Signer};
+use unc_primitives_core::hash::hash;
+use unc_primitives_core::types::AccountId;
 
 // These numbers are picked to be compatible with the current protocol and how
 // transactions are defined in it. Introducing this is no protocol change. This
@@ -220,13 +220,13 @@ impl From<SignableMessageType> for MessageDiscriminant {
 
 #[cfg(test)]
 mod tests {
-    use near_crypto::{InMemorySigner, KeyType, PublicKey};
-    use near_primitives_core::account::id::AccountIdRef;
+    use unc_crypto::{InMemorySigner, KeyType, PublicKey};
+    use unc_primitives_core::account::id::AccountIdRef;
 
     use super::*;
     use crate::action::delegate::{DelegateAction, SignedDelegateAction};
 
-    // Note: this is currently a simplified copy of near-primitives::test_utils::create_user_test_signer
+    // Note: this is currently a simplified copy of unc-primitives::test_utils::create_user_test_signer
     // TODO: consider whether it’s worth re-unifying them? it’s test-only code anyway.
     fn create_user_test_signer(account_id: &AccountIdRef) -> InMemorySigner {
         InMemorySigner::from_seed(account_id.to_owned(), KeyType::ED25519, account_id.as_str())

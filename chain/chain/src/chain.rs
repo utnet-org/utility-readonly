@@ -36,63 +36,63 @@ use chrono::Duration;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use itertools::Itertools;
 use lru::LruCache;
-use near_chain_configs::{MutableConfigValue, ReshardingConfig, ReshardingHandle};
+use unc_chain_configs::{MutableConfigValue, ReshardingConfig, ReshardingHandle};
 #[cfg(feature = "new_epoch_sync")]
-use near_chain_primitives::error::epoch_sync::EpochSyncInfoError;
-use near_chain_primitives::error::{BlockKnownError, Error, LogTransientStorageError};
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::EpochManagerAdapter;
-use near_o11y::log_assert;
-use near_primitives::block::{genesis_chunks, Block, BlockValidityError, Tip};
-use near_primitives::block_header::BlockHeader;
-use near_primitives::challenge::{
+use unc_chain_primitives::error::epoch_sync::EpochSyncInfoError;
+use unc_chain_primitives::error::{BlockKnownError, Error, LogTransientStorageError};
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_o11y::log_assert;
+use unc_primitives::block::{genesis_chunks, Block, BlockValidityError, Tip};
+use unc_primitives::block_header::BlockHeader;
+use unc_primitives::challenge::{
     BlockDoubleSign, Challenge, ChallengeBody, ChallengesResult, ChunkProofs, ChunkState,
     MaybeEncodedShardChunk, PartialState, SlashedValidator,
 };
-use near_primitives::checked_feature;
+use unc_primitives::checked_feature;
 #[cfg(feature = "new_epoch_sync")]
-use near_primitives::epoch_manager::epoch_sync::EpochSyncInfo;
+use unc_primitives::epoch_manager::epoch_sync::EpochSyncInfo;
 #[cfg(feature = "new_epoch_sync")]
-use near_primitives::errors::epoch_sync::EpochSyncHashType;
-use near_primitives::errors::EpochError;
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::merkle::{
+use unc_primitives::errors::epoch_sync::EpochSyncHashType;
+use unc_primitives::errors::EpochError;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::merkle::{
     combine_hash, merklize, verify_path, Direction, MerklePath, MerklePathItem, PartialMerkleTree,
 };
-use near_primitives::receipt::Receipt;
-use near_primitives::sandbox::state_patch::SandboxStatePatch;
-use near_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardUId};
-use near_primitives::sharding::{
+use unc_primitives::receipt::Receipt;
+use unc_primitives::sandbox::state_patch::SandboxStatePatch;
+use unc_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardUId};
+use unc_primitives::sharding::{
     ChunkHash, ChunkHashHeight, EncodedShardChunk, ReceiptList, ReceiptProof, ShardChunk,
     ShardChunkHeader, ShardInfo, ShardProof, StateSyncInfo,
 };
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::{
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::{
     get_num_state_parts, BitArray, CachedParts, ReceiptProofResponse, RootProof,
     ShardStateSyncResponseHeader, ShardStateSyncResponseHeaderV2, StateHeaderKey, StatePartKey,
 };
-use near_primitives::static_clock::StaticClock;
-use near_primitives::transaction::{ExecutionOutcomeWithIdAndProof, SignedTransaction};
-use near_primitives::types::chunk_extra::ChunkExtra;
-use near_primitives::types::{
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::transaction::{ExecutionOutcomeWithIdAndProof, SignedTransaction};
+use unc_primitives::types::chunk_extra::ChunkExtra;
+use unc_primitives::types::{
     AccountId, Balance, BlockExtra, BlockHeight, BlockHeightDelta, EpochId, MerkleHash, NumBlocks,
     ShardId, StateRoot,
 };
-use near_primitives::unwrap_or_return;
+use unc_primitives::unwrap_or_return;
 #[cfg(feature = "new_epoch_sync")]
-use near_primitives::utils::index_to_bytes;
-use near_primitives::utils::MaybeValidated;
-use near_primitives::version::{ProtocolFeature, PROTOCOL_VERSION};
-use near_primitives::views::{
+use unc_primitives::utils::index_to_bytes;
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives::version::{ProtocolFeature, PROTOCOL_VERSION};
+use unc_primitives::views::{
     BlockStatusView, DroppedReason, ExecutionOutcomeWithIdView, ExecutionStatusView,
     FinalExecutionOutcomeView, FinalExecutionOutcomeWithReceiptView, FinalExecutionStatus,
     LightClientBlockView, SignedTransactionView,
 };
-use near_store::config::StateSnapshotType;
-use near_store::flat::{store_helper, FlatStorageReadyStatus, FlatStorageStatus};
-use near_store::get_genesis_state_roots;
-use near_store::DBCol;
+use unc_store::config::StateSnapshotType;
+use unc_store::flat::{store_helper, FlatStorageReadyStatus, FlatStorageStatus};
+use unc_store::get_genesis_state_roots;
+use unc_store::DBCol;
 use once_cell::sync::OnceCell;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -266,7 +266,7 @@ pub struct Chain {
     snapshot_callbacks: Option<SnapshotCallbacks>,
 
     /// Configuration for resharding.
-    pub(crate) resharding_config: MutableConfigValue<near_chain_configs::ReshardingConfig>,
+    pub(crate) resharding_config: MutableConfigValue<unc_chain_configs::ReshardingConfig>,
 
     // A handle that allows the main process to interrupt resharding if needed.
     // This typically happens when the main process is interrupted.
@@ -2695,7 +2695,7 @@ impl Chain {
         &mut self,
         shard_id: ShardId,
         sync_hash: CryptoHash,
-        apply_result: Result<(), near_chain_primitives::Error>,
+        apply_result: Result<(), unc_chain_primitives::Error>,
     ) -> Result<(), Error> {
         let _span = tracing::debug_span!(target: "sync", "set_state_finalize").entered();
         apply_result?;
@@ -2731,7 +2731,7 @@ impl Chain {
                 &mut store_update,
                 shard_uid,
                 FlatStorageStatus::Ready(FlatStorageReadyStatus {
-                    flat_head: near_store::flat::BlockInfo {
+                    flat_head: unc_store::flat::BlockInfo {
                         hash: flat_head_hash,
                         prev_hash: flat_head_prev_hash,
                         height: flat_head_height,
@@ -4626,7 +4626,7 @@ impl Debug for ApplyStatePartsRequest {
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
 pub struct ApplyStatePartsResponse {
-    pub apply_result: Result<(), near_chain_primitives::error::Error>,
+    pub apply_result: Result<(), unc_chain_primitives::error::Error>,
     pub shard_id: ShardId,
     pub sync_hash: CryptoHash,
 }

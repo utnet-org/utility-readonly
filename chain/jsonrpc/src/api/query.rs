@@ -1,10 +1,10 @@
 use serde_json::Value;
 
-use near_client_primitives::types::QueryError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::query::{RpcQueryError, RpcQueryRequest, RpcQueryResponse};
-use near_primitives::types::BlockReference;
-use near_primitives::views::{QueryRequest, QueryResponse};
+use unc_client_primitives::types::QueryError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::query::{RpcQueryError, RpcQueryRequest, RpcQueryResponse};
+use unc_primitives::types::BlockReference;
+use unc_primitives::views::{QueryRequest, QueryResponse};
 
 use super::{Params, RpcFrom, RpcRequest};
 
@@ -143,27 +143,27 @@ impl RpcFrom<QueryResponse> for RpcQueryResponse {
     }
 }
 
-impl RpcFrom<near_primitives::views::QueryResponseKind>
-    for near_jsonrpc_primitives::types::query::QueryResponseKind
+impl RpcFrom<unc_primitives::views::QueryResponseKind>
+    for unc_jsonrpc_primitives::types::query::QueryResponseKind
 {
-    fn rpc_from(query_response_kind: near_primitives::views::QueryResponseKind) -> Self {
+    fn rpc_from(query_response_kind: unc_primitives::views::QueryResponseKind) -> Self {
         match query_response_kind {
-            near_primitives::views::QueryResponseKind::ViewAccount(account_view) => {
+            unc_primitives::views::QueryResponseKind::ViewAccount(account_view) => {
                 Self::ViewAccount(account_view)
             }
-            near_primitives::views::QueryResponseKind::ViewCode(contract_code_view) => {
+            unc_primitives::views::QueryResponseKind::ViewCode(contract_code_view) => {
                 Self::ViewCode(contract_code_view)
             }
-            near_primitives::views::QueryResponseKind::ViewState(view_state_result) => {
+            unc_primitives::views::QueryResponseKind::ViewState(view_state_result) => {
                 Self::ViewState(view_state_result)
             }
-            near_primitives::views::QueryResponseKind::CallResult(call_result) => {
+            unc_primitives::views::QueryResponseKind::CallResult(call_result) => {
                 Self::CallResult(call_result)
             }
-            near_primitives::views::QueryResponseKind::AccessKey(access_key_view) => {
+            unc_primitives::views::QueryResponseKind::AccessKey(access_key_view) => {
                 Self::AccessKey(access_key_view)
             }
-            near_primitives::views::QueryResponseKind::AccessKeyList(access_key_list) => {
+            unc_primitives::views::QueryResponseKind::AccessKeyList(access_key_list) => {
                 Self::AccessKeyList(access_key_list)
             }
         }

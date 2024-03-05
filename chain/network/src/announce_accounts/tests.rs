@@ -1,11 +1,11 @@
 use crate::announce_accounts::*;
 use crate::test_utils::{random_epoch_id, random_peer_id};
-use near_crypto::Signature;
-use near_primitives::network::AnnounceAccount;
+use unc_crypto::Signature;
+use unc_primitives::network::AnnounceAccount;
 
 #[test]
 fn announcement_same_epoch() {
-    let store = crate::store::Store::from(near_store::db::TestDB::new());
+    let store = crate::store::Store::from(unc_store::db::TestDB::new());
 
     let peer_id0 = random_peer_id();
     let peer_id1 = random_peer_id();
@@ -45,7 +45,7 @@ fn announcement_same_epoch() {
 
 #[test]
 fn dont_load_on_build() {
-    let store = crate::store::Store::from(near_store::db::TestDB::new());
+    let store = crate::store::Store::from(unc_store::db::TestDB::new());
 
     let peer_id0 = random_peer_id();
     let peer_id1 = random_peer_id();
@@ -81,7 +81,7 @@ fn dont_load_on_build() {
 
 #[test]
 fn load_from_disk() {
-    let store = crate::store::Store::from(near_store::db::TestDB::new());
+    let store = crate::store::Store::from(unc_store::db::TestDB::new());
 
     let peer_id0 = random_peer_id();
     let epoch_id0 = random_epoch_id();

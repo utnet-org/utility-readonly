@@ -4,7 +4,7 @@ use crate::sharding::{EncodedShardChunk, ShardChunk, ShardChunkHeader};
 use crate::types::AccountId;
 use crate::validator_signer::ValidatorSigner;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::Signature;
+use unc_crypto::Signature;
 
 /// Serialized TrieNodeWithSize or state value.
 pub type TrieValue = std::sync::Arc<[u8]>;

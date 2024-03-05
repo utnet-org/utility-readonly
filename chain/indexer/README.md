@@ -37,10 +37,10 @@ $ cargo run --release -- --home-dir ~/.near/localnet/ run
 
 After the node is started, you should see logs of every block produced in your localnet. Get back to the code to implement any custom handling of the data flowing into the indexer.
 
-Use [near-shell](https://github.com/near/near-shell) to submit transactions. For example, to create a new user you run the following command:
+Use [unc-shell](https://github.com/near/unc-shell) to submit transactions. For example, to create a new user you run the following command:
 
 ```bash
-$ NEAR_ENV=local near --keyPath ~/.near/localnet/validator_key.json \
+$ unc_ENV=local near --keyPath ~/.near/localnet/validator_key.json \
        create_account new-account.test.near --masterAccount test.near
 ```
 
@@ -114,5 +114,5 @@ Indexer Framework also exposes access to the internal APIs (see `Indexer::client
 
 *This list is not exhaustive, feel free to submit your project by sending a pull request.*
 
-* [Indexer for NEAR Wallet](https://github.com/near/near-indexer-for-wallet)
-* [Indexer for NEAR Explorer](https://github.com/near/near-indexer-for-explorer)
+* [Indexer for NEAR Wallet](https://github.com/near/unc-indexer-for-wallet)
+* [Indexer for NEAR Explorer](https://github.com/near/unc-indexer-for-explorer)

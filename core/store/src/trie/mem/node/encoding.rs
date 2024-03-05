@@ -8,8 +8,8 @@ use crate::trie::mem::flexible_data::FlexibleDataHeader;
 use crate::trie::TRIE_COSTS;
 use borsh::{BorshDeserialize, BorshSerialize};
 use elastic_array::ElasticArray16;
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::FlatStateValue;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::FlatStateValue;
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug, BorshSerialize, BorshDeserialize)]
 pub(crate) enum NodeKind {

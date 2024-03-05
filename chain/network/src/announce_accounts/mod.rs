@@ -1,7 +1,7 @@
 use crate::store;
 use lru::LruCache;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::types::AccountId;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::types::AccountId;
 use parking_lot::Mutex;
 use std::collections::HashMap;
 

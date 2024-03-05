@@ -7,10 +7,10 @@ use crate::receipt::Receipt;
 use crate::serialize::dec_format;
 use crate::trie_key::TrieKey;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::PublicKey;
+use unc_crypto::PublicKey;
 /// Reexport primitive types
-pub use near_primitives_core::types::*;
-pub use near_vm_runner::logic::TrieNodesCount;
+pub use unc_primitives_core::types::*;
+pub use unc_vm_runner::logic::TrieNodesCount;
 use once_cell::sync::Lazy;
 use serde_with::base64::Base64;
 use serde_with::serde_as;
@@ -26,7 +26,7 @@ pub type StateRoot = CryptoHash;
 pub enum Finality {
     #[serde(rename = "optimistic")]
     None,
-    #[serde(rename = "near-final")]
+    #[serde(rename = "unc-final")]
     DoomSlug,
     #[serde(rename = "final")]
     #[default]
@@ -547,8 +547,8 @@ pub struct ApprovalFrozen {
 
 pub mod validator_power_and_frozen {
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Balance, Power};
+    use unc_crypto::PublicKey;
+    use unc_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
     use crate::types::{ApprovalFrozen};
 
@@ -809,8 +809,8 @@ pub mod validator_power_and_frozen {
 
 pub mod validator_frozen {
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Balance};
+    use unc_crypto::PublicKey;
+    use unc_primitives_core::types::{AccountId, Balance};
     use serde::Serialize;
 
     pub use super::ValidatorFrozenV1;
@@ -966,8 +966,8 @@ pub struct ApprovalPower {
 pub mod validator_power {
     use crate::types::ApprovalPower;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_crypto::PublicKey;
-    use near_primitives_core::types::{AccountId, Power};
+    use unc_crypto::PublicKey;
+    use unc_primitives_core::types::{AccountId, Power};
     use serde::Serialize;
 
     pub use super::ValidatorPowerV1;
@@ -1164,8 +1164,8 @@ pub mod chunk_extra {
     use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
     use crate::types::StateRoot;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::{Balance, Gas};
+    use unc_primitives_core::hash::CryptoHash;
+    use unc_primitives_core::types::{Balance, Gas};
 
     pub use super::ChunkExtraV1;
 
@@ -1526,8 +1526,8 @@ pub struct StateChangesForShard {
 
 #[cfg(test)]
 mod tests {
-    use near_crypto::{KeyType, PublicKey};
-    use near_primitives_core::types::{Balance, Power};
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_primitives_core::types::{Balance, Power};
 
     use super::validator_power::ValidatorPower;
 

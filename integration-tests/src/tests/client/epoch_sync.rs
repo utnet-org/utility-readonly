@@ -3,34 +3,34 @@ use crate::test_helpers::heavy_test;
 use actix::Actor;
 use actix_rt::System;
 use futures::{future, FutureExt};
-use near_actix_test_utils::run_actix;
-use near_chain::{BlockProcessingArtifact, ChainStoreAccess};
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_client_primitives::types::GetBlock;
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::test_utils::WaitOrTimeoutActor;
-use near_o11y::testonly::{init_integration_logger, init_test_logger};
-use near_o11y::WithSpanContextExt;
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::epoch_sync::EpochSyncInfo;
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::get_num_state_parts;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::transaction::{
+use unc_actix_test_utils::run_actix;
+use unc_chain::{BlockProcessingArtifact, ChainStoreAccess};
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_client_primitives::types::GetBlock;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::test_utils::WaitOrTimeoutActor;
+use unc_o11y::testonly::{init_integration_logger, init_test_logger};
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::epoch_sync::EpochSyncInfo;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::get_num_state_parts;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
-use near_primitives::types::EpochId;
-use near_primitives::utils::MaybeValidated;
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::BlockHeight;
-use near_store::Mode::ReadOnly;
-use near_store::{DBCol, NodeStorage};
+use unc_primitives::types::EpochId;
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::BlockHeight;
+use unc_store::Mode::ReadOnly;
+use unc_store::{DBCol, NodeStorage};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
-use framework::{start_with_config, NearConfig};
+use framework::{start_with_config, UncConfig};
 use std::collections::HashSet;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
@@ -45,7 +45,7 @@ fn generate_transactions(last_hash: &CryptoHash, h: BlockHeight) -> Vec<SignedTr
             "test0".parse().unwrap(),
             &signer,
             vec![Action::DeployContract(DeployContractAction {
-                code: near_test_contracts::rs_contract().to_vec(),
+                code: unc_test_contracts::rs_contract().to_vec(),
             })],
             *last_hash,
         ));
@@ -201,8 +201,8 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
         });
 
         // Open storages of both nodes
-        let open_read_only_storage = |home_dir: &Path, near_config: &NearConfig| -> NodeStorage {
-            let opener = NodeStorage::opener(home_dir, false, &near_config.config.store, None);
+        let open_read_only_storage = |home_dir: &Path, unc_config: &UncConfig| -> NodeStorage {
+            let opener = NodeStorage::opener(home_dir, false, &unc_config.config.store, None);
             opener.open_in_mode(ReadOnly).unwrap()
         };
 

@@ -2,9 +2,9 @@ use crate::apply_block_cost;
 use crate::estimator_context::EstimatorContext;
 use crate::gas_cost::{GasCost, NonNegativeTolerance};
 use crate::transaction_builder::TransactionBuilder;
-use near_parameters::vm::{Config as VMConfig, VMKind};
-use near_parameters::ExtCosts;
-use near_primitives::transaction::{
+use unc_parameters::vm::{Config as VMConfig, VMKind};
+use unc_parameters::ExtCosts;
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
 use rand::distributions::Alphanumeric;
@@ -430,7 +430,7 @@ pub(crate) fn generate_data_only_contract(data_size: usize, config: &VMConfig) -
     );
     let wasm = wat::parse_str(wat_code).unwrap();
     // Validate generated code is valid.
-    near_vm_runner::prepare::prepare_contract(&wasm, config, VMKind::NearVm).unwrap();
+    unc_vm_runner::prepare::prepare_contract(&wasm, config, VMKind::NearVm).unwrap();
     wasm
 }
 

@@ -1,4 +1,4 @@
-use near_primitives::types::MaybeBlockId;
+use unc_primitives::types::MaybeBlockId;
 use serde_json::Value;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, arbitrary::Arbitrary)]
@@ -9,7 +9,7 @@ pub struct RpcGasPriceRequest {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcGasPriceResponse {
     #[serde(flatten)]
-    pub gas_price_view: near_primitives::views::GasPriceView,
+    pub gas_price_view: unc_primitives::views::GasPriceView,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]

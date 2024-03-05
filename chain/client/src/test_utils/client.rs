@@ -8,21 +8,21 @@ use std::sync::{Arc, RwLock};
 use crate::Client;
 use actix_rt::{Arbiter, System};
 use itertools::Itertools;
-use near_chain::chain::{do_apply_chunks, BlockCatchUpRequest};
-use near_chain::resharding::ReshardingRequest;
-use near_chain::test_utils::{wait_for_all_blocks_in_processing, wait_for_block_in_processing};
-use near_chain::{Chain, ChainStoreAccess, Provenance};
-use near_client_primitives::types::Error;
-use near_network::types::HighestHeightPeerInfo;
-use near_primitives::block::Block;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{merklize, MerklePath, PartialMerkleTree};
-use near_primitives::receipt::Receipt;
-use near_primitives::sharding::{EncodedShardChunk, ReedSolomonWrapper};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{BlockHeight, ShardId};
-use near_primitives::utils::MaybeValidated;
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_chain::chain::{do_apply_chunks, BlockCatchUpRequest};
+use unc_chain::resharding::ReshardingRequest;
+use unc_chain::test_utils::{wait_for_all_blocks_in_processing, wait_for_block_in_processing};
+use unc_chain::{Chain, ChainStoreAccess, Provenance};
+use unc_client_primitives::types::Error;
+use unc_network::types::HighestHeightPeerInfo;
+use unc_primitives::block::Block;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{merklize, MerklePath, PartialMerkleTree};
+use unc_primitives::receipt::Receipt;
+use unc_primitives::sharding::{EncodedShardChunk, ReedSolomonWrapper};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{BlockHeight, ShardId};
+use unc_primitives::utils::MaybeValidated;
+use unc_primitives::version::PROTOCOL_VERSION;
 use num_rational::Ratio;
 
 impl Client {
@@ -38,7 +38,7 @@ impl Client {
         block: MaybeValidated<Block>,
         provenance: Provenance,
         should_produce_chunk: bool,
-    ) -> Result<Vec<CryptoHash>, near_chain::Error> {
+    ) -> Result<Vec<CryptoHash>, unc_chain::Error> {
         self.start_process_block(block, provenance, Arc::new(|_| {}))?;
         wait_for_all_blocks_in_processing(&mut self.chain);
         let (accepted_blocks, errors) =
@@ -51,7 +51,7 @@ impl Client {
         &mut self,
         block: MaybeValidated<Block>,
         provenance: Provenance,
-    ) -> Result<Vec<CryptoHash>, near_chain::Error> {
+    ) -> Result<Vec<CryptoHash>, unc_chain::Error> {
         self.process_block_sync_with_produce_chunk_options(block, provenance, true)
     }
 
@@ -59,7 +59,7 @@ impl Client {
         &mut self,
         block: MaybeValidated<Block>,
         provenance: Provenance,
-    ) -> Result<Vec<CryptoHash>, near_chain::Error> {
+    ) -> Result<Vec<CryptoHash>, unc_chain::Error> {
         self.process_block_sync_with_produce_chunk_options(block, provenance, false)
     }
 

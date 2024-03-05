@@ -1,4 +1,4 @@
-# near-epoch-manager crate
+# unc-epoch-manager crate
 
 Epoch manager crate is responsible for code related to epochs and epoch switching.
 An epoch is a unit of time when the set of validators of the network remain constant.

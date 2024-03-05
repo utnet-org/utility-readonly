@@ -49,7 +49,7 @@ assert binary_protocol_version is not None
 
 node_config = state_sync_lib.get_state_sync_config_combined()
 
-near_root, node_dirs = init_cluster(
+unc_root, node_dirs = init_cluster(
     num_nodes=2,
     num_observers=1,
     num_shards=4,
@@ -60,12 +60,12 @@ near_root, node_dirs = init_cluster(
 
 started = time.time()
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
-node1 = spin_up_node(config, near_root, node_dirs[1], 1, boot_node=boot_node)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
+node1 = spin_up_node(config, unc_root, node_dirs[1], 1, boot_node=boot_node)
 
 utils.wait_for_blocks(boot_node, target=START_AT_BLOCK)
 
-node2 = spin_up_node(config, near_root, node_dirs[2], 2, boot_node=boot_node)
+node2 = spin_up_node(config, unc_root, node_dirs[2], 2, boot_node=boot_node)
 time.sleep(3)
 
 try:

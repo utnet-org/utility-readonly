@@ -3,13 +3,13 @@ use crate::trie::prefetching_trie_storage::PrefetcherResult;
 use crate::trie::POISONED_LOCK_ERR;
 use crate::{metrics, DBCol, MissingTrieValueContext, PrefetchApi, StorageError, Store};
 use lru::LruCache;
-use near_o11y::log_assert;
-use near_o11y::metrics::prometheus;
-use near_o11y::metrics::prometheus::core::{GenericCounter, GenericGauge};
-use near_primitives::challenge::PartialState;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::types::ShardId;
+use unc_o11y::log_assert;
+use unc_o11y::metrics::prometheus;
+use unc_o11y::metrics::prometheus::core::{GenericCounter, GenericGauge};
+use unc_primitives::challenge::PartialState;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::types::ShardId;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex};
@@ -433,12 +433,12 @@ impl TrieStorage for TrieCachingStorage {
         let val = match guard.get(hash) {
             Some(val) => {
                 self.metrics.shard_cache_hits.inc();
-                near_o11y::io_trace!(count: "shard_cache_hit");
+                unc_o11y::io_trace!(count: "shard_cache_hit");
                 val
             }
             None => {
                 self.metrics.shard_cache_misses.inc();
-                near_o11y::io_trace!(count: "shard_cache_miss");
+                unc_o11y::io_trace!(count: "shard_cache_miss");
                 let val;
                 if let Some(prefetcher) = &self.prefetch_api {
                     let prefetch_state = prefetcher.prefetching.get_or_set_fetching(*hash);
@@ -463,12 +463,12 @@ impl TrieStorage for TrieCachingStorage {
                             self.read_from_db(hash)?
                         }
                         PrefetcherResult::Prefetched(value) => {
-                            near_o11y::io_trace!(count: "prefetch_hit");
+                            unc_o11y::io_trace!(count: "prefetch_hit");
                             self.metrics.prefetch_hits.inc();
                             value
                         }
                         PrefetcherResult::Pending => {
-                            near_o11y::io_trace!(count: "prefetch_pending");
+                            unc_o11y::io_trace!(count: "prefetch_pending");
                             self.metrics.prefetch_pending.inc();
                             std::thread::yield_now();
                             // If data is already being prefetched, wait for that instead of sending a new request.
@@ -507,7 +507,7 @@ impl TrieStorage for TrieCachingStorage {
                     guard.put(*hash, val.clone());
                 } else {
                     self.metrics.shard_cache_too_large.inc();
-                    near_o11y::io_trace!(count: "shard_cache_too_large");
+                    unc_o11y::io_trace!(count: "shard_cache_too_large");
                 }
 
                 if let Some(prefetcher) = &self.prefetch_api {
@@ -610,9 +610,9 @@ mod bounded_queue_tests {
 mod trie_cache_tests {
     use crate::trie::trie_storage::TrieCacheInner;
     use crate::{StoreConfig, TrieCache, TrieConfig};
-    use near_primitives::hash::hash;
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::types::ShardId;
+    use unc_primitives::hash::hash;
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::types::ShardId;
 
     fn put_value(cache: &mut TrieCacheInner, value: &[u8]) {
         cache.put(hash(value), value.into());

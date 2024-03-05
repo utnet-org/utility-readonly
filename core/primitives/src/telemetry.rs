@@ -2,7 +2,7 @@
 //! node count and their status across the network.
 use crate::types::AccountId;
 use crate::types::BlockHeight;
-use near_primitives_core::hash::CryptoHash;
+use unc_primitives_core::hash::CryptoHash;
 
 #[derive(serde::Serialize, Debug)]
 pub struct TelemetryAgentInfo {

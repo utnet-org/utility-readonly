@@ -3,11 +3,11 @@ use std::sync::{Arc, RwLock};
 
 use actix::System;
 
-use near_client::{GetBlock, GetChunk};
-use near_network::test_utils::wait_or_timeout;
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
+use unc_client::{GetBlock, GetChunk};
+use unc_network::test_utils::wait_or_timeout;
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
 
 use crate::tests::framework::node_cluster::NodeCluster;
 

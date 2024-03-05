@@ -1,15 +1,15 @@
 //! Settings of the parameters of the runtime.
 
-use near_primitives::account::AccessKeyPermission;
-use near_primitives::errors::IntegerOverflowError;
+use unc_primitives::account::AccessKeyPermission;
+use unc_primitives::errors::IntegerOverflowError;
 use num_bigint::BigUint;
 use num_traits::cast::ToPrimitive;
 use num_traits::pow::Pow;
 // Just re-exporting RuntimeConfig for backwards compatibility.
-use near_parameters::{transfer_exec_fee, transfer_send_fee, ActionCosts, RuntimeConfig};
-pub use near_primitives::num_rational::Rational32;
-use near_primitives::transaction::{Action, DeployContractAction, Transaction};
-use near_primitives::types::{AccountId, Balance, Compute, Gas};
+use unc_parameters::{transfer_exec_fee, transfer_send_fee, ActionCosts, RuntimeConfig};
+pub use unc_primitives::num_rational::Rational32;
+use unc_primitives::transaction::{Action, DeployContractAction, Transaction};
+use unc_primitives::types::{AccountId, Balance, Compute, Gas};
 
 /// Describes the cost of converting this transaction into a receipt.
 #[derive(Debug)]

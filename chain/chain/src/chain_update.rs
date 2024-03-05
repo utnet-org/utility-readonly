@@ -12,23 +12,23 @@ use crate::update_shard::{
 };
 use crate::{metrics, DoomslugThresholdMode};
 use crate::{Chain, Doomslug};
-use near_chain_primitives::error::Error;
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_epoch_manager::types::BlockHeaderInfo;
-use near_epoch_manager::EpochManagerAdapter;
-use near_primitives::block::{Block, Tip};
-use near_primitives::block_header::BlockHeader;
+use unc_chain_primitives::error::Error;
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_epoch_manager::types::BlockHeaderInfo;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_primitives::block::{Block, Tip};
+use unc_primitives::block_header::BlockHeader;
 #[cfg(feature = "new_epoch_sync")]
-use near_primitives::epoch_manager::{block_info::BlockInfo, epoch_sync::EpochSyncInfo};
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::{account_id_to_shard_id, account_id_to_shard_uid, ShardUId};
-use near_primitives::sharding::ShardChunk;
-use near_primitives::state_sync::{ReceiptProofResponse, ShardStateSyncResponseHeader};
-use near_primitives::types::chunk_extra::ChunkExtra;
-use near_primitives::types::{
+use unc_primitives::epoch_manager::{block_info::BlockInfo, epoch_sync::EpochSyncInfo};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::{account_id_to_shard_id, account_id_to_shard_uid, ShardUId};
+use unc_primitives::sharding::ShardChunk;
+use unc_primitives::state_sync::{ReceiptProofResponse, ShardStateSyncResponseHeader};
+use unc_primitives::types::chunk_extra::ChunkExtra;
+use unc_primitives::types::{
     AccountId, BlockExtra, BlockHeight, BlockHeightDelta, NumShards, ShardId,
 };
-use near_primitives::views::LightClientBlockView;
+use unc_primitives::views::LightClientBlockView;
 use std::collections::HashMap;
 #[cfg(feature = "new_epoch_sync")]
 use std::collections::HashSet;
@@ -924,7 +924,7 @@ impl<'a> ChainUpdate<'a> {
             return Ok(());
         }
         if self.chain_store_update.store().exists(
-            near_store::DBCol::EpochSyncInfo,
+            unc_store::DBCol::EpochSyncInfo,
             prev_epoch_last_block_info.epoch_id().as_ref(),
         )? {
             // We already wrote `EpochSyncInfo` for this epoch.
@@ -944,11 +944,11 @@ impl<'a> ChainUpdate<'a> {
         let mut store_update = self.chain_store_update.store().store_update();
         store_update
             .set_ser(
-                near_store::DBCol::EpochSyncInfo,
+                unc_store::DBCol::EpochSyncInfo,
                 last_block_info.epoch_id().as_ref(),
                 &self.create_epoch_sync_info(last_block_info, next_epoch_first_hash, None)?,
             )
-            .map_err(near_primitives::errors::EpochError::from)?;
+            .map_err(unc_primitives::errors::EpochError::from)?;
         self.chain_store_update.merge(store_update);
         Ok(())
     }
@@ -1056,7 +1056,7 @@ impl<'a> ChainUpdate<'a> {
 
         let epoch_id = last_block_info.epoch_id();
         let next_epoch_id = self.epoch_manager.get_next_epoch_id(last_block_info.hash())?;
-        let next_next_epoch_id = near_primitives::types::EpochId(*last_block_info.hash());
+        let next_next_epoch_id = unc_primitives::types::EpochId(*last_block_info.hash());
 
         Ok(EpochSyncInfo {
             all_block_hashes,

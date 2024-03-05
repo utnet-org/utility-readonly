@@ -2,15 +2,15 @@
 //! components of the mock network.
 
 use anyhow::{anyhow, Context as AnyhowContext};
-use near_async::time;
-use near_chain::{Block, Chain, ChainStoreAccess, Error};
-use near_client::sync::header::MAX_BLOCK_HEADERS;
-use near_crypto::SecretKey;
-use near_network::raw::{DirectMessage, Listener, Message, RoutedMessage};
-use near_network::tcp;
-use near_network::types::{PartialEncodedChunkRequestMsg, PartialEncodedChunkResponseMsg};
-use near_primitives::sharding::ChunkHash;
-use near_primitives::types::{BlockHeight, ShardId};
+use unc_async::time;
+use unc_chain::{Block, Chain, ChainStoreAccess, Error};
+use unc_client::sync::header::MAX_BLOCK_HEADERS;
+use unc_crypto::SecretKey;
+use unc_network::raw::{DirectMessage, Listener, Message, RoutedMessage};
+use unc_network::tcp;
+use unc_network::types::{PartialEncodedChunkRequestMsg, PartialEncodedChunkResponseMsg};
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::types::{BlockHeight, ShardId};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::future::Future;
 use std::path::Path;
@@ -401,7 +401,7 @@ impl MockPeer {
         self.current_height += 1;
         match self.chain.get_block_by_height(height) {
             Ok(b) => Ok(Some(b)),
-            Err(near_chain::Error::DBNotFoundErr(_)) => Ok(None),
+            Err(unc_chain::Error::DBNotFoundErr(_)) => Ok(None),
             Err(e) => Err(e.into()),
         }
     }

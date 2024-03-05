@@ -4,13 +4,13 @@ use actix::prelude::SendError;
 use actix::{Actor, Message};
 use actix_rt::Arbiter;
 use core::fmt::Debug;
-use near_async::messaging::Sender;
-use near_network::types::{
+use unc_async::messaging::Sender;
+use unc_network::types::{
     PeerManagerMessageRequest, StateSync as NetworkStateSync, StateSyncResponse,
 };
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
-use near_store::ShardUId;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
+use unc_store::ShardUId;
 use std::collections::HashMap;
 use tracing::warn;
 

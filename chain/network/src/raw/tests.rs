@@ -3,11 +3,11 @@ use crate::raw;
 use crate::tcp;
 use crate::testonly;
 use crate::types::PeerInfo;
-use near_async::time;
-use near_crypto::{KeyType, SecretKey};
-use near_o11y::testonly::init_test_logger;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
+use unc_async::time;
+use unc_crypto::{KeyType, SecretKey};
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
 use std::sync::Arc;
 
 #[tokio::test]
@@ -24,7 +24,7 @@ async fn test_raw_conn_pings() {
     let genesis_id = chain.genesis_id.clone();
     let _pm = crate::peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         cfg,
         chain,
     )
@@ -84,7 +84,7 @@ async fn test_raw_conn_state_parts() {
     let genesis_id = chain.genesis_id.clone();
     let _pm = crate::peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         cfg,
         chain,
     )
@@ -160,7 +160,7 @@ async fn test_listener() {
     cfg.outbound_disabled = false;
     let _pm = crate::peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         cfg,
         chain,
     )

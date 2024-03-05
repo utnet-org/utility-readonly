@@ -1,5 +1,5 @@
 [package]
-name = "near-chunks-primitives"
+name = "unc-chunks-primitives"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -12,5 +12,5 @@ publish = true
 workspace = true
 
 [dependencies]
-near-chain-primitives.workspace = true
-near-primitives.workspace = true
+unc-chain-primitives.workspace = true
+unc-primitives.workspace = true

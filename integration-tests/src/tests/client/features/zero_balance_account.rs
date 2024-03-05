@@ -1,19 +1,19 @@
 use assert_matches::assert_matches;
 
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::adapter::ProcessTxResponse;
-use near_client::test_utils::TestEnv;
-use near_crypto::{InMemorySigner, KeyType, PublicKey};
-use near_parameters::{ExtCostsConfig, RuntimeConfig, RuntimeConfigStore, StorageUsageConfig};
-use near_primitives::account::id::AccountId;
-use near_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
-use near_primitives::errors::{ActionError, ActionErrorKind, InvalidTxError, TxExecutionError};
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::transaction::Action::AddKey;
-use near_primitives::transaction::{Action, AddKeyAction, DeleteKeyAction, SignedTransaction};
-use near_primitives::version::{ProtocolFeature, PROTOCOL_VERSION};
-use near_primitives::views::{FinalExecutionStatus, QueryRequest, QueryResponseKind};
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::adapter::ProcessTxResponse;
+use unc_client::test_utils::TestEnv;
+use unc_crypto::{InMemorySigner, KeyType, PublicKey};
+use unc_parameters::{ExtCostsConfig, RuntimeConfig, RuntimeConfigStore, StorageUsageConfig};
+use unc_primitives::account::id::AccountId;
+use unc_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
+use unc_primitives::errors::{ActionError, ActionErrorKind, InvalidTxError, TxExecutionError};
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::transaction::Action::AddKey;
+use unc_primitives::transaction::{Action, AddKeyAction, DeleteKeyAction, SignedTransaction};
+use unc_primitives::version::{ProtocolFeature, PROTOCOL_VERSION};
+use unc_primitives::views::{FinalExecutionStatus, QueryRequest, QueryResponseKind};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use node_runtime::ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT;
@@ -85,7 +85,7 @@ fn test_zero_balance_account_creation() {
 
     // create a zero balance account with contract deployed. The transaction should fail
     let new_account_id: AccountId = "hell.test0".parse().unwrap();
-    let contract = near_test_contracts::sized_contract(ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT as usize);
+    let contract = unc_test_contracts::sized_contract(ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT as usize);
     let create_account_tx = SignedTransaction::create_contract(
         2,
         signer0.account_id.clone(),
@@ -246,7 +246,7 @@ fn test_zero_balance_account_add_key() {
 fn test_zero_balance_account_upgrade() {
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
     let epoch_length = 5;
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);

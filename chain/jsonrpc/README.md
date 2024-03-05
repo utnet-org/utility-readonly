@@ -9,7 +9,7 @@ submit a transaction.
 All the APIs that are compiled by default (default-features) and not prefixed
 with `EXPERIMENTAL_` are kept stable without breaking changes.
 
-We also support `near-api-*` bindings to JSON-RPC in the latest state and
+We also support `unc-api-*` bindings to JSON-RPC in the latest state and
 propagate deprecation warnings through them.
 
 The breaking changes (e.g. removal or change of `EXPERIMENTAL_` APIs) are

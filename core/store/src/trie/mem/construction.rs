@@ -2,7 +2,7 @@ use super::arena::Arena;
 use super::node::MemTrieNodeId;
 use crate::trie::mem::node::InputMemTrieNode;
 use crate::NibbleSlice;
-use near_primitives::state::FlatStateValue;
+use unc_primitives::state::FlatStateValue;
 
 /// Algorithm to construct a trie from a given stream of sorted leaf values.
 ///

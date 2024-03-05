@@ -1,5 +1,5 @@
 [package]
-name = "near-network"
+name = "unc-network"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -51,15 +51,15 @@ tokio-util.workspace = true
 tracing.workspace = true
 time.workspace = true
 
-near-async.workspace = true
-near-fmt.workspace = true
-near-o11y.workspace = true
-near-crypto.workspace = true
-near-performance-metrics.workspace = true
-near-performance-metrics-macros.workspace = true
-near-primitives.workspace = true
-near-stable-hasher.workspace = true
-near-store.workspace = true
+unc-async.workspace = true
+unc-fmt.workspace = true
+unc-o11y.workspace = true
+unc-crypto.workspace = true
+unc-performance-metrics.workspace = true
+unc-performance-metrics-macros.workspace = true
+unc-primitives.workspace = true
+unc-stable-hasher.workspace = true
+unc-store.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true
@@ -71,21 +71,21 @@ webrtc-util.workspace = true
 
 [features]
 nightly_protocol = [
-  "near-async/nightly_protocol",
-  "near-fmt/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
+  "unc-async/nightly_protocol",
+  "unc-fmt/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
 ]
 nightly = [
   "nightly_protocol",
-  "near-async/nightly",
-  "near-fmt/nightly",
-  "near-o11y/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
+  "unc-async/nightly",
+  "unc-fmt/nightly",
+  "unc-o11y/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
 ]
 performance_stats = [
-    "near-performance-metrics/performance_stats",
+    "unc-performance-metrics/performance_stats",
 ]
 test_features = []

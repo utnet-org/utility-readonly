@@ -1,6 +1,6 @@
 # Locust based load testing
 
-TLDR: Use [locust](https://locust.io/) to generate transactions against a Near chain and produce statistics.
+TLDR: Use [locust](https://locust.io/) to generate transactions against a unc chain and produce statistics.
 
 Locust is a python library which we are using to send load to an RPC node. How
 to set up the network under test is outside the scope of this document. This is
@@ -107,8 +107,8 @@ used to pay for transactions.
 
 As the load generator is currently configured, it will consume 1M NEAR from the
 master funding account for each worker instance spawned. So, if you run with 64
-workers with 1000 users, it will consume 64M Near. It's recommended to have a
-funding key with billions of Near.
+workers with 1000 users, it will consume 64M unc. It's recommended to have a
+funding key with billions of unc.
 
 Also, the account name associated with this account should not bee too long.
 Keep it below 20 characters, and it should be fine. The reason is that we create

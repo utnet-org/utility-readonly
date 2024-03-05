@@ -1,5 +1,5 @@
 [package]
-name = "near-state-parts-dump-check"
+name = "unc-state-parts-dump-check"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -18,13 +18,13 @@ anyhow.workspace = true
 borsh.workspace = true
 clap.workspace = true
 cloud-storage.workspace = true
-near-primitives.workspace = true
+unc-primitives.workspace = true
 framework.workspace = true
-near-store.workspace = true
-near-client.workspace = true
-near-jsonrpc.workspace = true
-near-primitives-core.workspace = true
-near-o11y.workspace = true
+unc-store.workspace = true
+unc-client.workspace = true
+unc-jsonrpc.workspace = true
+unc-primitives-core.workspace = true
+unc-o11y.workspace = true
 once_cell.workspace = true
 reqwest.workspace = true
 tokio.workspace = true
@@ -32,20 +32,20 @@ tracing.workspace = true
 [features]
 nightly = [
   "nightly_protocol",
-  "near-client/nightly",
-  "near-jsonrpc/nightly",
-  "near-o11y/nightly",
-  "near-primitives-core/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
+  "unc-client/nightly",
+  "unc-jsonrpc/nightly",
+  "unc-o11y/nightly",
+  "unc-primitives-core/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
   "framework/nightly",
 ]
 nightly_protocol = [
-  "near-client/nightly_protocol",
-  "near-jsonrpc/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-primitives-core/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
+  "unc-client/nightly_protocol",
+  "unc-jsonrpc/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
   "framework/nightly_protocol",
 ]

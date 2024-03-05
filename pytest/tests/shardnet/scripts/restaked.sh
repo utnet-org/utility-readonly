@@ -9,13 +9,13 @@ staking_key=$(grep public_key /home/ubuntu/.near/shardnet/validator_key.json | a
 
 while true; do
   skip=0
-  NEAR_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 proposals | grep ${account_id}
+  unc_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 proposals | grep ${account_id}
   if [ $? -eq 0 ]; then
     # Already in the proposals.
     echo "$(date): Found in the proposals"
     skip=1
   fi
-  NEAR_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 validators current | grep ${account_id}
+  unc_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 validators current | grep ${account_id}
   if [ $? -eq 0 ]; then
     # Is currently a validator.
     echo "$(date): Currently a validator"
@@ -24,7 +24,7 @@ while true; do
   if [ ${skip} -eq 0 ]; then
     # Not skipping, do the staking.
     echo "$(date): Doing restaking"
-    NEAR_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 stake ${account_id} ${staking_key} ${amount}
+    unc_ENV=shardnet near --nodeUrl=http://127.0.0.1:3030 stake ${account_id} ${staking_key} ${amount}
   fi
   echo "$(date): Sleeping for ${delay_sec} seconds"
   sleep ${delay_sec}

@@ -1,18 +1,18 @@
 use anyhow::Context;
 use clap;
-use near_chain::{ChainStore, ChainStoreAccess, ChainUpdate, DoomslugThresholdMode};
-use near_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
-use near_epoch_manager::EpochManager;
-use near_primitives::block::BlockHeader;
-use near_primitives::borsh::BorshDeserialize;
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::AGGREGATOR_KEY;
-use near_primitives::hash::CryptoHash;
-use near_store::{checkpoint_hot_storage_and_cleanup_columns, DBCol, NodeStorage};
+use unc_chain::{ChainStore, ChainStoreAccess, ChainUpdate, DoomslugThresholdMode};
+use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::EpochManager;
+use unc_primitives::block::BlockHeader;
+use unc_primitives::borsh::BorshDeserialize;
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::AGGREGATOR_KEY;
+use unc_primitives::hash::CryptoHash;
+use unc_store::{checkpoint_hot_storage_and_cleanup_columns, DBCol, NodeStorage};
 use framework::NightshadeRuntime;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
+use unc_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
 
 #[derive(clap::Parser)]
 pub struct EpochSyncCommand {
@@ -30,22 +30,22 @@ enum SubCommand {
 
 impl EpochSyncCommand {
     pub fn run(self, home_dir: &Path) -> anyhow::Result<()> {
-        let mut near_config = Self::create_snapshot(home_dir)?;
-        let storage = framework::open_storage(&home_dir, &mut near_config)?;
+        let mut unc_config = Self::create_snapshot(home_dir)?;
+        let storage = framework::open_storage(&home_dir, &mut unc_config)?;
 
         match self.subcmd {
-            SubCommand::ValidateEpochSyncInfo(cmd) => cmd.run(&home_dir, &storage, &near_config),
+            SubCommand::ValidateEpochSyncInfo(cmd) => cmd.run(&home_dir, &storage, &unc_config),
         }
     }
 
-    fn create_snapshot(home_dir: &Path) -> anyhow::Result<framework::config::NearConfig> {
-        let mut near_config = framework::config::load_config(
+    fn create_snapshot(home_dir: &Path) -> anyhow::Result<framework::config::UncConfig> {
+        let mut unc_config = framework::config::load_config(
             &home_dir,
-            near_chain_configs::GenesisValidationMode::UnsafeFast,
+            unc_chain_configs::GenesisValidationMode::UnsafeFast,
         )
         .unwrap_or_else(|e| panic!("Error loading config: {e:#}"));
 
-        let store_path_addition = near_config
+        let store_path_addition = unc_config
             .config
             .store
             .path
@@ -54,7 +54,7 @@ impl EpochSyncCommand {
             .join("epoch-sync-snapshot");
         let snapshot_path = home_dir.join(store_path_addition.clone());
 
-        let storage = framework::open_storage(&home_dir, &mut near_config)?;
+        let storage = framework::open_storage(&home_dir, &mut unc_config)?;
 
         if snapshot_path.exists() && snapshot_path.is_dir() {
             tracing::info!(?snapshot_path, "Found a DB snapshot");
@@ -68,9 +68,9 @@ impl EpochSyncCommand {
             )?;
         }
 
-        near_config.config.store.path = Some(store_path_addition.join("data"));
+        unc_config.config.store.path = Some(store_path_addition.join("data"));
 
-        Ok(near_config)
+        Ok(unc_config)
     }
 }
 
@@ -88,7 +88,7 @@ impl ValidateEpochSyncInfoCmd {
         &self,
         home_dir: &Path,
         storage: &NodeStorage,
-        config: &framework::config::NearConfig,
+        config: &framework::config::UncConfig,
     ) -> anyhow::Result<()> {
         let store = storage.get_hot_store();
 

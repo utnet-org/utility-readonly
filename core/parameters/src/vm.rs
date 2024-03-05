@@ -1,7 +1,7 @@
 use crate::cost::{ExtCostsConfig, ParameterCost};
 use borsh::BorshSerialize;
-use near_primitives_core::config::AccountIdValidityRulesVersion;
-use near_primitives_core::types::Gas;
+use unc_primitives_core::config::AccountIdValidityRulesVersion;
+use unc_primitives_core::types::Gas;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
@@ -9,7 +9,7 @@ use std::hash::{Hash, Hasher};
 // if particular VM reached publicly visible networks.
 //
 // Additionally, this is public only for the purposes of internal tools like the estimator. This
-// API should otherwise be considered a private configuration of the `near-vm-runner`
+// API should otherwise be considered a private configuration of the `unc-vm-runner`
 // crate.
 #[derive(
     Clone,
@@ -155,7 +155,7 @@ pub struct Config {
     /// The kind of the VM implementation to use
     pub vm_kind: VMKind,
 
-    /// Disable the fix for the #9393 issue in near-vm-runner.
+    /// Disable the fix for the #9393 issue in unc-vm-runner.
     pub disable_9393_fix: bool,
 
     /// Set to `StorageGetMode::FlatStorage` in order to enable the `FlatStorageReads` protocol
@@ -198,7 +198,7 @@ impl Config {
 
     pub fn make_free(&mut self) {
         self.ext_costs = ExtCostsConfig {
-            costs: near_primitives_core::enum_map::enum_map! {
+            costs: unc_primitives_core::enum_map::enum_map! {
                 _ => ParameterCost { gas: 0, compute: 0 }
             },
         };

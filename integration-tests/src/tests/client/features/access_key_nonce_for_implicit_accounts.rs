@@ -1,26 +1,26 @@
 use crate::tests::client::process_blocks::produce_blocks_from_height;
 use assert_matches::assert_matches;
-use near_async::messaging::CanSend;
-use near_chain::orphan::NUM_ORPHAN_ANCESTORS_CHECK;
-use near_chain::{ChainGenesis, Error, Provenance};
-use near_chain_configs::Genesis;
-use near_chunks::metrics::PARTIAL_ENCODED_CHUNK_FORWARD_CACHED_WITHOUT_HEADER;
-use near_client::test_utils::{create_chunk_with_transactions, TestEnv};
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, SecretKey, Signer};
-use near_network::shards_manager::ShardsManagerRequestFromNetwork;
-use near_network::types::{NetworkRequests, PeerManagerMessageRequest};
-use near_o11y::testonly::init_test_logger;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::account::AccessKey;
-use near_primitives::errors::InvalidTxError;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, BlockHeight};
-use near_primitives::utils::derive_near_implicit_account_id;
-use near_primitives::version::{ProtocolFeature, ProtocolVersion};
-use near_primitives::views::FinalExecutionStatus;
+use unc_async::messaging::CanSend;
+use unc_chain::orphan::NUM_ORPHAN_ANCESTORS_CHECK;
+use unc_chain::{ChainGenesis, Error, Provenance};
+use unc_chain_configs::Genesis;
+use unc_chunks::metrics::PARTIAL_ENCODED_CHUNK_FORWARD_CACHED_WITHOUT_HEADER;
+use unc_client::test_utils::{create_chunk_with_transactions, TestEnv};
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, SecretKey, Signer};
+use unc_network::shards_manager::ShardsManagerRequestFromNetwork;
+use unc_network::types::{NetworkRequests, PeerManagerMessageRequest};
+use unc_o11y::testonly::init_test_logger;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::account::AccessKey;
+use unc_primitives::errors::InvalidTxError;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, BlockHeight};
+use unc_primitives::utils::derive_unc_implicit_account_id;
+use unc_primitives::version::{ProtocolFeature, ProtocolVersion};
+use unc_primitives::views::FinalExecutionStatus;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use framework::UNC_BASE;
@@ -117,9 +117,9 @@ fn test_transaction_hash_collision() {
 /// It creates NEAR-implicit account, deletes it and creates again, so that nonce of the access
 /// key is updated. Then it tries to send tx from NEAR-implicit account with invalid nonce, which
 /// should fail since the protocol upgrade.
-fn get_status_of_tx_hash_collision_for_near_implicit_account(
+fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     protocol_version: ProtocolVersion,
-    near_implicit_account_signer: InMemorySigner,
+    unc_implicit_account_signer: InMemorySigner,
 ) -> ProcessTxResponse {
     let epoch_length = 100;
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
@@ -134,13 +134,13 @@ fn get_status_of_tx_hash_collision_for_near_implicit_account(
     let mut height = 1;
     let blocks_number = 5;
     let signer1 = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-    let near_implicit_account_id = near_implicit_account_signer.account_id.clone();
+    let unc_implicit_account_id = unc_implicit_account_signer.account_id.clone();
 
     // Send money to NEAR-implicit account, invoking its creation.
     let send_money_tx = SignedTransaction::send_money(
         1,
         "test1".parse().unwrap(),
-        near_implicit_account_id.clone(),
+        unc_implicit_account_id.clone(),
         &signer1,
         deposit_for_account_creation,
         *genesis_block.hash(),
@@ -151,11 +151,11 @@ fn get_status_of_tx_hash_collision_for_near_implicit_account(
     // Delete NEAR-implicit account.
     let delete_account_tx = SignedTransaction::delete_account(
         // Because AccessKeyNonceRange is enabled, correctness of this nonce is guaranteed.
-        (height - 1) * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER,
-        near_implicit_account_id.clone(),
-        near_implicit_account_id.clone(),
+        (height - 1) * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER,
+        unc_implicit_account_id.clone(),
+        unc_implicit_account_id.clone(),
         "test0".parse().unwrap(),
-        &near_implicit_account_signer,
+        &unc_implicit_account_signer,
         *block.hash(),
     );
     height = check_tx_processing(&mut env, delete_account_tx, height, blocks_number);
@@ -165,7 +165,7 @@ fn get_status_of_tx_hash_collision_for_near_implicit_account(
     let send_money_again_tx = SignedTransaction::send_money(
         2,
         "test1".parse().unwrap(),
-        near_implicit_account_id.clone(),
+        unc_implicit_account_id.clone(),
         &signer1,
         deposit_for_account_creation,
         *block.hash(),
@@ -174,44 +174,44 @@ fn get_status_of_tx_hash_collision_for_near_implicit_account(
     let block = env.clients[0].chain.get_block_by_height(height - 1).unwrap();
 
     // Send money from NEAR-implicit account with incorrect nonce.
-    let send_money_from_near_implicit_account_tx = SignedTransaction::send_money(
+    let send_money_from_unc_implicit_account_tx = SignedTransaction::send_money(
         1,
-        near_implicit_account_id.clone(),
+        unc_implicit_account_id.clone(),
         "test0".parse().unwrap(),
-        &near_implicit_account_signer,
+        &unc_implicit_account_signer,
         100,
         *block.hash(),
     );
     let response =
-        env.clients[0].process_tx(send_money_from_near_implicit_account_tx, false, false);
+        env.clients[0].process_tx(send_money_from_unc_implicit_account_tx, false, false);
 
     // Check that sending money from NEAR-implicit account with correct nonce is still valid.
-    let send_money_from_near_implicit_account_tx = SignedTransaction::send_money(
+    let send_money_from_unc_implicit_account_tx = SignedTransaction::send_money(
         (height - 1) * AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER,
-        near_implicit_account_id,
+        unc_implicit_account_id,
         "test0".parse().unwrap(),
-        &near_implicit_account_signer,
+        &unc_implicit_account_signer,
         100,
         *block.hash(),
     );
-    check_tx_processing(&mut env, send_money_from_near_implicit_account_tx, height, blocks_number);
+    check_tx_processing(&mut env, send_money_from_unc_implicit_account_tx, height, blocks_number);
 
     response
 }
 
 /// Test that duplicate transactions from NEAR-implicit accounts are properly rejected.
 #[test]
-fn test_transaction_hash_collision_for_near_implicit_account_fail() {
+fn test_transaction_hash_collision_for_unc_implicit_account_fail() {
     let protocol_version = ProtocolFeature::AccessKeyNonceForImplicitAccounts.protocol_version();
     let secret_key = SecretKey::from_seed(KeyType::ED25519, "test");
     let public_key = secret_key.public_key();
-    let near_implicit_account_id = derive_near_implicit_account_id(public_key.unwrap_as_ed25519());
-    let near_implicit_account_signer =
-        InMemorySigner::from_secret_key(near_implicit_account_id, secret_key);
+    let unc_implicit_account_id = derive_unc_implicit_account_id(public_key.unwrap_as_ed25519());
+    let unc_implicit_account_signer =
+        InMemorySigner::from_secret_key(unc_implicit_account_id, secret_key);
     assert_matches!(
-        get_status_of_tx_hash_collision_for_near_implicit_account(
+        get_status_of_tx_hash_collision_for_unc_implicit_account(
             protocol_version,
-            near_implicit_account_signer
+            unc_implicit_account_signer
         ),
         ProcessTxResponse::InvalidTx(InvalidTxError::InvalidNonce { .. })
     );
@@ -219,18 +219,18 @@ fn test_transaction_hash_collision_for_near_implicit_account_fail() {
 
 /// Test that duplicate transactions from NEAR-implicit accounts are not rejected until protocol upgrade.
 #[test]
-fn test_transaction_hash_collision_for_near_implicit_account_ok() {
+fn test_transaction_hash_collision_for_unc_implicit_account_ok() {
     let protocol_version =
         ProtocolFeature::AccessKeyNonceForImplicitAccounts.protocol_version() - 1;
     let secret_key = SecretKey::from_seed(KeyType::ED25519, "test");
     let public_key = secret_key.public_key();
-    let near_implicit_account_id = derive_near_implicit_account_id(public_key.unwrap_as_ed25519());
-    let near_implicit_account_signer =
-        InMemorySigner::from_secret_key(near_implicit_account_id, secret_key);
+    let unc_implicit_account_id = derive_unc_implicit_account_id(public_key.unwrap_as_ed25519());
+    let unc_implicit_account_signer =
+        InMemorySigner::from_secret_key(unc_implicit_account_id, secret_key);
     assert_matches!(
-        get_status_of_tx_hash_collision_for_near_implicit_account(
+        get_status_of_tx_hash_collision_for_unc_implicit_account(
             protocol_version,
-            near_implicit_account_signer
+            unc_implicit_account_signer
         ),
         ProcessTxResponse::ValidTx
     );
@@ -370,7 +370,7 @@ fn test_request_chunks_for_orphan() {
         let res = env.clients[1].process_block_test(blocks[i].clone().into(), Provenance::NONE);
         assert_matches!(
             res.unwrap_err(),
-            near_chain::Error::ChunksMissing(_) | near_chain::Error::Orphan
+            unc_chain::Error::ChunksMissing(_) | unc_chain::Error::Orphan
         );
         env.process_shards_manager_responses_and_finish_processing_blocks(1);
         env.process_partial_encoded_chunks_requests(1);
@@ -380,13 +380,13 @@ fn test_request_chunks_for_orphan() {
     // process blocks 3 to 15 without processing missing chunks
     // block 3 will be put into the blocks_with_missing_chunks pool
     let res = env.clients[1].process_block_test(blocks[3].clone().into(), Provenance::NONE);
-    assert_matches!(res.unwrap_err(), near_chain::Error::ChunksMissing(_));
+    assert_matches!(res.unwrap_err(), unc_chain::Error::ChunksMissing(_));
     // remove the missing chunk request from the network queue because we want to process it later
     let missing_chunk_request = env.network_adapters[1].pop().unwrap();
     // block 4-20 will be put to the orphan pool
     for i in 4..20 {
         let res = env.clients[1].process_block_test(blocks[i].clone().into(), Provenance::NONE);
-        assert_matches!(res.unwrap_err(), near_chain::Error::Orphan);
+        assert_matches!(res.unwrap_err(), unc_chain::Error::Orphan);
     }
     // check that block 4-2+NUM_ORPHAN_ANCESTORS_CHECK requested partial encoded chunks already
     for i in 4..3 + NUM_ORPHAN_ANCESTORS_CHECK {

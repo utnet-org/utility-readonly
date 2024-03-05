@@ -1,6 +1,6 @@
 use crate::run_test::{BlockConfig, NetworkConfig, RuntimeConfig, Scenario, TransactionConfig};
-use near_crypto::{InMemorySigner, KeyType};
-use near_primitives::{
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_primitives::{
     transaction::Action,
     types::{AccountId, BlockHeight, BlockHeightDelta, Gas, Nonce},
 };
@@ -19,7 +19,7 @@ pub struct ScenarioBuilder {
 /// ```
 ///     use runtime_tester::ScenarioBuilder;
 ///     use std::time::Duration;
-///     use near_primitives::transaction::{Action, DeployContractAction};
+///     use unc_primitives::transaction::{Action, DeployContractAction};
 ///
 ///     let mut builder = ScenarioBuilder::new().
 ///         number_of_accounts(10).
@@ -28,7 +28,7 @@ pub struct ScenarioBuilder {
 ///     builder.add_block();
 ///     builder.add_transaction(0, 9,
 ///                             vec![Action::DeployContract(DeployContractAction {
-///                                 code: near_test_contracts::rs_contract().to_vec(),
+///                                 code: unc_test_contracts::rs_contract().to_vec(),
 ///                             })]);
 ///
 ///     builder.add_block();

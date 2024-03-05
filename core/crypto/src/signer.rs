@@ -1,7 +1,7 @@
 use crate::key_conversion::convert_secret_key;
 use crate::key_file::KeyFile;
 use crate::{KeyType, PublicKey, SecretKey, Signature};
-use near_account_id::AccountId;
+use unc_account_id::AccountId;
 use std::io;
 use std::path::Path;
 use std::sync::Arc;

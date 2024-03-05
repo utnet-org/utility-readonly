@@ -1,23 +1,23 @@
 use std::rc::Rc;
 
 use actix_rt::ArbiterHandle;
-use near_chain::{Block, ChainStore, ChainStoreAccess};
-use near_epoch_manager::EpochManager;
-use near_o11y::metrics::{
+use unc_chain::{Block, ChainStore, ChainStoreAccess};
+use unc_epoch_manager::EpochManager;
+use unc_o11y::metrics::{
     exponential_buckets, linear_buckets, processing_time_buckets, try_create_histogram_vec,
     try_create_int_counter_vec, try_create_int_gauge, try_create_int_gauge_vec, HistogramVec,
     IntCounterVec, IntGauge, IntGaugeVec,
 };
 
-use near_primitives::{shard_layout::ShardLayout, state_record::StateRecord, trie_key};
-use near_store::{ShardUId, Store, Trie, TrieDBStorage};
+use unc_primitives::{shard_layout::ShardLayout, state_record::StateRecord, trie_key};
+use unc_store::{ShardUId, Store, Trie, TrieDBStorage};
 use once_cell::sync::Lazy;
 
-use crate::NearConfig;
+use crate::UncConfig;
 
 pub static APPLYING_CHUNKS_TIME: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_applying_chunks_time",
+        "unc_applying_chunks_time",
         "Time taken to apply chunks per shard",
         &["shard_id"],
         Some(processing_time_buckets()),
@@ -27,7 +27,7 @@ pub static APPLYING_CHUNKS_TIME: Lazy<HistogramVec> = Lazy::new(|| {
 
 pub(crate) static APPLY_CHUNK_DELAY: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_apply_chunk_delay_seconds",
+        "unc_apply_chunk_delay_seconds",
         "Time to process a chunk. Gas used by the chunk is a metric label, rounded up to 100 teragas.",
         &["tgas_ceiling"],
         Some(linear_buckets(0.0, 0.05, 50).unwrap()),
@@ -37,7 +37,7 @@ pub(crate) static APPLY_CHUNK_DELAY: Lazy<HistogramVec> = Lazy::new(|| {
 
 pub(crate) static DELAYED_RECEIPTS_COUNT: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_delayed_receipts_count",
+        "unc_delayed_receipts_count",
         "The count of the delayed receipts. Indicator of congestion.",
         &["shard_id"],
     )
@@ -46,7 +46,7 @@ pub(crate) static DELAYED_RECEIPTS_COUNT: Lazy<IntGaugeVec> = Lazy::new(|| {
 
 pub(crate) static POSTPONED_RECEIPTS_COUNT: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_postponed_receipts_count",
+        "unc_postponed_receipts_count",
         "The count of the postponed receipts. Indicator of congestion.",
         &["shard_id"],
     )
@@ -55,7 +55,7 @@ pub(crate) static POSTPONED_RECEIPTS_COUNT: Lazy<IntGaugeVec> = Lazy::new(|| {
 
 pub(crate) static PREPARE_TX_SIZE: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_prepare_tx_size",
+        "unc_prepare_tx_size",
         "Sum of transaction sizes per produced chunk, as a histogram",
         &["shard_id"],
         // Maximum is < 14MB, typical values are unknown right now so buckets
@@ -67,7 +67,7 @@ pub(crate) static PREPARE_TX_SIZE: Lazy<HistogramVec> = Lazy::new(|| {
 
 pub(crate) static CONFIG_CORRECT: Lazy<IntGauge> = Lazy::new(|| {
     try_create_int_gauge(
-        "near_config_correct",
+        "unc_config_correct",
         "Are the current dynamically loadable configs correct",
     )
     .unwrap()
@@ -75,7 +75,7 @@ pub(crate) static CONFIG_CORRECT: Lazy<IntGauge> = Lazy::new(|| {
 
 pub(crate) static COLD_STORE_COPY_RESULT: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_cold_store_copy_result",
+        "unc_cold_store_copy_result",
         "The result of a cold store copy iteration in the cold store loop.",
         &["copy_result"],
     )
@@ -84,7 +84,7 @@ pub(crate) static COLD_STORE_COPY_RESULT: Lazy<IntCounterVec> = Lazy::new(|| {
 
 pub(crate) static STATE_SYNC_DUMP_ITERATION_ELAPSED: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_state_sync_dump_iteration_elapsed_sec",
+        "unc_state_sync_dump_iteration_elapsed_sec",
         "Time needed to obtain and write a part",
         &["shard_id"],
         Some(exponential_buckets(0.001, 1.6, 25).unwrap()),
@@ -94,7 +94,7 @@ pub(crate) static STATE_SYNC_DUMP_ITERATION_ELAPSED: Lazy<HistogramVec> = Lazy::
 
 pub(crate) static STATE_SYNC_DUMP_NUM_PARTS_TOTAL: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_state_sync_dump_num_parts_total",
+        "unc_state_sync_dump_num_parts_total",
         "Total number of parts in the epoch that being dumped",
         &["shard_id"],
     )
@@ -103,7 +103,7 @@ pub(crate) static STATE_SYNC_DUMP_NUM_PARTS_TOTAL: Lazy<IntGaugeVec> = Lazy::new
 
 pub(crate) static STATE_SYNC_DUMP_NUM_PARTS_DUMPED: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_state_sync_dump_num_parts_dumped",
+        "unc_state_sync_dump_num_parts_dumped",
         "Number of parts dumped in the epoch that is being dumped",
         &["shard_id"],
     )
@@ -112,7 +112,7 @@ pub(crate) static STATE_SYNC_DUMP_NUM_PARTS_DUMPED: Lazy<IntGaugeVec> = Lazy::ne
 
 pub(crate) static STATE_SYNC_DUMP_SIZE_TOTAL: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_state_sync_dump_size_total",
+        "unc_state_sync_dump_size_total",
         "Total size of parts written to S3",
         &["epoch_height", "shard_id"],
     )
@@ -121,7 +121,7 @@ pub(crate) static STATE_SYNC_DUMP_SIZE_TOTAL: Lazy<IntCounterVec> = Lazy::new(||
 
 pub(crate) static STATE_SYNC_DUMP_EPOCH_HEIGHT: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_state_sync_dump_epoch_height",
+        "unc_state_sync_dump_epoch_height",
         "Epoch Height of an epoch being dumped",
         &["shard_id"],
     )
@@ -130,7 +130,7 @@ pub(crate) static STATE_SYNC_DUMP_EPOCH_HEIGHT: Lazy<IntGaugeVec> = Lazy::new(||
 
 pub(crate) static STATE_SYNC_APPLY_PART_DELAY: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_state_sync_apply_part_delay_sec",
+        "unc_state_sync_apply_part_delay_sec",
         "Latency of applying a state part",
         &["shard_id"],
         Some(exponential_buckets(0.001, 2.0, 20).unwrap()),
@@ -140,7 +140,7 @@ pub(crate) static STATE_SYNC_APPLY_PART_DELAY: Lazy<HistogramVec> = Lazy::new(||
 
 pub(crate) static STATE_SYNC_OBTAIN_PART_DELAY: Lazy<HistogramVec> = Lazy::new(|| {
     try_create_histogram_vec(
-        "near_state_sync_obtain_part_delay_sec",
+        "unc_state_sync_obtain_part_delay_sec",
         "Latency of applying a state part",
         &["shard_id", "result"],
         Some(exponential_buckets(0.001, 2.0, 20).unwrap()),
@@ -168,14 +168,14 @@ fn log_trie_item(key: Vec<u8>, value: Vec<u8>) {
     }
 }
 
-fn export_postponed_receipt_count(near_config: &NearConfig, store: &Store) -> anyhow::Result<()> {
+fn export_postponed_receipt_count(unc_config: &UncConfig, store: &Store) -> anyhow::Result<()> {
     let chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
     let epoch_manager =
-        EpochManager::new_from_genesis_config(store.clone(), &near_config.genesis.config)?;
+        EpochManager::new_from_genesis_config(store.clone(), &unc_config.genesis.config)?;
 
     let head = chain_store.final_head()?;
     let block = chain_store.get_block(&head.last_block_hash)?;
@@ -251,7 +251,7 @@ fn get_postponed_receipt_count_for_trie(trie: Trie) -> Result<i64, anyhow::Error
 
 /// Spawns a background loop that will periodically log trie related metrics.
 pub fn spawn_trie_metrics_loop(
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
     period: std::time::Duration,
 ) -> anyhow::Result<ArbiterHandle> {
@@ -268,7 +268,7 @@ pub fn spawn_trie_metrics_loop(
             interval.tick().await;
 
             let start_time = std::time::Instant::now();
-            let result = export_postponed_receipt_count(&near_config, &store);
+            let result = export_postponed_receipt_count(&unc_config, &store);
             if let Err(err) = result {
                 tracing::error!(target: "metrics", "Error when exporting postponed receipts count {err}.");
             };
@@ -283,10 +283,10 @@ pub fn spawn_trie_metrics_loop(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_primitives::trie_key::col;
-    use near_store::test_utils::simplify_changes;
-    use near_store::test_utils::test_populate_trie;
-    use near_store::test_utils::TestTriesBuilder;
+    use unc_primitives::trie_key::col;
+    use unc_store::test_utils::simplify_changes;
+    use unc_store::test_utils::test_populate_trie;
+    use unc_store::test_utils::TestTriesBuilder;
 
     fn create_item(key: &[u8]) -> (Vec<u8>, Option<Vec<u8>>) {
         (key.to_vec(), Some(vec![]))

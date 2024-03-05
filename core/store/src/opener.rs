@@ -158,7 +158,7 @@ fn is_valid_kind_archive(kind: DbKind, archive: bool) -> bool {
 /// Typical usage:
 ///
 /// ```ignore
-/// let store = NodeStorage::opener(&near_config.config.store)
+/// let store = NodeStorage::opener(&unc_config.config.store)
 ///     .home(neard_home_dir)
 ///     .open();
 /// ```

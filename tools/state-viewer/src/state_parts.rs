@@ -1,22 +1,22 @@
 use crate::epoch_info::iterate_and_filter;
 use borsh::BorshDeserialize;
-use near_chain::{Chain, ChainGenesis, ChainStoreAccess, DoomslugThresholdMode};
-use near_client::sync::external::{
+use unc_chain::{Chain, ChainGenesis, ChainStoreAccess, DoomslugThresholdMode};
+use unc_client::sync::external::{
     create_bucket_readonly, create_bucket_readwrite, external_storage_location,
     external_storage_location_directory, get_num_parts_from_filename, ExternalConnection,
 };
-use near_client::sync::state::StateSync;
-use near_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
-use near_epoch_manager::EpochManager;
-use near_primitives::challenge::PartialState;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::state_part::PartId;
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::{EpochId, StateRoot};
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::{BlockHeight, EpochHeight, ShardId};
-use near_store::{PartialStorage, Store, Trie};
-use framework::{NearConfig, NightshadeRuntime};
+use unc_client::sync::state::StateSync;
+use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::EpochManager;
+use unc_primitives::challenge::PartialState;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::{EpochId, StateRoot};
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::{BlockHeight, EpochHeight, ShardId};
+use unc_store::{PartialStorage, Store, Trie};
+use framework::{UncConfig, NightshadeRuntime};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -93,22 +93,22 @@ impl StatePartsSubCommand {
         s3_region: Option<String>,
         gcs_bucket: Option<String>,
         home_dir: &Path,
-        near_config: NearConfig,
+        unc_config: UncConfig,
         store: Store,
     ) {
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
         let shard_tracker = ShardTracker::new(
-            TrackedConfig::from_config(&near_config.client_config),
+            TrackedConfig::from_config(&unc_config.client_config),
             epoch_manager.clone(),
         );
         let runtime = NightshadeRuntime::from_config(
             home_dir,
             store.clone(),
-            &near_config,
+            &unc_config,
             epoch_manager.clone(),
         );
-        let chain_genesis = ChainGenesis::new(&near_config.genesis);
+        let chain_genesis = ChainGenesis::new(&unc_config.genesis);
         let mut chain = Chain::new_for_view_client(
             epoch_manager,
             shard_tracker,
@@ -118,7 +118,7 @@ impl StatePartsSubCommand {
             false,
         )
         .unwrap();
-        let chain_id = &near_config.genesis.config.chain_id;
+        let chain_id = &unc_config.genesis.config.chain_id;
         let sys = actix::System::new();
         sys.block_on(async move {
             match self {

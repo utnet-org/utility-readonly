@@ -1,28 +1,28 @@
 use crate::concurrency::{Once, RateLimiter, WeakMap};
 use log::info;
-use near_async::messaging::CanSend;
-use near_async::time;
-use near_network::concurrency::ctx;
-use near_network::concurrency::scope;
-use near_network::types::{
+use unc_async::messaging::CanSend;
+use unc_async::time;
+use unc_network::concurrency::ctx;
+use unc_network::concurrency::scope;
+use unc_network::types::{
     AccountIdOrPeerTrackingShard, PartialEncodedChunkRequestMsg, PartialEncodedChunkResponseMsg,
     ReasonForBan, StateResponseInfo,
 };
-use near_network::types::{
+use unc_network::types::{
     FullPeerInfo, NetworkInfo, NetworkRequests, PeerManagerAdapter, PeerManagerMessageRequest,
 };
-use near_primitives::block::{Approval, Block, BlockHeader};
-use near_primitives::challenge::Challenge;
-use near_primitives::chunk_validation::ChunkEndorsement;
-use near_primitives::chunk_validation::ChunkStateWitness;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::sharding::ChunkHash;
-use near_primitives::sharding::ShardChunkHeader;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, EpochId, ShardId};
-use near_primitives::views::FinalExecutionOutcomeView;
-use framework::config::NearConfig;
+use unc_primitives::block::{Approval, Block, BlockHeader};
+use unc_primitives::challenge::Challenge;
+use unc_primitives::chunk_validation::ChunkEndorsement;
+use unc_primitives::chunk_validation::ChunkStateWitness;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::sharding::ShardChunkHeader;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, EpochId, ShardId};
+use unc_primitives::views::FinalExecutionOutcomeView;
+use framework::config::UncConfig;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -72,7 +72,7 @@ pub struct Network {
 
 impl Network {
     pub fn new(
-        config: &NearConfig,
+        config: &UncConfig,
         network_adapter: PeerManagerAdapter,
         qps_limit: u32,
     ) -> Arc<Network> {
@@ -226,7 +226,7 @@ impl Network {
 }
 
 #[async_trait::async_trait]
-impl near_network::client::Client for Network {
+impl unc_network::client::Client for Network {
     async fn tx_status_request(
         &self,
         _account_id: AccountId,

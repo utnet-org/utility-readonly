@@ -2,26 +2,26 @@ use crate::types::BlockHeaderInfo;
 #[cfg(feature = "new_epoch_sync")]
 use crate::EpochInfoAggregator;
 use crate::EpochManagerHandle;
-use near_chain_primitives::Error;
-use near_crypto::Signature;
-use near_primitives::block_header::{Approval, ApprovalInner, BlockHeader};
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::EpochConfig;
-use near_primitives::epoch_manager::ShardConfig;
-use near_primitives::errors::EpochError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardLayoutError};
-use near_primitives::sharding::{ChunkHash, ShardChunkHeader};
-use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, ShardId, ValidatorInfoIdentifier};
-use near_primitives::validator_mandates::AssignmentWeight;
-use near_primitives::version::ProtocolVersion;
-use near_primitives::views::EpochValidatorInfo;
-use near_store::{ShardUId, StoreUpdate};
+use unc_chain_primitives::Error;
+use unc_crypto::Signature;
+use unc_primitives::block_header::{Approval, ApprovalInner, BlockHeader};
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::EpochConfig;
+use unc_primitives::epoch_manager::ShardConfig;
+use unc_primitives::errors::EpochError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::{account_id_to_shard_id, ShardLayout, ShardLayoutError};
+use unc_primitives::sharding::{ChunkHash, ShardChunkHeader};
+use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, ShardId, ValidatorInfoIdentifier};
+use unc_primitives::validator_mandates::AssignmentWeight;
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives::views::EpochValidatorInfo;
+use unc_store::{ShardUId, StoreUpdate};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::Arc;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
 /// A trait that abstracts the interface of the EpochManager.
 /// The two implementations are EpochManagerHandle and KeyValueEpochManager.
@@ -296,8 +296,8 @@ pub trait EpochManagerAdapter: Send + Sync {
         &self,
         prev_block_hash: &CryptoHash,
         prev_random_value: &CryptoHash,
-        vrf_value: &near_crypto::vrf::Value,
-        vrf_proof: &near_crypto::vrf::Proof,
+        vrf_value: &unc_crypto::vrf::Value,
+        vrf_proof: &unc_crypto::vrf::Proof,
     ) -> Result<(), Error>;
 
     /// Verify validator signature for the given epoch.
@@ -797,13 +797,13 @@ impl EpochManagerAdapter for EpochManagerHandle {
         &self,
         prev_block_hash:  &CryptoHash,
         prev_random_value: &CryptoHash,
-        vrf_value: &near_crypto::vrf::Value,
-        vrf_proof: &near_crypto::vrf::Proof,
+        vrf_value: &unc_crypto::vrf::Value,
+        vrf_proof: &unc_crypto::vrf::Proof,
     ) -> Result<(), Error> {
         let epoch_manager = self.read();
         let height = epoch_manager.get_block_info(prev_block_hash)?.height();
         let validator = epoch_manager.get_block_producer_info_by_height(height+1)?;
-        let public_key = near_crypto::key_conversion::convert_public_key(
+        let public_key = unc_crypto::key_conversion::convert_public_key(
             validator.public_key().unwrap_as_ed25519(),
         )
         .unwrap();

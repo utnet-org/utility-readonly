@@ -1,5 +1,5 @@
 [package]
-name = "near-fmt"
+name = "unc-fmt"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -12,13 +12,13 @@ publish = true
 workspace = true
 
 [dependencies]
-near-primitives-core.workspace = true
+unc-primitives-core.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-primitives-core/nightly",
+  "unc-primitives-core/nightly",
 ]
 nightly_protocol = [
-  "near-primitives-core/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
 ]

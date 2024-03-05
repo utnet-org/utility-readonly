@@ -3,15 +3,15 @@ use crate::serialize::dec_format;
 use crate::transaction::{Action, TransferAction};
 use crate::types::{AccountId, Balance, ShardId};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::{KeyType, PublicKey};
-use near_fmt::AbbrBytes;
+use unc_crypto::{KeyType, PublicKey};
+use unc_fmt::AbbrBytes;
 use serde_with::base64::Base64;
 use serde_with::serde_as;
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
 
-pub use near_vm_runner::logic::DataReceiver;
+pub use unc_vm_runner::logic::DataReceiver;
 
 /// Receipts are used for a cross-shard communication.
 /// Receipts could be 2 types (determined by a `ReceiptEnum`): `ReceiptEnum::Action` of `ReceiptEnum::Data`.

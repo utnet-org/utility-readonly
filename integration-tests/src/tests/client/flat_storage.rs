@@ -1,24 +1,24 @@
 /// Tests which check correctness of background flat storage creation.
 use assert_matches::assert_matches;
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType};
-use near_o11y::testonly::init_test_logger;
-use near_primitives::errors::StorageError;
-use near_primitives::shard_layout::{ShardLayout, ShardUId};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::AccountId;
-use near_primitives_core::types::BlockHeight;
-use near_store::flat::{
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::errors::StorageError;
+use unc_primitives::shard_layout::{ShardLayout, ShardUId};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::AccountId;
+use unc_primitives_core::types::BlockHeight;
+use unc_store::flat::{
     store_helper, FetchingStateStatus, FlatStorageCreationStatus, FlatStorageManager,
     FlatStorageReadyStatus, FlatStorageStatus, NUM_PARTS_IN_ONE_STEP,
 };
-use near_store::test_utils::create_test_store;
-use near_store::{KeyLookupMode, Store, TrieTraversalItem};
-use near_vm_runner::logic::TrieNodesCount;
+use unc_store::test_utils::create_test_store;
+use unc_store::{KeyLookupMode, Store, TrieTraversalItem};
+use unc_vm_runner::logic::TrieNodesCount;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use std::str::FromStr;
@@ -31,7 +31,7 @@ const START_HEIGHT: BlockHeight = 7;
 /// Number of steps which should be enough to create flat storage.
 const CREATION_TIMEOUT: BlockHeight = 30;
 
-/// Setup environment with one Near client for testing.
+/// Setup environment with one unc client for testing.
 fn setup_env(genesis: &Genesis, store: Store) -> TestEnv {
     let chain_genesis = ChainGenesis::new(genesis);
     TestEnv::builder(chain_genesis)
@@ -535,7 +535,7 @@ fn test_not_supported_block() {
     let flat_head_height = START_HEIGHT - 4;
     // Trie key which must exist in the storage.
     let trie_key_bytes =
-        near_primitives::trie_key::TrieKey::Account { account_id: "test0".parse().unwrap() }
+        unc_primitives::trie_key::TrieKey::Account { account_id: "test0".parse().unwrap() }
             .to_vec();
     // Create trie, which includes creating chunk view, and get `ValueRef`s
     // for post state roots for blocks `START_HEIGHT - 3` and `START_HEIGHT - 2`.

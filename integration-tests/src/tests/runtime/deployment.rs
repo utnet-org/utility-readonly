@@ -1,10 +1,10 @@
 use crate::node::{Node, RuntimeNode};
-use near_chain_configs::Genesis;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::transaction::{Action, DeployContractAction, SignedTransaction};
-use near_primitives::types::AccountId;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::FinalExecutionStatus;
+use unc_chain_configs::Genesis;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::transaction::{Action, DeployContractAction, SignedTransaction};
+use unc_primitives::types::AccountId;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::FinalExecutionStatus;
 use framework::config::GenesisExt;
 
 const ONE_NEAR: u128 = 10u128.pow(24);
@@ -54,9 +54,9 @@ fn test_deploy_max_size_contract() {
     assert_eq!(transaction_result.receipts_outcome.len(), 2);
 
     // Deploy contract
-    let wasm_binary = near_test_contracts::sized_contract(contract_size as usize);
+    let wasm_binary = unc_test_contracts::sized_contract(contract_size as usize);
     // Run code through preparation for validation. (Deploying will succeed either way).
-    near_vm_runner::prepare::prepare_contract(
+    unc_vm_runner::prepare::prepare_contract(
         &wasm_binary,
         &config.wasm_config,
         config.wasm_config.vm_kind,

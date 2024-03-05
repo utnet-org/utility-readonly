@@ -1,52 +1,52 @@
 use crate::metrics;
 use crate::migrations::load_migration_data;
-use crate::NearConfig;
+use crate::UncConfig;
 
 use borsh::BorshDeserialize;
 use errors::FromStateViewerErrors;
-use near_chain::types::{
+use unc_chain::types::{
     ApplyChunkBlockContext, ApplyChunkResult, ApplyChunkShardContext, ApplyResultForResharding,
     RuntimeAdapter, RuntimeStorageConfig, StorageDataSource, Tip,
 };
-use near_chain::Error;
-use near_chain_configs::{
+use unc_chain::Error;
+use unc_chain_configs::{
     GenesisConfig, ProtocolConfig, DEFAULT_GC_NUM_EPOCHS_TO_KEEP, MIN_GC_NUM_EPOCHS_TO_KEEP,
 };
-use near_crypto::PublicKey;
-use near_epoch_manager::{EpochManagerAdapter, EpochManagerHandle};
-use near_parameters::{ActionCosts, ExtCosts, RuntimeConfigStore};
-use near_pool::types::PoolIterator;
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::errors::{InvalidTxError, RuntimeError, StorageError};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::receipt::{DelayedReceiptIndices, Receipt};
-use near_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
-use near_primitives::sandbox::state_patch::SandboxStatePatch;
-use near_primitives::shard_layout::{
+use unc_crypto::PublicKey;
+use unc_epoch_manager::{EpochManagerAdapter, EpochManagerHandle};
+use unc_parameters::{ActionCosts, ExtCosts, RuntimeConfigStore};
+use unc_pool::types::PoolIterator;
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::errors::{InvalidTxError, RuntimeError, StorageError};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::receipt::{DelayedReceiptIndices, Receipt};
+use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
+use unc_primitives::sandbox::state_patch::SandboxStatePatch;
+use unc_primitives::shard_layout::{
     account_id_to_shard_id, account_id_to_shard_uid, ShardLayout, ShardUId,
 };
-use near_primitives::state_part::PartId;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{
+use unc_primitives::state_part::PartId;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{
     AccountId, Balance, BlockHeight, EpochHeight, EpochId, EpochInfoProvider, Gas, MerkleHash,
     ShardId, StateChangeCause, StateChangesForResharding, StateRoot, StateRootNode,
 };
-use near_primitives::version::ProtocolVersion;
-use near_primitives::views::{
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives::views::{
     AccessKeyInfoView, CallResult, QueryRequest, QueryResponse, QueryResponseKind, ViewApplyState,
     ViewStateResult,
 };
-use near_store::config::StateSnapshotType;
-use near_store::flat::FlatStorageManager;
-use near_store::metadata::DbKind;
-use near_store::{
+use unc_store::config::StateSnapshotType;
+use unc_store::flat::FlatStorageManager;
+use unc_store::metadata::DbKind;
+use unc_store::{
     ApplyStatePartResult, DBCol, ShardTries, StateSnapshotConfig, Store,
     StoreCompiledContractCache, Trie, TrieConfig, WrappedTrieChanges, COLD_HEAD_KEY,
 };
-use near_vm_runner::logic::CompiledContractCache;
-use near_vm_runner::precompile_contract;
-use near_vm_runner::ContractCode;
+use unc_vm_runner::logic::CompiledContractCache;
+use unc_vm_runner::precompile_contract;
+use unc_vm_runner::ContractCode;
 use node_runtime::adapter::ViewRuntimeAdapter;
 use node_runtime::state_viewer::TrieViewer;
 use node_runtime::{
@@ -83,7 +83,7 @@ impl NightshadeRuntime {
     pub fn from_config(
         home_dir: &Path,
         store: Store,
-        config: &NearConfig,
+        config: &UncConfig,
         epoch_manager: Arc<EpochManagerHandle>,
     ) -> Arc<Self> {
         // TODO (#9989): directly use the new state snapshot config once the migration is done.
@@ -877,7 +877,7 @@ impl RuntimeAdapter for NightshadeRuntime {
         // Currently, the min execution cost is ~100 GGas and the chunk capacity is 1 PGas, giving
         // a bound of at most 10000 receipts processed in a chunk.
         let delayed_receipts_indices: DelayedReceiptIndices =
-            near_store::get(&state_update, &TrieKey::DelayedReceiptIndices)?.unwrap_or_default();
+            unc_store::get(&state_update, &TrieKey::DelayedReceiptIndices)?.unwrap_or_default();
         let min_fee = runtime_config.fees.fee(ActionCosts::new_action_receipt).exec_fee();
         let new_receipt_count_limit = if min_fee > 0 {
             // Round up to include at least one receipt.
@@ -1040,13 +1040,13 @@ impl RuntimeAdapter for NightshadeRuntime {
         block_hash: &CryptoHash,
         epoch_id: &EpochId,
         request: &QueryRequest,
-    ) -> Result<QueryResponse, near_chain::near_chain_primitives::error::QueryError> {
+    ) -> Result<QueryResponse, unc_chain::unc_chain_primitives::error::QueryError> {
         match request {
             QueryRequest::ViewAccount { account_id } => {
                 let account = self
                     .view_account(&shard_uid, *state_root, account_id)
                     .map_err(|err| {
-                    near_chain::near_chain_primitives::error::QueryError::from_view_account_error(
+                    unc_chain::unc_chain_primitives::error::QueryError::from_view_account_error(
                         err,
                         block_height,
                         *block_hash,
@@ -1061,7 +1061,7 @@ impl RuntimeAdapter for NightshadeRuntime {
             QueryRequest::ViewCode { account_id } => {
                 let contract_code = self
                     .view_contract_code(&shard_uid,  *state_root, account_id)
-                    .map_err(|err| near_chain::near_chain_primitives::error::QueryError::from_view_contract_code_error(err, block_height, *block_hash))?;
+                    .map_err(|err| unc_chain::unc_chain_primitives::error::QueryError::from_view_contract_code_error(err, block_height, *block_hash))?;
                 Ok(QueryResponse {
                     kind: QueryResponseKind::ViewCode(contract_code.into()),
                     block_height,
@@ -1073,7 +1073,7 @@ impl RuntimeAdapter for NightshadeRuntime {
                 let (epoch_height, current_protocol_version) = {
                     let epoch_manager = self.epoch_manager.read();
                     let epoch_info = epoch_manager.get_epoch_info(epoch_id).map_err(|err| {
-                        near_chain::near_chain_primitives::error::QueryError::from_epoch_error(
+                        unc_chain::unc_chain_primitives::error::QueryError::from_epoch_error(
                             err,
                             block_height,
                             *block_hash,
@@ -1099,7 +1099,7 @@ impl RuntimeAdapter for NightshadeRuntime {
                         self.epoch_manager.as_ref(),
                         current_protocol_version,
                     )
-                    .map_err(|err| near_chain::near_chain_primitives::error::QueryError::from_call_function_error(err, block_height, *block_hash))?;
+                    .map_err(|err| unc_chain::unc_chain_primitives::error::QueryError::from_call_function_error(err, block_height, *block_hash))?;
                 Ok(QueryResponse {
                     kind: QueryResponseKind::CallResult(CallResult {
                         result: call_function_result,
@@ -1119,7 +1119,7 @@ impl RuntimeAdapter for NightshadeRuntime {
                         *include_proof,
                     )
                     .map_err(|err| {
-                        near_chain::near_chain_primitives::error::QueryError::from_view_state_error(
+                        unc_chain::unc_chain_primitives::error::QueryError::from_view_state_error(
                             err,
                             block_height,
                             *block_hash,
@@ -1134,7 +1134,7 @@ impl RuntimeAdapter for NightshadeRuntime {
             QueryRequest::ViewAccessKeyList { account_id } => {
                 let access_key_list =
                     self.view_access_keys(&shard_uid, *state_root, account_id).map_err(|err| {
-                        near_chain::near_chain_primitives::error::QueryError::from_view_access_key_error(
+                        unc_chain::unc_chain_primitives::error::QueryError::from_view_access_key_error(
                             err,
                             block_height,
                             *block_hash,
@@ -1158,7 +1158,7 @@ impl RuntimeAdapter for NightshadeRuntime {
                 let access_key = self
                     .view_access_key(&shard_uid, *state_root, account_id, public_key)
                     .map_err(|err| {
-                        near_chain::near_chain_primitives::error::QueryError::from_view_access_key_error(
+                        unc_chain::unc_chain_primitives::error::QueryError::from_view_access_key_error(
                             err,
                             block_height,
                             *block_hash,

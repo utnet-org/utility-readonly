@@ -19,8 +19,8 @@ use crate::validator_signer::{EmptyValidatorSigner, ValidatorSigner};
 use crate::version::{ProtocolVersion, SHARD_CHUNK_HEADER_UPGRADE_VERSION};
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::{DateTime, Utc};
-use near_crypto::Signature;
-use near_primitives_core::types::ShardId;
+use unc_crypto::Signature;
+use unc_primitives_core::types::ShardId;
 use primitive_types::U256;
 use std::ops::Index;
 use std::sync::Arc;
@@ -50,8 +50,8 @@ pub struct BlockV1 {
     pub challenges: Challenges,
 
     // Data to confirm the correctness of randomness beacon output
-    pub vrf_value: near_crypto::vrf::Value,
-    pub vrf_proof: near_crypto::vrf::Proof,
+    pub vrf_value: unc_crypto::vrf::Value,
+    pub vrf_proof: unc_crypto::vrf::Proof,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone, Eq, PartialEq)]
@@ -61,8 +61,8 @@ pub struct BlockV2 {
     pub challenges: Challenges,
 
     // Data to confirm the correctness of randomness beacon output
-    pub vrf_value: near_crypto::vrf::Value,
-    pub vrf_proof: near_crypto::vrf::Proof,
+    pub vrf_value: unc_crypto::vrf::Value,
+    pub vrf_proof: unc_crypto::vrf::Proof,
 }
 
 /// V2 -> V3: added BlockBody
@@ -78,8 +78,8 @@ pub struct BlockBody {
     pub challenges: Challenges,
 
     // Data to confirm the correctness of randomness beacon output
-    pub vrf_value: near_crypto::vrf::Value,
-    pub vrf_proof: near_crypto::vrf::Proof,
+    pub vrf_value: unc_crypto::vrf::Value,
+    pub vrf_proof: unc_crypto::vrf::Proof,
 }
 
 /// Versioned Block data structure.
@@ -193,8 +193,8 @@ impl Block {
         for chunk in &chunks {
             assert_eq!(chunk.height_included(), height);
         }
-        let vrf_value = near_crypto::vrf::Value([0; 32]);
-        let vrf_proof = near_crypto::vrf::Proof([0; 64]);
+        let vrf_value = unc_crypto::vrf::Value([0; 32]);
+        let vrf_proof = unc_crypto::vrf::Proof([0; 64]);
         let body = BlockBody { chunks, challenges, vrf_value, vrf_proof };
         let header = BlockHeader::genesis(
             genesis_protocol_version,
@@ -537,7 +537,7 @@ impl Block {
     }
 
     #[inline]
-    pub fn vrf_value(&self) -> &near_crypto::vrf::Value {
+    pub fn vrf_value(&self) -> &unc_crypto::vrf::Value {
         match self {
             Block::BlockV1(block) => &block.vrf_value,
             Block::BlockV2(block) => &block.vrf_value,
@@ -546,7 +546,7 @@ impl Block {
     }
 
     #[inline]
-    pub fn vrf_proof(&self) -> &near_crypto::vrf::Proof {
+    pub fn vrf_proof(&self) -> &unc_crypto::vrf::Proof {
         match self {
             Block::BlockV1(block) => &block.vrf_proof,
             Block::BlockV2(block) => &block.vrf_proof,

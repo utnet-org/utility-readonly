@@ -1,8 +1,8 @@
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{Balance, NumShards, Power, ShardId};
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
-use near_primitives::utils::min_heap::{MinHeap, PeekMut};
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::{Balance, NumShards, Power, ShardId};
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::utils::min_heap::{MinHeap, PeekMut};
 
 /// Assign chunk producers (a.k.a. validators) to shards.  The i-th element
 /// of the output corresponds to the validators assigned to the i-th shard.
@@ -167,7 +167,7 @@ impl HasStake<Balance> for ValidatorPowerAndFrozen {
 
 #[cfg(test)]
 mod tests {
-    use near_primitives::types::{Balance, NumShards};
+    use unc_primitives::types::{Balance, NumShards};
     use std::collections::HashSet;
 
     const EXPONENTIAL_STAKES: [Balance; 12] = [100, 90, 81, 73, 66, 59, 53, 48, 43, 39, 35, 31];

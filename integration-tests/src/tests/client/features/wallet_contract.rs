@@ -1,27 +1,27 @@
 use assert_matches::assert_matches;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::{test_utils::TestEnv, ProcessTxResponse};
-use near_crypto::{InMemorySigner, KeyType, SecretKey};
-use near_primitives::errors::{
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::{test_utils::TestEnv, ProcessTxResponse};
+use unc_crypto::{InMemorySigner, KeyType, SecretKey};
+use unc_primitives::errors::{
     ActionError, ActionErrorKind, FunctionCallError, InvalidAccessKeyError, InvalidTxError,
     TxExecutionError,
 };
-use near_primitives::test_utils::eth_implicit_test_account;
-use near_primitives::transaction::{
+use unc_primitives::test_utils::eth_implicit_test_account;
+use unc_primitives::transaction::{
     Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction,
     TransferAction,
 };
-use near_primitives::utils::derive_eth_implicit_account_id;
-use near_primitives::views::{
+use unc_primitives::utils::derive_eth_implicit_account_id;
+use unc_primitives::views::{
     FinalExecutionStatus, QueryRequest, QueryResponse, QueryResponseKind,
 };
-use near_primitives_core::{
+use unc_primitives_core::{
     account::AccessKey, checked_feature, types::BlockHeight, version::PROTOCOL_VERSION,
 };
-use near_store::ShardUId;
-use near_vm_runner::ContractCode;
-use near_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
+use unc_store::ShardUId;
+use unc_vm_runner::ContractCode;
+use unc_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
 use framework::{config::GenesisExt, test_utils::TestEnvNightshadeSetupExt, UNC_BASE};
 use node_runtime::ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT;
 use rlp::RlpStream;
@@ -301,7 +301,7 @@ fn meta_tx_call_wallet_contract(create_account: bool, authorized: bool) {
     if create_account {
         // The public key recovered from the RLP transaction's signature isn't valid for this ETH-implicit account.
         // The Wallet Contract will reject this transaction.
-        let expected_error = near_primitives::views::ExecutionStatusView::Failure(
+        let expected_error = unc_primitives::views::ExecutionStatusView::Failure(
             TxExecutionError::ActionError(
                 ActionError {
                     index: Some(0),
@@ -317,7 +317,7 @@ fn meta_tx_call_wallet_contract(create_account: bool, authorized: bool) {
         assert_eq!(wallet_contract_call_result, &expected_error);
     } else {
         // The Wallet Contract function call is not executed because the account does not exist.
-        let expected_error = near_primitives::views::ExecutionStatusView::Failure(
+        let expected_error = unc_primitives::views::ExecutionStatusView::Failure(
             TxExecutionError::ActionError(ActionError {
                 index: Some(0),
                 kind: ActionErrorKind::AccountDoesNotExist { account_id: eth_implicit_account },

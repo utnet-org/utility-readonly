@@ -2,18 +2,18 @@ use std::collections::HashMap;
 
 use borsh::BorshDeserialize;
 
-use near_crypto::PublicKey;
-use near_epoch_manager::EpochManagerAdapter;
-use near_primitives::block::{Block, BlockHeader};
-use near_primitives::challenge::{
+use unc_crypto::PublicKey;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_primitives::block::{Block, BlockHeader};
+use unc_primitives::challenge::{
     BlockDoubleSign, Challenge, ChallengeBody, ChunkProofs, ChunkState, MaybeEncodedShardChunk,
 };
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::merklize;
-use near_primitives::sharding::{ShardChunk, ShardChunkHeader};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::chunk_extra::ChunkExtra;
-use near_primitives::types::{AccountId, BlockHeight, EpochId, Nonce};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::merklize;
+use unc_primitives::sharding::{ShardChunk, ShardChunkHeader};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::chunk_extra::ChunkExtra;
+use unc_primitives::types::{AccountId, BlockHeight, EpochId, Nonce};
 
 use crate::types::RuntimeAdapter;
 use crate::{byzantine_assert, Chain};
@@ -423,7 +423,7 @@ pub fn validate_challenge(
 
 #[cfg(test)]
 mod tests {
-    use near_crypto::{InMemorySigner, KeyType};
+    use unc_crypto::{InMemorySigner, KeyType};
 
     use super::*;
 

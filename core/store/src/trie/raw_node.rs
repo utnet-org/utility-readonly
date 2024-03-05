@@ -1,7 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::ValueRef;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::ValueRef;
 
 /// Trie node with memory cost of its subtree.
 ///

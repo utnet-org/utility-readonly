@@ -1,11 +1,11 @@
 use clap::{Arg, Command};
-use near_chain::store_validator::StoreValidator;
-use near_chain_configs::GenesisValidationMode;
-use near_epoch_manager::{
+use unc_chain::store_validator::StoreValidator;
+use unc_chain_configs::GenesisValidationMode;
+use unc_epoch_manager::{
     shard_tracker::{ShardTracker, TrackedConfig},
     EpochManager,
 };
-use near_o11y::testonly::init_integration_logger;
+use unc_o11y::testonly::init_integration_logger;
 use framework::{get_default_home, load_config};
 use std::path::PathBuf;
 use std::process;
@@ -27,33 +27,33 @@ fn main() {
         .get_matches();
 
     let home_dir = matches.get_one::<PathBuf>("home").unwrap();
-    let near_config = load_config(home_dir, GenesisValidationMode::Full)
+    let unc_config = load_config(home_dir, GenesisValidationMode::Full)
         .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
-    let store = near_store::NodeStorage::opener(
+    let store = unc_store::NodeStorage::opener(
         home_dir,
-        near_config.config.archive,
-        &near_config.config.store,
+        unc_config.config.archive,
+        &unc_config.config.store,
         None,
     )
     .open()
     .unwrap()
     .get_hot_store();
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let shard_tracker = ShardTracker::new(
-        TrackedConfig::from_config(&near_config.client_config),
+        TrackedConfig::from_config(&unc_config.client_config),
         epoch_manager.clone(),
     );
     let runtime = framework::NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
 
     let mut store_validator = StoreValidator::new(
-        near_config.validator_signer.as_ref().map(|x| x.validator_id().clone()),
-        near_config.genesis.config,
+        unc_config.validator_signer.as_ref().map(|x| x.validator_id().clone()),
+        unc_config.genesis.config,
         epoch_manager,
         shard_tracker,
         runtime,

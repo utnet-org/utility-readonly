@@ -1,6 +1,6 @@
-use near_primitives::types::NumBlocks;
-use near_primitives::types::{BlockHeightDelta, NumSeats};
-use near_primitives::version::ProtocolVersion;
+use unc_primitives::types::NumBlocks;
+use unc_primitives::types::{BlockHeightDelta, NumSeats};
+use unc_primitives::version::ProtocolVersion;
 use num_rational::Rational32;
 use std::path::PathBuf;
 

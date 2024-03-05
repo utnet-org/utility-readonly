@@ -4,13 +4,13 @@ use crate::config::{
 };
 use crate::safe_add_balance_apply;
 use crate::{ApplyStats, DelayedReceiptIndices, ValidatorAccountsUpdate};
-use near_parameters::{ActionCosts, RuntimeConfig};
-use near_primitives::errors::{IntegerOverflowError, RuntimeError, StorageError};
-use near_primitives::receipt::{Receipt, ReceiptEnum};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{AccountId, Balance};
-use near_store::{get, get_account, get_postponed_receipt, TrieAccess, TrieUpdate};
+use unc_parameters::{ActionCosts, RuntimeConfig};
+use unc_primitives::errors::{IntegerOverflowError, RuntimeError, StorageError};
+use unc_primitives::receipt::{Receipt, ReceiptEnum};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{AccountId, Balance};
+use unc_store::{get, get_account, get_postponed_receipt, TrieAccess, TrieUpdate};
 use std::collections::HashSet;
 
 /// Returns delayed receipts with given range of indices.
@@ -242,17 +242,17 @@ pub(crate) fn check_balance(
 mod tests {
     use super::*;
     use crate::ApplyStats;
-    use near_crypto::{InMemorySigner, KeyType};
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::receipt::ActionReceipt;
-    use near_primitives::test_utils::account_new;
-    use near_primitives::transaction::{Action, TransferAction};
-    use near_primitives::types::{MerkleHash, StateChangeCause};
-    use near_store::test_utils::TestTriesBuilder;
-    use near_store::{set_account, Trie};
+    use unc_crypto::{InMemorySigner, KeyType};
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::receipt::ActionReceipt;
+    use unc_primitives::test_utils::account_new;
+    use unc_primitives::transaction::{Action, TransferAction};
+    use unc_primitives::types::{MerkleHash, StateChangeCause};
+    use unc_store::test_utils::TestTriesBuilder;
+    use unc_store::{set_account, Trie};
     use testlib::runtime_utils::{alice_account, bob_account};
 
-    use crate::near_primitives::shard_layout::ShardUId;
+    use crate::unc_primitives::shard_layout::ShardUId;
     use assert_matches::assert_matches;
 
     /// Initial balance used in tests.

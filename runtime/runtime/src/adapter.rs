@@ -1,13 +1,13 @@
-use crate::near_primitives::shard_layout::ShardUId;
-use near_crypto::PublicKey;
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::{
+use crate::unc_primitives::shard_layout::ShardUId;
+use unc_crypto::PublicKey;
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::{
     AccountId, BlockHeight, EpochHeight, EpochId, EpochInfoProvider, MerkleHash,
 };
-use near_primitives::version::ProtocolVersion;
-use near_primitives::views::ViewStateResult;
-use near_vm_runner::ContractCode;
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives::views::ViewStateResult;
+use unc_vm_runner::ContractCode;
 
 /// Adapter for querying runtime.
 pub trait ViewRuntimeAdapter {

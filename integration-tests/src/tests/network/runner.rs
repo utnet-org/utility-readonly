@@ -1,32 +1,32 @@
 use actix::{Actor, Addr};
 use anyhow::{anyhow, bail, Context};
-use near_async::actix::AddrWithAutoSpanContextExt;
-use near_async::messaging::{IntoSender, LateBoundSender, Sender};
-use near_async::time;
-use near_chain::test_utils::{KeyValueRuntime, MockEpochManager, ValidatorSchedule};
-use near_chain::types::RuntimeAdapter;
-use near_chain::{Chain, ChainGenesis};
-use near_chain_configs::ClientConfig;
-use near_chunks::shards_manager_actor::start_shards_manager;
-use near_client::{start_client, start_view_client, SyncAdapter};
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_network::actix::ActixSystem;
-use near_network::blacklist;
-use near_network::config;
-use near_network::tcp;
-use near_network::test_utils::{expected_routing_tables, peer_id_from_seed, GetInfo};
-use near_network::types::{
+use unc_async::actix::AddrWithAutoSpanContextExt;
+use unc_async::messaging::{IntoSender, LateBoundSender, Sender};
+use unc_async::time;
+use unc_chain::test_utils::{KeyValueRuntime, MockEpochManager, ValidatorSchedule};
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{Chain, ChainGenesis};
+use unc_chain_configs::ClientConfig;
+use unc_chunks::shards_manager_actor::start_shards_manager;
+use unc_client::{start_client, start_view_client, SyncAdapter};
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_network::actix::ActixSystem;
+use unc_network::blacklist;
+use unc_network::config;
+use unc_network::tcp;
+use unc_network::test_utils::{expected_routing_tables, peer_id_from_seed, GetInfo};
+use unc_network::types::{
     PeerInfo, PeerManagerMessageRequest, PeerManagerMessageResponse, ROUTED_MESSAGE_TTL,
 };
-use near_network::PeerManagerActor;
-use near_o11y::testonly::init_test_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::GenesisId;
-use near_primitives::network::PeerId;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::{AccountId, ValidatorId};
-use near_primitives::validator_signer::ValidatorSigner;
-use near_telemetry::{TelemetryActor, TelemetryConfig};
+use unc_network::PeerManagerActor;
+use unc_o11y::testonly::init_test_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::GenesisId;
+use unc_primitives::network::PeerId;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::{AccountId, ValidatorId};
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_telemetry::{TelemetryActor, TelemetryConfig};
 use std::collections::HashSet;
 use std::future::Future;
 use std::iter::Iterator;
@@ -47,7 +47,7 @@ fn setup_network_node(
     chain_genesis: ChainGenesis,
     config: config::NetworkConfig,
 ) -> Addr<PeerManagerActor> {
-    let store = near_store::test_utils::create_test_node_storage_default();
+    let store = unc_store::test_utils::create_test_node_storage_default();
 
     let num_validators = validators.len() as ValidatorId;
 
@@ -58,7 +58,7 @@ fn setup_network_node(
     let signer = Arc::new(create_test_signer(account_id.as_str()));
     let telemetry_actor = TelemetryActor::new(TelemetryConfig::default()).start();
 
-    let db = store.into_inner(near_store::Temperature::Hot);
+    let db = store.into_inner(unc_store::Temperature::Hot);
     let mut client_config =
         ClientConfig::test(false, 100, 200, num_validators, false, true, true, true);
     client_config.archive = config.archive;
@@ -72,7 +72,7 @@ fn setup_network_node(
     };
     let network_adapter = Arc::new(LateBoundSender::default());
     let shards_manager_adapter = Arc::new(LateBoundSender::default());
-    let adv = near_client::adversarial::Controls::default();
+    let adv = unc_client::adversarial::Controls::default();
     let state_sync_adapter =
         Arc::new(RwLock::new(SyncAdapter::new(Sender::noop(), Sender::noop())));
     let client_actor = start_client(
@@ -117,7 +117,7 @@ fn setup_network_node(
         time::Clock::real(),
         db.clone(),
         config,
-        Arc::new(near_client::adapter::Adapter::new(client_actor, view_client_actor)),
+        Arc::new(unc_client::adapter::Adapter::new(client_actor, view_client_actor)),
         shards_manager_adapter.as_sender(),
         genesis_id,
     )

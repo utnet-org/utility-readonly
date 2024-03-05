@@ -1,4 +1,4 @@
-use near_store::{checkpoint_hot_storage_and_cleanup_columns, Mode, NodeStorage, StoreConfig};
+use unc_store::{checkpoint_hot_storage_and_cleanup_columns, Mode, NodeStorage, StoreConfig};
 use std::path::{Path, PathBuf};
 
 #[derive(clap::Args)]
@@ -29,7 +29,7 @@ impl MakeSnapshotCommand {
 #[cfg(test)]
 mod tests {
     use crate::make_snapshot::MakeSnapshotCommand;
-    use near_store::{DBCol, Mode, NodeStorage, StoreConfig};
+    use unc_store::{DBCol, Mode, NodeStorage, StoreConfig};
 
     /// Populates a DB, makes a checkpoint, makes changes to the DB.
     /// Checks that the checkpoint DB can be opened and doesn't contain the latest changes.

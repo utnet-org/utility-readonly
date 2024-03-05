@@ -3,24 +3,24 @@ use crate::config::{Config, GasMetric};
 use crate::gas_cost::GasCost;
 use genesis_populate::get_account_id;
 use genesis_populate::state_dump::StateDump;
-use near_parameters::{ExtCosts, RuntimeConfigStore};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::Receipt;
-use near_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
-use near_primitives::state::FlatStateValue;
-use near_primitives::test_utils::MockEpochInfoProvider;
-use near_primitives::transaction::{ExecutionStatus, SignedTransaction};
-use near_primitives::types::{Gas, MerkleHash};
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::flat::{
+use unc_parameters::{ExtCosts, RuntimeConfigStore};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::test_utils::MockEpochInfoProvider;
+use unc_primitives::transaction::{ExecutionStatus, SignedTransaction};
+use unc_primitives::types::{Gas, MerkleHash};
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::flat::{
     store_helper, BlockInfo, FlatStateChanges, FlatStateDelta, FlatStateDeltaMetadata, FlatStorage,
     FlatStorageManager, FlatStorageReadyStatus, FlatStorageStatus,
 };
-use near_store::{
+use unc_store::{
     ShardTries, ShardUId, StateSnapshotConfig, Store, StoreCompiledContractCache, TrieUpdate,
 };
-use near_store::{TrieCache, TrieCachingStorage, TrieConfig};
-use near_vm_runner::logic::LimitConfig;
+use unc_store::{TrieCache, TrieCachingStorage, TrieConfig};
+use unc_vm_runner::logic::LimitConfig;
 use node_runtime::{ApplyState, Runtime};
 use std::collections::HashMap;
 use std::iter;
@@ -88,7 +88,7 @@ impl<'c> EstimatorContext<'c> {
         self.generate_deltas(&flat_storage);
 
         // Create ShardTries with relevant settings adjusted for estimator.
-        let mut trie_config = near_store::TrieConfig::default();
+        let mut trie_config = unc_store::TrieConfig::default();
         trie_config.enable_receipt_prefetching = true;
         let tries = ShardTries::new(
             store.clone(),
@@ -325,7 +325,7 @@ impl Testbed<'_> {
         let mut store_update = self.tries.store_update();
         let shard_uid = ShardUId::single_shard();
         self.root = self.tries.apply_all(&apply_result.trie_changes, shard_uid, &mut store_update);
-        near_store::flat::FlatStateChanges::from_state_changes(&apply_result.state_changes)
+        unc_store::flat::FlatStateChanges::from_state_changes(&apply_result.state_changes)
             .apply_to_flat_state(&mut store_update, shard_uid);
         store_update.commit().unwrap();
         self.apply_state.block_height += 1;
@@ -419,7 +419,7 @@ impl Testbed<'_> {
     }
 
     /// Instantiate a new trie for the estimator.
-    fn trie(&mut self) -> near_store::Trie {
+    fn trie(&mut self) -> unc_store::Trie {
         // We generated `finality_lag` fake blocks earlier, so the fake height
         // will be at the same number.
         let tip_height = self.config.finality_lag;

@@ -20,12 +20,12 @@ from metrics import Metrics
 from transaction import sign_payment_tx_and_get_hash, sign_staking_tx_and_get_hash
 
 DEFAULT_KEY_TARGET = '/tmp/mocknet'
-KEY_TARGET_ENV_VAR = 'NEAR_PYTEST_KEY_TARGET'
-# NODE_SSH_KEY_PATH = '~/.ssh/near_ops'
+KEY_TARGET_ENV_VAR = 'unc_PYTEST_KEY_TARGET'
+# NODE_SSH_KEY_PATH = '~/.ssh/unc_ops'
 NODE_SSH_KEY_PATH = None
 NODE_USERNAME = 'ubuntu'
 NUM_ACCOUNTS = 26 * 2
-PROJECT = 'near-mocknet'
+PROJECT = 'unc-mocknet'
 PUBLIC_KEY = 'ed25519:76NVkDErhbP1LGrSAf5Db6BsFJ6LBw6YVA4BsfTBohmN'
 SECRET_KEY = 'ed25519:3cCk8KUWBySGCxBcn1syMoY5u73wx5eaPLRbQcMi23LwBA3aLsqEbA33Ww1bsJaFrchmDciGe9otdn45SrDSkow2'
 TX_OUT_FILE = '/home/ubuntu/tx_events'
@@ -328,7 +328,7 @@ def chain_measure_bps_and_tps(
     assert block_times
     tx_cumulative = data.compute_cumulative(tx_count)
     bps = data.compute_rate(block_times)
-    tps_fit = data.linear_regression(block_times, tx_cumulative)
+    tps_fit = data.liunc_regression(block_times, tx_cumulative)
     logger.info(
         f'Num blocks: {len(block_times)}, num transactions: {len(tx_count)}, bps: {bps}, tps_fit: {tps_fit}'
     )
@@ -460,7 +460,7 @@ def kill_proccess_script(pid):
     '''
 
 
-def get_near_pid(machine):
+def get_unc_pid(machine):
     p = machine.run(
         "ps aux | grep 'near.* run' | grep -v grep | awk '{print $2}'")
     return p.stdout.strip()
@@ -478,7 +478,7 @@ def is_binary_running_all_nodes(binary_name: str, all_nodes) -> bool:
 def stop_node(node):
     m = node.machine
     logger.info(f'Stopping node {m.name}')
-    pids = get_near_pid(m).split()
+    pids = get_unc_pid(m).split()
 
     for pid in pids:
         m.run('bash', input=kill_proccess_script(pid))
@@ -786,10 +786,10 @@ def create_and_upload_genesis_file_from_empty_genesis(
 ):
     node0 = validator_node_and_stakes[0][0]
     node0.machine.run(
-        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/uncd --home /home/ubuntu/.near-tmp init --chain-id {}'
+        'rm -rf /home/ubuntu/.unc-tmp && mkdir /home/ubuntu/.unc-tmp && /home/ubuntu/uncd --home /home/ubuntu/.unc-tmp init --chain-id {}'
         .format(chain_id))
     genesis_config = download_and_read_json(
-        node0, "/home/ubuntu/.near-tmp/genesis.json")
+        node0, "/home/ubuntu/.unc-tmp/genesis.json")
     records = []
 
     VALIDATOR_BALANCE = (10**2) * ONE_NEAR
@@ -1031,11 +1031,11 @@ def update_config_file(
 
 def create_and_upload_config_file_from_default(nodes, chain_id, overrider=None):
     nodes[0].machine.run(
-        'rm -rf /home/ubuntu/.near-tmp && mkdir /home/ubuntu/.near-tmp && /home/ubuntu/uncd --home /home/ubuntu/.near-tmp init --chain-id {}'
+        'rm -rf /home/ubuntu/.unc-tmp && mkdir /home/ubuntu/.unc-tmp && /home/ubuntu/uncd --home /home/ubuntu/.unc-tmp init --chain-id {}'
         .format(chain_id))
     config_json = download_and_read_json(
         nodes[0],
-        '/home/ubuntu/.near-tmp/config.json',
+        '/home/ubuntu/.unc-tmp/config.json',
     )
     config_json['tracked_shards'] = [0, 1, 2, 3]
     config_json['archive'] = True
@@ -1101,7 +1101,7 @@ def start_node(node, upgrade_schedule=None):
     attempt = 0
     success = False
     while attempt < 3:
-        pid = get_near_pid(m)
+        pid = get_unc_pid(m)
         if pid != '':
             success = True
             break

@@ -1,19 +1,19 @@
-use near_crypto::PublicKey;
-use near_primitives::action::{
+use unc_crypto::PublicKey;
+use unc_primitives::action::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
 };
-use near_primitives::errors::RuntimeError;
-use near_primitives::receipt::DataReceiver;
-use near_primitives_core::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::{AccountId, Balance, Gas, GasWeight, Nonce};
-use near_vm_runner::logic::HostError;
-use near_vm_runner::logic::VMLogicError;
+use unc_primitives::errors::RuntimeError;
+use unc_primitives::receipt::DataReceiver;
+use unc_primitives_core::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::{AccountId, Balance, Gas, GasWeight, Nonce};
+use unc_vm_runner::logic::HostError;
+use unc_vm_runner::logic::VMLogicError;
 
 use crate::config::safe_add_gas;
 
-/// near_vm_runner::types is not public.
+/// unc_vm_runner::types is not public.
 type ReceiptIndex = u64;
 
 type ActionReceipts = Vec<(AccountId, ReceiptMetadata)>;
@@ -393,8 +393,8 @@ impl ReceiptManager {
 
 #[cfg(test)]
 mod tests {
-    use near_primitives::transaction::Action;
-    use near_primitives_core::types::{Gas, GasWeight};
+    use unc_primitives::transaction::Action;
+    use unc_primitives_core::types::{Gas, GasWeight};
 
     #[track_caller]
     fn function_call_weight_verify(function_calls: &[(Gas, u64, Gas)], after_distribute: bool) {

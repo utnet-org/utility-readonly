@@ -1,20 +1,20 @@
 use crate::client_actor::ClientActor;
 use crate::view_client::ViewClientActor;
-use near_network::types::{
+use unc_network::types::{
     NetworkInfo, PartialEncodedChunkForwardMsg, PartialEncodedChunkRequestMsg,
     PartialEncodedChunkResponseMsg, ReasonForBan, StateResponseInfo,
 };
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::{Approval, Block, BlockHeader};
-use near_primitives::challenge::Challenge;
-use near_primitives::chunk_validation::{ChunkEndorsement, ChunkStateWitness};
-use near_primitives::errors::InvalidTxError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::sharding::PartialEncodedChunk;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, BlockHeight, EpochId, ShardId};
-use near_primitives::views::FinalExecutionOutcomeView;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::{Approval, Block, BlockHeader};
+use unc_primitives::challenge::Challenge;
+use unc_primitives::chunk_validation::{ChunkEndorsement, ChunkStateWitness};
+use unc_primitives::errors::InvalidTxError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::sharding::PartialEncodedChunk;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, BlockHeight, EpochId, ShardId};
+use unc_primitives::views::FinalExecutionOutcomeView;
 
 /// Transaction status query
 #[derive(actix::Message, Debug)]
@@ -173,7 +173,7 @@ impl Adapter {
 }
 
 #[async_trait::async_trait]
-impl near_network::client::Client for Adapter {
+impl unc_network::client::Client for Adapter {
     async fn tx_status_request(
         &self,
         account_id: AccountId,

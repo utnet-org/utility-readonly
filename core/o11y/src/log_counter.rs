@@ -7,7 +7,7 @@ use tracing_subscriber::Layer;
 
 pub(crate) static LOG_COUNTER: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_log_msg_total",
+        "unc_log_msg_total",
         "Number of messages logged at various log levels",
         &["level"],
     )
@@ -16,7 +16,7 @@ pub(crate) static LOG_COUNTER: Lazy<IntCounterVec> = Lazy::new(|| {
 
 pub(crate) static LOG_WITH_LOCATION_COUNTER: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_log_msg_with_loc_total",
+        "unc_log_msg_with_loc_total",
         "Number of messages logged at various log levels wth target and location",
         &["level", "target", "file", "line"],
     )

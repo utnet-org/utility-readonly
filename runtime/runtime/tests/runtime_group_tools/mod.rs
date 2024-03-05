@@ -1,20 +1,20 @@
-use near_chain_configs::{get_initial_supply, Genesis, GenesisConfig, GenesisRecords};
-use near_crypto::{InMemorySigner, KeyType};
-use near_parameters::ActionCosts;
-use near_primitives::account::{AccessKey, Account};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::receipt::Receipt;
-use near_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state_record::{state_record_to_account_id, StateRecord};
-use near_primitives::test_utils::MockEpochInfoProvider;
-use near_primitives::transaction::{ExecutionOutcomeWithId, SignedTransaction};
-use near_primitives::types::{AccountId, AccountInfo, Balance};
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives_core::account::id::AccountIdRef;
-use near_store::genesis::GenesisStateApplier;
-use near_store::test_utils::TestTriesBuilder;
-use near_store::ShardTries;
+use unc_chain_configs::{get_initial_supply, Genesis, GenesisConfig, GenesisRecords};
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_parameters::ActionCosts;
+use unc_primitives::account::{AccessKey, Account};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::receipt::Receipt;
+use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state_record::{state_record_to_account_id, StateRecord};
+use unc_primitives::test_utils::MockEpochInfoProvider;
+use unc_primitives::transaction::{ExecutionOutcomeWithId, SignedTransaction};
+use unc_primitives::types::{AccountId, AccountInfo, Balance};
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives_core::account::id::AccountIdRef;
+use unc_store::genesis::GenesisStateApplier;
+use unc_store::test_utils::TestTriesBuilder;
+use unc_store::ShardTries;
 use node_runtime::{ApplyState, Runtime};
 use random_config::random_config;
 use std::collections::{HashMap, HashSet};
@@ -196,7 +196,7 @@ impl RuntimeGroup {
 
     pub fn new(num_runtimes: u64, num_existing_accounts: u64, contract_code: &[u8]) -> Arc<Self> {
         let account_ids = (0..num_runtimes)
-            .map(|i| AccountId::try_from(format!("near_{}", i)).unwrap())
+            .map(|i| AccountId::try_from(format!("unc_{}", i)).unwrap())
             .collect();
         Self::new_with_account_ids(account_ids, num_existing_accounts, contract_code)
     }
@@ -427,11 +427,11 @@ macro_rules! assert_receipts {
 
 /// A short form for refunds.
 /// ```
-/// assert_refund!(group, ref1 @ "near_0");
+/// assert_refund!(group, ref1 @ "unc_0");
 /// ```
 /// expands into:
 /// ```
-/// assert_receipts!(group, "system" => ref1 @ "near_0",
+/// assert_receipts!(group, "system" => ref1 @ "unc_0",
 ///                  ReceiptEnum::Action(ActionReceipt{actions, ..}), {},
 ///                  actions,
 ///                  a0, Action::Transfer(TransferAction{..}), {}

@@ -6,11 +6,11 @@ use tokio::sync::mpsc;
 use tracing::info;
 
 use configs::{Opts, SubCommand};
-use near_indexer;
+use unc_indexer;
 
 mod configs;
 
-async fn listen_blocks(mut stream: mpsc::Receiver<near_indexer::StreamerMessage>) {
+async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>) {
     while let Some(streamer_message) = stream.recv().await {
         // TODO: handle data as you need
         // Example of `StreamerMessage` with all the data (the data is synthetic)
@@ -260,32 +260,32 @@ fn main() -> Result<()> {
     // We use it to automatically search the for root certificates to perform HTTPS calls
     // (sending telemetry and downloading genesis)
     openssl_probe::init_ssl_cert_env_vars();
-    let env_filter = near_o11y::tracing_subscriber::EnvFilter::new(
+    let env_filter = unc_o11y::tracing_subscriber::EnvFilter::new(
         "framework=info,indexer_example=info,tokio_reactor=info,near=info,\
-         stats=info,telemetry=info,indexer=info,near-performance-metrics=info",
+         stats=info,telemetry=info,indexer=info,unc-performance-metrics=info",
     );
-    let _subscriber = near_o11y::default_subscriber(env_filter, &Default::default()).global();
+    let _subscriber = unc_o11y::default_subscriber(env_filter, &Default::default()).global();
     let opts: Opts = Opts::parse();
 
-    let home_dir = opts.home_dir.unwrap_or(near_indexer::get_default_home());
+    let home_dir = opts.home_dir.unwrap_or(unc_indexer::get_default_home());
 
     match opts.subcmd {
         SubCommand::Run => {
-            let indexer_config = near_indexer::IndexerConfig {
+            let indexer_config = unc_indexer::IndexerConfig {
                 home_dir,
-                sync_mode: near_indexer::SyncModeEnum::FromInterruption,
-                await_for_node_synced: near_indexer::AwaitForNodeSyncedEnum::WaitForFullSync,
+                sync_mode: unc_indexer::SyncModeEnum::FromInterruption,
+                await_for_node_synced: unc_indexer::AwaitForNodeSyncedEnum::WaitForFullSync,
                 validate_genesis: true,
             };
             let system = actix::System::new();
             system.block_on(async move {
-                let indexer = near_indexer::Indexer::new(indexer_config).expect("Indexer::new()");
+                let indexer = unc_indexer::Indexer::new(indexer_config).expect("Indexer::new()");
                 let stream = indexer.streamer();
                 actix::spawn(listen_blocks(stream));
             });
             system.run()?;
         }
-        SubCommand::Init(config) => near_indexer::indexer_init_configs(&home_dir, config.into())?,
+        SubCommand::Init(config) => unc_indexer::indexer_init_configs(&home_dir, config.into())?,
     }
     Ok(())
 }

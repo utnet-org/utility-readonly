@@ -2,17 +2,17 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::{fmt, io};
 
-use near_chain_configs::GCConfig;
-use near_chain_primitives::Error;
-use near_epoch_manager::EpochManagerAdapter;
-use near_primitives::block::Block;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::get_block_shard_uid;
-use near_primitives::state_sync::{StateHeaderKey, StatePartKey};
-use near_primitives::types::{BlockHeight, BlockHeightDelta, EpochId, NumBlocks, ShardId};
-use near_primitives::utils::{get_block_shard_id, get_outcome_id_block_hash, index_to_bytes};
-use near_store::flat::store_helper;
-use near_store::{DBCol, KeyForStateChanges, ShardTries, ShardUId};
+use unc_chain_configs::GCConfig;
+use unc_chain_primitives::Error;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_primitives::block::Block;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::get_block_shard_uid;
+use unc_primitives::state_sync::{StateHeaderKey, StatePartKey};
+use unc_primitives::types::{BlockHeight, BlockHeightDelta, EpochId, NumBlocks, ShardId};
+use unc_primitives::utils::{get_block_shard_id, get_outcome_id_block_hash, index_to_bytes};
+use unc_store::flat::store_helper;
+use unc_store::{DBCol, KeyForStateChanges, ShardTries, ShardUId};
 
 use crate::types::RuntimeAdapter;
 use crate::{metrics, Chain, ChainStoreAccess, ChainStoreUpdate};
@@ -777,7 +777,7 @@ impl<'a> ChainStoreUpdate<'a> {
         let mut epoch_to_hashes =
             HashMap::clone(self.chain_store().get_all_block_hashes_by_height(height)?.as_ref());
         let hashes = epoch_to_hashes.get_mut(epoch_id).ok_or_else(|| {
-            near_chain_primitives::Error::Other("current epoch id should exist".into())
+            unc_chain_primitives::Error::Other("current epoch id should exist".into())
         })?;
         hashes.remove(block_hash);
         if hashes.is_empty() {

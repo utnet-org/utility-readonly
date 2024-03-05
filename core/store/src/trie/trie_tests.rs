@@ -2,11 +2,11 @@ use crate::test_utils::{gen_changes, simplify_changes, test_populate_trie, TestT
 use crate::trie::trie_storage::{TrieMemoryPartialStorage, TrieStorage};
 use crate::{PartialStorage, Trie, TrieUpdate};
 use assert_matches::assert_matches;
-use near_primitives::challenge::PartialState;
-use near_primitives::errors::{MissingTrieValueContext, StorageError};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::types::TrieNodesCount;
+use unc_primitives::challenge::PartialState;
+use unc_primitives::errors::{MissingTrieValueContext, StorageError};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::types::TrieNodesCount;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::cell::RefCell;
@@ -210,7 +210,7 @@ mod trie_storage_tests {
     use crate::trie::TrieRefcountAddition;
     use crate::{Store, TrieChanges, TrieConfig};
     use assert_matches::assert_matches;
-    use near_primitives::hash::hash;
+    use unc_primitives::hash::hash;
 
     fn create_store_with_values(values: &[Vec<u8>], shard_uid: ShardUId) -> Store {
         let tries = TestTriesBuilder::new().build();

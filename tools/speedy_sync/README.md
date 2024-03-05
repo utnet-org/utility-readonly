@@ -32,7 +32,7 @@ To create a checkpoint, please run:
 ```
 cargo build -p speedy_sync 
 
-./speedy_sync create --home $PATH_TO_RUNNING_NEAR_NODE --destination-dir $PATH_TO_PLACE_WHERE_TO_PUT_CHECKPOINT
+./speedy_sync create --home $PATH_TO_RUNNING_unc_NODE --destination-dir $PATH_TO_PLACE_WHERE_TO_PUT_CHECKPOINT
 ```
 
 ## Loading a checkpoint

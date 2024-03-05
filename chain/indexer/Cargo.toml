@@ -1,5 +1,5 @@
 [package]
-name = "near-indexer"
+name = "unc-indexer"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -24,41 +24,41 @@ tokio.workspace = true
 tracing.workspace = true
 
 framework.workspace = true
-near-client.workspace = true
-near-chain-configs.workspace = true
-near-dyn-configs.workspace = true
-near-crypto.workspace = true
-near-indexer-primitives.workspace = true
-near-o11y.workspace = true
-near-parameters.workspace = true
-near-primitives.workspace = true
-near-store.workspace = true
+unc-client.workspace = true
+unc-chain-configs.workspace = true
+unc-dyn-configs.workspace = true
+unc-crypto.workspace = true
+unc-indexer-primitives.workspace = true
+unc-o11y.workspace = true
+unc-parameters.workspace = true
+unc-primitives.workspace = true
+unc-store.workspace = true
 node-runtime.workspace = true
 
 [features]
 nightly_protocol = [
-  "near-chain-configs/nightly_protocol",
-  "near-client/nightly_protocol",
-  "near-dyn-configs/nightly_protocol",
-  "near-indexer-primitives/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-parameters/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-client/nightly_protocol",
+  "unc-dyn-configs/nightly_protocol",
+  "unc-indexer-primitives/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-parameters/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
   "framework/nightly_protocol",
   "node-runtime/nightly_protocol",
 ]
-calimero_zero_storage = ["near-primitives/calimero_zero_storage"]
+calimero_zero_storage = ["unc-primitives/calimero_zero_storage"]
 nightly = [
   "nightly_protocol",
-  "near-chain-configs/nightly",
-  "near-client/nightly",
-  "near-dyn-configs/nightly",
-  "near-indexer-primitives/nightly",
-  "near-o11y/nightly",
-  "near-parameters/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
+  "unc-chain-configs/nightly",
+  "unc-client/nightly",
+  "unc-dyn-configs/nightly",
+  "unc-indexer-primitives/nightly",
+  "unc-o11y/nightly",
+  "unc-parameters/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
   "framework/nightly",
   "node-runtime/nightly",
 ]

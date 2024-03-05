@@ -39,7 +39,7 @@ jobs:
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: "projects/968400232856/locations/global/workloadIdentityPools/project-identity-pool/providers/github-provider"
-          service_account: "near-fuzzer-service-account@near-fuzzer.iam.gserviceaccount.com"
+          service_account: "unc-fuzzer-service-account@unc-fuzzer.iam.gserviceaccount.com"
 
       - name: Installing nightly rust
         run: |

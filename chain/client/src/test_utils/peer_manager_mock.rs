@@ -1,5 +1,5 @@
-use near_network::types::SetChainInfo;
-use near_network::types::{PeerManagerMessageRequest, PeerManagerMessageResponse};
+use unc_network::types::SetChainInfo;
+use unc_network::types::{PeerManagerMessageRequest, PeerManagerMessageResponse};
 
 pub struct PeerManagerMock {
     handle: Box<

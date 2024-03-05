@@ -1,5 +1,5 @@
-pub use near_primitives::hash::CryptoHash;
-pub use near_primitives::{self, types, views};
+pub use unc_primitives::hash::CryptoHash;
+pub use unc_primitives::{self, types, views};
 
 /// Resulting struct represents block with chunks
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

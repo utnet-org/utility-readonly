@@ -1,17 +1,17 @@
-use near_chain::{Block, ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_client_primitives::types::Error;
-use near_crypto::InMemorySigner;
-use near_epoch_manager::EpochManager;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::{Action, SignedTransaction};
-use near_primitives::types::{AccountId, BlockHeight, BlockHeightDelta, Gas, Nonce};
-use near_store::config::StateSnapshotType;
-use near_store::genesis::initialize_genesis_state;
-use near_store::test_utils::create_test_store;
+use unc_chain::{Block, ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_client_primitives::types::Error;
+use unc_crypto::InMemorySigner;
+use unc_epoch_manager::EpochManager;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::{Action, SignedTransaction};
+use unc_primitives::types::{AccountId, BlockHeight, BlockHeightDelta, Gas, Nonce};
+use unc_store::config::StateSnapshotType;
+use unc_store::genesis::initialize_genesis_state;
+use unc_store::test_utils::create_test_store;
 use framework::{config::GenesisExt, NightshadeRuntime};
 use std::io;
 use std::path::Path;
@@ -36,7 +36,7 @@ impl Scenario {
             self.network_config.seeds.iter().map(|x| x.parse().unwrap()).collect();
         let clients = vec![accounts[0].clone()];
         let mut genesis = Genesis::test(accounts, 1);
-        let mut runtime_config = near_parameters::RuntimeConfig::test();
+        let mut runtime_config = unc_parameters::RuntimeConfig::test();
         runtime_config.wasm_config.limit_config.max_total_prepaid_gas =
             self.runtime_config.max_total_prepaid_gas;
         genesis.config.epoch_length = self.runtime_config.epoch_length;
@@ -46,7 +46,7 @@ impl Scenario {
         let (tempdir, store) = if self.use_in_memory_store {
             (None, create_test_store())
         } else {
-            let (tempdir, opener) = near_store::NodeStorage::test_opener();
+            let (tempdir, opener) = unc_store::NodeStorage::test_opener();
             let store = opener.open().unwrap();
             (Some(tempdir), store.get_hot_store())
         };
@@ -196,7 +196,7 @@ mod test {
     use std::path::Path;
     use std::time::{Duration, Instant};
 
-    use near_o11y::testonly::init_test_logger;
+    use unc_o11y::testonly::init_test_logger;
     use tracing::info;
 
     #[test]

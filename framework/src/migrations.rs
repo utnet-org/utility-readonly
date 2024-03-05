@@ -1,19 +1,19 @@
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_primitives::receipt::ReceiptResult;
-use near_primitives::runtime::migration_data::MigrationData;
-use near_primitives::types::Gas;
-use near_primitives::utils::index_to_bytes;
-use near_store::metadata::{DbVersion, DB_VERSION};
-use near_store::migrations::BatchedStoreUpdate;
-use near_store::{DBCol, Store};
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_primitives::receipt::ReceiptResult;
+use unc_primitives::runtime::migration_data::MigrationData;
+use unc_primitives::types::Gas;
+use unc_primitives::utils::index_to_bytes;
+use unc_store::metadata::{DbVersion, DB_VERSION};
+use unc_store::migrations::BatchedStoreUpdate;
+use unc_store::{DBCol, Store};
 
 /// Fix an issue with block ordinal (#5761)
 // This migration takes at least 3 hours to complete on mainnet
-pub fn migrate_30_to_31(store: &Store, near_config: &crate::NearConfig) -> anyhow::Result<()> {
-    if near_config.client_config.archive
-        && &near_config.genesis.config.chain_id == near_primitives::chains::MAINNET
+pub fn migrate_30_to_31(store: &Store, unc_config: &crate::UncConfig) -> anyhow::Result<()> {
+    if unc_config.client_config.archive
+        && &unc_config.genesis.config.chain_id == unc_primitives::chains::MAINNET
     {
-        do_migrate_30_to_31(store, &near_config.genesis.config)?;
+        do_migrate_30_to_31(store, &unc_config.genesis.config)?;
     }
     Ok(())
 }
@@ -23,7 +23,7 @@ pub fn migrate_30_to_31(store: &Store, near_config: &crate::NearConfig) -> anyho
 /// Recomputes block ordinal due to a bug fixed in #5761.
 pub fn do_migrate_30_to_31(
     store: &Store,
-    genesis_config: &near_chain_configs::GenesisConfig,
+    genesis_config: &unc_chain_configs::GenesisConfig,
 ) -> anyhow::Result<()> {
     let genesis_height = genesis_config.genesis_height;
     let chain_store = ChainStore::new(store.clone(), genesis_height, false);
@@ -58,10 +58,10 @@ pub fn do_migrate_30_to_31(
 const GAS_USED_FOR_STORAGE_USAGE_DELTA_MIGRATION: Gas = 1_000_000_000_000_000;
 
 pub fn load_migration_data(chain_id: &str) -> MigrationData {
-    let is_mainnet = chain_id == near_primitives::chains::MAINNET;
+    let is_mainnet = chain_id == unc_primitives::chains::MAINNET;
     MigrationData {
         storage_usage_delta: if is_mainnet {
-            near_mainnet_res::mainnet_storage_usage_delta()
+            unc_mainnet_res::mainnet_storage_usage_delta()
         } else {
             Vec::new()
         },
@@ -71,7 +71,7 @@ pub fn load_migration_data(chain_id: &str) -> MigrationData {
             0
         },
         restored_receipts: if is_mainnet {
-            near_mainnet_res::mainnet_restored_receipts()
+            unc_mainnet_res::mainnet_restored_receipts()
         } else {
             ReceiptResult::default()
         },
@@ -79,16 +79,16 @@ pub fn load_migration_data(chain_id: &str) -> MigrationData {
 }
 
 pub(super) struct Migrator<'a> {
-    config: &'a crate::config::NearConfig,
+    config: &'a crate::config::UncConfig,
 }
 
 impl<'a> Migrator<'a> {
-    pub fn new(config: &'a crate::config::NearConfig) -> Self {
+    pub fn new(config: &'a crate::config::UncConfig) -> Self {
         Self { config }
     }
 }
 
-impl<'a> near_store::StoreMigrator for Migrator<'a> {
+impl<'a> unc_store::StoreMigrator for Migrator<'a> {
     fn check_support(&self, version: DbVersion) -> Result<(), &'static str> {
         // TODO(mina86): Once open ranges in match are stabilised, get rid of
         // this constant and change the match to be 27..DB_VERSION.
@@ -103,18 +103,18 @@ impl<'a> near_store::StoreMigrator for Migrator<'a> {
     fn migrate(&self, store: &Store, version: DbVersion) -> anyhow::Result<()> {
         match version {
             0..=31 => unreachable!(),
-            32 => near_store::migrations::migrate_32_to_33(store),
+            32 => unc_store::migrations::migrate_32_to_33(store),
             33 => {
-                near_store::migrations::migrate_33_to_34(store, self.config.client_config.archive)
+                unc_store::migrations::migrate_33_to_34(store, self.config.client_config.archive)
             }
-            34 => near_store::migrations::migrate_34_to_35(store),
+            34 => unc_store::migrations::migrate_34_to_35(store),
             35 => {
                 tracing::info!(target: "migrations", "Migrating DB version from 35 to 36. Flat storage data will be created on disk.");
                 tracing::info!(target: "migrations", "It will happen in parallel with regular block processing. ETA is 15h for RPC node and 2d for archival node.");
                 Ok(())
             }
-            36 => near_store::migrations::migrate_36_to_37(store),
-            37 => near_store::migrations::migrate_37_to_38(store),
+            36 => unc_store::migrations::migrate_36_to_37(store),
+            37 => unc_store::migrations::migrate_37_to_38(store),
             DB_VERSION.. => unreachable!(),
         }
     }
@@ -123,9 +123,9 @@ impl<'a> near_store::StoreMigrator for Migrator<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_mainnet_res::mainnet_restored_receipts;
-    use near_mainnet_res::mainnet_storage_usage_delta;
-    use near_primitives::hash::hash;
+    use unc_mainnet_res::mainnet_restored_receipts;
+    use unc_mainnet_res::mainnet_storage_usage_delta;
+    use unc_primitives::hash::hash;
 
     #[test]
     fn test_migration_data() {
@@ -134,9 +134,9 @@ mod tests {
                 .to_string(),
             "2fEgaLFBBJZqgLQEvHPsck4NS3sFzsgyKaMDqTw5HVvQ"
         );
-        let mainnet_migration_data = load_migration_data(near_primitives::chains::MAINNET);
+        let mainnet_migration_data = load_migration_data(unc_primitives::chains::MAINNET);
         assert_eq!(mainnet_migration_data.storage_usage_delta.len(), 3112);
-        let testnet_migration_data = load_migration_data(near_primitives::chains::TESTNET);
+        let testnet_migration_data = load_migration_data(unc_primitives::chains::TESTNET);
         assert_eq!(testnet_migration_data.storage_usage_delta.len(), 0);
     }
 
@@ -147,9 +147,9 @@ mod tests {
                 .to_string(),
             "48ZMJukN7RzvyJSW9MJ5XmyQkQFfjy2ZxPRaDMMHqUcT"
         );
-        let mainnet_migration_data = load_migration_data(near_primitives::chains::MAINNET);
+        let mainnet_migration_data = load_migration_data(unc_primitives::chains::MAINNET);
         assert_eq!(mainnet_migration_data.restored_receipts.get(&0u64).unwrap().len(), 383);
-        let testnet_migration_data = load_migration_data(near_primitives::chains::TESTNET);
+        let testnet_migration_data = load_migration_data(unc_primitives::chains::TESTNET);
         assert!(testnet_migration_data.restored_receipts.is_empty());
     }
 }

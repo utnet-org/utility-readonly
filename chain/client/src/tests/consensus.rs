@@ -2,19 +2,19 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::{Arc, RwLock, RwLockWriteGuard};
 
 use actix::System;
-use near_chain::test_utils::ValidatorSchedule;
+use unc_chain::test_utils::ValidatorSchedule;
 use rand::{thread_rng, Rng};
 
 use crate::adapter::{BlockApproval, BlockResponse};
 use crate::test_utils::{setup_mock_all_validators, ActorHandlesForTesting};
-use near_actix_test_utils::run_actix;
-use near_chain::Block;
-use near_network::types::PeerInfo;
-use near_network::types::{NetworkRequests, NetworkResponses, PeerManagerMessageRequest};
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::{Approval, ApprovalInner};
-use near_primitives::types::{AccountId, BlockHeight};
+use unc_actix_test_utils::run_actix;
+use unc_chain::Block;
+use unc_network::types::PeerInfo;
+use unc_network::types::{NetworkRequests, NetworkResponses, PeerManagerMessageRequest};
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::{Approval, ApprovalInner};
+use unc_primitives::types::{AccountId, BlockHeight};
 
 /// Rotates three independent sets of block producers producing blocks with a very short epoch length.
 /// Occasionally when an endorsement comes, make all the endorsers send a skip message far-ish into
@@ -281,6 +281,6 @@ fn test_consensus_with_epoch_switches() {
 
         // We only check the terminating condition once every 20 heights, thus extra 80 to
         // account for possibly going beyond the HEIGHT_GOAL.
-        near_network::test_utils::wait_or_panic(3000 * (80 + HEIGHT_GOAL));
+        unc_network::test_utils::wait_or_panic(3000 * (80 + HEIGHT_GOAL));
     });
 }

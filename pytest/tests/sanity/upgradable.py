@@ -75,7 +75,7 @@ def test_upgrade() -> None:
        network matches `new` nodes.
     """
     executables = get_executables()
-    node_root = utils.get_near_tempdir('upgradable', clean=True)
+    node_root = utils.get_unc_tempdir('upgradable', clean=True)
 
     # Setup local network.
     cmd = (executables.stable.uncd, f'--home={node_root}', 'localnet', '-v',
@@ -144,11 +144,11 @@ def test_upgrade() -> None:
     # Restart stable nodes into new version.
     for i in range(3):
         nodes[i].kill()
-        nodes[i].near_root = executables.current.root
+        nodes[i].unc_root = executables.current.root
         nodes[i].binary_name = executables.current.uncd
         nodes[i].start(
             boot_node=nodes[0],
-            extra_env={"NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE": "1"},
+            extra_env={"unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE": "1"},
         )
 
     utils.wait_for_blocks(nodes[3], count=60)

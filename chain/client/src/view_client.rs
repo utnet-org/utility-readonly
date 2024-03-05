@@ -7,52 +7,52 @@ use crate::{
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered,
 };
 use actix::{Actor, Addr, Handler, SyncArbiter, SyncContext};
-use near_async::messaging::CanSend;
-use near_chain::types::{RuntimeAdapter, Tip};
-use near_chain::{
+use unc_async::messaging::CanSend;
+use unc_chain::types::{RuntimeAdapter, Tip};
+use unc_chain::{
     get_epoch_block_producers_view, Chain, ChainGenesis, ChainStoreAccess, DoomslugThresholdMode,
 };
-use near_chain_configs::{ClientConfig, ProtocolConfigView};
-use near_chain_primitives::error::EpochErrorResultToChainError;
-use near_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
-use near_epoch_manager::shard_tracker::ShardTracker;
-use near_epoch_manager::EpochManagerAdapter;
-use near_network::types::{
+use unc_chain_configs::{ClientConfig, ProtocolConfigView};
+use unc_chain_primitives::error::EpochErrorResultToChainError;
+use unc_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
+use unc_epoch_manager::shard_tracker::ShardTracker;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_network::types::{
     NetworkRequests, PeerManagerAdapter, PeerManagerMessageRequest, ReasonForBan,
     StateResponseInfo, StateResponseInfoV2,
 };
-use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
-use near_performance_metrics_macros::perf;
-use near_primitives::block::{Block, BlockHeader};
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{merklize, PartialMerkleTree};
-use near_primitives::network::AnnounceAccount;
-use near_primitives::receipt::Receipt;
-use near_primitives::sharding::ShardChunk;
-use near_primitives::state_sync::{
+use unc_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
+use unc_performance_metrics_macros::perf;
+use unc_primitives::block::{Block, BlockHeader};
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{merklize, PartialMerkleTree};
+use unc_primitives::network::AnnounceAccount;
+use unc_primitives::receipt::Receipt;
+use unc_primitives::sharding::ShardChunk;
+use unc_primitives::state_sync::{
     ShardStateSyncResponse, ShardStateSyncResponseHeader, ShardStateSyncResponseV3,
 };
-use near_primitives::static_clock::StaticClock;
-use near_primitives::types::{
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::types::{
     AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId,
     ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier,
 };
-use near_primitives::views::{
+use unc_primitives::views::{
     BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView,
     FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView,
     MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, SplitStorageInfoView,
     StateChangesKindsView, StateChangesView, TxExecutionStatus, TxStatusView,
 };
-use near_store::flat::{FlatStorageReadyStatus, FlatStorageStatus};
-use near_store::{DBCol, COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY};
+use unc_store::flat::{FlatStorageReadyStatus, FlatStorageStatus};
+use unc_store::{DBCol, COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY};
 use std::cmp::Ordering;
 use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::hash::Hash;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
-use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
+use unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Max number of queries that we keep.
 const QUERY_REQUEST_LIMIT: usize = 500;
@@ -144,7 +144,7 @@ impl ViewClientActor {
     fn maybe_block_id_to_block_header(
         &self,
         block_id: MaybeBlockId,
-    ) -> Result<BlockHeader, near_chain::Error> {
+    ) -> Result<BlockHeader, unc_chain::Error> {
         match block_id {
             None => {
                 let block_hash = self.chain.head()?.last_block_hash;
@@ -170,7 +170,7 @@ impl ViewClientActor {
     fn get_block_hash_by_finality(
         &self,
         finality: &Finality,
-    ) -> Result<CryptoHash, near_chain::Error> {
+    ) -> Result<CryptoHash, unc_chain::Error> {
         match finality {
             Finality::None => Ok(self.chain.head()?.last_block_hash),
             Finality::DoomSlug => Ok(*self.chain.head_header()?.last_ds_final_block()),
@@ -186,7 +186,7 @@ impl ViewClientActor {
     fn get_block_header_by_reference(
         &self,
         reference: &BlockReference,
-    ) -> Result<Option<BlockHeader>, near_chain::Error> {
+    ) -> Result<Option<BlockHeader>, unc_chain::Error> {
         match reference {
             BlockReference::BlockId(BlockId::Height(block_height)) => {
                 self.chain.get_block_header_by_height(*block_height).map(Some)
@@ -219,7 +219,7 @@ impl ViewClientActor {
     fn get_block_by_reference(
         &self,
         reference: &BlockReference,
-    ) -> Result<Option<Block>, near_chain::Error> {
+    ) -> Result<Option<Block>, unc_chain::Error> {
         match reference {
             BlockReference::BlockId(BlockId::Height(block_height)) => {
                 self.chain.get_block_by_height(*block_height).map(Some)
@@ -248,7 +248,7 @@ impl ViewClientActor {
     fn get_maintenance_windows(
         &self,
         account_id: AccountId,
-    ) -> Result<MaintenanceWindowsView, near_chain::Error> {
+    ) -> Result<MaintenanceWindowsView, unc_chain::Error> {
         let head = self.chain.head()?;
         let epoch_id = self.epoch_manager.get_epoch_id(&head.last_block_hash)?;
         let epoch_info: Arc<EpochInfo> = self.epoch_manager.get_epoch_info(&epoch_id)?;
@@ -298,10 +298,10 @@ impl ViewClientActor {
         let header = match header {
             Ok(Some(header)) => Ok(header),
             Ok(None) => Err(QueryError::NoSyncedBlocks),
-            Err(near_chain::near_chain_primitives::Error::DBNotFoundErr(_)) => {
+            Err(unc_chain::unc_chain_primitives::Error::DBNotFoundErr(_)) => {
                 Err(QueryError::UnknownBlock { block_reference: msg.block_reference })
             }
-            Err(near_chain::near_chain_primitives::Error::IOErr(err)) => {
+            Err(unc_chain::unc_chain_primitives::Error::IOErr(err)) => {
                 Err(QueryError::InternalError { error_message: err.to_string() })
             }
             Err(err) => Err(QueryError::Unreachable { error_message: err.to_string() }),
@@ -327,7 +327,7 @@ impl ViewClientActor {
         let tip = self.chain.head();
         let chunk_extra =
             self.chain.get_chunk_extra(header.hash(), &shard_uid).map_err(|err| match err {
-                near_chain::near_chain_primitives::Error::DBNotFoundErr(_) => match tip {
+                unc_chain::unc_chain_primitives::Error::DBNotFoundErr(_) => match tip {
                     Ok(tip) => {
                         let gc_stop_height = self.runtime.get_gc_stop_height(&tip.last_block_hash);
                         if !self.config.archive && header.height() < gc_stop_height {
@@ -341,7 +341,7 @@ impl ViewClientActor {
                     }
                     Err(err) => QueryError::InternalError { error_message: err.to_string() },
                 },
-                near_chain::near_chain_primitives::Error::IOErr(error) => {
+                unc_chain::unc_chain_primitives::Error::IOErr(error) => {
                     QueryError::InternalError { error_message: error.to_string() }
                 }
                 _ => QueryError::Unreachable { error_message: err.to_string() },
@@ -360,31 +360,31 @@ impl ViewClientActor {
         ) {
             Ok(query_response) => Ok(query_response),
             Err(query_error) => Err(match query_error {
-                near_chain::near_chain_primitives::error::QueryError::InternalError {
+                unc_chain::unc_chain_primitives::error::QueryError::InternalError {
                     error_message,
                     ..
                 } => QueryError::InternalError { error_message },
-                near_chain::near_chain_primitives::error::QueryError::InvalidAccount {
+                unc_chain::unc_chain_primitives::error::QueryError::InvalidAccount {
                     requested_account_id,
                     block_height,
                     block_hash,
                 } => QueryError::InvalidAccount { requested_account_id, block_height, block_hash },
-                near_chain::near_chain_primitives::error::QueryError::UnknownAccount {
+                unc_chain::unc_chain_primitives::error::QueryError::UnknownAccount {
                     requested_account_id,
                     block_height,
                     block_hash,
                 } => QueryError::UnknownAccount { requested_account_id, block_height, block_hash },
-                near_chain::near_chain_primitives::error::QueryError::NoContractCode {
+                unc_chain::unc_chain_primitives::error::QueryError::NoContractCode {
                     contract_account_id,
                     block_height,
                     block_hash,
                 } => QueryError::NoContractCode { contract_account_id, block_height, block_hash },
-                near_chain::near_chain_primitives::error::QueryError::UnknownAccessKey {
+                unc_chain::unc_chain_primitives::error::QueryError::UnknownAccessKey {
                     public_key,
                     block_height,
                     block_hash,
                 } => QueryError::UnknownAccessKey { public_key, block_height, block_hash },
-                near_chain::near_chain_primitives::error::QueryError::ContractExecutionError {
+                unc_chain::unc_chain_primitives::error::QueryError::ContractExecutionError {
                     error_message,
                     block_hash,
                     block_height,
@@ -393,7 +393,7 @@ impl ViewClientActor {
                     block_height,
                     block_hash,
                 },
-                near_chain::near_chain_primitives::error::QueryError::TooLargeContractState {
+                unc_chain::unc_chain_primitives::error::QueryError::TooLargeContractState {
                     requested_account_id,
                     block_height,
                     block_hash,
@@ -492,7 +492,7 @@ impl ViewClientActor {
                     };
                     Ok(TxStatusView { execution_outcome: Some(res), status })
                 }
-                Err(near_chain::Error::DBNotFoundErr(_)) => {
+                Err(unc_chain::Error::DBNotFoundErr(_)) => {
                     if self.chain.get_execution_outcome(&tx_hash).is_ok() {
                         Ok(TxStatusView {
                             execution_outcome: None,
@@ -534,7 +534,7 @@ impl ViewClientActor {
     fn retrieve_headers(
         &mut self,
         hashes: Vec<CryptoHash>,
-    ) -> Result<Vec<BlockHeader>, near_chain::Error> {
+    ) -> Result<Vec<BlockHeader>, unc_chain::Error> {
         self.chain.retrieve_headers(hashes, sync::header::MAX_BLOCK_HEADERS, None)
     }
 
@@ -685,16 +685,16 @@ impl Handler<WithSpanContext<GetChunk>> for ViewClientActor {
         let get_chunk_from_block = |block: Block,
                                     shard_id: ShardId,
                                     chain: &Chain|
-         -> Result<ShardChunk, near_chain::Error> {
+         -> Result<ShardChunk, unc_chain::Error> {
             let chunk_header = block
                 .chunks()
                 .get(shard_id as usize)
-                .ok_or_else(|| near_chain::Error::InvalidShardId(shard_id))?
+                .ok_or_else(|| unc_chain::Error::InvalidShardId(shard_id))?
                 .clone();
             let chunk_hash = chunk_header.chunk_hash();
             let chunk = chain.get_chunk(&chunk_hash)?;
             let res = ShardChunk::with_header(ShardChunk::clone(&chunk), chunk_header).ok_or(
-                near_chain::Error::Other(format!(
+                unc_chain::Error::Other(format!(
                     "Mismatched versions for chunk with hash {}",
                     chunk_hash.0
                 )),
@@ -979,7 +979,7 @@ impl Handler<WithSpanContext<GetNextLightClientBlock>> for ViewClientActor {
             match self.chain.chain_store().get_epoch_light_client_block(&last_next_epoch_id.0) {
                 Ok(light_block) => Ok(Some(light_block)),
                 Err(e) => {
-                    if let near_chain::Error::DBNotFoundErr(_) = e {
+                    if let unc_chain::Error::DBNotFoundErr(_) = e {
                         Ok(None)
                     } else {
                         Err(e.into())
@@ -1051,7 +1051,7 @@ impl Handler<WithSpanContext<GetExecutionOutcome>> for ViewClientActor {
                     Err(GetExecutionOutcomeError::NotConfirmed { transaction_or_receipt_id: id })
                 }
             }
-            Err(near_chain::Error::DBNotFoundErr(_)) => {
+            Err(unc_chain::Error::DBNotFoundErr(_)) => {
                 let head = self.chain.head()?;
                 let target_shard_id = self
                     .epoch_manager
@@ -1361,7 +1361,7 @@ impl Handler<WithSpanContext<StateRequestHeader>> for ViewClientActor {
                 // Don't respond to the node, because the request is malformed.
                 return None;
             }
-            Err(near_chain::Error::DBNotFoundErr(_)) => {
+            Err(unc_chain::Error::DBNotFoundErr(_)) => {
                 // This case may appear in case of latency in epoch switching.
                 // Request sender is ready to sync but we still didn't get the block.
                 info!(target: "sync", ?sync_hash, "Can't get sync_hash block for state request header");
@@ -1456,7 +1456,7 @@ impl Handler<WithSpanContext<StateRequestPart>> for ViewClientActor {
                 // Do not respond, possible malicious behavior.
                 return None;
             }
-            Err(near_chain::Error::DBNotFoundErr(_)) => {
+            Err(unc_chain::Error::DBNotFoundErr(_)) => {
                 // This case may appear in case of latency in epoch switching.
                 // Request sender is ready to sync but we still didn't get the block.
                 info!(target: "sync", ?sync_hash, "Can't get sync_hash block for state request part");

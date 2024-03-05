@@ -7,20 +7,20 @@ use std::sync::{Arc, RwLock};
 use actix::{Addr, MailboxError, System};
 use futures::{future, FutureExt};
 
-use near_actix_test_utils::run_actix;
-use near_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::types::PeerInfo;
-use near_network::types::{
+use unc_actix_test_utils::run_actix;
+use unc_chain::test_utils::{account_id_to_shard_id, ValidatorSchedule};
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::types::PeerInfo;
+use unc_network::types::{
     NetworkResponses, PeerManagerMessageRequest, PeerManagerMessageResponse,
 };
-use near_o11y::testonly::init_integration_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, BlockReference};
-use near_primitives::views::QueryResponseKind::ViewAccount;
-use near_primitives::views::{QueryRequest, QueryResponse};
+use unc_o11y::testonly::init_integration_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, BlockReference};
+use unc_primitives::views::QueryResponseKind::ViewAccount;
+use unc_primitives::views::{QueryRequest, QueryResponse};
 
 use crate::adapter::{ProcessTxRequest, ProcessTxResponse};
 use crate::test_utils::{setup_mock_all_validators, ActorHandlesForTesting, BlockStats};
@@ -90,7 +90,7 @@ fn test_keyvalue_runtime_balances() {
             actix::spawn(actor);
         }
 
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -519,7 +519,7 @@ fn test_cross_shard_tx_common(
             actix::spawn(actor);
         }
 
-        near_network::test_utils::wait_or_panic(if rotate_validators {
+        unc_network::test_utils::wait_or_panic(if rotate_validators {
             1000 * 60 * 80
         } else {
             1000 * 60 * 45

@@ -1,8 +1,8 @@
 use anyhow::Context;
-use near_network::types::PeerInfo;
-use near_primitives::hash::CryptoHash;
-use near_primitives::network::PeerId;
-use near_primitives::types::AccountId;
+use unc_network::types::PeerInfo;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::AccountId;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -97,14 +97,14 @@ pub struct ChainInfo {
 
 pub static CHAIN_INFO: &[ChainInfo] = &[
     ChainInfo {
-        chain_id: near_primitives::chains::MAINNET,
+        chain_id: unc_primitives::chains::MAINNET,
         genesis_hash: CryptoHash([
             198, 253, 249, 28, 142, 130, 248, 249, 23, 204, 25, 117, 233, 222, 28, 100, 190, 17,
             137, 158, 50, 29, 253, 245, 254, 188, 251, 183, 49, 63, 20, 134,
         ]),
     },
     ChainInfo {
-        chain_id: near_primitives::chains::TESTNET,
+        chain_id: unc_primitives::chains::TESTNET,
         genesis_hash: CryptoHash([
             215, 132, 218, 90, 158, 94, 102, 102, 133, 22, 193, 154, 128, 149, 68, 143, 197, 74,
             34, 162, 137, 113, 220, 51, 15, 0, 153, 223, 148, 55, 148, 16,

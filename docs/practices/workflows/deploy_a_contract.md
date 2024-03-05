@@ -12,13 +12,13 @@ to understand what's going one here:
 ```console
 $ cargo run --profile dev-release -p uncd -- init
 $ cargo run --profile dev-release -p uncd -- run
-$ NEAR_ENV=local near create-account alice.test.near --masterAccount test.near
+$ unc_ENV=local near create-account alice.test.near --masterAccount test.near
 ```
 
 As a sanity check, querying the state of `alice.test.near` account should work:
 
 ```console
-$ NEAR_ENV=local near state alice.test.near
+$ unc_ENV=local near state alice.test.near
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:7tU4NtFozPWLotcfhbT9KfBbR3TJHPfKJeCri8Me6jU7
 Account alice.test.near
 {
@@ -52,7 +52,7 @@ Such "interactions" are carried through host functions, which are quite a bit
 like syscalls in traditional operating systems.
 
 The set of host functions that the contract can import is defined in
-[`imports.rs`](https://github.com/utnet-org/utility/blob/aeccaaab334275f6d0a62deabd184675bc3c6a23/runtime/near-vm-runner/src/imports.rs#L71-L242).
+[`imports.rs`](https://github.com/utnet-org/utility/blob/aeccaaab334275f6d0a62deabd184675bc3c6a23/runtime/unc-vm-runner/src/imports.rs#L71-L242).
 
 In this particular case, we need the `value_return` function:
 
@@ -227,7 +227,7 @@ $ wasm-tools print target/wasm32-unknown-unknown/release/hello_near.wasm
 Now that we have the WASM, let's deploy it!
 
 ```console
-$ NEAR_ENV=local near deploy alice.test.near \
+$ unc_ENV=local near deploy alice.test.near \
     ./target/wasm32-unknown-unknown/release/hello_near.wasm
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
 Starting deployment. Account id: alice.test.near, node: http://127.0.0.1:3030, helper: http://localhost:3000, file: ./target/wasm32-unknown-unknown/release/hello_near.wasm
@@ -241,7 +241,7 @@ And, finally, let's call our contract:
 
 
 ```console
-$ NEAR_ENV=local $near call alice.test.near hello --accountId alice.test.near
+$ unc_ENV=local $near call alice.test.near hello --accountId alice.test.near
 Scheduling a call: alice.test.near.hello()
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
 Doing account.functionCall()
@@ -258,7 +258,7 @@ spends NEAR to call the contact deployed to the `alice` account:
 
 
 ```console
-$ NEAR_ENV=local $near call alice.test.near hello --accountId bob.test.near
+$ unc_ENV=local $near call alice.test.near hello --accountId bob.test.near
 Scheduling a call: alice.test.near.hello()
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
 Doing account.functionCall()

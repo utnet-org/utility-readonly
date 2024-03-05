@@ -1,12 +1,12 @@
 use crate::chain::BlockMissingChunks;
-use crate::near_chain_primitives::error::BlockKnownError::KnownInProcessing;
+use crate::unc_chain_primitives::error::BlockKnownError::KnownInProcessing;
 use crate::orphan::OrphanMissingChunks;
 use crate::Provenance;
-use near_primitives::block::Block;
-use near_primitives::challenge::{ChallengeBody, ChallengesResult};
-use near_primitives::hash::CryptoHash;
-use near_primitives::sharding::{ReceiptProof, ShardChunkHeader, StateSyncInfo};
-use near_primitives::types::ShardId;
+use unc_primitives::block::Block;
+use unc_primitives::challenge::{ChallengeBody, ChallengesResult};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::sharding::{ReceiptProof, ShardChunkHeader, StateSyncInfo};
+use unc_primitives::types::ShardId;
 use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -44,12 +44,12 @@ pub(crate) enum AddError {
     BlockAlreadyInPool,
 }
 
-impl From<AddError> for near_chain_primitives::Error {
+impl From<AddError> for unc_chain_primitives::Error {
     fn from(err: AddError) -> Self {
         match err {
-            AddError::ExceedingPoolSize => near_chain_primitives::Error::TooManyProcessingBlocks,
+            AddError::ExceedingPoolSize => unc_chain_primitives::Error::TooManyProcessingBlocks,
             AddError::BlockAlreadyInPool => {
-                near_chain_primitives::Error::BlockKnown(KnownInProcessing)
+                unc_chain_primitives::Error::BlockKnown(KnownInProcessing)
             }
         }
     }

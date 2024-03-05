@@ -1,6 +1,6 @@
 use crate::peer::transfer_stats::TransferStats;
-use near_async::time;
-use near_primitives::hash::CryptoHash;
+use unc_async::time;
+use unc_primitives::hash::CryptoHash;
 
 /// Maximum number of requests and responses to track.
 const MAX_TRACK_SIZE: usize = 30;
@@ -93,7 +93,7 @@ impl Tracker {
 
 #[cfg(test)]
 mod tests {
-    use near_primitives::hash::hash;
+    use unc_primitives::hash::hash;
 
     use super::*;
 

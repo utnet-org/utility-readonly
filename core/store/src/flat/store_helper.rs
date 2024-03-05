@@ -11,9 +11,9 @@ use crate::flat::types::FlatStorageError;
 use crate::flat::FlatStorageReadyStatus;
 use crate::{DBCol, Store, StoreUpdate};
 use borsh::BorshDeserialize;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::FlatStateValue;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::FlatStateValue;
 use std::io;
 
 pub fn get_delta_changes(
@@ -281,8 +281,8 @@ pub fn iter_flat_state_entries<'a>(
 mod tests {
     use crate::flat::store_helper::set_flat_state_value;
     use crate::test_utils::create_test_store;
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::state::FlatStateValue;
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::state::FlatStateValue;
 
     #[test]
     fn iter_flat_state_entries() {

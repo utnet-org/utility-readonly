@@ -4,7 +4,7 @@ version = "0.0.0"
 edition = "2021"
 publish = false
 description = "An entry point for miscelaneous (stylistic) workspace-wide tests"
-authors = ["Near Inc <hello@nearprotocol.com>"]
+authors = ["unc Inc <hello@nearprotocol.com>"]
 
 [lints]
 workspace = true

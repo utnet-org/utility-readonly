@@ -1,5 +1,5 @@
-use near_client_primitives::types::GetClientConfigError;
-use near_jsonrpc_primitives::types::client_config::RpcClientConfigError;
+use unc_client_primitives::types::GetClientConfigError;
+use unc_jsonrpc_primitives::types::client_config::RpcClientConfigError;
 
 use super::RpcFrom;
 

@@ -1,13 +1,13 @@
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_parameters::RuntimeConfigStore;
-use near_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
-use near_primitives::errors::{ActionsValidationError, InvalidTxError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::transaction::{Action, AddKeyAction, Transaction};
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
+use unc_primitives::errors::{ActionsValidationError, InvalidTxError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::transaction::{Action, AddKeyAction, Transaction};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -15,10 +15,10 @@ use framework::test_utils::TestEnvNightshadeSetupExt;
 fn test_account_id_in_function_call_permission_upgrade() {
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
     let old_protocol_version =
-        near_primitives::version::ProtocolFeature::AccountIdInFunctionCallPermission
+        unc_primitives::version::ProtocolFeature::AccountIdInFunctionCallPermission
             .protocol_version()
             - 1;
     let new_protocol_version = old_protocol_version + 1;

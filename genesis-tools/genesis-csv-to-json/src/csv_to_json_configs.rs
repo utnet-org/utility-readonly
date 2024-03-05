@@ -1,7 +1,7 @@
-use near_chain_configs::{Genesis, GenesisConfig};
-use near_primitives::types::{Balance, NumShards, ShardId};
-use near_primitives::utils::get_num_seats_per_shard;
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_chain_configs::{Genesis, GenesisConfig};
+use unc_primitives::types::{Balance, NumShards, ShardId};
+use unc_primitives::utils::get_num_seats_per_shard;
+use unc_primitives::version::PROTOCOL_VERSION;
 use framework::config::{
     Config, BLOCK_PRODUCER_KICKOUT_THRESHOLD, CHUNK_PRODUCER_KICKOUT_THRESHOLD, CONFIG_FILENAME,
     EXPECTED_EPOCH_LENGTH, FISHERMEN_THRESHOLD, GAS_PRICE_ADJUSTMENT_RATE, GENESIS_CONFIG_FILENAME,
@@ -18,14 +18,14 @@ const ACCOUNTS_FILE: &str = "accounts.csv";
 const SHARDS: &'static [ShardId] = &[0, 1, 2, 3, 4, 5, 6, 7];
 
 fn verify_total_supply(total_supply: Balance, chain_id: &str) {
-    if chain_id == near_primitives::chains::MAINNET {
+    if chain_id == unc_primitives::chains::MAINNET {
         assert_eq!(
             total_supply,
             1_000_000_000 * UNC_BASE,
             "Total supply should be exactly 1 billion"
         );
     } else if total_supply > 10_000_000_000 * UNC_BASE
-        && chain_id == near_primitives::chains::TESTNET
+        && chain_id == unc_primitives::chains::TESTNET
     {
         panic!("Total supply should not be more than 10 billion");
     }

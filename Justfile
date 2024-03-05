@@ -2,7 +2,7 @@
 # them at earliest convenience :)
 # Also in addition to this, the `nextest-integration` test is currently disabled on macos
 with_macos_excludes := if os() == "macos" {
-    "--exclude node-runtime --exclude runtime-params-estimator --exclude near-network --exclude estimator-warehouse"
+    "--exclude node-runtime --exclude runtime-params-estimator --exclude unc-network --exclude estimator-warehouse"
 } else {
     ""
 }
@@ -87,7 +87,7 @@ check-lychee:
 # build target/rpc_errors_schema.json
 build-rpc-errors-schema:
     rm -f target/rpc_errors_schema.json
-    cargo check -p near-jsonrpc --features dump_errors_schema
+    cargo check -p unc-jsonrpc --features dump_errors_schema
 
 # update chain/jsonrpc/res/rpc_errors_schema.json
 update-rpc-errors-schema: build-rpc-errors-schema

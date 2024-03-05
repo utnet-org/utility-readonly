@@ -3,7 +3,7 @@ use std::{collections::HashMap, io, sync::Arc};
 use borsh::BorshDeserialize;
 
 use crate::runtime_utils::{get_runtime_and_trie, get_test_trie_viewer, TEST_SHARD_UID};
-use near_primitives::{
+use unc_primitives::{
     account::Account,
     hash::hash as sha256,
     hash::CryptoHash,
@@ -12,13 +12,13 @@ use near_primitives::{
     types::{AccountId, StateRoot},
     views::{StateItem, ViewApplyState},
 };
-use near_primitives::{
+use unc_primitives::{
     test_utils::MockEpochInfoProvider,
     trie_key::TrieKey,
     types::{EpochId, StateChangeCause},
     version::PROTOCOL_VERSION,
 };
-use near_store::{set_account, NibbleSlice, RawTrieNode, RawTrieNodeWithSize};
+use unc_store::{set_account, NibbleSlice, RawTrieNode, RawTrieNodeWithSize};
 use node_runtime::state_viewer::errors;
 use node_runtime::state_viewer::*;
 use testlib::runtime_utils::alice_account;
@@ -190,7 +190,7 @@ fn test_view_call_with_args() {
 
 fn assert_view_state(
     trie_viewer: &TrieViewer,
-    state_update: &near_store::TrieUpdate,
+    state_update: &unc_store::TrieUpdate,
     prefix: &[u8],
     want_values: &[(&[u8], &[u8])],
     want_proof: &[&'static str],

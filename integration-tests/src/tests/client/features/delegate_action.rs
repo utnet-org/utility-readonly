@@ -5,32 +5,32 @@
 
 use crate::node::{Node, RuntimeNode};
 use crate::tests::standard_cases::fee_helper;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_crypto::{KeyType, PublicKey, Signer};
-use near_parameters::ActionCosts;
-use near_primitives::account::{
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_crypto::{KeyType, PublicKey, Signer};
+use unc_parameters::ActionCosts;
+use unc_primitives::account::{
     id::AccountType, AccessKey, AccessKeyPermission, FunctionCallPermission,
 };
-use near_primitives::checked_feature;
-use near_primitives::errors::{
+use unc_primitives::checked_feature;
+use unc_primitives::errors::{
     ActionError, ActionErrorKind, ActionsValidationError, InvalidAccessKeyError, InvalidTxError,
     TxExecutionError,
 };
-use near_primitives::test_utils::{
-    create_user_test_signer, eth_implicit_test_account, near_implicit_test_account,
+use unc_primitives::test_utils::{
+    create_user_test_signer, eth_implicit_test_account, unc_implicit_test_account,
 };
-use near_primitives::transaction::{
+use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
 };
-use near_primitives::types::{AccountId, Balance};
-use near_primitives::version::{ProtocolFeature, ProtocolVersion, PROTOCOL_VERSION};
-use near_primitives::views::{
+use unc_primitives::types::{AccountId, Balance};
+use unc_primitives::version::{ProtocolFeature, ProtocolVersion, PROTOCOL_VERSION};
+use unc_primitives::views::{
     AccessKeyPermissionView, ExecutionStatusView, FinalExecutionOutcomeView, FinalExecutionStatus,
 };
-use near_test_contracts::{ft_contract, smallest_rs_contract};
+use unc_test_contracts::{ft_contract, smallest_rs_contract};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use framework::UNC_BASE;
@@ -49,7 +49,7 @@ fn exec_meta_transaction(
     actions: Vec<Action>,
     protocol_version: ProtocolVersion,
 ) -> FinalExecutionStatus {
-    near_o11y::testonly::init_test_logger();
+    unc_o11y::testonly::init_test_logger();
     let validator: AccountId = "test0".parse().unwrap();
     let user: AccountId = "alice.near".parse().unwrap();
     let receiver: AccountId = "bob.near".parse().unwrap();
@@ -140,7 +140,7 @@ fn check_meta_tx_execution(
         .unwrap()
         .nonce;
     let user_pubk = match sender.get_account_type() {
-        AccountType::NearImplicitAccount => PublicKey::from_near_implicit_account(&sender).unwrap(),
+        AccountType::NearImplicitAccount => PublicKey::from_unc_implicit_account(&sender).unwrap(),
         AccountType::EthImplicitAccount => {
             if checked_feature!("stable", EthImplicitAccounts, protocol_version) {
                 panic!("ETH-implicit accounts must not have access key");
@@ -274,7 +274,7 @@ fn check_meta_tx_fn_call(
 /// Note: The expectation is that the relayer pays for the tokens sent, as
 /// specified in NEP-366.
 #[test]
-fn meta_tx_near_transfer() {
+fn meta_tx_unc_transfer() {
     let sender = bob_account();
     let relayer = alice_account();
     let receiver = carol_account();
@@ -570,7 +570,7 @@ fn meta_tx_ft_transfer() {
     let receiver = "david.near";
 
     let mut genesis = Genesis::test(vec![alice_account(), bob_account(), carol_account()], 3);
-    add_contract(&mut genesis, &ft_contract, near_test_contracts::ft_contract().to_vec());
+    add_contract(&mut genesis, &ft_contract, unc_test_contracts::ft_contract().to_vec());
     let node = RuntimeNode::new_from_genesis(&relayer, genesis);
 
     // A BUNCH OF TEST SETUP
@@ -802,15 +802,15 @@ fn meta_tx_create_implicit_account_fails(new_account: AccountId) {
     let account_creation_result = &tx_result.receipts_outcome[1].outcome.status;
     assert!(matches!(
         account_creation_result,
-        near_primitives::views::ExecutionStatusView::Failure(TxExecutionError::ActionError(
+        unc_primitives::views::ExecutionStatusView::Failure(TxExecutionError::ActionError(
             ActionError { kind: ActionErrorKind::OnlyImplicitAccountCreationAllowed { .. }, .. }
         )),
     ));
 }
 
 #[test]
-fn meta_tx_create_near_implicit_account_fails() {
-    meta_tx_create_implicit_account_fails(near_implicit_test_account());
+fn meta_tx_create_unc_implicit_account_fails() {
+    meta_tx_create_implicit_account_fails(unc_implicit_test_account());
 }
 
 #[test]
@@ -849,15 +849,15 @@ fn meta_tx_create_and_use_implicit_account(new_account: AccountId) {
     let status = &tx_result.receipts_outcome[1].outcome.status;
     assert!(matches!(
         status,
-        near_primitives::views::ExecutionStatusView::Failure(TxExecutionError::ActionError(
+        unc_primitives::views::ExecutionStatusView::Failure(TxExecutionError::ActionError(
             ActionError { kind: ActionErrorKind::AccountDoesNotExist { account_id }, .. }
         )) if *account_id == new_account,
     ));
 }
 
 #[test]
-fn meta_tx_create_and_use_near_implicit_account() {
-    meta_tx_create_and_use_implicit_account(near_implicit_test_account());
+fn meta_tx_create_and_use_unc_implicit_account() {
+    meta_tx_create_and_use_implicit_account(unc_implicit_test_account());
 }
 
 #[test]
@@ -939,8 +939,8 @@ fn meta_tx_create_implicit_account(new_account: AccountId) {
 }
 
 #[test]
-fn meta_tx_create_near_implicit_account() {
-    meta_tx_create_implicit_account(near_implicit_test_account());
+fn meta_tx_create_unc_implicit_account() {
+    meta_tx_create_implicit_account(unc_implicit_test_account());
 }
 
 #[test]

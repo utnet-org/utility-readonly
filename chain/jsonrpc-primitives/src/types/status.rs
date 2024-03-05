@@ -1,9 +1,9 @@
 #[cfg(feature = "debug_types")]
-use near_client_primitives::debug::{
+use unc_client_primitives::debug::{
     DebugBlockStatusData, EpochInfoView, TrackedShardsView, ValidatorStatus,
 };
 #[cfg(feature = "debug_types")]
-use near_primitives::views::{
+use unc_primitives::views::{
     CatchupStatusView, ChainProcessingInfo, NetworkGraphView, NetworkRoutesView, PeerStoreView,
     RecentOutboundConnectionsView, RequestedStatePartsView, SnapshotHostsView,
     SplitStorageInfoView, SyncStatusView,
@@ -12,7 +12,7 @@ use near_primitives::views::{
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct RpcStatusResponse {
     #[serde(flatten)]
-    pub status_response: near_primitives::views::StatusResponse,
+    pub status_response: unc_primitives::views::StatusResponse,
 }
 
 #[cfg(feature = "debug_types")]
@@ -55,7 +55,7 @@ pub enum RpcStatusError {
     #[error("No blocks for {elapsed:?}")]
     NoNewBlocks { elapsed: std::time::Duration },
     #[error("Epoch Out Of Bounds {epoch_id:?}")]
-    EpochOutOfBounds { epoch_id: near_primitives::types::EpochId },
+    EpochOutOfBounds { epoch_id: unc_primitives::types::EpochId },
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
 }

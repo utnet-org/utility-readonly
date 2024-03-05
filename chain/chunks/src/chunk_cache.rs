@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
-use near_primitives::hash::CryptoHash;
-use near_primitives::sharding::{
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::sharding::{
     ChunkHash, PartialEncodedChunkPart, PartialEncodedChunkV2, ReceiptProof, ShardChunkHeader,
 };
-use near_primitives::types::{BlockHeight, BlockHeightDelta, ShardId};
+use unc_primitives::types::{BlockHeight, BlockHeightDelta, ShardId};
 use std::collections::hash_map::Entry::Occupied;
 use tracing::warn;
 
@@ -271,10 +271,10 @@ impl EncodedChunksCache {
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use near_crypto::KeyType;
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::sharding::{PartialEncodedChunkV2, ShardChunkHeader, ShardChunkHeaderV2};
-    use near_primitives::validator_signer::InMemoryValidatorSigner;
+    use unc_crypto::KeyType;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::sharding::{PartialEncodedChunkV2, ShardChunkHeader, ShardChunkHeaderV2};
+    use unc_primitives::validator_signer::InMemoryValidatorSigner;
 
     use crate::chunk_cache::EncodedChunksCache;
     use crate::ChunkRequestInfo;

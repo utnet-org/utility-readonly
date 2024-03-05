@@ -2,9 +2,9 @@
 use crate::config_store::INITIAL_TESTNET_CONFIG;
 use crate::cost::RuntimeFeesConfig;
 use crate::parameter_table::ParameterTable;
-use near_account_id::AccountId;
-use near_primitives_core::types::Balance;
-use near_primitives_core::version::PROTOCOL_VERSION;
+use unc_account_id::AccountId;
+use unc_primitives_core::types::Balance;
+use unc_primitives_core::version::PROTOCOL_VERSION;
 
 use super::parameter_table::InvalidConfigError;
 

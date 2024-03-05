@@ -4,9 +4,9 @@ extern crate bencher;
 use bencher::Bencher;
 use rand::random;
 
-use near_primitives::shard_layout::ShardUId;
-use near_store::test_utils::TestTriesBuilder;
-use near_store::Trie;
+use unc_primitives::shard_layout::ShardUId;
+use unc_store::test_utils::TestTriesBuilder;
+use unc_store::Trie;
 
 fn rand_bytes() -> Vec<u8> {
     (0..10).map(|_| random::<u8>()).collect()

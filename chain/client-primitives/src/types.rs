@@ -1,38 +1,38 @@
 use actix::Message;
 use chrono::DateTime;
 use chrono::Utc;
-use near_chain_configs::{ClientConfig, ProtocolConfigView};
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{MerklePath, PartialMerkleTree};
-use near_primitives::network::PeerId;
-use near_primitives::sharding::ChunkHash;
-use near_primitives::types::{
+use unc_chain_configs::{ClientConfig, ProtocolConfigView};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{MerklePath, PartialMerkleTree};
+use unc_primitives::network::PeerId;
+use unc_primitives::sharding::ChunkHash;
+use unc_primitives::types::{
     AccountId, BlockHeight, BlockReference, EpochId, EpochReference, MaybeBlockId, ShardId,
     TransactionOrReceiptId,
 };
-use near_primitives::views::{
+use unc_primitives::views::{
     BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView,
     GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView,
     QueryRequest, QueryResponse, ReceiptView, ShardSyncDownloadView, SplitStorageInfoView,
     StateChangesKindsView, StateChangesRequestView, StateChangesView, SyncStatusView, TxStatusView,
 };
-pub use near_primitives::views::{StatusResponse, StatusSyncInfo};
+pub use unc_primitives::views::{StatusResponse, StatusSyncInfo};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tracing::debug_span;
 use yansi::Color::Magenta;
 use yansi::Style;
-use near_primitives::errors::EpochError;
-use near_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
+use unc_primitives::errors::EpochError;
+use unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
 /// Combines errors coming from chain, tx pool and block producer.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Chain: {0}")]
-    Chain(#[from] near_chain_primitives::Error),
+    Chain(#[from] unc_chain_primitives::Error),
     #[error("Chunk: {0}")]
-    Chunk(#[from] near_chunks_primitives::Error),
+    Chunk(#[from] unc_chunks_primitives::Error),
     #[error("Block Producer: {0}")]
     BlockProducer(String),
     #[error("Chunk Producer: {0}")]
@@ -41,8 +41,8 @@ pub enum Error {
     Other(String),
 }
 
-impl From<near_primitives::errors::EpochError> for Error {
-    fn from(err: near_primitives::errors::EpochError) -> Self {
+impl From<unc_primitives::errors::EpochError> for Error {
+    fn from(err: unc_primitives::errors::EpochError) -> Self {
         Error::Chain(err.into())
     }
 }
@@ -389,13 +389,13 @@ pub enum GetProviderError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::Error> for crate::types::GetProviderError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for crate::types::GetProviderError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::IOError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -434,13 +434,13 @@ pub enum GetBlockError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::Error> for GetBlockError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetBlockError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::IOError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -502,19 +502,19 @@ pub enum GetChunkError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::Error> for GetChunkError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetChunkError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::IOError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
-            near_chain_primitives::Error::InvalidShardId(shard_id) => {
+            unc_chain_primitives::Error::InvalidShardId(shard_id) => {
                 Self::InvalidShardId { shard_id }
             }
-            near_chain_primitives::Error::ChunkMissing(chunk_hash) => {
+            unc_chain_primitives::Error::ChunkMissing(chunk_hash) => {
                 Self::UnknownChunk { chunk_hash }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -544,46 +544,46 @@ pub enum QueryError {
     #[error("There are no fully synchronized blocks on the node yet")]
     NoSyncedBlocks,
     #[error("The node does not track the shard ID {requested_shard_id}")]
-    UnavailableShard { requested_shard_id: near_primitives::types::ShardId },
+    UnavailableShard { requested_shard_id: unc_primitives::types::ShardId },
     #[error("Account ID {requested_account_id} is invalid")]
     InvalidAccount {
-        requested_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        requested_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error(
         "Account {requested_account_id} does not exist while viewing at block #{block_height}"
     )]
     UnknownAccount {
-        requested_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        requested_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error(
         "Contract code for contract ID {contract_account_id} has never been observed on the node at block #{block_height}"
     )]
     NoContractCode {
-        contract_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        contract_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("State of contract {contract_account_id} is too large to be viewed")]
     TooLargeContractState {
-        contract_account_id: near_primitives::types::AccountId,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        contract_account_id: unc_primitives::types::AccountId,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Access key for public key {public_key} has never been observed on the node at block #{block_height}")]
     UnknownAccessKey {
-        public_key: near_crypto::PublicKey,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        public_key: unc_crypto::PublicKey,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Function call returned an error: {vm_error}")]
     ContractExecutionError {
         vm_error: String,
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
@@ -591,11 +591,11 @@ pub enum QueryError {
         "The data for block #{block_height} is garbage collected on this node, use an archival node to fetch historical data"
     )]
     GarbageCollectedBlock {
-        block_height: near_primitives::types::BlockHeight,
-        block_hash: near_primitives::hash::CryptoHash,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error("Block either has never been observed on the node or has been garbage collected: {block_reference:?}")]
-    UnknownBlock { block_reference: near_primitives::types::BlockReference },
+    UnknownBlock { block_reference: unc_primitives::types::BlockReference },
     // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
@@ -618,7 +618,7 @@ pub enum StatusError {
     #[error("No blocks for {elapsed:?}")]
     NoNewBlocks { elapsed: std::time::Duration },
     #[error("Epoch Out Of Bounds {epoch_id:?}")]
-    EpochOutOfBounds { epoch_id: near_primitives::types::EpochId },
+    EpochOutOfBounds { epoch_id: unc_primitives::types::EpochId },
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
     // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
@@ -629,17 +629,17 @@ pub enum StatusError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::error::Error> for StatusError {
-    fn from(error: near_chain_primitives::error::Error) -> Self {
+impl From<unc_chain_primitives::error::Error> for StatusError {
+    fn from(error: unc_chain_primitives::error::Error) -> Self {
         match error {
-            near_chain_primitives::error::Error::IOErr(error) => {
+            unc_chain_primitives::error::Error::IOErr(error) => {
                 Self::InternalError { error_message: error.to_string() }
             }
-            near_chain_primitives::error::Error::DBNotFoundErr(error_message)
-            | near_chain_primitives::error::Error::ValidatorError(error_message) => {
+            unc_chain_primitives::error::Error::DBNotFoundErr(error_message)
+            | unc_chain_primitives::error::Error::ValidatorError(error_message) => {
                 Self::InternalError { error_message }
             }
-            near_chain_primitives::error::Error::EpochOutOfBounds(epoch_id) => {
+            unc_chain_primitives::error::Error::EpochOutOfBounds(epoch_id) => {
                 Self::EpochOutOfBounds { epoch_id }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -663,7 +663,7 @@ pub enum GetNextLightClientBlockError {
     #[error("Block either has never been observed on the node or has been garbage collected: {error_message}")]
     UnknownBlock { error_message: String },
     #[error("Epoch Out Of Bounds {epoch_id:?}")]
-    EpochOutOfBounds { epoch_id: near_primitives::types::EpochId },
+    EpochOutOfBounds { epoch_id: unc_primitives::types::EpochId },
     // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
@@ -672,16 +672,16 @@ pub enum GetNextLightClientBlockError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::error::Error> for GetNextLightClientBlockError {
-    fn from(error: near_chain_primitives::error::Error) -> Self {
+impl From<unc_chain_primitives::error::Error> for GetNextLightClientBlockError {
+    fn from(error: unc_chain_primitives::error::Error) -> Self {
         match error {
-            near_chain_primitives::error::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::error::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
-            near_chain_primitives::error::Error::IOErr(error) => {
+            unc_chain_primitives::error::Error::IOErr(error) => {
                 Self::InternalError { error_message: error.to_string() }
             }
-            near_chain_primitives::error::Error::EpochOutOfBounds(epoch_id) => {
+            unc_chain_primitives::error::Error::EpochOutOfBounds(epoch_id) => {
                 Self::EpochOutOfBounds { epoch_id }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -723,13 +723,13 @@ pub enum GetGasPriceError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::Error> for GetGasPriceError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetGasPriceError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::InternalError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -773,14 +773,14 @@ pub struct TxStatus {
 
 #[derive(Debug)]
 pub enum TxStatusError {
-    ChainError(near_chain_primitives::Error),
+    ChainError(unc_chain_primitives::Error),
     MissingTransaction(CryptoHash),
     InternalError(String),
     TimeoutError,
 }
 
-impl From<near_chain_primitives::Error> for TxStatusError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for TxStatusError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         Self::ChainError(error)
     }
 }
@@ -815,12 +815,12 @@ pub enum GetProviderInfoError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for crate::types::GetProviderInfoError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for crate::types::GetProviderInfoError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::DBNotFoundErr(_)
-            | near_chain_primitives::Error::BlockOutOfBounds(_) => Self::UnknownBlock,
-            near_chain_primitives::Error::IOErr(s) => Self::IOError(s.to_string()),
+            unc_chain_primitives::Error::DBNotFoundErr(_)
+            | unc_chain_primitives::Error::BlockOutOfBounds(_) => Self::UnknownBlock,
+            unc_chain_primitives::Error::IOErr(s) => Self::IOError(s.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -841,12 +841,12 @@ pub enum GetValidatorInfoError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetValidatorInfoError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetValidatorInfoError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::DBNotFoundErr(_)
-            | near_chain_primitives::Error::EpochOutOfBounds(_) => Self::UnknownEpoch,
-            near_chain_primitives::Error::IOErr(s) => Self::IOError(s.to_string()),
+            unc_chain_primitives::Error::DBNotFoundErr(_)
+            | unc_chain_primitives::Error::EpochOutOfBounds(_) => Self::UnknownEpoch,
+            unc_chain_primitives::Error::IOErr(s) => Self::IOError(s.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -883,13 +883,13 @@ pub enum GetStateChangesError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::Error> for GetStateChangesError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetStateChangesError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::IOError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -941,16 +941,16 @@ pub enum GetExecutionOutcomeError {
     #[error("Inconsistent state. Total number of shards is {number_or_shards} but the execution outcome is in shard {execution_outcome_shard_id}")]
     InconsistentState {
         number_or_shards: usize,
-        execution_outcome_shard_id: near_primitives::types::ShardId,
+        execution_outcome_shard_id: unc_primitives::types::ShardId,
     },
     #[error("{transaction_or_receipt_id} has not been confirmed")]
-    NotConfirmed { transaction_or_receipt_id: near_primitives::hash::CryptoHash },
+    NotConfirmed { transaction_or_receipt_id: unc_primitives::hash::CryptoHash },
     #[error("{transaction_or_receipt_id} does not exist")]
-    UnknownTransactionOrReceipt { transaction_or_receipt_id: near_primitives::hash::CryptoHash },
+    UnknownTransactionOrReceipt { transaction_or_receipt_id: unc_primitives::hash::CryptoHash },
     #[error("Node doesn't track the shard where {transaction_or_receipt_id} is executed")]
     UnavailableShard {
-        transaction_or_receipt_id: near_primitives::hash::CryptoHash,
-        shard_id: near_primitives::types::ShardId,
+        transaction_or_receipt_id: unc_primitives::hash::CryptoHash,
+        shard_id: unc_primitives::types::ShardId,
     },
     #[error("Internal error: {error_message}")]
     InternalError { error_message: String },
@@ -973,13 +973,13 @@ impl From<TxStatusError> for GetExecutionOutcomeError {
     }
 }
 
-impl From<near_chain_primitives::error::Error> for GetExecutionOutcomeError {
-    fn from(error: near_chain_primitives::error::Error) -> Self {
+impl From<unc_chain_primitives::error::Error> for GetExecutionOutcomeError {
+    fn from(error: unc_chain_primitives::error::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => {
+            unc_chain_primitives::Error::IOErr(error) => {
                 Self::InternalError { error_message: error.to_string() }
             }
-            near_chain_primitives::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
             _ => Self::Unreachable { error_message: error.to_string() },
@@ -1030,13 +1030,13 @@ pub enum GetBlockProofError {
     Unreachable { error_message: String },
 }
 
-impl From<near_chain_primitives::error::Error> for GetBlockProofError {
-    fn from(error: near_chain_primitives::error::Error) -> Self {
+impl From<unc_chain_primitives::error::Error> for GetBlockProofError {
+    fn from(error: unc_chain_primitives::error::Error) -> Self {
         match error {
-            near_chain_primitives::error::Error::DBNotFoundErr(error_message) => {
+            unc_chain_primitives::error::Error::DBNotFoundErr(error_message) => {
                 Self::UnknownBlock { error_message }
             }
-            near_chain_primitives::error::Error::Other(error_message) => {
+            unc_chain_primitives::error::Error::Other(error_message) => {
                 Self::InternalError { error_message }
             }
             err => Self::Unreachable { error_message: err.to_string() },
@@ -1058,7 +1058,7 @@ pub enum GetReceiptError {
     #[error("IO Error: {0}")]
     IOError(String),
     #[error("Receipt with id {0} has never been observed on this node")]
-    UnknownReceipt(near_primitives::hash::CryptoHash),
+    UnknownReceipt(unc_primitives::hash::CryptoHash),
     // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
     // expected cases, we cannot statically guarantee that no other errors will be returned
     // in the future.
@@ -1067,10 +1067,10 @@ pub enum GetReceiptError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetReceiptError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetReceiptError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
+            unc_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -1101,11 +1101,11 @@ pub enum GetProtocolConfigError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetProtocolConfigError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetProtocolConfigError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
-            near_chain_primitives::Error::DBNotFoundErr(s) => Self::UnknownBlock(s),
+            unc_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
+            unc_chain_primitives::Error::DBNotFoundErr(s) => Self::UnknownBlock(s),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -1128,10 +1128,10 @@ pub enum GetMaintenanceWindowsError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetMaintenanceWindowsError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetMaintenanceWindowsError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
+            unc_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -1156,10 +1156,10 @@ pub enum GetClientConfigError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetClientConfigError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetClientConfigError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
+            unc_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -1184,10 +1184,10 @@ pub enum GetSplitStorageInfoError {
     Unreachable(String),
 }
 
-impl From<near_chain_primitives::Error> for GetSplitStorageInfoError {
-    fn from(error: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for GetSplitStorageInfoError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
         match error {
-            near_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
+            unc_chain_primitives::Error::IOErr(error) => Self::IOError(error.to_string()),
             _ => Self::Unreachable(error.to_string()),
         }
     }
@@ -1202,9 +1202,9 @@ impl From<std::io::Error> for GetSplitStorageInfoError {
 #[cfg(feature = "sandbox")]
 #[derive(Debug)]
 pub enum SandboxMessage {
-    SandboxPatchState(Vec<near_primitives::state_record::StateRecord>),
+    SandboxPatchState(Vec<unc_primitives::state_record::StateRecord>),
     SandboxPatchStateStatus,
-    SandboxFastForward(near_primitives::types::BlockHeightDelta),
+    SandboxFastForward(unc_primitives::types::BlockHeightDelta),
     SandboxFastForwardStatus,
 }
 

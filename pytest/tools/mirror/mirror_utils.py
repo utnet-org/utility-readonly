@@ -99,11 +99,11 @@ def init_target_dirs(uncd, last_ordinal, target_validators):
     return dirs
 
 
-def create_forked_chain(config, near_root, source_node_homes,
+def create_forked_chain(config, unc_root, source_node_homes,
                         target_validators):
     mkdir_clean(dot_near() / MIRROR_DIR)
     binary_name = config.get('binary_name', 'uncd')
-    uncd = os.path.join(near_root, binary_name)
+    uncd = os.path.join(unc_root, binary_name)
     try:
         subprocess.check_output([
             uncd, "--home",
@@ -217,10 +217,10 @@ def mirror_cleanup(process):
 # helper class so we can pass restart_once() as a callback to send_traffic()
 class MirrorProcess:
 
-    def __init__(self, near_root, source_home, online_source):
+    def __init__(self, unc_root, source_home, online_source):
         self.online_source = online_source
         self.source_home = source_home
-        self.uncd = os.path.join(near_root, 'uncd')
+        self.uncd = os.path.join(unc_root, 'uncd')
         self.start()
         self.start_time = time.time()
         self.restarted = False
@@ -568,7 +568,7 @@ def start_source_chain(config, num_source_validators=3):
         config_changes[i] = {"tracked_shards": [0, 1, 2, 3], "archive": True}
 
     config = load_config()
-    near_root, source_node_dirs = init_cluster(
+    unc_root, source_node_dirs = init_cluster(
         num_nodes=num_source_validators,
         num_observers=1,
         num_shards=4,
@@ -581,12 +581,12 @@ def start_source_chain(config, num_source_validators=3):
         ],
         client_config_changes=config_changes)
 
-    source_nodes = [spin_up_node(config, near_root, source_node_dirs[0], 0)]
+    source_nodes = [spin_up_node(config, unc_root, source_node_dirs[0], 0)]
 
     for i in range(1, num_source_validators):
         source_nodes.append(
             spin_up_node(config,
-                         near_root,
+                         unc_root,
                          source_node_dirs[i],
                          i,
                          boot_node=source_nodes[0]))
@@ -626,15 +626,15 @@ def start_source_chain(config, num_source_validators=3):
             break
 
     source_nodes[0].kill()
-    target_node_dirs = create_forked_chain(config, near_root, source_node_dirs,
+    target_node_dirs = create_forked_chain(config, unc_root, source_node_dirs,
                                            TARGET_VALIDATORS)
     source_nodes[0].start(boot_node=source_nodes[1])
-    return near_root, source_nodes, target_node_dirs, traffic_data
+    return unc_root, source_nodes, target_node_dirs, traffic_data
 
 
 # callback will be called once for every iteration of the utils.poll_blocks()
 # loop, and we break if it returns False
-def send_traffic(near_root, source_nodes, traffic_data, callback):
+def send_traffic(unc_root, source_nodes, traffic_data, callback):
     tip = source_nodes[1].get_latest_block()
     block_hash_bytes = base58.b58decode(tip.hash.encode('utf8'))
     start_source_height = tip.height

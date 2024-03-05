@@ -20,7 +20,7 @@ strum.workspace = true
 tracing.workspace = true
 
 framework.workspace = true
-near-chain-configs.workspace = true
-near-epoch-manager.workspace = true
-near-primitives.workspace = true
-near-store.workspace = true
+unc-chain-configs.workspace = true
+unc-epoch-manager.workspace = true
+unc-primitives.workspace = true
+unc-store.workspace = true

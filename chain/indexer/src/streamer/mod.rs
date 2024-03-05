@@ -9,14 +9,14 @@ use crate::INDEXER;
 use crate::{AwaitForNodeSyncedEnum, IndexerConfig};
 use actix::Addr;
 use async_recursion::async_recursion;
-use near_indexer_primitives::{
+use unc_indexer_primitives::{
     IndexerChunkView, IndexerExecutionOutcomeWithOptionalReceipt,
     IndexerExecutionOutcomeWithReceipt, IndexerShard, IndexerTransactionWithOutcome,
     StreamerMessage,
 };
-use near_parameters::RuntimeConfig;
-use near_primitives::hash::CryptoHash;
-use near_primitives::views;
+use unc_parameters::RuntimeConfig;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::views;
 use rocksdb::DB;
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -65,7 +65,7 @@ fn test_problematic_blocks_hash() {
 /// and returns everything together in one struct
 #[async_recursion]
 async fn build_streamer_message(
-    client: &Addr<near_client::ViewClientActor>,
+    client: &Addr<unc_client::ViewClientActor>,
     block: views::BlockView,
 ) -> Result<StreamerMessage, FailedToFetchData> {
     let _timer = metrics::BUILD_STREAMER_MESSAGE_TIME.start_timer();
@@ -73,16 +73,16 @@ async fn build_streamer_message(
 
     let protocol_config_view = fetch_protocol_config(&client, block.header.hash).await?;
     let num_shards = protocol_config_view.num_block_producer_seats_per_shard.len()
-        as near_primitives::types::NumShards;
+        as unc_primitives::types::NumShards;
 
-    let runtime_config_store = near_parameters::RuntimeConfigStore::new(None);
+    let runtime_config_store = unc_parameters::RuntimeConfigStore::new(None);
     let runtime_config = runtime_config_store.get_config(protocol_config_view.protocol_version);
 
     let mut shards_outcomes = fetch_outcomes(&client, block.header.hash).await?;
     let mut state_changes = fetch_state_changes(
         &client,
         block.header.hash,
-        near_primitives::types::EpochId(block.header.epoch_id),
+        unc_primitives::types::EpochId(block.header.epoch_id),
     )
     .await?;
     let mut indexer_shards = (0..num_shards)
@@ -192,7 +192,7 @@ async fn build_streamer_message(
         // ExecutionOutcomes appear.
         // ref: https://github.com/utnet-org/utility/pull/4248
         if PROBLEMATIC_BLOCKS.contains(&block.header.hash)
-            && &protocol_config_view.chain_id == near_primitives::chains::MAINNET
+            && &protocol_config_view.chain_id == unc_primitives::chains::MAINNET
         {
             let mut restored_receipts: Vec<views::ReceiptView> = vec![];
             let receipt_ids_included: std::collections::HashSet<CryptoHash> =
@@ -236,10 +236,10 @@ async fn build_streamer_message(
 /// Function that tries to find specific local receipt by it's ID and returns it
 /// otherwise returns None
 async fn find_local_receipt_by_id_in_block(
-    client: &Addr<near_client::ViewClientActor>,
+    client: &Addr<unc_client::ViewClientActor>,
     runtime_config: &RuntimeConfig,
     block: views::BlockView,
-    receipt_id: near_primitives::hash::CryptoHash,
+    receipt_id: unc_primitives::hash::CryptoHash,
 ) -> Result<Option<views::ReceiptView>, FailedToFetchData> {
     let chunks = fetch_block_chunks(&client, &block).await?;
 
@@ -281,24 +281,24 @@ async fn find_local_receipt_by_id_in_block(
 /// Function that starts Streamer's busy loop. Every half a seconds it fetches the status
 /// compares to already fetched block height and in case it differs fetches new block of given height.
 ///
-/// We have to pass `client: Addr<near_client::ClientActor>` and `view_client: Addr<near_client::ViewClientActor>`.
+/// We have to pass `client: Addr<unc_client::ClientActor>` and `view_client: Addr<unc_client::ViewClientActor>`.
 pub(crate) async fn start(
-    view_client: Addr<near_client::ViewClientActor>,
-    client: Addr<near_client::ClientActor>,
+    view_client: Addr<unc_client::ViewClientActor>,
+    client: Addr<unc_client::ClientActor>,
     indexer_config: IndexerConfig,
-    store_config: near_store::StoreConfig,
+    store_config: unc_store::StoreConfig,
     archive: bool,
     blocks_sink: mpsc::Sender<StreamerMessage>,
 ) {
     info!(target: INDEXER, "Starting Streamer...");
     let indexer_db_path =
-        near_store::NodeStorage::opener(&indexer_config.home_dir, archive, &store_config, None)
+        unc_store::NodeStorage::opener(&indexer_config.home_dir, archive, &store_config, None)
             .path()
             .join("indexer");
 
     // TODO: implement proper error handling
     let db = DB::open_default(indexer_db_path).unwrap();
-    let mut last_synced_block_height: Option<near_primitives::types::BlockHeight> = None;
+    let mut last_synced_block_height: Option<unc_primitives::types::BlockHeight> = None;
 
     'main: loop {
         time::sleep(INTERVAL).await;

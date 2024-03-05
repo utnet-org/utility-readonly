@@ -40,11 +40,11 @@ use crate::action::{RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction};
 use crate::version::{ProtocolVersion, Version};
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::DateTime;
-use near_crypto::{PublicKey, Signature};
-use near_fmt::{AbbrBytes, Slice};
-use near_parameters::{ActionCosts, ExtCosts};
-use near_vm_runner::logic::CompiledContractCache;
-use near_vm_runner::ContractCode;
+use unc_crypto::{PublicKey, Signature};
+use unc_fmt::{AbbrBytes, Slice};
+use unc_parameters::{ActionCosts, ExtCosts};
+use unc_vm_runner::logic::CompiledContractCache;
+use unc_vm_runner::ContractCode;
 use serde_with::base64::Base64;
 use serde_with::serde_as;
 use std::collections::HashMap;
@@ -1859,7 +1859,7 @@ pub struct FinalExecutionOutcomeWithReceiptView {
 pub mod validator_frozen_view {
     pub use super::ValidatorPowerViewV1;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::types::AccountId;
+    use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
     use crate::types::validator_frozen::ValidatorFrozen;
 
@@ -1932,7 +1932,7 @@ pub mod validator_power_view {
     pub use super::ValidatorPowerViewV1;
     use crate::types::validator_power::ValidatorPower;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::types::AccountId;
+    use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
 
     #[derive(
@@ -2004,7 +2004,7 @@ pub struct ValidatorPowerViewV1 {
 pub mod validator_power_and_frozen_view {
     pub use super::ValidatorPowerViewV1;
     use borsh::{BorshDeserialize, BorshSerialize};
-    use near_primitives_core::types::AccountId;
+    use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
     use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
@@ -2597,15 +2597,15 @@ pub struct SplitStorageInfoView {
 mod tests {
     use super::ExecutionMetadataView;
     use crate::transaction::ExecutionMetadata;
-    use near_vm_runner::{ProfileDataV2, ProfileDataV3};
+    use unc_vm_runner::{ProfileDataV2, ProfileDataV3};
 
     /// The JSON representation used in RPC responses must not remove or rename
     /// fields, only adding fields is allowed or we risk breaking clients.
     #[test]
     #[cfg_attr(feature = "nightly", ignore)]
     fn test_runtime_config_view() {
-        use near_parameters::{RuntimeConfig, RuntimeConfigStore, RuntimeConfigView};
-        use near_primitives_core::version::PROTOCOL_VERSION;
+        use unc_parameters::{RuntimeConfig, RuntimeConfigStore, RuntimeConfigView};
+        use unc_primitives_core::version::PROTOCOL_VERSION;
 
         let config_store = RuntimeConfigStore::new(None);
         let config = config_store.get_config(PROTOCOL_VERSION);

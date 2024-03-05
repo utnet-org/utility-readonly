@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use crate::EpochManagerAdapter;
-use near_cache::SyncLruCache;
-use near_chain_configs::ClientConfig;
-use near_primitives::errors::EpochError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::account_id_to_shard_id;
-use near_primitives::types::{AccountId, EpochId, ShardId};
+use unc_cache::SyncLruCache;
+use unc_chain_configs::ClientConfig;
+use unc_primitives::errors::EpochError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::account_id_to_shard_id;
+use unc_primitives::types::{AccountId, EpochId, ShardId};
 
 #[derive(Clone)]
 pub enum TrackedConfig {
@@ -200,20 +200,20 @@ mod tests {
     use crate::shard_tracker::TrackedConfig;
     use crate::test_utils::{frozen, hash_range};
     use crate::{EpochManager, EpochManagerAdapter, EpochManagerHandle, RewardCalculator};
-    use near_crypto::{KeyType, PublicKey};
-    use near_primitives::epoch_manager::block_info::BlockInfo;
-    use near_primitives::epoch_manager::{AllEpochConfig, EpochConfig};
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::shard_layout::ShardLayout;
-    use near_primitives::types::validator_power::ValidatorPower;
-    use near_primitives::types::{BlockHeight, EpochId, NumShards, ProtocolVersion, ShardId};
-    use near_primitives::version::ProtocolFeature::SimpleNightshade;
-    use near_primitives::version::PROTOCOL_VERSION;
-    use near_store::test_utils::create_test_store;
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_primitives::epoch_manager::block_info::BlockInfo;
+    use unc_primitives::epoch_manager::{AllEpochConfig, EpochConfig};
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::shard_layout::ShardLayout;
+    use unc_primitives::types::validator_power::ValidatorPower;
+    use unc_primitives::types::{BlockHeight, EpochId, NumShards, ProtocolVersion, ShardId};
+    use unc_primitives::version::ProtocolFeature::SimpleNightshade;
+    use unc_primitives::version::PROTOCOL_VERSION;
+    use unc_store::test_utils::create_test_store;
     use num_rational::Ratio;
     use std::collections::HashSet;
     use std::sync::Arc;
-    use near_primitives::types::validator_frozen::ValidatorFrozen;
+    use unc_primitives::types::validator_frozen::ValidatorFrozen;
 
     const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
 

@@ -1,14 +1,14 @@
 use crate::tests::client::process_blocks::deploy_test_contract;
 use assert_matches::assert_matches;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::errors::{
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::errors::{
     ActionErrorKind, CompilationError, FunctionCallError, PrepareError, TxExecutionError,
 };
-use near_primitives::version::ProtocolFeature;
-use near_primitives::views::FinalExecutionStatus;
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives::views::FinalExecutionStatus;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -40,7 +40,7 @@ fn verify_contract_limits_upgrade(
         deploy_test_contract(
             &mut env,
             "test0".parse().unwrap(),
-            &near_test_contracts::LargeContract {
+            &unc_test_contracts::LargeContract {
                 functions: function_limit + 1,
                 locals_per_function: local_limit + 1,
                 ..Default::default()

@@ -1,14 +1,14 @@
 use assert_matches::assert_matches;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_crypto::{InMemorySigner, KeyType};
-use near_parameters::vm::VMKind;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::transaction::{Action, DeployContractAction};
-use near_primitives::version::ProtocolFeature;
-use near_primitives::views::FinalExecutionStatus;
-use near_primitives_core::version::PROTOCOL_VERSION;
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_parameters::vm::VMKind;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::transaction::{Action, DeployContractAction};
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives::views::FinalExecutionStatus;
+use unc_primitives_core::version::PROTOCOL_VERSION;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -17,7 +17,7 @@ use framework::test_utils::TestEnvNightshadeSetupExt;
 fn test_deploy_cost_increased() {
     // The immediate protocol upgrade needs to be set for this test to pass in
     // the release branch where the protocol upgrade date is set.
-    std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+    std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
     let new_protocol_version = ProtocolFeature::IncreaseDeploymentCost.protocol_version();
     let old_protocol_version = new_protocol_version - 1;
@@ -25,9 +25,9 @@ fn test_deploy_cost_increased() {
     let config_store = RuntimeConfigStore::new(None);
     let config = &config_store.get_config(PROTOCOL_VERSION).wasm_config;
     let contract_size = 1024 * 1024;
-    let test_contract = near_test_contracts::sized_contract(contract_size);
+    let test_contract = unc_test_contracts::sized_contract(contract_size);
     // Run code through preparation for validation. (Deploying will succeed either way).
-    near_vm_runner::prepare::prepare_contract(&test_contract, config, VMKind::Wasmer2).unwrap();
+    unc_vm_runner::prepare::prepare_contract(&test_contract, config, VMKind::Wasmer2).unwrap();
 
     // Prepare TestEnv with a contract at the old protocol version.
     let epoch_length = 5;

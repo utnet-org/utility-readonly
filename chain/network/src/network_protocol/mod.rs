@@ -7,8 +7,8 @@ mod peer;
 mod proto_conv;
 mod state_sync;
 pub use edge::*;
-use near_primitives::chunk_validation::ChunkEndorsement;
-use near_primitives::chunk_validation::ChunkStateWitness;
+use unc_primitives::chunk_validation::ChunkEndorsement;
+use unc_primitives::chunk_validation::ChunkStateWitness;
 pub use peer::*;
 pub use state_sync::*;
 
@@ -27,24 +27,24 @@ use crate::network_protocol::proto_conv::trace_context::{
     extract_span_context, inject_trace_context,
 };
 use borsh::BorshDeserialize as _;
-use near_async::time;
-use near_crypto::PublicKey;
-use near_crypto::Signature;
-use near_o11y::OpenTelemetrySpanExt;
-use near_primitives::block::{Approval, Block, BlockHeader, GenesisId};
-use near_primitives::challenge::Challenge;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::combine_hash;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::sharding::{
+use unc_async::time;
+use unc_crypto::PublicKey;
+use unc_crypto::Signature;
+use unc_o11y::OpenTelemetrySpanExt;
+use unc_primitives::block::{Approval, Block, BlockHeader, GenesisId};
+use unc_primitives::challenge::Challenge;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::combine_hash;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::sharding::{
     ChunkHash, PartialEncodedChunk, PartialEncodedChunkPart, ReceiptProof, ShardChunkHeader,
 };
-use near_primitives::state_sync::{ShardStateSyncResponse, ShardStateSyncResponseV1};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::AccountId;
-use near_primitives::types::{BlockHeight, ShardId};
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::views::FinalExecutionOutcomeView;
+use unc_primitives::state_sync::{ShardStateSyncResponse, ShardStateSyncResponseV1};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::AccountId;
+use unc_primitives::types::{BlockHeight, ShardId};
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::views::FinalExecutionOutcomeView;
 use protobuf::Message as _;
 use std::collections::HashSet;
 use std::fmt;
@@ -75,7 +75,7 @@ pub enum ParsePeerAddrError {
     #[error("expected <PeerId>@<IP>:<port>, got \'{0}\'")]
     Format(String),
     #[error("PeerId: {0}")]
-    PeerId(#[source] near_crypto::ParseKeyError),
+    PeerId(#[source] unc_crypto::ParseKeyError),
     #[error("SocketAddr: {0}")]
     SocketAddr(#[source] std::net::AddrParseError),
 }
@@ -197,14 +197,14 @@ impl std::ops::Deref for VersionedAccountData {
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub struct AccountKeySignedPayload {
     payload: Vec<u8>,
-    signature: near_crypto::Signature,
+    signature: unc_crypto::Signature,
 }
 
 impl AccountKeySignedPayload {
     pub fn len(&self) -> usize {
         self.payload.len()
     }
-    pub fn signature(&self) -> &near_crypto::Signature {
+    pub fn signature(&self) -> &unc_crypto::Signature {
         &self.signature
     }
     pub fn verify(&self, key: &PublicKey) -> Result<(), ()> {
@@ -820,7 +820,7 @@ impl RawRoutedMessage {
     /// Panics if the target is an AccountId instead of a PeerId.
     pub fn sign(
         self,
-        node_key: &near_crypto::SecretKey,
+        node_key: &unc_crypto::SecretKey,
         routed_message_ttl: u8,
         now: Option<time::Utc>,
     ) -> RoutedMessageV2 {

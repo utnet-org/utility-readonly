@@ -1,4 +1,4 @@
-use near_o11y::metrics::IntGauge;
+use unc_o11y::metrics::IntGauge;
 
 use super::metrics::MEM_TRIE_ARENA_ACTIVE_ALLOCS_COUNT;
 use super::{ArenaMemory, ArenaPos, ArenaSliceMut};

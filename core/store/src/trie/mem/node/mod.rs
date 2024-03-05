@@ -7,8 +7,8 @@ mod view;
 use super::arena::{Arena, ArenaMemory, ArenaPos, ArenaPtr, ArenaPtrMut, ArenaSlice};
 use super::flexible_data::children::ChildrenView;
 use super::flexible_data::value::ValueView;
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::FlatStateValue;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::FlatStateValue;
 use std::fmt::{Debug, Formatter};
 
 /// The memory position of an encoded in-memory trie node.

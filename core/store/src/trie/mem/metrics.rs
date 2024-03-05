@@ -1,4 +1,4 @@
-use near_o11y::metrics::{
+use unc_o11y::metrics::{
     try_create_int_counter, try_create_int_counter_vec, try_create_int_gauge_vec, IntCounter,
     IntCounterVec, IntGaugeVec,
 };
@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 
 pub static MEM_TRIE_NUM_ROOTS: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
-        "near_mem_trie_num_roots",
+        "unc_mem_trie_num_roots",
         "Number of trie roots currently active in the in-memory trie",
         &["shard_uid"],
     )
@@ -15,7 +15,7 @@ pub static MEM_TRIE_NUM_ROOTS: Lazy<IntGaugeVec> = Lazy::new(|| {
 
 pub static MEM_TRIE_NUM_NODES_CREATED_FROM_UPDATES: Lazy<IntCounterVec> = Lazy::new(|| {
     try_create_int_counter_vec(
-        "near_mem_trie_num_nodes_created_from_updates",
+        "unc_mem_trie_num_nodes_created_from_updates",
         "Number of trie nodes created by applying updates",
         &["shard_uid"],
     )
@@ -24,7 +24,7 @@ pub static MEM_TRIE_NUM_NODES_CREATED_FROM_UPDATES: Lazy<IntCounterVec> = Lazy::
 
 pub static MEM_TRIE_NUM_LOOKUPS: Lazy<IntCounter> = Lazy::new(|| {
     try_create_int_counter(
-        "near_mem_trie_num_lookups",
+        "unc_mem_trie_num_lookups",
         "Number of in-memory trie lookups (number of keys looked up)",
     )
     .unwrap()

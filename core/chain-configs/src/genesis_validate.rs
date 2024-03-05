@@ -1,8 +1,8 @@
 use crate::genesis_config::{Genesis, GenesisConfig, GenesisContents};
-use near_config_utils::{ValidationError, ValidationErrors};
-use near_crypto::key_conversion::is_valid_staking_key;
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::AccountId;
+use unc_config_utils::{ValidationError, ValidationErrors};
+use unc_crypto::key_conversion::is_valid_staking_key;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::AccountId;
 use num_rational::Rational32;
 use std::collections::{HashMap, HashSet};
 
@@ -197,9 +197,9 @@ mod test {
     use super::*;
 
     use crate::GenesisRecords;
-    use near_crypto::{KeyType, PublicKey};
-    use near_primitives::account::{AccessKey, Account};
-    use near_primitives::types::AccountInfo;
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_primitives::account::{AccessKey, Account};
+    use unc_primitives::types::AccountInfo;
 
     const VALID_ED25519_RISTRETTO_KEY: &str = "ed25519:KuTCtARNzxZQ3YvXDeLjx83FDqxv2SdQTSbiq876zR7";
 

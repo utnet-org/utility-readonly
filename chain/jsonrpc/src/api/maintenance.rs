@@ -1,8 +1,8 @@
 use serde_json::Value;
 
-use near_client_primitives::types::GetMaintenanceWindowsError;
-use near_jsonrpc_primitives::errors::RpcParseError;
-use near_jsonrpc_primitives::types::maintenance::{
+use unc_client_primitives::types::GetMaintenanceWindowsError;
+use unc_jsonrpc_primitives::errors::RpcParseError;
+use unc_jsonrpc_primitives::types::maintenance::{
     RpcMaintenanceWindowsError, RpcMaintenanceWindowsRequest,
 };
 

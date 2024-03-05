@@ -1,15 +1,15 @@
 use crate::config::GasMetric;
 use crate::gas_cost::{GasCost, LeastSquaresTolerance};
 use crate::{utils::read_resource, REAL_CONTRACTS_SAMPLE};
-use near_parameters::vm::VMKind;
-use near_parameters::RuntimeConfigStore;
-use near_primitives::hash::CryptoHash;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::StoreCompiledContractCache;
-use near_vm_runner::internal::VMKindExt;
-use near_vm_runner::logic::VMContext;
-use near_vm_runner::logic::{CompiledContract, CompiledContractCache};
-use near_vm_runner::ContractCode;
+use unc_parameters::vm::VMKind;
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::StoreCompiledContractCache;
+use unc_vm_runner::internal::VMKindExt;
+use unc_vm_runner::logic::VMContext;
+use unc_vm_runner::logic::{CompiledContract, CompiledContractCache};
+use unc_vm_runner::ContractCode;
 
 const CURRENT_ACCOUNT_ID: &str = "alice";
 const SIGNER_ACCOUNT_ID: &str = "bob";
@@ -82,7 +82,7 @@ fn precompilation_cost(
     let cache_store2 = MockCompiledContractCache;
     let use_store = true;
     let cache: &dyn CompiledContractCache = if use_store {
-        let store = near_store::test_utils::create_test_store();
+        let store = unc_store::test_utils::create_test_store();
         cache_store1 = StoreCompiledContractCache::new(&store);
         &cache_store1
     } else {
@@ -120,7 +120,7 @@ fn precompilation_cost(
 
     // Now validate that estimations obtained earlier provides correct upper estimation
     // for several other contracts.
-    // Contracts binaries are taken from near-sdk-rs examples, ae20fc458858144e4a35faf58be778d13c2b0511.
+    // Contracts binaries are taken from unc-sdk-rs examples, ae20fc458858144e4a35faf58be778d13c2b0511.
     let validate_contracts = vec![
         // File 139637.
         read_resource("res/status_message.wasm"),
@@ -152,7 +152,7 @@ pub(crate) fn compile_single_contract_cost(
 ) -> GasCost {
     let contract = ContractCode::new(contract_bytes.to_vec(), None);
 
-    let store = near_store::test_utils::create_test_store();
+    let store = unc_store::test_utils::create_test_store();
     let cache = StoreCompiledContractCache::new(&store);
 
     measure_contract(vm_kind, metric, &contract, &cache)

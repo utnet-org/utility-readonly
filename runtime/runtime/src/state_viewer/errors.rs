@@ -1,9 +1,9 @@
 #[derive(thiserror::Error, Debug)]
 pub enum ViewAccountError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
-    InvalidAccountId { requested_account_id: near_primitives::types::AccountId },
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
     #[error("Account ID #{requested_account_id} does not exist")]
-    AccountDoesNotExist { requested_account_id: near_primitives::types::AccountId },
+    AccountDoesNotExist { requested_account_id: unc_primitives::types::AccountId },
     #[error("Internal error: #{error_message}")]
     InternalError { error_message: String },
 }
@@ -11,11 +11,11 @@ pub enum ViewAccountError {
 #[derive(thiserror::Error, Debug)]
 pub enum ViewContractCodeError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
-    InvalidAccountId { requested_account_id: near_primitives::types::AccountId },
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
     #[error("Account ID #{requested_account_id} does not exist")]
-    AccountDoesNotExist { requested_account_id: near_primitives::types::AccountId },
+    AccountDoesNotExist { requested_account_id: unc_primitives::types::AccountId },
     #[error("Contract code for contract ID #{contract_account_id} does not exist")]
-    NoContractCode { contract_account_id: near_primitives::types::AccountId },
+    NoContractCode { contract_account_id: unc_primitives::types::AccountId },
     #[error("Internal error: #{error_message}")]
     InternalError { error_message: String },
 }
@@ -23,9 +23,9 @@ pub enum ViewContractCodeError {
 #[derive(thiserror::Error, Debug)]
 pub enum ViewAccessKeyError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
-    InvalidAccountId { requested_account_id: near_primitives::types::AccountId },
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
     #[error("Access key for public key #{public_key} does not exist")]
-    AccessKeyDoesNotExist { public_key: near_crypto::PublicKey },
+    AccessKeyDoesNotExist { public_key: unc_crypto::PublicKey },
     #[error("Internal error: #{error_message}")]
     InternalError { error_message: String },
 }
@@ -33,11 +33,11 @@ pub enum ViewAccessKeyError {
 #[derive(thiserror::Error, Debug)]
 pub enum ViewStateError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
-    InvalidAccountId { requested_account_id: near_primitives::types::AccountId },
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
     #[error("Account {requested_account_id} does not exist")]
-    AccountDoesNotExist { requested_account_id: near_primitives::types::AccountId },
+    AccountDoesNotExist { requested_account_id: unc_primitives::types::AccountId },
     #[error("The state of {requested_account_id} is too large")]
-    AccountStateTooLarge { requested_account_id: near_primitives::types::AccountId },
+    AccountStateTooLarge { requested_account_id: unc_primitives::types::AccountId },
     #[error("Internal error: #{error_message}")]
     InternalError { error_message: String },
 }
@@ -45,9 +45,9 @@ pub enum ViewStateError {
 #[derive(thiserror::Error, Debug)]
 pub enum CallFunctionError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
-    InvalidAccountId { requested_account_id: near_primitives::types::AccountId },
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
     #[error("Account ID #{requested_account_id} does not exist")]
-    AccountDoesNotExist { requested_account_id: near_primitives::types::AccountId },
+    AccountDoesNotExist { requested_account_id: unc_primitives::types::AccountId },
     #[error("Internal error: #{error_message}")]
     InternalError { error_message: String },
     #[error("VM error occurred: #{error_message}")]
@@ -70,32 +70,32 @@ impl From<ViewAccountError> for ViewContractCodeError {
     }
 }
 
-impl From<near_primitives::errors::StorageError> for ViewAccountError {
-    fn from(storage_error: near_primitives::errors::StorageError) -> Self {
+impl From<unc_primitives::errors::StorageError> for ViewAccountError {
+    fn from(storage_error: unc_primitives::errors::StorageError) -> Self {
         Self::InternalError { error_message: storage_error.to_string() }
     }
 }
 
-impl From<near_primitives::errors::StorageError> for ViewContractCodeError {
-    fn from(storage_error: near_primitives::errors::StorageError) -> Self {
+impl From<unc_primitives::errors::StorageError> for ViewContractCodeError {
+    fn from(storage_error: unc_primitives::errors::StorageError) -> Self {
         Self::InternalError { error_message: storage_error.to_string() }
     }
 }
 
-impl From<near_primitives::errors::StorageError> for ViewAccessKeyError {
-    fn from(storage_error: near_primitives::errors::StorageError) -> Self {
+impl From<unc_primitives::errors::StorageError> for ViewAccessKeyError {
+    fn from(storage_error: unc_primitives::errors::StorageError) -> Self {
         Self::InternalError { error_message: storage_error.to_string() }
     }
 }
 
-impl From<near_primitives::errors::StorageError> for ViewStateError {
-    fn from(storage_error: near_primitives::errors::StorageError) -> Self {
+impl From<unc_primitives::errors::StorageError> for ViewStateError {
+    fn from(storage_error: unc_primitives::errors::StorageError) -> Self {
         Self::InternalError { error_message: storage_error.to_string() }
     }
 }
 
-impl From<near_primitives::errors::StorageError> for CallFunctionError {
-    fn from(storage_error: near_primitives::errors::StorageError) -> Self {
+impl From<unc_primitives::errors::StorageError> for CallFunctionError {
+    fn from(storage_error: unc_primitives::errors::StorageError) -> Self {
         Self::InternalError { error_message: storage_error.to_string() }
     }
 }

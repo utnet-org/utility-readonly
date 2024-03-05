@@ -214,7 +214,7 @@ returns a `ApplyResult`, which includes state changes, execution outcomes, etc.
 **Architecture Invariant:** The state update is only finalized at the end of
 `apply`. During all intermediate steps state changes can be reverted.
 
-### `runtime/near-vm-logic`
+### `runtime/unc-vm-logic`
 
 `VMLogic` contains all the implementations of host functions and is the
 interface between runtime and wasm. `VMLogic` is constructed when runtime
@@ -227,14 +227,14 @@ happens in the following two ways:
   blockchain by either reading some nontrivial data, or writing to the
   blockchain.
 
-### `runtime/near-vm-runner`
+### `runtime/unc-vm-runner`
 
 `run` function in `runner.rs` is the entry point to the vm runner. This function
 essentially spins up the vm and executes some function in a contract. It
 supports different wasm compilers including wasmer0, wasmer2, and wasmtime
 through compile-time feature flags. Currently we use wasmer0 and wasmer2 in
 production. The `imports` module exposes host functions defined in
-`near-vm-logic` to WASM code. In other words, it defines the ABI of the
+`unc-vm-logic` to WASM code. In other words, it defines the ABI of the
 contracts on NEAR.
 
 ### `uncd`
@@ -289,8 +289,8 @@ in CI.  Instead, they are run nightly and need to be explicitly
 included in `nightly/expensive.txt` file; for example:
 
 ```text
-expensive --timeout=1800 near-client near_client tests::catching_up::test_catchup_random_single_part_sync
-expensive --timeout=1800 near-client near_client tests::catching_up::test_catchup_random_single_part_sync --features nightly
+expensive --timeout=1800 unc-client unc_client tests::catching_up::test_catchup_random_single_part_sync
+expensive --timeout=1800 unc-client unc_client tests::catching_up::test_catchup_random_single_part_sync --features nightly
 ```
 
 For more details regarding nightly tests see `nightly/README.md`.

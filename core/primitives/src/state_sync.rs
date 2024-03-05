@@ -5,7 +5,7 @@ use crate::sharding::{
 };
 use crate::types::{BlockHeight, EpochId, ShardId, StateRoot, StateRootNode};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::types::EpochHeight;
+use unc_primitives_core::types::EpochHeight;
 use std::sync::Arc;
 
 #[derive(PartialEq, Eq, Clone, Debug, BorshSerialize, BorshDeserialize)]

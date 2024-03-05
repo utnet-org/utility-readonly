@@ -57,22 +57,22 @@ impl DatabaseCommand {
             SubCommand::CompactDatabase(cmd) => cmd.run(home),
             SubCommand::CorruptStateSnapshot(cmd) => cmd.run(home),
             SubCommand::MakeSnapshot(cmd) => {
-                let near_config = framework::config::load_config(
+                let unc_config = framework::config::load_config(
                     &home,
-                    near_chain_configs::GenesisValidationMode::UnsafeFast,
+                    unc_chain_configs::GenesisValidationMode::UnsafeFast,
                 )
                 .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
-                cmd.run(home, near_config.config.archive, &near_config.config.store)
+                cmd.run(home, unc_config.config.archive, &unc_config.config.store)
             }
             SubCommand::RunMigrations(cmd) => cmd.run(home),
             SubCommand::StatePerf(cmd) => cmd.run(home),
             SubCommand::LoadMemTrie(cmd) => {
-                let near_config = framework::config::load_config(
+                let unc_config = framework::config::load_config(
                     &home,
-                    near_chain_configs::GenesisValidationMode::UnsafeFast,
+                    unc_chain_configs::GenesisValidationMode::UnsafeFast,
                 )
                 .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
-                cmd.run(near_config, home)
+                cmd.run(unc_config, home)
             }
         }
     }

@@ -1,5 +1,5 @@
 [package]
-name = "near-indexer-primitives"
+name = "unc-indexer-primitives"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -15,13 +15,13 @@ workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
-near-primitives.workspace = true
+unc-primitives.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-primitives/nightly",
+  "unc-primitives/nightly",
 ]
 nightly_protocol = [
-  "near-primitives/nightly_protocol",
+  "unc-primitives/nightly_protocol",
 ]

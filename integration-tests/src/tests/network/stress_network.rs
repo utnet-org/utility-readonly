@@ -4,19 +4,19 @@ use std::time::Duration;
 
 use actix::{Actor, AsyncContext, System};
 use futures::FutureExt;
-use near_async::messaging::Sender;
+use unc_async::messaging::Sender;
 use tracing::info;
 
-use near_actix_test_utils::run_actix;
-use near_async::time;
-use near_network::tcp;
-use near_o11y::testonly::init_test_logger_allow_panic;
-use near_primitives::block::GenesisId;
+use unc_actix_test_utils::run_actix;
+use unc_async::time;
+use unc_network::tcp;
+use unc_o11y::testonly::init_test_logger_allow_panic;
+use unc_primitives::block::GenesisId;
 
-use near_network::config;
-use near_network::test_utils::{convert_boot_nodes, GetInfo, StopSignal, WaitOrTimeoutActor};
-use near_network::PeerManagerActor;
-use near_o11y::WithSpanContextExt;
+use unc_network::config;
+use unc_network::test_utils::{convert_boot_nodes, GetInfo, StopSignal, WaitOrTimeoutActor};
+use unc_network::PeerManagerActor;
+use unc_o11y::WithSpanContextExt;
 
 fn make_peer_manager(
     seed: &str,
@@ -27,9 +27,9 @@ fn make_peer_manager(
     config.peer_store.boot_nodes = convert_boot_nodes(boot_nodes);
     PeerManagerActor::spawn(
         time::Clock::real(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         config,
-        Arc::new(near_network::client::Noop),
+        Arc::new(unc_network::client::Noop),
         Sender::noop(),
         GenesisId::default(),
     )
@@ -45,7 +45,7 @@ fn make_peer_manager(
 /// This was fixed in (#1954). To reproduce this bug:
 /// ```
 /// git checkout 1f5eab0344235960dfcf767d143fb90a02c7c567
-/// cargo test --package near-network --test stress_network stress_test -- --exact --ignored
+/// cargo test --package unc-network --test stress_network stress_test -- --exact --ignored
 /// ```
 ///
 /// Logs observed on failing commit:

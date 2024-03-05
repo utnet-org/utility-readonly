@@ -3,8 +3,8 @@ use crate::trie::mem::arena::{ArenaSlice, ArenaSliceMut};
 use super::encoding::BorshFixedSize;
 use super::FlexibleDataHeader;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::{FlatStateValue, ValueRef};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::{FlatStateValue, ValueRef};
 
 /// Flexibly-sized data header for a trie value, representing either an inline
 /// value, or a reference to a value stored in the State column.

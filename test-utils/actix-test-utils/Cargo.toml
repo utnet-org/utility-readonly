@@ -1,5 +1,5 @@
 [package]
-name = "near-actix-test-utils"
+name = "unc-actix-test-utils"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -16,13 +16,13 @@ actix-rt.workspace = true
 futures.workspace = true
 once_cell.workspace = true
 
-near-store.workspace = true
+unc-store.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-store/nightly",
+  "unc-store/nightly",
 ]
 nightly_protocol = [
-  "near-store/nightly_protocol",
+  "unc-store/nightly_protocol",
 ]

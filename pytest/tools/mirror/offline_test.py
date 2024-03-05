@@ -20,16 +20,16 @@ import mirror_utils
 def main():
     config = load_config()
 
-    near_root, source_nodes, target_node_dirs, traffic_data = mirror_utils.start_source_chain(
+    unc_root, source_nodes, target_node_dirs, traffic_data = mirror_utils.start_source_chain(
         config)
 
     # sleep for a bit to allow test0 to catch up after restarting before we send traffic
     time.sleep(5)
-    mirror_utils.send_traffic(near_root, source_nodes, traffic_data,
+    mirror_utils.send_traffic(unc_root, source_nodes, traffic_data,
                               lambda: True)
 
     target_nodes = [
-        spin_up_node(config, near_root, target_node_dirs[i],
+        spin_up_node(config, unc_root, target_node_dirs[i],
                      len(source_nodes) + 1 + i)
         for i in range(len(target_node_dirs))
     ]
@@ -40,7 +40,7 @@ def main():
     for node in source_nodes[1:]:
         node.kill()
 
-    mirror = mirror_utils.MirrorProcess(near_root,
+    mirror = mirror_utils.MirrorProcess(unc_root,
                                         source_nodes[1].node_dir,
                                         online_source=False)
 

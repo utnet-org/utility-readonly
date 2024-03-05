@@ -1,5 +1,5 @@
 use crate::peer_manager::peer_manager_actor::MAX_TIER2_PEERS;
-use near_primitives::network::PeerId;
+use unc_primitives::network::PeerId;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet, VecDeque};
 use tracing::warn;

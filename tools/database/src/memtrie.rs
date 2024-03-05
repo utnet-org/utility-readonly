@@ -1,11 +1,11 @@
 use crate::utils::{flat_head, flat_head_state_root, open_rocksdb};
-use near_epoch_manager::EpochManager;
-use near_primitives::block::Tip;
-use near_primitives::block_header::BlockHeader;
-use near_primitives::types::ShardId;
-use near_store::trie::mem::loading::load_trie_from_flat_state;
-use near_store::{DBCol, ShardUId, HEAD_KEY};
-use framework::NearConfig;
+use unc_epoch_manager::EpochManager;
+use unc_primitives::block::Tip;
+use unc_primitives::block_header::BlockHeader;
+use unc_primitives::types::ShardId;
+use unc_store::trie::mem::loading::load_trie_from_flat_state;
+use unc_store::{DBCol, ShardUId, HEAD_KEY};
+use framework::UncConfig;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
@@ -18,10 +18,10 @@ pub struct LoadMemTrieCommand {
 }
 
 impl LoadMemTrieCommand {
-    pub fn run(&self, near_config: NearConfig, home: &Path) -> anyhow::Result<()> {
-        let rocksdb = Arc::new(open_rocksdb(home, near_store::Mode::ReadOnly)?);
-        let store = near_store::NodeStorage::new(rocksdb).get_hot_store();
-        let genesis_config = &near_config.genesis.config;
+    pub fn run(&self, unc_config: UncConfig, home: &Path) -> anyhow::Result<()> {
+        let rocksdb = Arc::new(open_rocksdb(home, unc_store::Mode::ReadOnly)?);
+        let store = unc_store::NodeStorage::new(rocksdb).get_hot_store();
+        let genesis_config = &unc_config.genesis.config;
         // Note: this is not necessarily correct; it's just an estimate of the shard layout,
         // so that users of this tool doesn't have to specify the full shard UID.
         let head =

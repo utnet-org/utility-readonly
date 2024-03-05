@@ -9,7 +9,7 @@ use crate::validator_signer::ValidatorSigner;
 use crate::version::{get_protocol_version, ProtocolVersion, PROTOCOL_VERSION};
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::{DateTime, Utc};
-use near_crypto::{KeyType, PublicKey, Signature};
+use unc_crypto::{KeyType, PublicKey, Signature};
 use std::sync::Arc;
 use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 

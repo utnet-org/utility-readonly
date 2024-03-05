@@ -49,17 +49,17 @@ members = [
     "integration-tests",
     "framework",
     "uncd",
-    "runtime/near-vm/test-api",
-    "runtime/near-vm/compiler",
-    "runtime/near-vm/compiler-singlepass",
-    "runtime/near-vm/engine",
-    "runtime/near-vm/vm",
-    "runtime/near-vm/types",
-    "runtime/near-vm/wast",
-    "runtime/near-vm/compiler-test-derive",
-    "runtime/near-vm-runner",
-    "runtime/near-vm-runner/fuzz",
-    "runtime/near-wallet-contract",
+    "runtime/unc-vm/test-api",
+    "runtime/unc-vm/compiler",
+    "runtime/unc-vm/compiler-singlepass",
+    "runtime/unc-vm/engine",
+    "runtime/unc-vm/vm",
+    "runtime/unc-vm/types",
+    "runtime/unc-vm/wast",
+    "runtime/unc-vm/compiler-test-derive",
+    "runtime/unc-vm-runner",
+    "runtime/unc-vm-runner/fuzz",
+    "runtime/unc-wallet-contract",
     "runtime/runtime",
     "runtime/runtime-params-estimator",
     "runtime/runtime-params-estimator/estimator-warehouse",
@@ -89,7 +89,7 @@ members = [
     "utils/config",
     "utils/fmt",
     "utils/mainnet-res",
-    "utils/near-cache",
+    "utils/unc-cache",
     "utils/stdx",
 ]
 
@@ -189,69 +189,69 @@ lru = "0.7.2"
 memmap2 = "0.5"
 memoffset = "0.8"
 more-asserts = "0.2"
-near-account-id = { version = "1.0.0", features = ["internal_unstable", "serde", "borsh"] }
-near-actix-test-utils = { path = "test-utils/actix-test-utils" }
-near-amend-genesis = { path = "tools/amend-genesis" }
-near-database-tool= { path = "tools/database" }
-near-async = { path = "core/async" }
-near-cache = { path = "utils/near-cache" }
-near-chain = { path = "chain/chain" }
-near-chain-configs = { path = "core/chain-configs" }
-near-chain-primitives = { path = "chain/chain-primitives" }
-near-chunks = { path = "chain/chunks" }
-near-chunks-primitives = { path = "chain/chunks-primitives" }
-near-client = { path = "chain/client" }
-near-client-primitives = { path = "chain/client-primitives" }
-near-cold-store-tool = { path = "tools/cold-store", package = "cold-store-tool" }
-near-config-utils = { path = "utils/config" }
+unc-account-id = { git = "https://github.com/zwong91/unc-account-id-rs", features = ["internal_unstable", "serde", "borsh"], branch = "main" }
+unc-actix-test-utils = { path = "test-utils/actix-test-utils" }
+unc-amend-genesis = { path = "tools/amend-genesis" }
+unc-database-tool= { path = "tools/database" }
+unc-async = { path = "core/async" }
+unc-cache = { path = "utils/unc-cache" }
+unc-chain = { path = "chain/chain" }
+unc-chain-configs = { path = "core/chain-configs" }
+unc-chain-primitives = { path = "chain/chain-primitives" }
+unc-chunks = { path = "chain/chunks" }
+unc-chunks-primitives = { path = "chain/chunks-primitives" }
+unc-client = { path = "chain/client" }
+unc-client-primitives = { path = "chain/client-primitives" }
+unc-cold-store-tool = { path = "tools/cold-store", package = "cold-store-tool" }
+unc-config-utils = { path = "utils/config" }
 framework = { path = "framework" }
-near-crypto = { path = "core/crypto" }
-near-dyn-configs = { path = "core/dyn-configs" }
-near-epoch-manager = { path = "chain/epoch-manager" }
-near-epoch-sync-tool = { path = "tools/epoch-sync"}
-near-flat-storage = { path = "tools/flat-storage" }
-near-fork-network = { path = "tools/fork-network" }
-near-fmt = { path = "utils/fmt" }
-near-indexer = { path = "chain/indexer" }
-near-indexer-primitives = { path = "chain/indexer-primitives" }
-near-jsonrpc = { path = "chain/jsonrpc" }
-near-jsonrpc-adversarial-primitives = { path = "chain/jsonrpc-adversarial-primitives" }
-near-jsonrpc-client = { path = "chain/jsonrpc/client" }
-near-jsonrpc-primitives = { path = "chain/jsonrpc-primitives", features = ["full"] }
-near-jsonrpc-tests = { path = "chain/jsonrpc/jsonrpc-tests" }
-near-mainnet-res = { path = "utils/mainnet-res" }
-near-mirror = { path = "tools/mirror" }
-near-network = { path = "chain/network" }
-near-o11y = { path = "core/o11y" }
-near-parameters = { path = "core/parameters" }
-near-performance-metrics = { path = "utils/near-performance-metrics" }
-near-performance-metrics-macros = { path = "utils/near-performance-metrics-macros" }
-near-ping = { path = "tools/ping" }
-near-pool = { path = "chain/pool" }
-near-primitives = { path = "core/primitives" }
-near-primitives-core = { path = "core/primitives-core" }
-near-rpc-error-core = { path = "tools/rpctypegen/core" }
-near-rpc-error-macro = { path = "tools/rpctypegen/macro" }
-near-stable-hasher = { path = "utils/near-stable-hasher" }
-near-state-parts = { path = "tools/state-parts" }
-near-state-parts-dump-check = { path = "tools/state-parts-dump-check" }
-near-state-viewer = { path = "tools/state-viewer", package = "state-viewer" }
-near-store = { path = "core/store" }
-near-telemetry = { path = "chain/telemetry" }
-near-test-contracts = { path = "runtime/near-test-contracts" }
-near-undo-block = { path = "tools/undo-block" }
-near-vm-test-api = { path = "runtime/near-vm/test-api" }
-near-vm-compiler = { path = "runtime/near-vm/compiler" }
-near-vm-compiler-singlepass = { path = "runtime/near-vm/compiler-singlepass" }
-near-vm-compiler-test-derive = { path = "runtime/near-vm/compiler-test-derive" }
-near-vm-engine = { path = "runtime/near-vm/engine" }
-near-vm-engine-universal = { path = "runtime/near-vm/engine-universal" }
-near-vm-runner = { path = "runtime/near-vm-runner" }
-near-vm-test-generator = { path = "runtime/near-vm/test-generator" }
-near-vm-types = { path = "runtime/near-vm/types" }
-near-vm-vm = { path = "runtime/near-vm/vm" }
-near-vm-wast = { path = "runtime/near-vm/wast" }
-near-wallet-contract = { path = "runtime/near-wallet-contract" }
+unc-crypto = { path = "core/crypto" }
+unc-dyn-configs = { path = "core/dyn-configs" }
+unc-epoch-manager = { path = "chain/epoch-manager" }
+unc-epoch-sync-tool = { path = "tools/epoch-sync"}
+unc-flat-storage = { path = "tools/flat-storage" }
+unc-fork-network = { path = "tools/fork-network" }
+unc-fmt = { path = "utils/fmt" }
+unc-indexer = { path = "chain/indexer" }
+unc-indexer-primitives = { path = "chain/indexer-primitives" }
+unc-jsonrpc = { path = "chain/jsonrpc" }
+unc-jsonrpc-adversarial-primitives = { path = "chain/jsonrpc-adversarial-primitives" }
+unc-jsonrpc-client = { path = "chain/jsonrpc/client" }
+unc-jsonrpc-primitives = { path = "chain/jsonrpc-primitives", features = ["full"] }
+unc-jsonrpc-tests = { path = "chain/jsonrpc/jsonrpc-tests" }
+unc-mainnet-res = { path = "utils/mainnet-res" }
+unc-mirror = { path = "tools/mirror" }
+unc-network = { path = "chain/network" }
+unc-o11y = { path = "core/o11y" }
+unc-parameters = { path = "core/parameters" }
+unc-performance-metrics = { path = "utils/unc-performance-metrics" }
+unc-performance-metrics-macros = { path = "utils/unc-performance-metrics-macros" }
+unc-ping = { path = "tools/ping" }
+unc-pool = { path = "chain/pool" }
+unc-primitives = { path = "core/primitives" }
+unc-primitives-core = { path = "core/primitives-core" }
+unc-rpc-error-core = { path = "tools/rpctypegen/core" }
+unc-rpc-error-macro = { path = "tools/rpctypegen/macro" }
+unc-stable-hasher = { path = "utils/unc-stable-hasher" }
+unc-state-parts = { path = "tools/state-parts" }
+unc-state-parts-dump-check = { path = "tools/state-parts-dump-check" }
+unc-state-viewer = { path = "tools/state-viewer", package = "state-viewer" }
+unc-store = { path = "core/store" }
+unc-telemetry = { path = "chain/telemetry" }
+unc-test-contracts = { path = "runtime/unc-test-contracts" }
+unc-undo-block = { path = "tools/undo-block" }
+unc-vm-test-api = { path = "runtime/unc-vm/test-api" }
+unc-vm-compiler = { path = "runtime/unc-vm/compiler" }
+unc-vm-compiler-singlepass = { path = "runtime/unc-vm/compiler-singlepass" }
+unc-vm-compiler-test-derive = { path = "runtime/unc-vm/compiler-test-derive" }
+unc-vm-engine = { path = "runtime/unc-vm/engine" }
+unc-vm-engine-universal = { path = "runtime/unc-vm/engine-universal" }
+unc-vm-runner = { path = "runtime/unc-vm-runner" }
+unc-vm-test-generator = { path = "runtime/unc-vm/test-generator" }
+unc-vm-types = { path = "runtime/unc-vm/types" }
+unc-vm-vm = { path = "runtime/unc-vm/vm" }
+unc-vm-wast = { path = "runtime/unc-vm/wast" }
+unc-wallet-contract = { path = "runtime/unc-wallet-contract" }
 nix = "0.24"
 node-runtime = { path = "runtime/runtime" }
 num-bigint = "0.3"
@@ -371,7 +371,7 @@ xshell = "0.2.1"
 xz2 = "0.1.6"
 yansi = "0.5.1"
 
-stdx = { package = "near-stdx", path = "utils/stdx" }
+stdx = { package = "unc-stdx", path = "utils/stdx" }
 
 [patch.crates-io]
 

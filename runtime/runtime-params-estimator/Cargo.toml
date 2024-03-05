@@ -40,15 +40,15 @@ tracing.workspace = true
 wat.workspace = true
 
 genesis-populate.workspace = true
-near-chain-configs.workspace = true
-near-crypto.workspace = true
-near-fmt.workspace = true
-near-o11y.workspace = true
-near-parameters = { workspace = true, features = ["clap"] }
-near-primitives.workspace = true
-near-store.workspace = true
-near-test-contracts.workspace = true
-near-vm-runner.workspace = true
+unc-chain-configs.workspace = true
+unc-crypto.workspace = true
+unc-fmt.workspace = true
+unc-o11y.workspace = true
+unc-parameters = { workspace = true, features = ["clap"] }
+unc-primitives.workspace = true
+unc-store.workspace = true
+unc-test-contracts.workspace = true
+unc-vm-runner.workspace = true
 framework.workspace = true
 node-runtime.workspace = true
 
@@ -57,41 +57,41 @@ insta.workspace = true
 
 [features]
 default = ["costs_counting"]
-costs_counting = ["near-vm-runner/costs_counting"]
+costs_counting = ["unc-vm-runner/costs_counting"]
 # Required feature for proper config, but can't be enabled by default because it is leaked to other release crates.
 required = [
   "costs_counting",
-  "near-vm-runner/no_cpu_compatibility_checks",
+  "unc-vm-runner/no_cpu_compatibility_checks",
   "no_cache",
 ]
 no_cache = [
   "node-runtime/no_cache",
-  "near-store/no_cache",
+  "unc-store/no_cache",
 ]
 nightly = [
   "nightly_protocol",
   "genesis-populate/nightly",
-  "near-chain-configs/nightly",
-  "near-fmt/nightly",
-  "near-o11y/nightly",
-  "near-parameters/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
-  "near-vm-runner/nightly",
+  "unc-chain-configs/nightly",
+  "unc-fmt/nightly",
+  "unc-o11y/nightly",
+  "unc-parameters/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
+  "unc-vm-runner/nightly",
   "framework/nightly",
   "node-runtime/nightly",
 ]
 nightly_protocol = [
   "genesis-populate/nightly_protocol",
-  "near-chain-configs/nightly_protocol",
-  "near-fmt/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-parameters/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
-  "near-vm-runner/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-fmt/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-parameters/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
+  "unc-vm-runner/nightly_protocol",
   "framework/nightly_protocol",
   "node-runtime/nightly_protocol",
 ]
 sandbox = ["node-runtime/sandbox"]
-io_trace = ["near-store/io_trace", "near-o11y/io_trace", "near-vm-runner/io_trace"]
+io_trace = ["unc-store/io_trace", "unc-o11y/io_trace", "unc-vm-runner/io_trace"]

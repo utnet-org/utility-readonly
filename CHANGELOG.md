@@ -41,7 +41,7 @@
 
 * Dump state by multiple nodes, each node will refer to s3 for which parts need to be dumped. [#9049](https://github.com/utnet-org/utility/pull/9049)
 * Small values in the flat storage trie are inlined for faster accesses [#9029](https://github.com/utnet-org/utility/pull/9029)
-* A current protocol version metric is added to the prometheus metrics under near_current_protocol_version [#9030](https://github.com/utnet-org/utility/pull/9030)
+* A current protocol version metric is added to the prometheus metrics under unc_current_protocol_version [#9030](https://github.com/utnet-org/utility/pull/9030)
 * The transaction pool size is tracked, and if the `transaction_pool_size_limit` config option is set, we now avoid storing more than the specified size of transactions in each shard's transaction pool [#8970](https://github.com/utnet-org/utility/pull/8970) and [#9036](https://github.com/utnet-org/utility/pull/9036)
 
 ## 1.34.0
@@ -139,7 +139,7 @@ to pay for the storage of their accounts.
   `validator_public_key`.  The `node_key` field is now deprecated and should not
   be used since it confusingly holds validator key.
   [#7828](https://github.com/utnet-org/utility/pull/7828)
-* Added `near_node_protocol_upgrade_voting_start` Prometheus metric whose value
+* Added `unc_node_protocol_upgrade_voting_start` Prometheus metric whose value
   is timestamp when voting for the next protocol version starts.
   [#7877](https://github.com/utnet-org/utility/pull/7877)
 * uncd cmd can now verify proofs from JSON files.
@@ -187,14 +187,14 @@ to pay for the storage of their accounts.
   deprecated.  If they are set in `config.json` the node will fail if migration
   needs to be performed.  Use `store.migration_snapshot` instead to configure
   the behaviour [#7486](https://github.com/utnet-org/utility/pull/7486)
-* Added `near_peer_message_sent_by_type_bytes` and
-  `near_peer_message_sent_by_type_total` Prometheus metrics measuring
+* Added `unc_peer_message_sent_by_type_bytes` and
+  `unc_peer_message_sent_by_type_total` Prometheus metrics measuring
   size and number of messages sent to peers.
   [#7523](https://github.com/utnet-org/utility/pull/7523)
-* `near_peer_message_received_total` Prometheus metric is now deprecated.
-  Instead of it aggregate `near_peer_message_received_by_type_total` metric.
+* `unc_peer_message_received_total` Prometheus metric is now deprecated.
+  Instead of it aggregate `unc_peer_message_received_by_type_total` metric.
   For example, to get total rate of received messages use
-  `sum(rate(near_peer_message_received_by_type_total{...}[5m]))`.
+  `sum(rate(unc_peer_message_received_by_type_total{...}[5m]))`.
   [#7548](https://github.com/utnet-org/utility/pull/7548)
 * Few changes to `view_state` JSON RPC query:
   - The requset has now an optional `include_proof` argument.  When set to
@@ -277,11 +277,11 @@ to pay for the storage of their accounts.
 
 ### Non-protocol Changes
 
-* Added `near_peer_message_received_by_type_bytes` [#6661](https://github.com/utnet-org/utility/pull/6661) and `near_dropped_message_by_type_and_reason_count` [#6678](https://github.com/utnet-org/utility/pull/6678) metrics.
-* Removed `near_<msg-type>_{total,bytes}` [#6661](https://github.com/utnet-org/utility/pull/6661), `near_<msg-type>_dropped`, `near_drop_message_unknown_account` and `near_dropped_messages_count` [#6678](https://github.com/utnet-org/utility/pull/6678) metrics.
-* Added `near_action_called_count` metric [#6679]((https://github.com/utnet-org/utility/pull/6679)
-* Removed `near_action_<action-type>_total` metrics [#6679]((https://github.com/utnet-org/utility/pull/6679)
-* Added `near_build_info` metric which exports neard’s build information [#6680](https://github.com/utnet-org/utility/pull/6680)
+* Added `unc_peer_message_received_by_type_bytes` [#6661](https://github.com/utnet-org/utility/pull/6661) and `unc_dropped_message_by_type_and_reason_count` [#6678](https://github.com/utnet-org/utility/pull/6678) metrics.
+* Removed `unc_<msg-type>_{total,bytes}` [#6661](https://github.com/utnet-org/utility/pull/6661), `unc_<msg-type>_dropped`, `unc_drop_message_unknown_account` and `unc_dropped_messages_count` [#6678](https://github.com/utnet-org/utility/pull/6678) metrics.
+* Added `unc_action_called_count` metric [#6679]((https://github.com/utnet-org/utility/pull/6679)
+* Removed `unc_action_<action-type>_total` metrics [#6679]((https://github.com/utnet-org/utility/pull/6679)
+* Added `unc_build_info` metric which exports neard’s build information [#6680](https://github.com/utnet-org/utility/pull/6680)
 * Make it possible to update logging at runtime: [#6665](https://github.com/utnet-org/utility/pull/6665)
 * Use correct cost in gas profile for adding function call key [#6749](https://github.com/utnet-org/utility/pull/6749)
 
@@ -337,7 +337,7 @@ to pay for the storage of their accounts.
 ### Non-protocol Changes
 
 * Fix a bug in chunk requesting where validator might request chunks even if parent block hasn’t been processed yet.
-* Fix memory leak in near-network.
+* Fix memory leak in unc-network.
 * Change block sync to request 5 blocks at a time
 * Change NUM_ORPHAN_ANCESTORS_CHECK to 3
 

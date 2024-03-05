@@ -63,13 +63,13 @@ want to run tests against a release build, you can create a file with the
 following config:
 
 ```json
-{"local": true, "near_root": "../target/release/"}
+{"local": true, "unc_root": "../target/release/"}
 ```
 
 and run the test with the following command:
 
 ```shell
-NEAR_PYTEST_CONFIG=<path to config> python tests/sanity/block_production.py
+unc_PYTEST_CONFIG=<path to config> python tests/sanity/block_production.py
 ```
 
 # Writing tests

@@ -1,8 +1,8 @@
 use crate::store::ChainStoreAccess;
-use near_chain_primitives::error::Error;
-use near_epoch_manager::EpochManagerAdapter;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::ShardId;
+use unc_chain_primitives::error::Error;
+use unc_epoch_manager::EpochManagerAdapter;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::ShardId;
 
 /// Check that epoch of block with given prev_block_hash is the first one with current protocol version.
 fn is_first_epoch_with_protocol_version(

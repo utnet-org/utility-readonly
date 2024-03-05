@@ -3,13 +3,13 @@ use serde_json::Value;
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcProtocolConfigRequest {
     #[serde(flatten)]
-    pub block_reference: near_primitives::types::BlockReference,
+    pub block_reference: unc_primitives::types::BlockReference,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcProtocolConfigResponse {
     #[serde(flatten)]
-    pub config_view: near_chain_configs::ProtocolConfigView,
+    pub config_view: unc_chain_configs::ProtocolConfigView,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]

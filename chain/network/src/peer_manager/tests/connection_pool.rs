@@ -11,9 +11,9 @@ use crate::private_actix::RegisterPeerError;
 use crate::tcp;
 use crate::testonly::make_rng;
 use crate::testonly::stream::Stream;
-use near_async::time;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_async::time;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::version::PROTOCOL_VERSION;
 use std::sync::Arc;
 
 #[tokio::test]
@@ -32,7 +32,7 @@ async fn connection_spam_security_test() {
     cfg.handshake_timeout = time::Duration::hours(1);
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         cfg,
         chain.clone(),
     )
@@ -67,7 +67,7 @@ async fn loop_connection() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -134,7 +134,7 @@ async fn owned_account_mismatch() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -197,7 +197,7 @@ async fn owned_account_conflict() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )
@@ -235,7 +235,7 @@ async fn invalid_edge() {
 
     let pm = peer_manager::testonly::start(
         clock.clock(),
-        near_store::db::TestDB::new(),
+        unc_store::db::TestDB::new(),
         chain.make_config(rng),
         chain.clone(),
     )

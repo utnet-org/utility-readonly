@@ -1,14 +1,14 @@
-use crate::near_chain_primitives::error::BlockKnownError;
+use crate::unc_chain_primitives::error::BlockKnownError;
 use crate::test_utils::{setup, wait_for_all_blocks_in_processing};
 use crate::{Block, BlockProcessingArtifact, ChainStoreAccess, Error};
 use assert_matches::assert_matches;
 use chrono;
 use chrono::TimeZone;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::hash::CryptoHash;
-use near_primitives::static_clock::MockClockGuard;
-use near_primitives::test_utils::TestBlockBuilder;
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::static_clock::MockClockGuard;
+use unc_primitives::test_utils::TestBlockBuilder;
+use unc_primitives::version::PROTOCOL_VERSION;
 use num_rational::Ratio;
 use std::sync::Arc;
 use std::time::Instant;
@@ -48,8 +48,8 @@ fn build_chain() {
     // ‘nightly’ feature enabled:
     //
     //     cargo install cargo-insta
-    //     cargo insta test --accept -p near-chain                    -- tests::simple_chain::build_chain
-    //     cargo insta test --accept -p near-chain --features nightly -- tests::simple_chain::build_chain
+    //     cargo insta test --accept -p unc-chain                    -- tests::simple_chain::build_chain
+    //     cargo insta test --accept -p unc-chain --features nightly -- tests::simple_chain::build_chain
     let hash = chain.head().unwrap().last_block_hash;
     if cfg!(feature = "nightly") {
         insta::assert_display_snapshot!(hash, @"CwaiZ4AmfJSnMN9rytYwwYHCTzLioC5xcjHzNkDex1HH");

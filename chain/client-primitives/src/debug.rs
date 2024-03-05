@@ -2,12 +2,12 @@
 //! without backwards compatibility of JSON encoding.
 use crate::types::StatusError;
 use chrono::DateTime;
-use near_primitives::types::EpochId;
-use near_primitives::views::{
+use unc_primitives::types::EpochId;
+use unc_primitives::views::{
     CatchupStatusView, ChainProcessingInfo, EpochValidatorInfo, RequestedStatePartsView,
     SyncStatusView,
 };
-use near_primitives::{
+use unc_primitives::{
     block_header::ApprovalInner,
     hash::CryptoHash,
     sharding::ChunkHash,

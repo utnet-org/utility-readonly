@@ -1,19 +1,19 @@
 /// Tools for modifying flat storage - should be used only for experimentation & debugging.
 use borsh::BorshDeserialize;
 use clap::Parser;
-use near_chain::flat_storage_creator::FlatStorageShardCreator;
-use near_chain::types::RuntimeAdapter;
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_chain_configs::GenesisValidationMode;
-use near_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
-use near_primitives::shard_layout::ShardVersion;
-use near_primitives::types::{BlockHeight, ShardId};
-use near_store::flat::{
+use unc_chain::flat_storage_creator::FlatStorageShardCreator;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_chain_configs::GenesisValidationMode;
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
+use unc_primitives::shard_layout::ShardVersion;
+use unc_primitives::types::{BlockHeight, ShardId};
+use unc_store::flat::{
     inline_flat_state_values, store_helper, FlatStateDelta, FlatStateDeltaMetadata,
     FlatStorageManager, FlatStorageStatus,
 };
-use near_store::{DBCol, Mode, NodeStorage, ShardUId, Store, StoreOpener};
-use framework::{load_config, NearConfig, NightshadeRuntime};
+use unc_store::{DBCol, Mode, NodeStorage, ShardUId, Store, StoreOpener};
+use framework::{load_config, UncConfig, NightshadeRuntime};
 use std::sync::atomic::AtomicBool;
 use std::{path::PathBuf, sync::Arc, time::Duration};
 use tqdm::tqdm;
@@ -145,16 +145,16 @@ impl FlatStorageCommand {
     fn get_db(
         opener: &StoreOpener,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         mode: Mode,
     ) -> (NodeStorage, Arc<EpochManagerHandle>, Arc<NightshadeRuntime>, ChainStore, Store) {
         let node_storage = opener.open_in_mode(mode).unwrap();
         let epoch_manager =
-            EpochManager::new_arc_handle(node_storage.get_hot_store(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(node_storage.get_hot_store(), &unc_config.genesis.config);
         let hot_runtime = NightshadeRuntime::from_config(
             home_dir,
             node_storage.get_hot_store(),
-            &near_config,
+            &unc_config,
             epoch_manager.clone(),
         );
         let chain_store = ChainStore::new(node_storage.get_hot_store(), 0, false);
@@ -166,11 +166,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &ViewCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (.., hot_store) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadOnly);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadOnly);
         println!("DB version: {:?}", hot_store.get_db_version()?);
         for item in hot_store.iter(DBCol::FlatStorageStatus) {
             let (bytes_shard_uid, status) = item?;
@@ -203,7 +203,7 @@ impl FlatStorageCommand {
         cmd: &SetStoreVersionCmd,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
-        let rw_storage = opener.open_in_mode(near_store::Mode::ReadWriteExisting)?;
+        let rw_storage = opener.open_in_mode(unc_store::Mode::ReadWriteExisting)?;
         let rw_store = rw_storage.get_hot_store();
         println!("Setting storage DB version to: {:?}", cmd.version);
         rw_store.set_db_version(cmd.version)?;
@@ -214,11 +214,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &ResetCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (_, epoch_manager, rw_hot_runtime, rw_chain_store, store) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadWriteExisting);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadWriteExisting);
         let tip = rw_chain_store.final_head()?;
 
         // TODO: there should be a method that 'loads' the current flat storage state based on Storage.
@@ -235,11 +235,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &InitCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (_, epoch_manager, rw_hot_runtime, rw_chain_store, rw_hot_store) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadWriteExisting);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadWriteExisting);
 
         let tip = rw_chain_store.final_head()?;
         let shard_uid = epoch_manager.shard_id_to_uid(cmd.shard_id, &tip.epoch_id)?;
@@ -266,11 +266,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &VerifyCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (_, epoch_manager, hot_runtime, chain_store, hot_store) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadOnly);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadOnly);
         let tip = chain_store.final_head()?;
         let shard_uid = epoch_manager.shard_id_to_uid(cmd.shard_id, &tip.epoch_id)?;
 
@@ -338,11 +338,11 @@ impl FlatStorageCommand {
                 break;
             }
 
-            if near_primitives::hash::hash(&item_trie.1) != value_ref.hash {
+            if unc_primitives::hash::hash(&item_trie.1) != value_ref.hash {
                 println!(
                     "Different ValueRef::hash for key: {:?} in trie: {:?} vs flat storage: {:?}",
                     item_trie.0,
-                    near_primitives::hash::hash(&item_trie.1),
+                    unc_primitives::hash::hash(&item_trie.1),
                     value_ref.hash
                 );
                 success = false;
@@ -361,11 +361,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &MigrateValueInliningCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let store =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadWriteExisting).4;
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadWriteExisting).4;
         let flat_storage_manager = FlatStorageManager::new(store.clone());
         inline_flat_state_values(
             store,
@@ -381,21 +381,21 @@ impl FlatStorageCommand {
         &self,
         cmd: &ConstructTriedFromFlatCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (_, epoch_manager, _, chain_store, store) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadWriteExisting);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadWriteExisting);
 
         let write_opener =
-            NodeStorage::opener(&cmd.write_store_path, false, &near_config.config.store, None);
+            NodeStorage::opener(&cmd.write_store_path, false, &unc_config.config.store, None);
         let write_node_storage = write_opener.open_in_mode(Mode::Create)?;
         let write_store = write_node_storage.get_hot_store();
 
         let tip = chain_store.final_head()?;
         let shard_uid = epoch_manager.shard_id_to_uid(cmd.shard_id, &tip.epoch_id)?;
 
-        near_store::trie::construct_trie_from_flat(store, write_store, shard_uid);
+        unc_store::trie::construct_trie_from_flat(store, write_store, shard_uid);
         Ok(())
     }
 
@@ -403,11 +403,11 @@ impl FlatStorageCommand {
         &self,
         cmd: &MoveFlatHeadCmd,
         home_dir: &PathBuf,
-        near_config: &NearConfig,
+        unc_config: &UncConfig,
         opener: StoreOpener,
     ) -> anyhow::Result<()> {
         let (_, _, runtime, chain_store, _) =
-            Self::get_db(&opener, home_dir, &near_config, near_store::Mode::ReadWriteExisting);
+            Self::get_db(&opener, home_dir, &unc_config, unc_store::Mode::ReadWriteExisting);
 
         let shard_uid = ShardUId { version: cmd.version, shard_id: cmd.shard_id as u32 };
         let flat_storage_manager = runtime.get_flat_storage_manager();
@@ -424,28 +424,28 @@ impl FlatStorageCommand {
         home_dir: &PathBuf,
         genesis_validation: GenesisValidationMode,
     ) -> anyhow::Result<()> {
-        let near_config = load_config(home_dir, genesis_validation)?;
+        let unc_config = load_config(home_dir, genesis_validation)?;
         let opener = NodeStorage::opener(
             home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
+            unc_config.config.archive,
+            &unc_config.config.store,
             None,
         );
 
         match &self.subcmd {
-            SubCommand::View(cmd) => self.view(cmd, home_dir, &near_config, opener),
+            SubCommand::View(cmd) => self.view(cmd, home_dir, &unc_config, opener),
             SubCommand::SetStoreVersion(cmd) => self.set_store_version(cmd, opener),
-            SubCommand::Reset(cmd) => self.reset(cmd, home_dir, &near_config, opener),
-            SubCommand::Init(cmd) => self.init(cmd, home_dir, &near_config, opener),
-            SubCommand::Verify(cmd) => self.verify(cmd, home_dir, &near_config, opener),
+            SubCommand::Reset(cmd) => self.reset(cmd, home_dir, &unc_config, opener),
+            SubCommand::Init(cmd) => self.init(cmd, home_dir, &unc_config, opener),
+            SubCommand::Verify(cmd) => self.verify(cmd, home_dir, &unc_config, opener),
             SubCommand::MigrateValueInlining(cmd) => {
-                self.migrate_value_inlining(cmd, home_dir, &near_config, opener)
+                self.migrate_value_inlining(cmd, home_dir, &unc_config, opener)
             }
             SubCommand::ConstructTrieFromFlat(cmd) => {
-                self.construct_trie_from_flat(cmd, home_dir, &near_config, opener)
+                self.construct_trie_from_flat(cmd, home_dir, &unc_config, opener)
             }
             SubCommand::MoveFlatHead(cmd) => {
-                self.move_flat_head(cmd, home_dir, &near_config, opener)
+                self.move_flat_head(cmd, home_dir, &unc_config, opener)
             }
         }
     }

@@ -1,15 +1,15 @@
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_client::ProcessTxResponse;
-use near_crypto::{InMemorySigner, KeyType};
-use near_primitives::account::Account;
-use near_primitives::sandbox::state_patch::SandboxStatePatch;
-use near_primitives::state_record::StateRecord;
-use near_primitives::transaction::{
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_client::ProcessTxResponse;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_primitives::account::Account;
+use unc_primitives::sandbox::state_patch::SandboxStatePatch;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::transaction::{
     Action, DeployContractAction, FunctionCallAction, SignedTransaction,
 };
-use near_primitives::types::{AccountId, BlockHeight, Nonce};
+use unc_primitives::types::{AccountId, BlockHeight, Nonce};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -30,7 +30,7 @@ fn test_setup() -> (TestEnv, InMemorySigner) {
             "test0".parse().unwrap(),
             &signer,
             vec![Action::DeployContract(DeployContractAction {
-                code: near_test_contracts::rs_contract().to_vec(),
+                code: unc_test_contracts::rs_contract().to_vec(),
             })],
         ),
         ProcessTxResponse::ValidTx

@@ -1,22 +1,22 @@
 use crate::genesis_helpers::genesis_block;
 use actix::Addr;
-use near_chain::Block;
-use near_chain_configs::Genesis;
-use near_client::{BlockResponse, ClientActor};
-use near_network::tcp;
-use near_network::test_utils::convert_boot_nodes;
-use near_network::types::PeerInfo;
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::Approval;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::PartialMerkleTree;
-use near_primitives::num_rational::{Ratio, Rational32};
-use near_primitives::types::{BlockHeightDelta, EpochId};
-use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_chain::Block;
+use unc_chain_configs::Genesis;
+use unc_client::{BlockResponse, ClientActor};
+use unc_network::tcp;
+use unc_network::test_utils::convert_boot_nodes;
+use unc_network::types::PeerInfo;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::Approval;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::PartialMerkleTree;
+use unc_primitives::num_rational::{Ratio, Rational32};
+use unc_primitives::types::{BlockHeightDelta, EpochId};
+use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::version::PROTOCOL_VERSION;
 use framework::config::{GenesisExt, TESTING_INIT_POWER, TESTING_INIT_STAKE};
-use framework::{load_test_config, NearConfig};
+use framework::{load_test_config, UncConfig};
 
 // This assumes that there is no height skipped. Otherwise epoch hash calculation will be wrong.
 pub fn add_blocks(
@@ -100,7 +100,7 @@ pub fn add_blocks(
 
 pub fn setup_configs_with_epoch_length(
     epoch_length: u64,
-) -> (Genesis, Block, NearConfig, NearConfig) {
+) -> (Genesis, Block, UncConfig, UncConfig) {
     let mut genesis = Genesis::test(vec!["other".parse().unwrap()], 1);
     genesis.config.epoch_length = epoch_length;
     // Avoid InvalidGasPrice error. Blocks must contain accurate `total_supply` value.
@@ -126,6 +126,6 @@ pub fn setup_configs_with_epoch_length(
     (genesis, genesis_block, near1, near2)
 }
 
-pub fn setup_configs() -> (Genesis, Block, NearConfig, NearConfig) {
+pub fn setup_configs() -> (Genesis, Block, UncConfig, UncConfig) {
     setup_configs_with_epoch_length(5)
 }

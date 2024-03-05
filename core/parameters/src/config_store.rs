@@ -1,6 +1,6 @@
 use crate::config::RuntimeConfig;
 use crate::parameter_table::{ParameterTable, ParameterTableDiff};
-use near_primitives_core::types::ProtocolVersion;
+use unc_primitives_core::types::ProtocolVersion;
 use std::collections::BTreeMap;
 use std::ops::Bound;
 use std::sync::Arc;
@@ -115,7 +115,7 @@ impl RuntimeConfigStore {
     /// need to override it specifically to preserve compatibility.
     pub fn for_chain_id(chain_id: &str) -> Self {
         match chain_id {
-            near_primitives_core::chains::TESTNET => {
+            unc_primitives_core::chains::TESTNET => {
                 let genesis_runtime_config = RuntimeConfig::initial_testnet_config();
                 Self::new(Some(&genesis_runtime_config))
             }
@@ -154,7 +154,7 @@ impl RuntimeConfigStore {
 mod tests {
     use super::*;
     use crate::cost::{ActionCosts, ExtCosts};
-    use near_primitives_core::version::ProtocolFeature::{
+    use unc_primitives_core::version::ProtocolFeature::{
         LowerDataReceiptAndEcrecoverBaseCost, LowerStorageCost, LowerStorageKeyLimit,
     };
     use std::collections::HashSet;
@@ -319,7 +319,7 @@ mod tests {
     #[cfg(not(feature = "calimero_zero_storage"))]
     fn test_json_unchanged() {
         use crate::view::RuntimeConfigView;
-        use near_primitives_core::version::PROTOCOL_VERSION;
+        use unc_primitives_core::version::PROTOCOL_VERSION;
 
         let store = RuntimeConfigStore::new(None);
         let mut any_failure = false;

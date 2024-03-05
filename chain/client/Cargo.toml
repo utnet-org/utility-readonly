@@ -1,5 +1,5 @@
 [package]
-name = "near-client"
+name = "unc-client"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -42,75 +42,75 @@ tokio.workspace = true
 tracing.workspace = true
 yansi.workspace = true
 
-near-async.workspace = true
-near-chain-configs.workspace = true
-near-chain-primitives.workspace = true
-near-chain.workspace = true
-near-chunks.workspace = true
-near-client-primitives.workspace = true
-near-crypto.workspace = true
-near-dyn-configs.workspace = true
-near-epoch-manager.workspace = true
-near-network.workspace = true
-near-o11y.workspace = true
-near-performance-metrics-macros.workspace = true
-near-performance-metrics.workspace = true
-near-pool.workspace = true
-near-parameters.workspace = true
-near-primitives.workspace = true
-near-store.workspace = true
-near-telemetry.workspace = true
+unc-async.workspace = true
+unc-chain-configs.workspace = true
+unc-chain-primitives.workspace = true
+unc-chain.workspace = true
+unc-chunks.workspace = true
+unc-client-primitives.workspace = true
+unc-crypto.workspace = true
+unc-dyn-configs.workspace = true
+unc-epoch-manager.workspace = true
+unc-network.workspace = true
+unc-o11y.workspace = true
+unc-performance-metrics-macros.workspace = true
+unc-performance-metrics.workspace = true
+unc-pool.workspace = true
+unc-parameters.workspace = true
+unc-primitives.workspace = true
+unc-store.workspace = true
+unc-telemetry.workspace = true
 
 [dev-dependencies]
 assert_matches.workspace = true
-near-actix-test-utils.workspace = true
+unc-actix-test-utils.workspace = true
 
 [features]
 # if enabled, we assert in most situations that are impossible unless some byzantine behavior is observed.
-byzantine_asserts = ["near-chain/byzantine_asserts"]
+byzantine_asserts = ["unc-chain/byzantine_asserts"]
 expensive_tests = []
 test_features = [
-  "near-network/test_features",
-  "near-chain/test_features",
-  "near-chunks/test_features",
+  "unc-network/test_features",
+  "unc-chain/test_features",
+  "unc-chunks/test_features",
 ]
 nightly_protocol = [
-  "near-async/nightly_protocol",
-  "near-chain-configs/nightly_protocol",
-  "near-chain/nightly_protocol",
-  "near-chunks/nightly_protocol",
-  "near-client-primitives/nightly_protocol",
-  "near-dyn-configs/nightly_protocol",
-  "near-epoch-manager/nightly_protocol",
-  "near-network/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-parameters/nightly_protocol",
-  "near-pool/nightly_protocol",
-  "near-primitives/nightly_protocol",
-  "near-store/nightly_protocol",
-  "near-telemetry/nightly_protocol",
+  "unc-async/nightly_protocol",
+  "unc-chain-configs/nightly_protocol",
+  "unc-chain/nightly_protocol",
+  "unc-chunks/nightly_protocol",
+  "unc-client-primitives/nightly_protocol",
+  "unc-dyn-configs/nightly_protocol",
+  "unc-epoch-manager/nightly_protocol",
+  "unc-network/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-parameters/nightly_protocol",
+  "unc-pool/nightly_protocol",
+  "unc-primitives/nightly_protocol",
+  "unc-store/nightly_protocol",
+  "unc-telemetry/nightly_protocol",
 ]
 nightly = [
   "nightly_protocol",
-  "near-async/nightly",
-  "near-chain-configs/nightly",
-  "near-chain/nightly",
-  "near-chunks/nightly",
-  "near-client-primitives/nightly",
-  "near-dyn-configs/nightly",
-  "near-epoch-manager/nightly",
-  "near-network/nightly",
-  "near-o11y/nightly",
-  "near-parameters/nightly",
-  "near-pool/nightly",
-  "near-primitives/nightly",
-  "near-store/nightly",
-  "near-telemetry/nightly",
+  "unc-async/nightly",
+  "unc-chain-configs/nightly",
+  "unc-chain/nightly",
+  "unc-chunks/nightly",
+  "unc-client-primitives/nightly",
+  "unc-dyn-configs/nightly",
+  "unc-epoch-manager/nightly",
+  "unc-network/nightly",
+  "unc-o11y/nightly",
+  "unc-parameters/nightly",
+  "unc-pool/nightly",
+  "unc-primitives/nightly",
+  "unc-store/nightly",
+  "unc-telemetry/nightly",
 ]
 sandbox = [
-  "near-client-primitives/sandbox",
-  "near-chain/sandbox",
+  "unc-client-primitives/sandbox",
+  "unc-chain/sandbox",
 ]
 new_epoch_sync = [
-  "near-chain/new_epoch_sync"
+  "unc-chain/new_epoch_sync"
 ]

@@ -1,5 +1,5 @@
 [package]
-name = "near-logger-utils"
+name = "unc-logger-utils"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -10,4 +10,4 @@ publish = false
 
 [dependencies]
 tracing.workspace = true
-near-o11y.workspace = true
+unc-o11y.workspace = true

@@ -229,7 +229,7 @@ class NeardRunner:
                     self.reset_current_neard_path()
                 self.save_data()
 
-    def target_near_home_path(self, *args):
+    def target_unc_home_path(self, *args):
         if self.is_traffic_generator():
             args = ('target',) + args
         return os.path.join(self.neard_home, *args)
@@ -237,23 +237,23 @@ class NeardRunner:
     def home_path(self, *args):
         return os.path.join(self.home, *args)
 
-    def tmp_near_home_path(self, *args):
-        args = ('tmp-near-home',) + args
+    def tmp_unc_home_path(self, *args):
+        args = ('tmp-unc-home',) + args
         return os.path.join(self.home, *args)
 
     def neard_init(self):
-        # We make uncd init save files to self.tmp_near_home_path() just to make it
+        # We make uncd init save files to self.tmp_unc_home_path() just to make it
         # a bit cleaner, so we can init to a non-existent directory and then move
         # the files we want to the real near home without having to remove it first
         cmd = [
             self.data['binaries'][0]['system_path'], '--home',
-            self.tmp_near_home_path(), 'init'
+            self.tmp_unc_home_path(), 'init'
         ]
         if not self.is_traffic_generator():
             cmd += ['--account-id', f'{socket.gethostname()}.near']
         subprocess.check_call(cmd)
 
-        with open(self.tmp_near_home_path('config.json'), 'r') as f:
+        with open(self.tmp_unc_home_path('config.json'), 'r') as f:
             config = json.load(f)
         self.data['neard_addr'] = config['rpc']['addr']
         config['tracked_shards'] = [0, 1, 2, 3]
@@ -263,28 +263,28 @@ class NeardRunner:
         config['rpc']['enable_debug_rpc'] = True
         if self.is_traffic_generator():
             config['archive'] = True
-        with open(self.tmp_near_home_path('config.json'), 'w') as f:
+        with open(self.tmp_unc_home_path('config.json'), 'w') as f:
             json.dump(config, f, indent=2)
 
     def move_init_files(self):
         try:
-            os.mkdir(self.target_near_home_path())
+            os.mkdir(self.target_unc_home_path())
         except FileExistsError:
             pass
-        for p in os.listdir(self.target_near_home_path()):
-            filename = self.target_near_home_path(p)
+        for p in os.listdir(self.target_unc_home_path()):
+            filename = self.target_unc_home_path(p)
             if os.path.isfile(filename):
                 os.remove(filename)
         try:
-            shutil.rmtree(self.target_near_home_path('data'))
+            shutil.rmtree(self.target_unc_home_path('data'))
         except FileNotFoundError:
             pass
         paths = ['config.json', 'node_key.json']
         if not self.is_traffic_generator():
             paths.append('validator_key.json')
         for path in paths:
-            shutil.move(self.tmp_near_home_path(path),
-                        self.target_near_home_path(path))
+            shutil.move(self.tmp_unc_home_path(path),
+                        self.target_unc_home_path(path))
 
     # This RPC method tells to stop uncd and re-initialize its home dir. This returns the
     # validator and node key that resulted from the initialization. We can't yet call amend-genesis
@@ -298,7 +298,7 @@ class NeardRunner:
         with self.lock:
             self.kill_neard()
             try:
-                shutil.rmtree(self.tmp_near_home_path())
+                shutil.rmtree(self.tmp_unc_home_path())
             except FileNotFoundError:
                 pass
             try:
@@ -313,12 +313,12 @@ class NeardRunner:
             self.neard_init()
             self.move_init_files()
 
-            with open(self.target_near_home_path('config.json'), 'r') as f:
+            with open(self.target_unc_home_path('config.json'), 'r') as f:
                 config = json.load(f)
-            with open(self.target_near_home_path('node_key.json'), 'r') as f:
+            with open(self.target_unc_home_path('node_key.json'), 'r') as f:
                 node_key = json.load(f)
             if not self.is_traffic_generator():
-                with open(self.target_near_home_path('validator_key.json'),
+                with open(self.target_unc_home_path('validator_key.json'),
                           'r') as f:
                     validator_key = json.load(f)
                     validator_account_id = validator_key['account_id']
@@ -369,10 +369,10 @@ class NeardRunner:
                     message='Can only call network_init after a call to init')
 
             if len(validators) < 3:
-                with open(self.target_near_home_path('config.json'), 'r') as f:
+                with open(self.target_unc_home_path('config.json'), 'r') as f:
                     config = json.load(f)
                 config['consensus']['min_num_peers'] = len(validators) - 1
-                with open(self.target_near_home_path('config.json'), 'w') as f:
+                with open(self.target_unc_home_path('config.json'), 'w') as f:
                     json.dump(config, f)
             with open(self.home_path('validators.json'), 'w') as f:
                 json.dump(validators, f)
@@ -388,7 +388,7 @@ class NeardRunner:
     def do_update_config(self, key_value):
         with self.lock:
             logging.info(f'updating config with {key_value}')
-            with open(self.target_near_home_path('config.json'), 'r') as f:
+            with open(self.target_unc_home_path('config.json'), 'r') as f:
                 config = json.load(f)
 
             [key, value] = key_value.split("=", 1)
@@ -404,7 +404,7 @@ class NeardRunner:
 
             object[key_item_list[-1]] = value
 
-            with open(self.target_near_home_path('config.json'), 'w') as f:
+            with open(self.target_unc_home_path('config.json'), 'w') as f:
                 json.dump(config, f, indent=2)
 
         return True
@@ -597,7 +597,7 @@ class NeardRunner:
                     '--source-home',
                     self.neard_home,
                     '--target-home',
-                    self.target_near_home_path(),
+                    self.target_unc_home_path(),
                     '--no-secret',
                 ]
             else:
@@ -669,9 +669,9 @@ class NeardRunner:
 
         with open(self.home_path('network_init.json'), 'r') as f:
             n = json.load(f)
-        with open(self.target_near_home_path('node_key.json'), 'r') as f:
+        with open(self.target_unc_home_path('node_key.json'), 'r') as f:
             node_key = json.load(f)
-        with open(self.target_near_home_path('config.json'), 'r') as f:
+        with open(self.target_unc_home_path('config.json'), 'r') as f:
             config = json.load(f)
         boot_nodes = []
         for b in n['boot_nodes']:
@@ -679,7 +679,7 @@ class NeardRunner:
                 boot_nodes.append(b)
 
         config['network']['boot_nodes'] = ','.join(boot_nodes)
-        with open(self.target_near_home_path('config.json'), 'w') as f:
+        with open(self.target_unc_home_path('config.json'), 'w') as f:
             config = json.dump(config, f, indent=2)
 
         cmd = [
@@ -690,9 +690,9 @@ class NeardRunner:
             '--records-file-in',
             os.path.join(self.neard_home, 'setup', 'records.json'),
             '--genesis-file-out',
-            self.target_near_home_path('genesis.json'),
+            self.target_unc_home_path('genesis.json'),
             '--records-file-out',
-            self.target_near_home_path('records.json'),
+            self.target_unc_home_path('records.json'),
             '--validators',
             self.home_path('validators.json'),
             '--chain-id',
@@ -734,7 +734,7 @@ class NeardRunner:
                 # the command probably won't fail. But should somehow check that it was OK
 
                 logging.info('setting use_production_config to true')
-                genesis_path = self.target_near_home_path('genesis.json')
+                genesis_path = self.target_unc_home_path('genesis.json')
                 with open(genesis_path, 'r') as f:
                     genesis_config = json.load(f)
                 with open(genesis_path, 'w') as f:
@@ -769,7 +769,7 @@ class NeardRunner:
                     cmd = [
                         self.data['binaries'][0]['system_path'],
                         '--home',
-                        self.target_near_home_path(),
+                        self.target_unc_home_path(),
                         '--unsafe-fast-startup',
                         'run',
                     ]
@@ -805,21 +805,21 @@ class NeardRunner:
                 # make another backup to restore to
                 backup_dir = self.home_path('backups', 'start')
                 logging.info(f'copying data dir to {backup_dir}')
-                shutil.copytree(self.target_near_home_path('data'), backup_dir)
+                shutil.copytree(self.target_unc_home_path('data'), backup_dir)
                 self.set_state(TestState.STOPPED)
                 self.save_data()
         except requests.exceptions.ConnectionError:
             pass
 
-    def reset_near_home(self):
+    def reset_unc_home(self):
         try:
             logging.info("removing the old directory")
-            shutil.rmtree(self.target_near_home_path('data'))
+            shutil.rmtree(self.target_unc_home_path('data'))
         except FileNotFoundError:
             pass
         logging.info('restoring data dir from backup')
         shutil.copytree(self.home_path('backups', 'start'),
-                        self.target_near_home_path('data'))
+                        self.target_unc_home_path('data'))
         logging.info('data dir restored')
         self.set_state(TestState.STOPPED)
         self.save_data()
@@ -838,7 +838,7 @@ class NeardRunner:
                 elif state == TestState.RUNNING:
                     self.check_upgrade_neard()
                 elif state == TestState.RESETTING:
-                    self.reset_near_home()
+                    self.reset_unc_home()
             time.sleep(10)
 
     def serve(self, port):

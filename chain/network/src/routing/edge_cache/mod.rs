@@ -1,6 +1,6 @@
 use crate::network_protocol::Edge;
-use near_primitives::network::PeerId;
-use near_primitives::views::{EdgeCacheView, LabeledEdgeView};
+use unc_primitives::network::PeerId;
+use unc_primitives::views::{EdgeCacheView, LabeledEdgeView};
 use std::collections::hash_map::{Entry, Iter};
 use std::collections::{HashMap, HashSet};
 

@@ -4,7 +4,7 @@ use crate::trie::mem::flexible_data::encoding::RawDecoderMut;
 use super::encoding::{CommonHeader, NodeKind, NonLeafHeader};
 use super::{MemTrieNodePtr, MemTrieNodePtrMut};
 
-use near_primitives::hash::{hash, CryptoHash};
+use unc_primitives::hash::{hash, CryptoHash};
 
 impl<'a> MemTrieNodePtrMut<'a> {
     fn as_const<'b>(&'b self) -> MemTrieNodePtr<'b> {

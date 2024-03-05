@@ -1,6 +1,6 @@
 Mirror transactions from a given network into a custom mocktest network and add load
 
-1. Setup a custom mocknet network following the README in the `provisioning/terraform/network/mocknet/mirror/` directory of the [near-ops](https://github.com/near/near-ops) repo.
+1. Setup a custom mocknet network following the README in the `provisioning/terraform/network/mocknet/mirror/` directory of the [unc-ops](https://github.com/near/unc-ops) repo.
 - you'll need the `unique_id`, `chain_id`, and `start_height` from this setup when running the mirror.py test script in 2.
 2. Run `python3 tests/mocknet/mirror.py --chain-id {chain_id} --start-height {start_height} --unique-id {unique_id} init-uncd-runner`, replacing the `{}`s with appropriate values from the `framework/pytest` directory. This starts a helper program on each node that will be in charge of the test state and uncd process.
 3. Run `python3 tests/mocknet/mirror.py --chain-id {chain_id} --start-height {start_height} --unique-id {unique_id} new-test`. This will take a few hours.

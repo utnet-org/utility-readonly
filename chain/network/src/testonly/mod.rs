@@ -1,4 +1,4 @@
-use near_o11y::testonly::init_test_logger;
+use unc_o11y::testonly::init_test_logger;
 use pretty_assertions::Comparison;
 use std::cmp::Eq;
 use std::collections::HashSet;

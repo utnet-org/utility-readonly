@@ -1,9 +1,9 @@
-use near_parameters::vm::Config as VMConfig;
-use near_parameters::{
+use unc_parameters::vm::Config as VMConfig;
+use unc_parameters::{
     AccountCreationConfig, ActionCosts, ExtCosts, ExtCostsConfig, Fee, ParameterCost,
     RuntimeConfig, RuntimeConfigStore, RuntimeFeesConfig,
 };
-use near_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::version::PROTOCOL_VERSION;
 
 use anyhow::Context;
 

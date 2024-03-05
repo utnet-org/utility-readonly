@@ -1,13 +1,13 @@
 use chrono::{DateTime, Duration, Utc};
-use near_async::messaging::CanSend;
-use near_chain::{Chain, ChainStoreAccess};
-use near_client_primitives::types::SyncStatus;
-use near_network::types::PeerManagerMessageRequest;
-use near_network::types::{HighestHeightPeerInfo, NetworkRequests, PeerManagerAdapter};
-use near_primitives::block::Tip;
-use near_primitives::hash::CryptoHash;
-use near_primitives::static_clock::StaticClock;
-use near_primitives::types::BlockHeight;
+use unc_async::messaging::CanSend;
+use unc_chain::{Chain, ChainStoreAccess};
+use unc_client_primitives::types::SyncStatus;
+use unc_network::types::PeerManagerMessageRequest;
+use unc_network::types::{HighestHeightPeerInfo, NetworkRequests, PeerManagerAdapter};
+use unc_primitives::block::Tip;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::types::BlockHeight;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::cmp::min;
@@ -95,7 +95,7 @@ impl HeaderSync {
         chain: &Chain,
         highest_height: BlockHeight,
         highest_height_peers: &[HighestHeightPeerInfo],
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         let _span = tracing::debug_span!(target: "sync", "run", sync = "HeaderSync").entered();
         let head = chain.head()?;
         let header_head = chain.header_head()?;
@@ -245,7 +245,7 @@ impl HeaderSync {
                                         PeerManagerMessageRequest::NetworkRequests(
                                             NetworkRequests::BanPeer {
                                                 peer_id: peer.peer_info.id.clone(),
-                                                ban_reason: near_network::types::ReasonForBan::ProvidedNotEnoughHeaders,
+                                                ban_reason: unc_network::types::ReasonForBan::ProvidedNotEnoughHeaders,
                                             },
                                         ),
                                     );
@@ -332,7 +332,7 @@ impl HeaderSync {
     // back, then 8 blocks back, etc, until we reach the most recent final block. The reason
     // why we stop at the final block is because the consensus guarantees us that the final
     // blocks observed by all nodes are on the same fork.
-    fn get_locator(&mut self, chain: &Chain) -> Result<Vec<CryptoHash>, near_chain::Error> {
+    fn get_locator(&mut self, chain: &Chain) -> Result<Vec<CryptoHash>, unc_chain::Error> {
         let store = chain.chain_store();
         let tip = store.header_head()?;
         // We could just get the ordinal from the header, but it's off by one: #8177.
@@ -375,21 +375,21 @@ mod test {
     use std::sync::Arc;
     use std::thread;
 
-    use near_chain::test_utils::{
+    use unc_chain::test_utils::{
         process_block_sync, setup, setup_with_validators_and_start_time, ValidatorSchedule,
     };
-    use near_chain::{BlockProcessingArtifact, Provenance};
-    use near_crypto::{KeyType, PublicKey};
-    use near_network::test_utils::MockPeerManagerAdapter;
-    use near_primitives::block::{Approval, Block, GenesisId};
-    use near_primitives::network::PeerId;
-    use near_primitives::test_utils::TestBlockBuilder;
+    use unc_chain::{BlockProcessingArtifact, Provenance};
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_network::test_utils::MockPeerManagerAdapter;
+    use unc_primitives::block::{Approval, Block, GenesisId};
+    use unc_primitives::network::PeerId;
+    use unc_primitives::test_utils::TestBlockBuilder;
 
     use super::*;
-    use near_network::types::{BlockInfo, FullPeerInfo, PeerInfo};
-    use near_primitives::merkle::PartialMerkleTree;
-    use near_primitives::types::EpochId;
-    use near_primitives::version::PROTOCOL_VERSION;
+    use unc_network::types::{BlockInfo, FullPeerInfo, PeerInfo};
+    use unc_primitives::merkle::PartialMerkleTree;
+    use unc_primitives::types::EpochId;
+    use unc_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
 
     #[test]
@@ -479,7 +479,7 @@ mod test {
         let mut sync_status = SyncStatus::NoSync;
         let peer1 = FullPeerInfo {
             peer_info: PeerInfo::random(),
-            chain_info: near_network::types::PeerChainInfo {
+            chain_info: unc_network::types::PeerChainInfo {
                 genesis_id: GenesisId {
                     chain_id: "unittest".to_string(),
                     hash: *chain.genesis().hash(),
@@ -579,7 +579,7 @@ mod test {
         let mut sync_status = SyncStatus::NoSync;
         let peer1 = FullPeerInfo {
             peer_info: PeerInfo::random(),
-            chain_info: near_network::types::PeerChainInfo {
+            chain_info: unc_network::types::PeerChainInfo {
                 genesis_id: GenesisId {
                     chain_id: "unittest".to_string(),
                     hash: *chain.genesis().hash(),
@@ -805,7 +805,7 @@ mod test {
         let mut sync_status = SyncStatus::NoSync;
         let peer1 = FullPeerInfo {
             peer_info: PeerInfo::random(),
-            chain_info: near_network::types::PeerChainInfo {
+            chain_info: unc_network::types::PeerChainInfo {
                 genesis_id: GenesisId {
                     chain_id: "unittest".to_string(),
                     hash: *chain.genesis().hash(),

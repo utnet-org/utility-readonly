@@ -7,8 +7,8 @@ use crate::types::{Balance, BlockHeight, Gas, MerkleHash, ShardId, StateRoot, Va
 use crate::validator_signer::ValidatorSigner;
 use crate::version::{ProtocolFeature, ProtocolVersion, SHARD_CHUNK_HEADER_UPGRADE_VERSION};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::Signature;
-use near_fmt::AbbrBytes;
+use unc_crypto::Signature;
+use unc_fmt::AbbrBytes;
 use reed_solomon_erasure::galois_8::{Field, ReedSolomon};
 use reed_solomon_erasure::ReconstructShard;
 use std::cmp::Ordering;

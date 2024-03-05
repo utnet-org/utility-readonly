@@ -1,7 +1,7 @@
 use crate::hash::CryptoHash;
 use crate::types::{AccountId, NumShards};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::types::ShardId;
+use unc_primitives_core::types::ShardId;
 use std::collections::HashMap;
 use std::{fmt, str};
 
@@ -427,7 +427,7 @@ impl<'de> serde::de::Visitor<'de> for ShardUIdVisitor {
 #[cfg(test)]
 mod tests {
     use crate::shard_layout::{account_id_to_shard_id, ShardLayout, ShardLayoutV1, ShardUId};
-    use near_primitives_core::types::{AccountId, ShardId};
+    use unc_primitives_core::types::{AccountId, ShardId};
     use rand::distributions::Alphanumeric;
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};

@@ -3,9 +3,9 @@ mod metrics;
 use actix::{Actor, Addr, Context, Handler};
 use awc::{Client, Connector};
 use futures::FutureExt;
-use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
-use near_performance_metrics_macros::perf;
-use near_primitives::static_clock::StaticClock;
+use unc_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext, WithSpanContextExt};
+use unc_performance_metrics_macros::perf;
+use unc_primitives::static_clock::StaticClock;
 use std::ops::Sub;
 use std::time::{Duration, Instant};
 
@@ -93,7 +93,7 @@ impl Handler<WithSpanContext<TelemetryEvent>> for TelemetryActor {
         }
         for endpoint in self.config.endpoints.iter() {
             let endpoint = endpoint.clone();
-            near_performance_metrics::actix::spawn(
+            unc_performance_metrics::actix::spawn(
                 "telemetry",
                 self.client
                     .post(endpoint.clone())

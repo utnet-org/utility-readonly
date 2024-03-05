@@ -21,7 +21,7 @@ import utils
 
 
 def main():
-    node_root = utils.get_near_tempdir('backward', clean=True)
+    node_root = utils.get_unc_tempdir('backward', clean=True)
     executables = branches.prepare_ab_test()
 
     # Setup local network.

@@ -4,40 +4,40 @@ use std::time::Duration;
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::DateTime;
 use chrono::Utc;
-use near_chain_configs::MutableConfigValue;
-use near_chain_configs::ReshardingConfig;
-use near_primitives::sandbox::state_patch::SandboxStatePatch;
-use near_store::flat::FlatStorageManager;
-use near_store::StorageError;
+use unc_chain_configs::MutableConfigValue;
+use unc_chain_configs::ReshardingConfig;
+use unc_primitives::sandbox::state_patch::SandboxStatePatch;
+use unc_store::flat::FlatStorageManager;
+use unc_store::StorageError;
 use num_rational::Rational32;
 
-use near_chain_configs::{Genesis, ProtocolConfig};
-use near_chain_primitives::Error;
-use near_pool::types::PoolIterator;
-use near_primitives::challenge::ChallengesResult;
-use near_primitives::checked_feature;
-use near_primitives::errors::InvalidTxError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::{merklize, MerklePath};
-use near_primitives::receipt::Receipt;
-use near_primitives::shard_layout::{ShardLayout, ShardUId};
-use near_primitives::state_part::PartId;
-use near_primitives::transaction::{ExecutionOutcomeWithId, SignedTransaction};
-use near_primitives::types::validator_power::{ValidatorPower, ValidatorPowerIter};
-use near_primitives::types::{
+use unc_chain_configs::{Genesis, ProtocolConfig};
+use unc_chain_primitives::Error;
+use unc_pool::types::PoolIterator;
+use unc_primitives::challenge::ChallengesResult;
+use unc_primitives::checked_feature;
+use unc_primitives::errors::InvalidTxError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::{merklize, MerklePath};
+use unc_primitives::receipt::Receipt;
+use unc_primitives::shard_layout::{ShardLayout, ShardUId};
+use unc_primitives::state_part::PartId;
+use unc_primitives::transaction::{ExecutionOutcomeWithId, SignedTransaction};
+use unc_primitives::types::validator_power::{ValidatorPower, ValidatorPowerIter};
+use unc_primitives::types::{
     Balance, BlockHeight, BlockHeightDelta, EpochId, Gas, MerkleHash, NumBlocks, ShardId,
     StateChangesForResharding, StateRoot, StateRootNode,
 };
-use near_primitives::version::{
+use unc_primitives::version::{
     ProtocolVersion, MIN_GAS_PRICE_NEP_92, MIN_GAS_PRICE_NEP_92_FIX, MIN_PROTOCOL_VERSION_NEP_92,
     MIN_PROTOCOL_VERSION_NEP_92_FIX,
 };
-use near_primitives::views::{QueryRequest, QueryResponse};
-use near_store::{PartialStorage, ShardTries, Store, Trie, WrappedTrieChanges};
+use unc_primitives::views::{QueryRequest, QueryResponse};
+use unc_store::{PartialStorage, ShardTries, Store, Trie, WrappedTrieChanges};
 
-pub use near_epoch_manager::EpochManagerAdapter;
-pub use near_primitives::block::{Block, BlockHeader, Tip};
-use near_primitives::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
+pub use unc_epoch_manager::EpochManagerAdapter;
+pub use unc_primitives::block::{Block, BlockHeader, Tip};
+use unc_primitives::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum BlockStatus {
@@ -413,7 +413,7 @@ pub trait RuntimeAdapter: Send + Sync {
         block_hash: &CryptoHash,
         epoch_id: &EpochId,
         request: &QueryRequest,
-    ) -> Result<QueryResponse, near_chain_primitives::error::QueryError>;
+    ) -> Result<QueryResponse, unc_chain_primitives::error::QueryError>;
 
     /// Get part of the state corresponding to the given state root.
     /// `prev_hash` is a block whose post state root is `state_root`.
@@ -488,13 +488,13 @@ mod tests {
     use std::sync::Arc;
 
     use chrono::Utc;
-    use near_primitives::test_utils::{create_test_signer, TestBlockBuilder};
+    use unc_primitives::test_utils::{create_test_signer, TestBlockBuilder};
 
-    use near_primitives::block::{genesis_chunks, Approval};
-    use near_primitives::hash::hash;
-    use near_primitives::merkle::verify_path;
-    use near_primitives::transaction::{ExecutionMetadata, ExecutionOutcome, ExecutionStatus};
-    use near_primitives::version::PROTOCOL_VERSION;
+    use unc_primitives::block::{genesis_chunks, Approval};
+    use unc_primitives::hash::hash;
+    use unc_primitives::merkle::verify_path;
+    use unc_primitives::transaction::{ExecutionMetadata, ExecutionOutcome, ExecutionStatus};
+    use unc_primitives::version::PROTOCOL_VERSION;
 
     use super::*;
 

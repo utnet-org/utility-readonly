@@ -4,13 +4,13 @@ use crate::{
     TrieCachingStorage, TrieConfig, TrieStorage,
 };
 use crossbeam::select;
-use near_o11y::metrics::prometheus;
-use near_o11y::metrics::prometheus::core::GenericGauge;
-use near_o11y::tracing::error;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{AccountId, ShardId, StateRoot};
+use unc_o11y::metrics::prometheus;
+use unc_o11y::metrics::prometheus::core::GenericGauge;
+use unc_o11y::tracing::error;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{AccountId, ShardId, StateRoot};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -477,11 +477,11 @@ impl PrefetchApi {
                         let storage_key = trie_key.to_vec();
                         metric_prefetch_sent.inc();
                         if let Ok(_maybe_value) = prefetcher_trie.get(&storage_key) {
-                            near_o11y::io_trace!(count: "prefetch");
+                            unc_o11y::io_trace!(count: "prefetch");
                         } else {
                             // This may happen in rare occasions and can be ignored safely.
                             // See comments in `TriePrefetchingStorage::retrieve_raw_bytes`.
-                            near_o11y::io_trace!(count: "prefetch_failure");
+                            unc_o11y::io_trace!(count: "prefetch_failure");
                             metric_prefetch_fail.inc();
                         }
                     }
@@ -579,7 +579,7 @@ mod tests_utils {
 #[cfg(test)]
 mod tests {
     use super::{PrefetchStagingArea, PrefetcherResult};
-    use near_primitives::hash::CryptoHash;
+    use unc_primitives::hash::CryptoHash;
 
     #[test]
     fn test_prefetch_staging_area_blocking_get_after_update() {

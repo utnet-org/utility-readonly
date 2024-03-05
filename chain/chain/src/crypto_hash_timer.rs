@@ -1,5 +1,5 @@
 use lru::LruCache;
-use near_primitives::{hash::CryptoHash, static_clock::StaticClock};
+use unc_primitives::{hash::CryptoHash, static_clock::StaticClock};
 use std::{
     sync::Mutex,
     time::{Duration, Instant},
@@ -55,7 +55,7 @@ fn test_crypto_hash_timer() {
     let crypto_hash: CryptoHash = "s3N6V7CNAN2Eg6vfivMVHR4hbMZeh72fTmYbrC6dXBT".parse().unwrap();
     // Timer should be missing.
     assert_eq!(CryptoHashTimer::get_timer_value(crypto_hash), None);
-    let mock_clock_guard = near_primitives::static_clock::MockClockGuard::default();
+    let mock_clock_guard = unc_primitives::static_clock::MockClockGuard::default();
     let start_time = Instant::now();
     mock_clock_guard.add_instant(start_time);
     mock_clock_guard.add_instant(start_time + std::time::Duration::from_secs(1));

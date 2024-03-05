@@ -1,6 +1,6 @@
 use clap::{Arg, Command};
 use genesis_populate::GenesisBuilder;
-use near_chain_configs::GenesisValidationMode;
+use unc_chain_configs::GenesisValidationMode;
 use framework::{get_default_home, load_config};
 use std::path::PathBuf;
 
@@ -31,21 +31,21 @@ fn main() {
         .get_one::<String>("additional-accounts-num")
         .map(|x| x.parse::<u64>().expect("Failed to parse number of additional accounts."))
         .unwrap();
-    let near_config = load_config(home_dir, GenesisValidationMode::Full)
+    let unc_config = load_config(home_dir, GenesisValidationMode::Full)
         .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
-    let store = near_store::NodeStorage::opener(
+    let store = unc_store::NodeStorage::opener(
         home_dir,
-        near_config.config.archive,
-        &near_config.config.store,
+        unc_config.config.archive,
+        &unc_config.config.store,
         None,
     )
     .open()
     .unwrap()
     .get_hot_store();
-    GenesisBuilder::from_config_and_store(home_dir, near_config, store)
+    GenesisBuilder::from_config_and_store(home_dir, unc_config, store)
         .add_additional_accounts(additional_accounts_num)
-        .add_additional_accounts_contract(near_test_contracts::trivial_contract().to_vec())
+        .add_additional_accounts_contract(unc_test_contracts::trivial_contract().to_vec())
         .print_progress()
         .build()
         .unwrap()

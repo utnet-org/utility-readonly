@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use near_actix_test_utils::ShutdownableThread;
-use near_chain_configs::Genesis;
-use near_crypto::{InMemorySigner, KeyType, Signer};
-use near_primitives::types::AccountId;
-use framework::{start_with_config, NearConfig};
+use unc_actix_test_utils::ShutdownableThread;
+use unc_chain_configs::Genesis;
+use unc_crypto::{InMemorySigner, KeyType, Signer};
+use unc_primitives::types::AccountId;
+use framework::{start_with_config, UncConfig};
 
 use crate::node::Node;
 use crate::user::rpc_user::RpcUser;
@@ -17,13 +17,13 @@ pub enum ThreadNodeState {
 }
 
 pub struct ThreadNode {
-    pub config: NearConfig,
+    pub config: UncConfig,
     pub state: ThreadNodeState,
     pub signer: Arc<InMemorySigner>,
     pub dir: tempfile::TempDir,
 }
 
-fn start_thread(config: NearConfig, path: PathBuf) -> ShutdownableThread {
+fn start_thread(config: UncConfig, path: PathBuf) -> ShutdownableThread {
     ShutdownableThread::start("test", move || {
         start_with_config(&path, config).expect("start_with_config");
     })
@@ -81,7 +81,7 @@ impl Node for ThreadNode {
 
 impl ThreadNode {
     /// Side effects: create storage, open database, lock database
-    pub fn new(config: NearConfig) -> ThreadNode {
+    pub fn new(config: UncConfig) -> ThreadNode {
         let signer = Arc::new(InMemorySigner::from_seed(
             config.validator_signer.as_ref().unwrap().validator_id().clone(),
             KeyType::ED25519,

@@ -25,13 +25,13 @@ use crate::trie::{
 };
 use crate::{metrics, PartialStorage, StorageError, Trie, TrieChanges};
 use borsh::BorshDeserialize;
-use near_primitives::challenge::PartialState;
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::state::FlatStateValue;
-use near_primitives::state_part::PartId;
-use near_primitives::state_record::is_contract_code_key;
-use near_primitives::types::{ShardId, StateRoot};
-use near_vm_runner::ContractCode;
+use unc_primitives::challenge::PartialState;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_record::is_contract_code_key;
+use unc_primitives::types::{ShardId, StateRoot};
+use unc_vm_runner::ContractCode;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -517,7 +517,7 @@ mod tests {
     use rand::seq::SliceRandom;
     use rand::Rng;
 
-    use near_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::hash::{hash, CryptoHash};
 
     use crate::test_utils::{gen_changes, test_populate_trie, TestTriesBuilder};
     use crate::trie::iterator::CrumbStatus;
@@ -527,7 +527,7 @@ mod tests {
 
     use super::*;
     use crate::{DBCol, MissingTrieValueContext, TrieCachingStorage};
-    use near_primitives::shard_layout::ShardUId;
+    use unc_primitives::shard_layout::ShardUId;
 
     /// Checks that sampling state boundaries always gives valid state keys
     /// even if trie contains intermediate nodes.

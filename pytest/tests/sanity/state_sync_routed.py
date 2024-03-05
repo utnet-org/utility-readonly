@@ -36,7 +36,7 @@ TIMEOUT = 150 + START_AT_BLOCK * 10
 config = load_config()
 node_config = state_sync_lib.get_state_sync_config_combined()
 
-near_root, node_dirs = init_cluster(
+unc_root, node_dirs = init_cluster(
     2, 3, 1, config,
     [["min_gas_price", 0], ["max_inflation_rate", [0, 1]], ["epoch_length", 10],
      ["block_producer_kickout_threshold", 80]],
@@ -45,22 +45,22 @@ near_root, node_dirs = init_cluster(
 started = time.time()
 
 # First observer
-node2 = spin_up_node(config, near_root, node_dirs[2], 2)
+node2 = spin_up_node(config, unc_root, node_dirs[2], 2)
 # Boot from observer since block producer will blacklist third observer
 boot_node = node2
 
 # Second observer
-node3 = spin_up_node(config, near_root, node_dirs[3], 3, boot_node=boot_node)
+node3 = spin_up_node(config, unc_root, node_dirs[3], 3, boot_node=boot_node)
 
 # Spin up validators
 node0 = spin_up_node(config,
-                     near_root,
+                     unc_root,
                      node_dirs[0],
                      0,
                      boot_node=boot_node,
                      blacklist=[4])
 node1 = spin_up_node(config,
-                     near_root,
+                     unc_root,
                      node_dirs[1],
                      1,
                      boot_node=boot_node,
@@ -87,7 +87,7 @@ if mode == 'onetx':
     assert ctx.get_balances() == ctx.expected_balances
 
 node4 = spin_up_node(config,
-                     near_root,
+                     unc_root,
                      node_dirs[4],
                      4,
                      boot_node=boot_node,
@@ -125,7 +125,7 @@ assert catch_up_height in boot_heights, "%s not in %s" % (catch_up_height,
 while True:
     assert time.time(
     ) - started < TIMEOUT, "Waiting for node 4 to connect to two peers"
-    if metrics4.get_int_metric_value("near_peer_connections_total") == 2:
+    if metrics4.get_int_metric_value("unc_peer_connections_total") == 2:
         break
     time.sleep(0.1)
 

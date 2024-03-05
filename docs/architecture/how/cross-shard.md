@@ -9,7 +9,7 @@ shard 1).
 Imagine, we run the following command in the command line:
 
 ```console
-$ NEAR_ENV=local near send shard0 shard1 500
+$ unc_ENV=local near send shard0 shard1 500
 ```
 
 What happens under the hood? How is this transaction changed into receipts and

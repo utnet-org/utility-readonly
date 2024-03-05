@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ReceiptReference {
-    pub receipt_id: near_primitives::hash::CryptoHash,
+    pub receipt_id: unc_primitives::hash::CryptoHash,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -12,7 +12,7 @@ pub struct RpcReceiptRequest {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct RpcReceiptResponse {
     #[serde(flatten)]
-    pub receipt_view: near_primitives::views::ReceiptView,
+    pub receipt_view: unc_primitives::views::ReceiptView,
 }
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
@@ -21,7 +21,7 @@ pub enum RpcReceiptError {
     #[error("The node reached its limits. Try again later. More details: {error_message}")]
     InternalError { error_message: String },
     #[error("Receipt with id {receipt_id} has never been observed on this node")]
-    UnknownReceipt { receipt_id: near_primitives::hash::CryptoHash },
+    UnknownReceipt { receipt_id: unc_primitives::hash::CryptoHash },
 }
 
 impl From<RpcReceiptError> for crate::errors::RpcError {

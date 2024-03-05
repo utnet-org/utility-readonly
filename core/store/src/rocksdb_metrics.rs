@@ -1,6 +1,6 @@
 use crate::db::{StatsValue, StoreStatistics};
 use crate::Temperature;
-use near_o11y::metrics::{
+use unc_o11y::metrics::{
     try_create_gauge_vec, try_create_int_gauge, try_create_int_gauge_vec, GaugeVec, IntGauge,
     IntGaugeVec,
 };
@@ -57,7 +57,7 @@ impl RocksDBMetrics {
             if values.len() == 1 {
                 // A counter stats.
                 // A statistic 'a.b.c' creates the following prometheus metric:
-                // - near_a_b_c
+                // - unc_a_b_c
                 if let StatsValue::Count(value) = values[0] {
                     self.set_int_value(
                         |stat_name: &str| stat_name.to_string(),
@@ -155,15 +155,15 @@ fn get_temperature_str(temperature: &Temperature) -> &'static str {
 }
 
 fn get_prometheus_metric_name(stat_name: &str) -> String {
-    format!("near_{}", stat_name.replace(&['.', '-'], "_"))
+    format!("unc_{}", stat_name.replace(&['.', '-'], "_"))
 }
 
 fn get_metric_name_summary_count_gauge(stat_name: &str) -> String {
-    format!("near_{}_count", stat_name.replace('.', "_"))
+    format!("unc_{}_count", stat_name.replace('.', "_"))
 }
 
 fn get_metric_name_summary_sum_gauge(stat_name: &str) -> String {
-    format!("near_{}_sum", stat_name.replace('.', "_"))
+    format!("unc_{}_sum", stat_name.replace('.', "_"))
 }
 
 fn get_stats_summary_count_key(stat_name: &str) -> String {

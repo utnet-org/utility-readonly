@@ -5,9 +5,9 @@ use super::node::{InputMemTrieNode, MemTrieNodeId, MemTrieNodeView};
 use super::MemTries;
 use crate::trie::{Children, MemTrieChanges, TrieRefcountDeltaMap, TRIE_COSTS};
 use crate::{NibbleSlice, RawTrieNode, RawTrieNodeWithSize, TrieChanges};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::state::FlatStateValue;
-use near_primitives::types::BlockHeight;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::types::BlockHeight;
 use std::collections::HashMap;
 
 /// An old node means a node in the current in-memory trie. An updated node means a
@@ -879,9 +879,9 @@ mod tests {
     use crate::trie::mem::MemTries;
     use crate::trie::MemTrieChanges;
     use crate::{KeyLookupMode, ShardTries, TrieChanges};
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::state::{FlatStateValue, ValueRef};
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::state::{FlatStateValue, ValueRef};
     use rand::Rng;
     use std::collections::{HashMap, HashSet};
 

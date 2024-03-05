@@ -65,7 +65,7 @@ EPOCH_LENGTH = 300
 
 config = load_config()
 node_config = state_sync_lib.get_state_sync_config_combined()
-near_root, node_dirs = init_cluster(
+unc_root, node_dirs = init_cluster(
     3, 1, 1, config,
     [["min_gas_price", 0], ["max_inflation_rate", [0, 1]],
      ["epoch_length", EPOCH_LENGTH], ["block_producer_kickout_threshold", 0],
@@ -75,7 +75,7 @@ near_root, node_dirs = init_cluster(
 logging.info("Populating genesis")
 
 if genesis_data is None:
-    genesis_populate_all(near_root, additional_accounts, node_dirs)
+    genesis_populate_all(unc_root, additional_accounts, node_dirs)
 else:
     for node_dir in node_dirs:
         copy_genesis(genesis_data, node_dir)
@@ -94,18 +94,18 @@ LARGE_HEIGHT = SMALL_HEIGHT + 50
 TIMEOUT = 3600
 start = time.time()
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
 validator = spin_up_node(config,
-                         near_root,
+                         unc_root,
                          node_dirs[1],
                          1,
                          boot_node=boot_node)
 delayed_validator = spin_up_node(config,
-                                 near_root,
+                                 unc_root,
                                  node_dirs[2],
                                  2,
                                  boot_node=boot_node)
-observer = spin_up_node(config, near_root, node_dirs[3], 3, boot_node=boot_node)
+observer = spin_up_node(config, unc_root, node_dirs[3], 3, boot_node=boot_node)
 
 
 def wait_for_height(target_height, rpc_node, sleep_time=2, bps_threshold=-1):

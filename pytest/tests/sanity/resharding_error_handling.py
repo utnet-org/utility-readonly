@@ -53,7 +53,7 @@ class ReshardingErrorHandlingTest(unittest.TestCase):
             self.epoch_length, self.binary_protocol_version, logger)
         client_config_changes = get_client_config_changes(num_nodes, 10)
 
-        near_root, [node0_dir, node1_dir] = init_cluster(
+        unc_root, [node0_dir, node1_dir] = init_cluster(
             num_nodes=num_nodes,
             num_observers=0,
             num_shards=1,
@@ -64,13 +64,13 @@ class ReshardingErrorHandlingTest(unittest.TestCase):
 
         node0 = spin_up_node(
             self.config,
-            near_root,
+            unc_root,
             node0_dir,
             0,
         )
         node1 = spin_up_node(
             self.config,
-            near_root,
+            unc_root,
             node1_dir,
             1,
             boot_node=node0,
@@ -105,7 +105,7 @@ class ReshardingErrorHandlingTest(unittest.TestCase):
 
         metrics = MetricsTracker(node0)
         for height, _ in poll_blocks(node0):
-            status = metrics.get_metric_all_values("near_resharding_status")
+            status = metrics.get_metric_all_values("unc_resharding_status")
             logger.info(f"#{height} resharding status {status}")
 
             if len(status) > 0:

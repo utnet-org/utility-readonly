@@ -98,7 +98,7 @@ class RecompressStorageTestCase(unittest.TestCase):
         """Calls node’s uncd with given arguments."""
         node_dir = pathlib.Path(node.node_dir)
         cmd = [
-            pathlib.Path(node.near_root) / node.binary_name,
+            pathlib.Path(node.unc_root) / node.binary_name,
             f'--home={node_dir}',
         ] + list(args)
         logger.info('Running ' + ' '.join(str(arg) for arg in cmd))

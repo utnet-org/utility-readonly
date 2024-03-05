@@ -205,8 +205,8 @@ imports and rely on `rustfmt` to sort them.
 // GOOD
 use crate::types::KnownPeerState;
 use borsh::BorshSerialize;
-use near_primitives::utils::to_timestamp;
-use near_store::{DBCol::Peers, Store};
+use unc_primitives::utils::to_timestamp;
+use unc_store::{DBCol::Peers, Store};
 use rand::seq::SliceRandom;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -218,8 +218,8 @@ use std::net::SocketAddr;
 use borsh::BorshSerialize;
 use rand::seq::SliceRandom;
 
-use near_primitives::utils::to_timestamp;
-use near_store::{DBCol::Peers, Store};
+use unc_primitives::utils::to_timestamp;
+use unc_store::{DBCol::Peers, Store};
 
 use crate::types::KnownPeerState;
 ```
@@ -443,11 +443,11 @@ metrics don't incur a significant runtime cost.
 
 ### Naming
 
-Prefix all `framework` metrics with `near_`. Follow the
+Prefix all `framework` metrics with `unc_`. Follow the
 [Prometheus naming convention](https://prometheus.io/docs/practices/naming/)
 for new metrics.
 
-**Rationale:** The `near_` prefix makes it trivial to separate metrics exported
+**Rationale:** The `unc_` prefix makes it trivial to separate metrics exported
 by `framework` from other metrics, such as metrics about the state of the machine
 that runs `uncd`.
 

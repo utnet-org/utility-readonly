@@ -7,13 +7,13 @@ use crate::PeerManagerActor;
 use actix::{Actor, ActorContext, Context, Handler};
 use futures::future::BoxFuture;
 use futures::{future, Future, FutureExt};
-use near_async::messaging::{CanSend, CanSendAsync};
-use near_crypto::{KeyType, SecretKey};
-use near_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext};
-use near_primitives::hash::hash;
-use near_primitives::network::PeerId;
-use near_primitives::types::EpochId;
-use near_primitives::utils::index_to_bytes;
+use unc_async::messaging::{CanSend, CanSendAsync};
+use unc_crypto::{KeyType, SecretKey};
+use unc_o11y::{handler_debug_span, OpenTelemetrySpanExt, WithSpanContext};
+use unc_primitives::hash::hash;
+use unc_primitives::network::PeerId;
+use unc_primitives::types::EpochId;
+use unc_primitives::utils::index_to_bytes;
 use rand::{thread_rng, RngCore};
 use std::collections::{HashMap, VecDeque};
 use std::ops::ControlFlow;
@@ -55,10 +55,10 @@ pub fn wait_or_panic(max_wait_ms: u64) {
 ///
 /// ```rust,ignore
 /// use actix::{System, Actor};
-/// use near_network::test_utils::WaitOrTimeoutActor;
+/// use unc_network::test_utils::WaitOrTimeoutActor;
 /// use std::time::{Instant, Duration};
 ///
-/// near_actix_test_utils::run_actix(async {
+/// unc_actix_test_utils::run_actix(async {
 ///     let start = Instant::now();
 ///     WaitOrTimeoutActor::new(
 ///         Box::new(move |ctx| {
@@ -90,7 +90,7 @@ impl WaitOrTimeoutActor {
     fn wait_or_timeout(&mut self, ctx: &mut Context<Self>) {
         (self.f)(ctx);
 
-        near_performance_metrics::actix::run_later(
+        unc_performance_metrics::actix::run_later(
             ctx,
             tokio::time::Duration::from_millis(self.check_interval_ms),
             move |act, ctx| {

@@ -1,6 +1,6 @@
 use crate::network_protocol::PeerInfo;
 use anyhow::{anyhow, Context as _};
-use near_primitives::network::PeerId;
+use unc_primitives::network::PeerId;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::fmt;
@@ -189,7 +189,7 @@ impl ListenerAddr {
         Self(addr)
     }
 
-    /// Constructs a std::net::TcpListener, for usage outside of near_network.
+    /// Constructs a std::net::TcpListener, for usage outside of unc_network.
     pub fn std_listener(&self) -> std::io::Result<std::net::TcpListener> {
         self.listener()?.0.into_std()
     }

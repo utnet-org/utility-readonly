@@ -4,16 +4,16 @@ somewhat significantly.
 
 # 1. Overview
 
-Near Protocol uses its own implementation of a custom peer-to-peer network. Peers
+unc Protocol uses its own implementation of a custom peer-to-peer network. Peers
 who join the network are represented by nodes and connections between them by edges.
 
-The purpose of this document is to describe the inner workings of the `near-network`
+The purpose of this document is to describe the inner workings of the `unc-network`
 package; and to be used as reference by future engineers to understand the network
 code without any prior knowledge.
 
 # 2. Code structure
 
-`near-network` runs on top of the `actor` framework called 
+`unc-network` runs on top of the `actor` framework called 
 [`Actix`](https://actix.rs/docs/). Code structure is split between 4 actors
 `PeerManagerActor`, `PeerActor`, `RoutingTableActor`, `EdgeValidatorActor`
 
@@ -58,7 +58,7 @@ Responsibilities:
 
 ### 2.4 `PeerManagerActor`
 
-`PeerManagerActor` is the main actor of `near-network` crate. It acts as a
+`PeerManagerActor` is the main actor of `unc-network` crate. It acts as a
 bridge connecting to the world outside, the other peers, and `ClientActor` and
 `ClientViewActor`, which handle processing any operations on the chain.
 `PeerManagerActor` maintains information about p2p network via `RoutingTableActor`,
@@ -86,7 +86,7 @@ on its own thread.
 
 # 4. NetworkConfig
 
-`near-network` reads configuration from `NetworkConfig`, which is a part of `client
+`unc-network` reads configuration from `NetworkConfig`, which is a part of `client
 config`.
 
 Here is a list of features read from config:
@@ -436,11 +436,11 @@ containing only edges adjacent to current node.
 # 10. Message transportation layers.
 
 This section describes different protocols of sending messages currently used in
-`Near`.
+`unc`.
 
 ## 10.1 Messages between Actors.
 
-`Near` is build on `Actix`'s `actor`
+`unc` is build on `Actix`'s `actor`
 [framework](https://actix.rs/docs/actix/actor). Usually each actor
 runs on its own dedicated thread. Some, like `PeerActor` have one thread per
 each instance. Only messages implementing `actix::Message`, can be sent
@@ -453,7 +453,7 @@ Actix messages can be found by looking for `impl actix::Message`.
 
 ## 10.2 Messages sent through TCP
 
-Near is using `borsh` serialization to exchange messages between nodes (See
+unc is using `borsh` serialization to exchange messages between nodes (See
 [borsh.io](https://borsh.io/)). We should be careful when making changes to
 them. We have to maintain backward compatibility. Only messages implementing
 `BorshSerialize`, `BorshDeserialize` can be sent. We also use `borsh` for
@@ -461,7 +461,7 @@ database storage.
 
 ## 10.3 Messages sent/received through `chain/jsonrpc`
 
-Near runs a `json REST server`. (See `actix_web::HttpServer`). All messages sent
+unc runs a `json REST server`. (See `actix_web::HttpServer`). All messages sent
 and received must implement `serde::Serialize` and `serde::Deserialize`.
 
 # 11. Code flow - routing a message

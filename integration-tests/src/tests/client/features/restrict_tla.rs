@@ -1,11 +1,11 @@
 use super::super::process_blocks::create_account;
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_primitives::errors::{ActionError, ActionErrorKind};
-use near_primitives::types::{AccountId, BlockHeight};
-use near_primitives::views::FinalExecutionStatus;
-use near_primitives_core::version::PROTOCOL_VERSION;
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_primitives::errors::{ActionError, ActionErrorKind};
+use unc_primitives::types::{AccountId, BlockHeight};
+use unc_primitives::views::FinalExecutionStatus;
+use unc_primitives_core::version::PROTOCOL_VERSION;
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -16,7 +16,7 @@ fn test_create_top_level_accounts() {
     let mut genesis = Genesis::test(vec![account.clone()], 1);
     genesis.config.epoch_length = epoch_length;
     genesis.config.protocol_version = PROTOCOL_VERSION;
-    let runtime_config = near_parameters::RuntimeConfigStore::new(None);
+    let runtime_config = unc_parameters::RuntimeConfigStore::new(None);
     let mut env = TestEnv::builder(ChainGenesis::new(&genesis))
         .real_epoch_managers(&genesis.config)
         .nightshade_runtimes_with_runtime_config_store(&genesis, vec![runtime_config])

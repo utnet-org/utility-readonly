@@ -1,16 +1,16 @@
 use borsh::BorshDeserialize;
-use near_chain::types::RuntimeAdapter;
-use near_chain::{ChainStore, ChainStoreAccess};
-use near_epoch_manager::{EpochManager, EpochManagerAdapter};
-use near_primitives::hash::CryptoHash;
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::{
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{ChainStore, ChainStoreAccess};
+use unc_epoch_manager::{EpochManager, EpochManagerAdapter};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::{
     EpochId, ShardId, StateChangesForBlock, StateChangesForBlockRange, StateChangesForShard,
     StateRoot,
 };
-use near_primitives_core::types::BlockHeight;
-use near_store::{KeyForStateChanges, Store, WrappedTrieChanges};
-use framework::{NearConfig, NightshadeRuntime};
+use unc_primitives_core::types::BlockHeight;
+use unc_store::{KeyForStateChanges, Store, WrappedTrieChanges};
+use framework::{UncConfig, NightshadeRuntime};
 use std::path::{Path, PathBuf};
 
 #[derive(clap::Subcommand, Debug, Clone)]
@@ -42,13 +42,13 @@ pub(crate) enum StateChangesSubCommand {
 }
 
 impl StateChangesSubCommand {
-    pub(crate) fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+    pub(crate) fn run(self, home_dir: &Path, unc_config: UncConfig, store: Store) {
         match self {
             StateChangesSubCommand::Apply { file, shard_id, state_root } => {
-                apply_state_changes(file, shard_id, state_root, home_dir, near_config, store)
+                apply_state_changes(file, shard_id, state_root, home_dir, unc_config, store)
             }
             StateChangesSubCommand::Dump { height_from, height_to, file } => {
-                dump_state_changes(height_from, height_to, file, near_config, store)
+                dump_state_changes(height_from, height_to, file, unc_config, store)
             }
         }
     }
@@ -66,16 +66,16 @@ fn dump_state_changes(
     height_from: BlockHeight,
     height_to: BlockHeight,
     file: PathBuf,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
     assert!(height_from <= height_to, "--height-from must be less than or equal to --height-to");
 
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let chain_store = ChainStore::new(
         store.clone(),
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
 
     let blocks = (height_from..=height_to).filter_map(|block_height| {
@@ -131,20 +131,20 @@ fn apply_state_changes(
     shard_id: ShardId,
     mut state_root: StateRoot,
     home_dir: &Path,
-    near_config: NearConfig,
+    unc_config: UncConfig,
     store: Store,
 ) {
-    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+    let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         store.clone(),
-        &near_config,
+        &unc_config,
         epoch_manager.clone(),
     );
     let mut chain_store = ChainStore::new(
         store,
-        near_config.genesis.config.genesis_height,
-        near_config.client_config.save_trie_changes,
+        unc_config.genesis.config.genesis_height,
+        unc_config.client_config.save_trie_changes,
     );
 
     let data = std::fs::read(&file).unwrap();
@@ -209,7 +209,7 @@ pub fn get_state_change_shard_id(
     block_hash: &CryptoHash,
     epoch_id: &EpochId,
     epoch_manager: &dyn EpochManagerAdapter,
-) -> Result<ShardId, near_chain::near_chain_primitives::error::Error> {
+) -> Result<ShardId, unc_chain::unc_chain_primitives::error::Error> {
     if let Some(account_id) = trie_key.get_account_id() {
         let shard_id = epoch_manager.account_id_to_shard_id(&account_id, epoch_id)?;
         Ok(shard_id)
@@ -217,7 +217,7 @@ pub fn get_state_change_shard_id(
         let shard_uid =
             KeyForStateChanges::delayed_receipt_key_decode_shard_uid(row_key, block_hash, trie_key)
                 .map_err(|err| {
-                    near_chain::near_chain_primitives::error::Error::Other(err.to_string())
+                    unc_chain::unc_chain_primitives::error::Error::Other(err.to_string())
                 })?;
         Ok(shard_uid.shard_id as ShardId)
     }

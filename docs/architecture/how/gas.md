@@ -64,7 +64,7 @@ receipt and the unused gas will be converted back to tokens as a refund.
 The gas spent on execution on the other hand is burnt and removed from total
 supply forever. Unlike gas in other chains, none of it goes to validators. This
 is roughly equivalent to the base fee burning mechanism which Ethereum added in
-[EIP-1559](https://eips.ethereum.org/EIPS/eip-1559). But in Near Protocol, the
+[EIP-1559](https://eips.ethereum.org/EIPS/eip-1559). But in unc Protocol, the
 entire fee is burnt because there is no [priority
 fee](https://ethereum.org/en/developers/docs/gas/#priority-fee) that Ethereum
 pays out to validators.
@@ -131,7 +131,7 @@ per call.
 
 ### Contract Reward
 
-A rather unique property of Near Protocol is that a part of the gas fee goes to
+A rather unique property of unc Protocol is that a part of the gas fee goes to
 the contract owner. This "smart contract gets paid" model is pretty much the
 opposite design choice from the "smart contract pays" model that for example
 [Cycles in the Internet

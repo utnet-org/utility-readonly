@@ -1,4 +1,4 @@
-use near_o11y::{log_assert, log_assert_fail};
+use unc_o11y::{log_assert, log_assert_fail};
 
 use crate::db::refcount::set_refcount;
 use crate::db::{DBIterator, DBOp, DBSlice, DBTransaction, Database};
@@ -267,7 +267,7 @@ mod test {
 
         // Check expected value.  Use cargo-insta to update the expected value:
         //     cargo install cargo-insta
-        //     cargo insta test --accept -p near-store  -- db::colddb
+        //     cargo insta test --accept -p unc-store  -- db::colddb
         insta::assert_display_snapshot!(result.join("\n"), @r###"
         State `ShardUId || 11111111111111111111111111111111`
             [cold] get_raw_bytes        → FooBar; rc: 1
@@ -313,7 +313,7 @@ mod test {
 
         // Check expected value.  Use cargo-insta to update the expected value:
         //     cargo install cargo-insta
-        //     cargo insta test --accept -p near-store  -- db::colddb
+        //     cargo insta test --accept -p unc-store  -- db::colddb
         insta::assert_display_snapshot!(result.join("\n"), @r###"
         State
         [cold] (`ShardUId || 11111111111111111111111111111111`, FooBar)

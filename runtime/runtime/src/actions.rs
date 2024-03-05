@@ -6,38 +6,38 @@ use crate::ext::{ExternalError, RuntimeExt};
 use crate::receipt_manager::ReceiptManager;
 use crate::{metrics, ActionResult, ApplyState};
 
-use near_crypto::PublicKey;
-use near_parameters::{AccountCreationConfig, ActionCosts, RuntimeConfig, RuntimeFeesConfig};
-use near_primitives::account::{AccessKey, AccessKeyPermission, Account};
-use near_primitives::action::delegate::{DelegateAction, SignedDelegateAction};
-use near_primitives::checked_feature;
-use near_primitives::config::ViewConfig;
-use near_primitives::errors::{ActionError, ActionErrorKind, InvalidAccessKeyError, RuntimeError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
-use near_primitives::transaction::{
+use unc_crypto::PublicKey;
+use unc_parameters::{AccountCreationConfig, ActionCosts, RuntimeConfig, RuntimeFeesConfig};
+use unc_primitives::account::{AccessKey, AccessKeyPermission, Account};
+use unc_primitives::action::delegate::{DelegateAction, SignedDelegateAction};
+use unc_primitives::checked_feature;
+use unc_primitives::config::ViewConfig;
+use unc_primitives::errors::{ActionError, ActionErrorKind, InvalidAccessKeyError, RuntimeError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
+use unc_primitives::transaction::{
     Action, AddKeyAction, DeleteAccountAction, DeleteKeyAction, DeployContractAction,
     FunctionCallAction, StakeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
-use near_primitives::utils::{account_is_implicit, create_random_seed};
-use near_primitives::version::{
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
+use unc_primitives::utils::{account_is_implicit, create_random_seed};
+use unc_primitives::version::{
     ProtocolFeature, ProtocolVersion, DELETE_KEY_STORAGE_USAGE_PROTOCOL_VERSION,
 };
-use near_primitives_core::account::id::AccountType;
-use near_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
-use near_vm_runner::logic::errors::{
+use unc_primitives_core::account::id::AccountType;
+use unc_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
+use unc_vm_runner::logic::errors::{
     CompilationError, FunctionCallError, InconsistentStateError, VMRunnerError,
 };
-use near_vm_runner::logic::types::PromiseResult;
-use near_vm_runner::logic::{VMContext, VMOutcome};
-use near_vm_runner::precompile_contract;
-use near_vm_runner::ContractCode;
-use near_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
+use unc_vm_runner::logic::types::PromiseResult;
+use unc_vm_runner::logic::{VMContext, VMOutcome};
+use unc_vm_runner::precompile_contract;
+use unc_vm_runner::ContractCode;
+use unc_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
 
 use std::sync::Arc;
-use near_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
 
 /// Returns `ContractCode` (if exists) for the given `account` or returns `StorageError`.
 /// For ETH-implicit accounts returns `Wallet Contract` implementation that it is a part
@@ -126,7 +126,7 @@ pub(crate) fn execute_function_call(
     if checked_feature!("stable", ChunkNodesCache, protocol_version) {
         runtime_ext.set_trie_cache_mode(TrieCacheMode::CachingChunk);
     }
-    let result = near_vm_runner::run(
+    let result = unc_vm_runner::run(
         &code,
         &function_call.method_name,
         runtime_ext,
@@ -474,11 +474,11 @@ pub(crate) fn action_implicit_account_creation_transfer(
                 current_protocol_version
             ) {
                 access_key.nonce = (block_height - 1)
-                    * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+                    * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
             }
 
             // unwrap: here it's safe because the `account_id` has already been determined to be implicit by `get_account_type`
-            let public_key = PublicKey::from_near_implicit_account(account_id).unwrap();
+            let public_key = PublicKey::from_unc_implicit_account(account_id).unwrap();
 
             *account = Some(Account::new(
                 transfer.deposit,
@@ -523,7 +523,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
                 // This panic is unreachable as this is an implicit account creation transfer.
                 // `check_account_existence` would fail because in this protocol version `account_is_implicit`
                 // would return false for an account that is of the ETH-implicit type.
-                panic!("must be near-implicit");
+                panic!("must be unc-implicit");
             }
         }
         // This panic is unreachable as this is an implicit account creation transfer.
@@ -656,7 +656,7 @@ pub(crate) fn action_add_key(
     if checked_feature!("stable", AccessKeyNonceRange, apply_state.current_protocol_version) {
         let mut access_key = add_key.access_key.clone();
         access_key.nonce = (apply_state.block_height - 1)
-            * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+            * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
         set_access_key(state_update, account_id.clone(), add_key.public_key.clone(), &access_key);
     } else {
         set_access_key(
@@ -917,7 +917,7 @@ fn validate_delegate_action_key(
     }
 
     let upper_bound = apply_state.block_height
-        * near_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
+        * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER;
     if delegate_action.nonce >= upper_bound {
         result.result = Err(ActionErrorKind::DelegateActionNonceTooLarge {
             delegate_nonce: delegate_action.nonce,
@@ -1131,17 +1131,17 @@ pub(crate) fn check_account_existence(
 mod tests {
 
     use super::*;
-    use crate::near_primitives::shard_layout::ShardUId;
-    use near_primitives::account::FunctionCallPermission;
-    use near_primitives::action::delegate::NonDelegateAction;
-    use near_primitives::errors::InvalidAccessKeyError;
-    use near_primitives::hash::hash;
-    use near_primitives::runtime::migration_data::MigrationFlags;
-    use near_primitives::transaction::CreateAccountAction;
-    use near_primitives::trie_key::TrieKey;
-    use near_primitives::types::{EpochId, StateChangeCause};
-    use near_store::set_account;
-    use near_store::test_utils::TestTriesBuilder;
+    use crate::unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::account::FunctionCallPermission;
+    use unc_primitives::action::delegate::NonDelegateAction;
+    use unc_primitives::errors::InvalidAccessKeyError;
+    use unc_primitives::hash::hash;
+    use unc_primitives::runtime::migration_data::MigrationFlags;
+    use unc_primitives::transaction::CreateAccountAction;
+    use unc_primitives::trie_key::TrieKey;
+    use unc_primitives::types::{EpochId, StateChangeCause};
+    use unc_store::set_account;
+    use unc_store::test_utils::TestTriesBuilder;
     use std::sync::Arc;
 
     fn test_action_create_account(
@@ -1175,7 +1175,7 @@ mod tests {
 
     #[test]
     fn test_create_account_valid_top_level_long() {
-        let account_id = "bob_near_long_name".parse().unwrap();
+        let account_id = "bob_unc_long_name".parse().unwrap();
         let predecessor_id = "alice.near".parse().unwrap();
         let action_result = test_action_create_account(account_id, predecessor_id, 11);
         assert!(action_result.result.is_ok());
@@ -1348,7 +1348,7 @@ mod tests {
 
         let action_receipt = ActionReceipt {
             signer_id: "alice.test.near".parse().unwrap(),
-            signer_public_key: PublicKey::empty(near_crypto::KeyType::ED25519),
+            signer_public_key: PublicKey::empty(unc_crypto::KeyType::ED25519),
             gas_price: 1,
             output_data_receivers: Vec::new(),
             input_data_ids: Vec::new(),
@@ -1610,7 +1610,7 @@ mod tests {
             create_apply_state(signed_delegate_action.delegate_action.max_block_height);
         let mut state_update = setup_account(
             &sender_id,
-            &PublicKey::empty(near_crypto::KeyType::ED25519),
+            &PublicKey::empty(unc_crypto::KeyType::ED25519),
             &access_key,
         );
 

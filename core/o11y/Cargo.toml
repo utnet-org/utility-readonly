@@ -1,5 +1,5 @@
 [package]
-name = "near-o11y"
+name = "unc-o11y"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -12,9 +12,9 @@ publish = true
 workspace = true
 
 [dependencies]
-near-crypto.workspace = true
-near-fmt.workspace = true
-near-primitives-core.workspace = true
+unc-crypto.workspace = true
+unc-fmt.workspace = true
+unc-primitives-core.workspace = true
 
 actix.workspace = true
 base64.workspace = true
@@ -41,13 +41,13 @@ smartstring.workspace = true
 
 [features]
 nightly_protocol = [
-  "near-fmt/nightly_protocol",
-  "near-primitives-core/nightly_protocol",
+  "unc-fmt/nightly_protocol",
+  "unc-primitives-core/nightly_protocol",
 ]
 nightly = [
   "nightly_protocol",
-  "near-fmt/nightly",
-  "near-primitives-core/nightly",
+  "unc-fmt/nightly",
+  "unc-primitives-core/nightly",
 ]
 io_trace = []
 

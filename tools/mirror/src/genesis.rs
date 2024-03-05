@@ -1,6 +1,6 @@
-use near_primitives::state_record::StateRecord;
-use near_primitives_core::account::id::AccountType;
-use near_primitives_core::account::{AccessKey, AccessKeyPermission};
+use unc_primitives::state_record::StateRecord;
+use unc_primitives_core::account::id::AccountType;
+use unc_primitives_core::account::{AccessKey, AccessKeyPermission};
 use serde::ser::{SerializeSeq, Serializer};
 use std::collections::HashSet;
 use std::fs::File;
@@ -30,7 +30,7 @@ pub fn map_records<P: AsRef<Path>>(
     let mut has_full_key = HashSet::new();
     let mut accounts = HashSet::new();
 
-    near_chain_configs::stream_records_from_file(reader, |mut r| {
+    unc_chain_configs::stream_records_from_file(reader, |mut r| {
         match &mut r {
             StateRecord::AccessKey { account_id, public_key, access_key } => {
                 let replacement = crate::key_mapping::map_key(&public_key, secret.as_ref());

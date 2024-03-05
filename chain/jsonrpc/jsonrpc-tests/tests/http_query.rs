@@ -1,11 +1,11 @@
 use actix::System;
 use futures::{future, FutureExt};
 
-use near_actix_test_utils::run_actix;
-use near_jsonrpc::client::new_http_client;
-use near_o11y::testonly::init_test_logger;
+use unc_actix_test_utils::run_actix;
+use unc_jsonrpc::client::new_http_client;
+use unc_o11y::testonly::init_test_logger;
 
-use near_jsonrpc_tests as test_utils;
+use unc_jsonrpc_tests as test_utils;
 
 /// Retrieve client status via HTTP GET.
 #[test]

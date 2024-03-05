@@ -27,7 +27,7 @@ TARGET_HEIGHT = int(EPOCH_LENGTH * 2.8)
 config = load_config()
 node_config = state_sync_lib.get_state_sync_config_combined()
 # give more stake to the bootnode so that it can produce the blocks alone
-near_root, node_dirs = init_cluster(
+unc_root, node_dirs = init_cluster(
     4, 1, 4, config,
     [["min_gas_price", 0], ["max_inflation_rate", [0, 1]],
      ["epoch_length", EPOCH_LENGTH], ["block_producer_kickout_threshold", 20],
@@ -36,11 +36,11 @@ near_root, node_dirs = init_cluster(
 
 started = time.time()
 
-boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
+boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
 boot_node.stop_checking_store()
-node2 = spin_up_node(config, near_root, node_dirs[2], 2, boot_node=boot_node)
-node3 = spin_up_node(config, near_root, node_dirs[3], 3, boot_node=boot_node)
-observer = spin_up_node(config, near_root, node_dirs[4], 4, boot_node=boot_node)
+node2 = spin_up_node(config, unc_root, node_dirs[2], 2, boot_node=boot_node)
+node3 = spin_up_node(config, unc_root, node_dirs[3], 3, boot_node=boot_node)
+observer = spin_up_node(config, unc_root, node_dirs[4], 4, boot_node=boot_node)
 observer.stop_checking_store()
 
 ctx = utils.TxContext([4, 4, 4, 4, 4],
@@ -70,7 +70,7 @@ for height, hash_ in utils.poll_blocks(observer,
 logger.info("stage 1 done")
 
 # 2. Spin up the second node and make sure it gets to TARGET_HEIGHT
-node1 = spin_up_node(config, near_root, node_dirs[1], 1, boot_node=boot_node)
+node1 = spin_up_node(config, unc_root, node_dirs[1], 1, boot_node=boot_node)
 node1.stop_checking_store()
 
 node1_height, _ = utils.wait_for_blocks(node1, target=TARGET_HEIGHT)

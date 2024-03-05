@@ -3,14 +3,14 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use clap::Parser;
-use near_chain::{Block, ChainStore};
-use near_chain_configs::GenesisValidationMode;
-use near_epoch_manager::EpochManager;
+use unc_chain::{Block, ChainStore};
+use unc_chain_configs::GenesisValidationMode;
+use unc_epoch_manager::EpochManager;
 use framework::config::load_config;
 
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::{account_id_to_shard_id, ShardUId};
-use near_primitives::types::{AccountId, BlockHeight};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::{account_id_to_shard_id, ShardUId};
+use unc_primitives::types::{AccountId, BlockHeight};
 
 use framework::open_storage;
 
@@ -49,16 +49,16 @@ pub(crate) struct AnalyseGasUsageCommand {
 impl AnalyseGasUsageCommand {
     pub(crate) fn run(&self, home: &PathBuf) -> anyhow::Result<()> {
         // Create a ChainStore and EpochManager that will be used to read blockchain data.
-        let mut near_config = load_config(home, GenesisValidationMode::Full).unwrap();
-        let node_storage = open_storage(&home, &mut near_config).unwrap();
+        let mut unc_config = load_config(home, GenesisValidationMode::Full).unwrap();
+        let node_storage = open_storage(&home, &mut unc_config).unwrap();
         let store = node_storage.get_split_store().unwrap_or_else(|| node_storage.get_hot_store());
         let chain_store = Rc::new(ChainStore::new(
             store.clone(),
-            near_config.genesis.config.genesis_height,
+            unc_config.genesis.config.genesis_height,
             false,
         ));
         let epoch_manager =
-            EpochManager::new_from_genesis_config(store, &near_config.genesis.config).unwrap();
+            EpochManager::new_from_genesis_config(store, &unc_config.genesis.config).unwrap();
 
         // Create an iterator over the blocks that should be analysed
         let blocks_iter_opt = make_block_iterator_from_command_args(
@@ -429,7 +429,7 @@ fn analyse_gas_usage(
 mod tests {
     use std::str::FromStr;
 
-    use near_primitives::types::AccountId;
+    use unc_primitives::types::AccountId;
 
     use super::{GasUsageInShard, ShardSplit};
 

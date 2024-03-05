@@ -1,21 +1,21 @@
 /// Test economic edge cases.
 use std::path::Path;
 
-use near_client::ProcessTxResponse;
-use near_epoch_manager::EpochManager;
+use unc_client::ProcessTxResponse;
+use unc_epoch_manager::EpochManager;
 use num_rational::Ratio;
 
-use near_chain::ChainGenesis;
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_crypto::{InMemorySigner, KeyType};
-use near_o11y::testonly::init_integration_logger;
-use near_primitives::transaction::SignedTransaction;
-use near_store::{genesis::initialize_genesis_state, test_utils::create_test_store};
+use unc_chain::ChainGenesis;
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_o11y::testonly::init_integration_logger;
+use unc_primitives::transaction::SignedTransaction;
+use unc_store::{genesis::initialize_genesis_state, test_utils::create_test_store};
 use framework::{config::GenesisExt, NightshadeRuntime};
 use testlib::fees_utils::FeeHelper;
 
-use near_primitives::types::EpochId;
+use unc_primitives::types::EpochId;
 use primitive_types::U256;
 
 fn build_genesis() -> Genesis {
@@ -88,7 +88,7 @@ fn test_burn_mint() {
         ),
         ProcessTxResponse::ValidTx
     );
-    let near_balance = env.query_balance("near".parse().unwrap());
+    let unc_balance = env.query_balance("near".parse().unwrap());
     assert_eq!(calc_total_supply(&mut env), initial_total_supply);
     for i in 1..6 {
         env.produce_block(0, i);
@@ -123,7 +123,7 @@ fn test_burn_mint() {
     assert_eq!(block4.header().total_supply(), block3.header().total_supply() - half_transfer_cost);
     assert_eq!(block4.chunks()[0].prev_balance_burnt(), half_transfer_cost);
     // Check that Protocol Treasury account got it's 1% as well.
-    assert_eq!(env.query_balance("near".parse().unwrap()), near_balance + epoch_total_reward / 10);
+    assert_eq!(env.query_balance("near".parse().unwrap()), unc_balance + epoch_total_reward / 10);
     // Block 5: reward from previous block.
     let block5 = env.clients[0].chain.get_block_by_height(5).unwrap();
     let prev_total_supply = block4.header().total_supply();

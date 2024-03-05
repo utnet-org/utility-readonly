@@ -16,7 +16,7 @@ ignore = [
     # We should remove wasmer0 and this ignore as soon as we get limited replayability.
     "RUSTSEC-2020-0077",
 
-    # parity-wasm is deprecated, but is used by our runtimes before near-vm, which we need to keep alive for replayability reasons.
+    # parity-wasm is deprecated, but is used by our runtimes before unc-vm, which we need to keep alive for replayability reasons.
     # We should remove them all, as well as this ignore, as soon as we get limited replayability.
     "RUSTSEC-2022-0061",
 

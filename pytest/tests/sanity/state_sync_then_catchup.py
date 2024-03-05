@@ -98,16 +98,16 @@ def main():
     node_config_sync["tracked_shards"] = []
 
     config = load_config()
-    near_root, node_dirs = init_cluster(1, 1, 4, config,
+    unc_root, node_dirs = init_cluster(1, 1, 4, config,
                                         [["epoch_length", EPOCH_LENGTH]], {
                                             0: node_config_dump,
                                             1: node_config_sync
                                         })
 
-    boot_node = spin_up_node(config, near_root, node_dirs[0], 0)
+    boot_node = spin_up_node(config, unc_root, node_dirs[0], 0)
     logger.info('started boot_node')
     node1 = spin_up_node(config,
-                         near_root,
+                         unc_root,
                          node_dirs[1],
                          1,
                          boot_node=boot_node)

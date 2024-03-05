@@ -2,9 +2,9 @@ use crate::hash::CryptoHash;
 use crate::serialize::dec_format;
 use crate::types::{AccountId, Balance, EpochId, Gas, Nonce};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::PublicKey;
-use near_primitives_core::types::{BlockHeight, ProtocolVersion};
-use near_rpc_error_macro::RpcError;
+use unc_crypto::PublicKey;
+use unc_primitives_core::types::{BlockHeight, ProtocolVersion};
+use unc_rpc_error_macro::RpcError;
 use std::fmt::{Debug, Display};
 
 /// Error returned in the ExecutionOutcome in case of failure
@@ -1308,7 +1308,7 @@ pub enum CompilationError {
     },
 }
 
-/// Serializable version of `near-vm-runner::FunctionCallError`.
+/// Serializable version of `unc-vm-runner::FunctionCallError`.
 ///
 /// Must never reorder/remove elements, can only add new variants at the end (but do that very
 /// carefully). It describes stable serialization format, and only used by serialization logic.
@@ -1346,9 +1346,9 @@ pub enum FunctionCallError {
     ExecutionError(String),
 }
 
-impl From<near_vm_runner::logic::errors::MethodResolveError> for MethodResolveError {
-    fn from(outer_err: near_vm_runner::logic::errors::MethodResolveError) -> Self {
-        use near_vm_runner::logic::errors::MethodResolveError as MRE;
+impl From<unc_vm_runner::logic::errors::MethodResolveError> for MethodResolveError {
+    fn from(outer_err: unc_vm_runner::logic::errors::MethodResolveError) -> Self {
+        use unc_vm_runner::logic::errors::MethodResolveError as MRE;
         match outer_err {
             MRE::MethodEmptyName => Self::MethodEmptyName,
             MRE::MethodNotFound => Self::MethodNotFound,
@@ -1357,9 +1357,9 @@ impl From<near_vm_runner::logic::errors::MethodResolveError> for MethodResolveEr
     }
 }
 
-impl From<near_vm_runner::logic::errors::PrepareError> for PrepareError {
-    fn from(outer_err: near_vm_runner::logic::errors::PrepareError) -> Self {
-        use near_vm_runner::logic::errors::PrepareError as PE;
+impl From<unc_vm_runner::logic::errors::PrepareError> for PrepareError {
+    fn from(outer_err: unc_vm_runner::logic::errors::PrepareError) -> Self {
+        use unc_vm_runner::logic::errors::PrepareError as PE;
         match outer_err {
             PE::Serialization => Self::Serialization,
             PE::Deserialization => Self::Deserialization,
@@ -1374,9 +1374,9 @@ impl From<near_vm_runner::logic::errors::PrepareError> for PrepareError {
     }
 }
 
-impl From<near_vm_runner::logic::errors::CompilationError> for CompilationError {
-    fn from(outer_err: near_vm_runner::logic::errors::CompilationError) -> Self {
-        use near_vm_runner::logic::errors::CompilationError as CE;
+impl From<unc_vm_runner::logic::errors::CompilationError> for CompilationError {
+    fn from(outer_err: unc_vm_runner::logic::errors::CompilationError) -> Self {
+        use unc_vm_runner::logic::errors::CompilationError as CE;
         match outer_err {
             CE::CodeDoesNotExist { account_id } => Self::CodeDoesNotExist {
                 account_id: account_id.parse().expect("account_id in error must be valid"),
@@ -1387,9 +1387,9 @@ impl From<near_vm_runner::logic::errors::CompilationError> for CompilationError 
     }
 }
 
-impl From<near_vm_runner::logic::errors::FunctionCallError> for FunctionCallError {
-    fn from(outer_err: near_vm_runner::logic::errors::FunctionCallError) -> Self {
-        use near_vm_runner::logic::errors::FunctionCallError as FCE;
+impl From<unc_vm_runner::logic::errors::FunctionCallError> for FunctionCallError {
+    fn from(outer_err: unc_vm_runner::logic::errors::FunctionCallError) -> Self {
+        use unc_vm_runner::logic::errors::FunctionCallError as FCE;
         match outer_err {
             FCE::CompilationError(e) => Self::CompilationError(e.into()),
             FCE::MethodResolveError(e) => Self::MethodResolveError(e.into()),
@@ -1405,8 +1405,8 @@ impl From<near_vm_runner::logic::errors::FunctionCallError> for FunctionCallErro
 
 #[cfg(feature = "new_epoch_sync")]
 pub mod epoch_sync {
-    use near_primitives_core::hash::CryptoHash;
-    use near_primitives_core::types::EpochHeight;
+    use unc_primitives_core::hash::CryptoHash;
+    use unc_primitives_core::types::EpochHeight;
     use std::fmt::Debug;
 
     #[derive(Eq, PartialEq, Clone, strum::Display, Debug)]

@@ -1,7 +1,7 @@
 use crate::config::Config;
-use near_chain_configs::UpdateableClientConfig;
-use near_dyn_configs::{UpdateableConfigLoaderError, UpdateableConfigs};
-use near_o11y::log_config::LogConfig;
+use unc_chain_configs::UpdateableClientConfig;
+use unc_dyn_configs::{UpdateableConfigLoaderError, UpdateableConfigs};
+use unc_o11y::log_config::LogConfig;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
@@ -64,7 +64,7 @@ where
     for<'a> T: Deserialize<'a>,
 {
     match std::fs::read_to_string(path) {
-        Ok(config_str) => match near_config_utils::strip_comments_from_json_str(&config_str) {
+        Ok(config_str) => match unc_config_utils::strip_comments_from_json_str(&config_str) {
             Ok(config_str_without_comments) => {
                 match serde_json::from_str::<T>(&config_str_without_comments) {
                     Ok(config) => {

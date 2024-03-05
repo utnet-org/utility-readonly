@@ -21,13 +21,13 @@ use crate::{client, network_protocol};
 use actix::fut::future::wrap_future;
 use actix::{Actor as _, AsyncContext as _};
 use anyhow::Context as _;
-use near_async::messaging::Sender;
-use near_async::time;
-use near_o11y::{handler_debug_span, handler_trace_span, OpenTelemetrySpanExt, WithSpanContext};
-use near_performance_metrics_macros::perf;
-use near_primitives::block::GenesisId;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::views::{
+use unc_async::messaging::Sender;
+use unc_async::time;
+use unc_o11y::{handler_debug_span, handler_trace_span, OpenTelemetrySpanExt, WithSpanContext};
+use unc_performance_metrics_macros::perf;
+use unc_primitives::block::GenesisId;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::views::{
     ConnectionInfoView, EdgeView, KnownPeerStateView, NetworkGraphView, PeerStoreView,
     RecentOutboundConnectionsView, SnapshotHostInfoView, SnapshotHostsView,
 };
@@ -70,7 +70,7 @@ const REPORT_BANDWIDTH_THRESHOLD_COUNT: usize = 10_000;
 /// network issue.
 const UNRELIABLE_PEER_HORIZON: u64 = 60;
 
-/// Due to implementation limits of `Graph` in `near-network`, we support up to 128 client.
+/// Due to implementation limits of `Graph` in `unc-network`, we support up to 128 client.
 pub const MAX_TIER2_PEERS: usize = 128;
 
 /// When picking a peer to connect to, we'll pick from the 'safer peers'
@@ -201,7 +201,7 @@ impl actix::Actor for PeerManagerActor {
 impl PeerManagerActor {
     pub fn spawn(
         clock: time::Clock,
-        store: Arc<dyn near_store::db::Database>,
+        store: Arc<dyn unc_store::db::Database>,
         config: config::NetworkConfig,
         client: Arc<dyn client::Client>,
         shards_manager_adapter: Sender<ShardsManagerRequestFromNetwork>,
@@ -373,7 +373,7 @@ impl PeerManagerActor {
             total_msg_received_count, "Bandwidth stats"
         );
 
-        near_performance_metrics::actix::run_later(
+        unc_performance_metrics::actix::run_later(
             ctx,
             every.try_into().unwrap(),
             move |act, ctx| {
@@ -619,7 +619,7 @@ impl PeerManagerActor {
 
         let new_interval = min(max_interval, interval * EXPONENTIAL_BACKOFF_RATIO);
 
-        near_performance_metrics::actix::run_later(
+        unc_performance_metrics::actix::run_later(
             ctx,
             interval.try_into().unwrap(),
             move |act, ctx| {
@@ -713,7 +713,7 @@ impl PeerManagerActor {
             ),
         ));
 
-        near_performance_metrics::actix::run_later(
+        unc_performance_metrics::actix::run_later(
             ctx,
             interval.try_into().unwrap(),
             move |act, ctx| {

@@ -3,12 +3,12 @@ use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 
 use crate::types::{PoolIterator, PoolKey, TransactionGroup};
 
-use near_crypto::PublicKey;
-use near_o11y::metrics::prometheus::core::{AtomicI64, GenericGauge};
-use near_primitives::epoch_manager::RngSeed;
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::AccountId;
+use unc_crypto::PublicKey;
+use unc_o11y::metrics::prometheus::core::{AtomicI64, GenericGauge};
+use unc_primitives::epoch_manager::RngSeed;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::AccountId;
 use std::ops::Bound;
 
 mod metrics;
@@ -301,10 +301,10 @@ mod tests {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
 
-    use near_crypto::{InMemorySigner, KeyType};
+    use unc_crypto::{InMemorySigner, KeyType};
 
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::types::Balance;
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::types::Balance;
 
     const TEST_SEED: RngSeed = [3; 32];
 

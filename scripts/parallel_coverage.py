@@ -29,7 +29,7 @@ def coverage(test_binary):
         f'{os.getuid()}:{os.getgid()}', '-v', f'{test_binary}:{test_binary}',
         '-v', f'{src_dir}:{src_dir}', '-v',
         f'{coverage_output}:{coverage_output}',
-        'nearprotocol/near-coverage-runtime', 'bash', '-c',
+        'nearprotocol/unc-coverage-runtime', 'bash', '-c',
         f'/usr/local/bin/kcov --include-pattern=framework --exclude-pattern=.so --verify {coverage_output} {test_binary}'
     ],
                          stdout=subprocess.PIPE,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     build_tests()
     binaries = test_binaries(exclude=[
         r'test_regression-.*',
-        r'near-.*',
+        r'unc-.*',
         r'test_cases_runtime-.*',
         r'test_cases_testnet_rpc-.*',
         r'test_catchup-.*',

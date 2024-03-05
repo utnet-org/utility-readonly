@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use num_rational::Rational32;
 use primitive_types::U256;
 
-use near_chain_configs::GenesisConfig;
-use near_primitives::checked_feature;
-use near_primitives::types::{AccountId, Balance, BlockChunkValidatorStats};
-use near_primitives::version::{ProtocolVersion, ENABLE_INFLATION_PROTOCOL_VERSION};
+use unc_chain_configs::GenesisConfig;
+use unc_primitives::checked_feature;
+use unc_primitives::types::{AccountId, Balance, BlockChunkValidatorStats};
+use unc_primitives::version::{ProtocolVersion, ENABLE_INFLATION_PROTOCOL_VERSION};
 
 pub(crate) const NUM_NS_IN_SECOND: u64 = 1_000_000_000;
 pub const NUM_SECONDS_IN_A_YEAR: u64 = 24 * 60 * 60 * 365;
@@ -153,8 +153,8 @@ impl RewardCalculator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_primitives::types::{BlockChunkValidatorStats, ValidatorStats};
-    use near_primitives::version::PROTOCOL_VERSION;
+    use unc_primitives::types::{BlockChunkValidatorStats, ValidatorStats};
+    use unc_primitives::version::PROTOCOL_VERSION;
     use num_rational::Ratio;
     use std::collections::HashMap;
 

@@ -3,11 +3,11 @@ use crate::hash::{hash, CryptoHash};
 use crate::merkle::MerklePath;
 use crate::types::{AccountId, Balance, Gas, Nonce};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::{PublicKey, Signature};
-use near_fmt::{AbbrBytes, Slice};
-use near_primitives_core::serialize::{from_base64, to_base64};
-use near_primitives_core::types::Compute;
-use near_vm_runner::{ProfileDataV2, ProfileDataV3};
+use unc_crypto::{PublicKey, Signature};
+use unc_fmt::{AbbrBytes, Slice};
+use unc_primitives_core::serialize::{from_base64, to_base64};
+use unc_primitives_core::types::Compute;
+use unc_vm_runner::{ProfileDataV2, ProfileDataV3};
 use serde::de::Error as DecodeError;
 use serde::ser::Error as EncodeError;
 use std::borrow::Borrow;
@@ -313,7 +313,7 @@ mod tests {
     use super::*;
     use crate::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
     use borsh::BorshDeserialize;
-    use near_crypto::{InMemorySigner, KeyType, Signature, Signer};
+    use unc_crypto::{InMemorySigner, KeyType, Signature, Signer};
 
     #[test]
     fn test_verify_transaction() {

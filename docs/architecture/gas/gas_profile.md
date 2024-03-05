@@ -13,10 +13,10 @@ details of how they are computed can change without a protocol version bump.
 ## Example Transaction Gas Profile
 
 You can query the gas profile of a transaction with
-[NEAR CLI](https://docs.near.org/tools/near-cli).
+[NEAR CLI](https://docs.near.org/tools/unc-cli).
 
 ```bash
-NEAR_ENV=mainnet near tx-status 8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw  \
+unc_ENV=mainnet near tx-status 8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw  \
   --accountId app.nearcrowd.near  \
   --nodeUrl https://archival-rpc.mainnet.near.org  # Allows to retrieve older transactions.
 ```
@@ -162,7 +162,7 @@ When charging gas for an action, the `ActionResult` can be updated directly. But
 when charging WASM costs, it would be too slow to do a context switch each time,
 Therefore, a fast gas counter exists that can be updated from within the VM.
 (See
-[gas_counter.rs](https://github.com/utnet-org/utility/blob/06711f8460f946b8d2042aa1df6abe03c5184767/runtime/near-vm-logic/src/gas_counter.rs))
+[gas_counter.rs](https://github.com/utnet-org/utility/blob/06711f8460f946b8d2042aa1df6abe03c5184767/runtime/unc-vm-logic/src/gas_counter.rs))
 At the end of a function call execution, the gas counter is read by the host and
 merged into the `ActionResult`.
 

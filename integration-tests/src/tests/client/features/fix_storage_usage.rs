@@ -1,11 +1,11 @@
 use borsh::BorshDeserialize;
-use near_chain::{ChainGenesis, Provenance};
-use near_chain_configs::Genesis;
-use near_client::test_utils::TestEnv;
-use near_o11y::testonly::init_test_logger;
-use near_primitives::version::ProtocolFeature;
-use near_primitives::{trie_key::TrieKey, types::AccountId};
-use near_store::{ShardUId, TrieUpdate};
+use unc_chain::{ChainGenesis, Provenance};
+use unc_chain_configs::Genesis;
+use unc_client::test_utils::TestEnv;
+use unc_o11y::testonly::init_test_logger;
+use unc_primitives::version::ProtocolFeature;
+use unc_primitives::{trie_key::TrieKey, types::AccountId};
+use unc_store::{ShardUId, TrieUpdate};
 use framework::config::GenesisExt;
 use framework::test_utils::TestEnvNightshadeSetupExt;
 
@@ -45,13 +45,13 @@ fn process_blocks_with_storage_usage_fix(
         let trie =
             env.clients[0].runtime_adapter.get_trie_for_shard(0, block.hash(), root, true).unwrap();
         let state_update = TrieUpdate::new(trie);
-        use near_primitives::account::Account;
-        let mut account_near_raw = state_update
+        use unc_primitives::account::Account;
+        let mut account_unc_raw = state_update
             .get(&TrieKey::Account { account_id: "near".parse().unwrap() })
             .unwrap()
             .unwrap()
             .clone();
-        let account_near = Account::try_from_slice(&mut account_near_raw).unwrap();
+        let account_near = Account::try_from_slice(&mut account_unc_raw).unwrap();
         let mut account_test0_raw = state_update
             .get(&TrieKey::Account { account_id: "test0".parse().unwrap() })
             .unwrap()
@@ -67,7 +67,7 @@ fn process_blocks_with_storage_usage_fix(
 fn test_fix_storage_usage_migration() {
     init_test_logger();
     process_blocks_with_storage_usage_fix(
-        near_primitives::chains::MAINNET.to_string(),
+        unc_primitives::chains::MAINNET.to_string(),
         |account_id: AccountId, block_height: u64, storage_usage: u64| {
             if account_id == "near" && block_height >= 11 {
                 assert_eq!(storage_usage, 4378);
@@ -77,7 +77,7 @@ fn test_fix_storage_usage_migration() {
         },
     );
     process_blocks_with_storage_usage_fix(
-        near_primitives::chains::TESTNET.to_string(),
+        unc_primitives::chains::TESTNET.to_string(),
         |_: AccountId, _: u64, storage_usage: u64| {
             assert_eq!(storage_usage, 182);
         },

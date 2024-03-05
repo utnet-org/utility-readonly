@@ -1,13 +1,13 @@
 //! Contract that can be used for different types of loadtesting.
 //! Based on the rust-counter example.
 
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::LookupMap;
-use near_sdk::{env, near_bindgen};
+use unc_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use unc_sdk::collections::LookupMap;
+use unc_sdk::{env, unc_bindgen};
 
-near_sdk::setup_alloc!();
+unc_sdk::setup_alloc!();
 
-#[near_bindgen]
+#[unc_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Counter {
     val: u64,
@@ -19,7 +19,7 @@ impl Default for Counter {
         Self { val: 0, records: LookupMap::new(b"r".to_vec()) }
     }
 }
-#[near_bindgen]
+#[unc_bindgen]
 impl Counter {
     pub fn get_num(&self) -> u64 {
         return self.val;

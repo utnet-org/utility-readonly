@@ -1,18 +1,18 @@
 use crate::receipt_manager::ReceiptManager;
-use near_primitives::errors::{EpochError, StorageError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::trie_key::{trie_key_parsers, TrieKey};
-use near_primitives::types::{
+use unc_primitives::errors::{EpochError, StorageError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::trie_key::{trie_key_parsers, TrieKey};
+use unc_primitives::types::{
     AccountId, Balance, EpochId, EpochInfoProvider, Gas, TrieCacheMode, TrieNodesCount,
 };
-use near_primitives::utils::create_data_id;
-use near_primitives::version::ProtocolVersion;
-use near_primitives_core::types::Power;
-use near_store::{get_code, KeyLookupMode, TrieUpdate, TrieUpdateValuePtr};
-use near_vm_runner::logic::errors::{AnyError, VMLogicError};
-use near_vm_runner::logic::types::ReceiptIndex;
-use near_vm_runner::logic::{External, StorageGetMode, ValuePtr};
-use near_vm_runner::ContractCode;
+use unc_primitives::utils::create_data_id;
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives_core::types::Power;
+use unc_store::{get_code, KeyLookupMode, TrieUpdate, TrieUpdateValuePtr};
+use unc_vm_runner::logic::errors::{AnyError, VMLogicError};
+use unc_vm_runner::logic::types::ReceiptIndex;
+use unc_vm_runner::logic::{External, StorageGetMode, ValuePtr};
+use unc_vm_runner::ContractCode;
 
 pub struct RuntimeExt<'a> {
     trie_update: &'a mut TrieUpdate,
@@ -247,7 +247,7 @@ impl<'a> External for RuntimeExt<'a> {
         args: Vec<u8>,
         attached_deposit: Balance,
         prepaid_gas: Gas,
-        gas_weight: near_primitives::types::GasWeight,
+        gas_weight: unc_primitives::types::GasWeight,
     ) -> Result<(), VMLogicError> {
         self.receipt_manager.append_action_function_call_weight(
             receipt_index,
@@ -271,7 +271,7 @@ impl<'a> External for RuntimeExt<'a> {
         &mut self,
         receipt_index: ReceiptIndex,
         stake: Balance,
-        public_key: near_crypto::PublicKey,
+        public_key: unc_crypto::PublicKey,
     ) {
         self.receipt_manager.append_action_stake(receipt_index, stake, public_key)
     }
@@ -279,8 +279,8 @@ impl<'a> External for RuntimeExt<'a> {
     fn append_action_add_key_with_full_access(
         &mut self,
         receipt_index: ReceiptIndex,
-        public_key: near_crypto::PublicKey,
-        nonce: near_primitives::types::Nonce,
+        public_key: unc_crypto::PublicKey,
+        nonce: unc_primitives::types::Nonce,
     ) {
         self.receipt_manager.append_action_add_key_with_full_access(
             receipt_index,
@@ -292,8 +292,8 @@ impl<'a> External for RuntimeExt<'a> {
     fn append_action_add_key_with_function_call(
         &mut self,
         receipt_index: ReceiptIndex,
-        public_key: near_crypto::PublicKey,
-        nonce: near_primitives::types::Nonce,
+        public_key: unc_crypto::PublicKey,
+        nonce: unc_primitives::types::Nonce,
         allowance: Option<Balance>,
         receiver_id: AccountId,
         method_names: Vec<Vec<u8>>,
@@ -311,7 +311,7 @@ impl<'a> External for RuntimeExt<'a> {
     fn append_action_delete_key(
         &mut self,
         receipt_index: ReceiptIndex,
-        public_key: near_crypto::PublicKey,
+        public_key: unc_crypto::PublicKey,
     ) {
         self.receipt_manager.append_action_delete_key(receipt_index, public_key)
     }

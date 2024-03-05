@@ -1,4 +1,4 @@
-# Near Telemetry
+# unc Telemetry
 
 A small utility (TelemetryActor), that tries to send the telemetry (metrics) information as JSON over HTTP-post to selected list of servers.
 Telemetry is sent from all the framework binaries (that enabled it in the config.json) - like validators, RPC nodes etc.

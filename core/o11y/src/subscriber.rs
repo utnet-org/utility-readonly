@@ -3,8 +3,8 @@ use crate::reload::{
     set_default_otlp_level, set_log_layer_handle, set_otlp_layer_handle, LogLayer, SimpleLogLayer,
 };
 use crate::{log_counter, OpenTelemetryLevel};
-use near_crypto::PublicKey;
-use near_primitives_core::types::AccountId;
+use unc_crypto::PublicKey;
+use unc_primitives_core::types::AccountId;
 use std::path::PathBuf;
 use tracing::subscriber::DefaultGuard;
 use tracing_appender::non_blocking::NonBlocking;
@@ -188,8 +188,8 @@ pub(crate) fn use_color_auto() -> bool {
 /// # Example
 ///
 /// ```rust
-/// let filter = near_o11y::EnvFilterBuilder::from_env().finish().unwrap();
-/// let _subscriber = near_o11y::default_subscriber(filter, &Default::default()).global();
+/// let filter = unc_o11y::EnvFilterBuilder::from_env().finish().unwrap();
+/// let _subscriber = unc_o11y::default_subscriber(filter, &Default::default()).global();
 /// ```
 pub fn default_subscriber(
     env_filter: EnvFilter,

@@ -1,8 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives::errors::StorageError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::state::FlatStateValue;
-use near_primitives::types::BlockHeight;
+use unc_primitives::errors::StorageError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::types::BlockHeight;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Copy, Clone, PartialEq, Eq, serde::Serialize)]
 pub struct BlockInfo {

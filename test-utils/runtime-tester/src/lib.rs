@@ -10,9 +10,9 @@ pub use crate::scenario_builder::ScenarioBuilder;
 #[test]
 // Use this test as a base for creating reproducers.
 fn scenario_smoke_test() {
-    use near_crypto::{InMemorySigner, KeyType};
-    use near_primitives::transaction::{Action, TransferAction};
-    use near_primitives::types::AccountId;
+    use unc_crypto::{InMemorySigner, KeyType};
+    use unc_primitives::transaction::{Action, TransferAction};
+    use unc_primitives::types::AccountId;
 
     let num_accounts = 5;
 

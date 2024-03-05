@@ -116,7 +116,7 @@ def _compile_current(branch: str) -> Executables:
     logger.info(f'Building uncd for branch {branch}')
     subprocess.check_call(['cargo', 'build', '-p', 'uncd', '--bin', 'uncd'],
                           cwd=_REPO_DIR)
-    subprocess.check_call(['cargo', 'build', '-p', 'near-test-contracts'],
+    subprocess.check_call(['cargo', 'build', '-p', 'unc-test-contracts'],
                           cwd=_REPO_DIR)
     branch = escaped(branch)
     uncd = _OUT_DIR / f'uncd-{branch}'

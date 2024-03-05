@@ -1,4 +1,4 @@
-use near_primitives::errors::TxExecutionError;
+use unc_primitives::errors::TxExecutionError;
 use serde_json::{to_value, Value};
 use std::fmt;
 
@@ -45,7 +45,7 @@ pub enum RpcRequestValidationErrorKind {
     PartialEq,
     Eq,
     Clone,
-    near_rpc_error_macro::RpcError,
+    unc_rpc_error_macro::RpcError,
 )]
 pub enum ServerError {
     TxExecutionError(TxExecutionError),

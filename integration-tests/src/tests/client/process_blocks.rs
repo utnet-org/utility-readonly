@@ -6,75 +6,75 @@ use std::sync::{Arc, RwLock};
 use actix::System;
 use assert_matches::assert_matches;
 use futures::{future, FutureExt};
-use near_actix_test_utils::run_actix;
-use near_async::messaging::IntoSender;
-use near_chain::chain::ApplyStatePartsRequest;
-use near_chain::test_utils::ValidatorSchedule;
-use near_chain::types::{LatestKnown, RuntimeAdapter};
+use unc_actix_test_utils::run_actix;
+use unc_async::messaging::IntoSender;
+use unc_chain::chain::ApplyStatePartsRequest;
+use unc_chain::test_utils::ValidatorSchedule;
+use unc_chain::types::{LatestKnown, RuntimeAdapter};
 #[cfg(not(feature = "nightly"))]
-use near_chain::validate::validate_chunk_with_chunk_extra;
+use unc_chain::validate::validate_chunk_with_chunk_extra;
 #[cfg(not(feature = "nightly"))]
-use near_chain::ChainStore;
-use near_chain::{
+use unc_chain::ChainStore;
+use unc_chain::{
     Block, BlockProcessingArtifact, ChainGenesis, ChainStoreAccess, Error, Provenance,
 };
-use near_chain_configs::{Genesis, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
-use near_chunks::test_utils::MockClientAdapterForShardsManager;
-use near_client::test_utils::{
+use unc_chain_configs::{Genesis, DEFAULT_GC_NUM_EPOCHS_TO_KEEP};
+use unc_chunks::test_utils::MockClientAdapterForShardsManager;
+use unc_client::test_utils::{
     create_chunk_on_height, setup_client_with_synchronous_shards_manager, setup_mock,
     setup_mock_all_validators, TestEnv,
 };
-use near_client::{
+use unc_client::{
     BlockApproval, BlockResponse, Client, GetBlockWithMerkleTree, ProcessTxResponse, SetNetworkInfo,
 };
-use near_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
-use near_network::test_utils::{wait_or_panic, MockPeerManagerAdapter};
-use near_network::types::{
+use unc_crypto::{InMemorySigner, KeyType, PublicKey, Signature, Signer};
+use unc_network::test_utils::{wait_or_panic, MockPeerManagerAdapter};
+use unc_network::types::{
     BlockInfo, ConnectedPeerInfo, HighestHeightPeerInfo, NetworkInfo, PeerChainInfo,
     PeerManagerMessageRequest, PeerManagerMessageResponse, PeerType,
 };
-use near_network::types::{FullPeerInfo, NetworkRequests, NetworkResponses};
-use near_network::types::{PeerInfo, ReasonForBan};
-use near_o11y::testonly::{init_integration_logger, init_test_logger};
-use near_o11y::WithSpanContextExt;
-use near_parameters::{ActionCosts, ExtCosts};
-use near_parameters::{RuntimeConfig, RuntimeConfigStore};
-use near_primitives::block::Approval;
-use near_primitives::block_header::BlockHeader;
-use near_primitives::epoch_manager::RngSeed;
-use near_primitives::errors::TxExecutionError;
-use near_primitives::errors::{ActionError, ActionErrorKind, InvalidTxError};
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::merkle::{verify_hash, PartialMerkleTree};
-use near_primitives::receipt::DelayedReceiptIndices;
-use near_primitives::shard_layout::{get_block_shard_uid, ShardUId};
-use near_primitives::sharding::{ShardChunkHeader, ShardChunkHeaderInner, ShardChunkHeaderV3};
-use near_primitives::state_part::PartId;
-use near_primitives::state_sync::StatePartKey;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::test_utils::TestBlockBuilder;
-use near_primitives::transaction::{
+use unc_network::types::{FullPeerInfo, NetworkRequests, NetworkResponses};
+use unc_network::types::{PeerInfo, ReasonForBan};
+use unc_o11y::testonly::{init_integration_logger, init_test_logger};
+use unc_o11y::WithSpanContextExt;
+use unc_parameters::{ActionCosts, ExtCosts};
+use unc_parameters::{RuntimeConfig, RuntimeConfigStore};
+use unc_primitives::block::Approval;
+use unc_primitives::block_header::BlockHeader;
+use unc_primitives::epoch_manager::RngSeed;
+use unc_primitives::errors::TxExecutionError;
+use unc_primitives::errors::{ActionError, ActionErrorKind, InvalidTxError};
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::merkle::{verify_hash, PartialMerkleTree};
+use unc_primitives::receipt::DelayedReceiptIndices;
+use unc_primitives::shard_layout::{get_block_shard_uid, ShardUId};
+use unc_primitives::sharding::{ShardChunkHeader, ShardChunkHeaderInner, ShardChunkHeaderV3};
+use unc_primitives::state_part::PartId;
+use unc_primitives::state_sync::StatePartKey;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::test_utils::TestBlockBuilder;
+use unc_primitives::transaction::{
     Action, DeployContractAction, ExecutionStatus, FunctionCallAction, SignedTransaction,
     Transaction,
 };
-use near_primitives::trie_key::TrieKey;
-use near_primitives::types::validator_stake::ValidatorStake;
-use near_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ProtocolVersion};
-use near_primitives::utils::to_timestamp;
-use near_primitives::validator_signer::ValidatorSigner;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::{
+use unc_primitives::trie_key::TrieKey;
+use unc_primitives::types::validator_stake::ValidatorStake;
+use unc_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ProtocolVersion};
+use unc_primitives::utils::to_timestamp;
+use unc_primitives::validator_signer::ValidatorSigner;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::{
     BlockHeaderView, FinalExecutionStatus, QueryRequest, QueryResponseKind,
 };
-use near_primitives_core::num_rational::{Ratio, Rational32};
-use near_primitives_core::types::ShardId;
-use near_store::cold_storage::{update_cold_db, update_cold_head};
-use near_store::metadata::DbKind;
-use near_store::metadata::DB_VERSION;
-use near_store::test_utils::create_test_node_storage_with_cold;
-use near_store::test_utils::create_test_store;
-use near_store::NodeStorage;
-use near_store::{get, DBCol, TrieChanges};
+use unc_primitives_core::num_rational::{Ratio, Rational32};
+use unc_primitives_core::types::ShardId;
+use unc_store::cold_storage::{update_cold_db, update_cold_head};
+use unc_store::metadata::DbKind;
+use unc_store::metadata::DB_VERSION;
+use unc_store::test_utils::create_test_node_storage_with_cold;
+use unc_store::test_utils::create_test_store;
+use unc_store::NodeStorage;
+use unc_store::{get, DBCol, TrieChanges};
 use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use framework::UNC_BASE;
@@ -221,7 +221,7 @@ pub(crate) fn prepare_env_with_congestion(
         "test0".parse().unwrap(),
         &signer,
         vec![Action::DeployContract(DeployContractAction {
-            code: near_test_contracts::backwards_compatible_rs_contract().to_vec(),
+            code: unc_test_contracts::backwards_compatible_rs_contract().to_vec(),
         })],
         *genesis_block.hash(),
     );
@@ -290,7 +290,7 @@ fn produce_two_blocks() {
                 PeerManagerMessageResponse::NetworkResponses(NetworkResponses::NoResponse)
             }),
         );
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -362,7 +362,7 @@ fn receive_network_block() {
             future::ready(())
         });
         actix::spawn(actor);
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -467,7 +467,7 @@ fn produce_block_with_approvals() {
             future::ready(())
         });
         actix::spawn(actor);
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -553,7 +553,7 @@ fn produce_block_with_approvals_arrived_early() {
             ),
         );
 
-        near_network::test_utils::wait_or_panic(10000);
+        unc_network::test_utils::wait_or_panic(10000);
     });
 }
 
@@ -729,7 +729,7 @@ fn invalid_blocks_common(is_requested: bool) {
             future::ready(())
         });
         actix::spawn(actor);
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -896,7 +896,7 @@ fn ban_peer_for_invalid_block_common(mode: InvalidBlockMode) {
                 },
             ),
         );
-        near_network::test_utils::wait_or_panic(20000);
+        unc_network::test_utils::wait_or_panic(20000);
     });
 }
 
@@ -983,9 +983,9 @@ fn client_sync_headers() {
                     },
                     received_bytes_per_sec: 0,
                     sent_bytes_per_sec: 0,
-                    last_time_peer_requested: near_async::time::Instant::now(),
-                    last_time_received_message: near_async::time::Instant::now(),
-                    connection_established_time: near_async::time::Instant::now(),
+                    last_time_peer_requested: unc_async::time::Instant::now(),
+                    last_time_received_message: unc_async::time::Instant::now(),
+                    connection_established_time: unc_async::time::Instant::now(),
                     peer_type: PeerType::Outbound,
                     nonce: 1,
                 }],
@@ -2263,7 +2263,7 @@ fn test_block_height_processed_orphan() {
 #[test]
 #[cfg(not(feature = "nightly"))]
 fn test_validate_chunk_extra() {
-    let mut capture = near_o11y::testonly::TracingCapture::enable();
+    let mut capture = unc_o11y::testonly::TracingCapture::enable();
 
     let epoch_length = 5;
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
@@ -2282,7 +2282,7 @@ fn test_validate_chunk_extra() {
         "test0".parse().unwrap(),
         &signer,
         vec![Action::DeployContract(DeployContractAction {
-            code: near_test_contracts::rs_contract().to_vec(),
+            code: unc_test_contracts::rs_contract().to_vec(),
         })],
         *genesis_block.hash(),
     );
@@ -2352,7 +2352,7 @@ fn test_validate_chunk_extra() {
             block.compute_block_body_hash().unwrap();
         block.mut_header().resign(&validator_signer);
         let res = env.clients[0].process_block_test(block.clone().into(), Provenance::NONE);
-        assert_matches!(res.unwrap_err(), near_chain::Error::ChunksMissing(_));
+        assert_matches!(res.unwrap_err(), unc_chain::Error::ChunksMissing(_));
     }
 
     // Process the previously unavailable chunk. This causes two blocks to be
@@ -2769,11 +2769,11 @@ fn test_execution_metadata() {
         + config.fees.fee(ActionCosts::function_call_byte).exec_fee() * "main".len() as u64;
 
     let expected_wasm_ops = match config.wasm_config.limit_config.contract_prepare_version {
-        near_vm_runner::logic::ContractPrepareVersion::V0 => 2,
-        near_vm_runner::logic::ContractPrepareVersion::V1 => 2,
+        unc_vm_runner::logic::ContractPrepareVersion::V0 => 2,
+        unc_vm_runner::logic::ContractPrepareVersion::V1 => 2,
         // We spend two wasm instructions (call & drop), plus 8 ops for initializing function
         // operand stack (8 bytes worth to hold the return value.)
-        near_vm_runner::logic::ContractPrepareVersion::V2 => 10,
+        unc_vm_runner::logic::ContractPrepareVersion::V2 => 10,
     };
 
     // Profile for what's happening *inside* wasm vm during function call.
@@ -2974,7 +2974,7 @@ fn test_query_final_state() {
     }
 
     let query_final_state =
-        |chain: &mut near_chain::Chain, runtime: Arc<dyn RuntimeAdapter>, account_id: AccountId| {
+        |chain: &mut unc_chain::Chain, runtime: Arc<dyn RuntimeAdapter>, account_id: AccountId| {
             let final_head = chain.chain_store().final_head().unwrap();
             let last_final_block = chain.get_block(&final_head.last_block_hash).unwrap();
             let response = runtime
@@ -3385,7 +3385,7 @@ fn test_validator_stake_host_function() {
     let block_height = deploy_test_contract(
         &mut env,
         "test0".parse().unwrap(),
-        near_test_contracts::rs_contract(),
+        unc_test_contracts::rs_contract(),
         epoch_length,
         1,
     );
@@ -3495,11 +3495,11 @@ fn test_long_chain_with_restart_from_snapshot() {
 /// These tests fail on aarch because the WasmtimeVM::precompile method doesn't populate the cache.
 mod contract_precompilation_tests {
     use super::*;
-    use near_primitives::test_utils::MockEpochInfoProvider;
-    use near_primitives::views::ViewApplyState;
-    use near_store::{StoreCompiledContractCache, TrieUpdate};
-    use near_vm_runner::logic::CompiledContractCache;
-    use near_vm_runner::{get_contract_cache_key, ContractCode};
+    use unc_primitives::test_utils::MockEpochInfoProvider;
+    use unc_primitives::views::ViewApplyState;
+    use unc_store::{StoreCompiledContractCache, TrieUpdate};
+    use unc_vm_runner::logic::CompiledContractCache;
+    use unc_vm_runner::{get_contract_cache_key, ContractCode};
     use node_runtime::state_viewer::TrieViewer;
 
     const EPOCH_LENGTH: u64 = 25;
@@ -3545,7 +3545,7 @@ mod contract_precompilation_tests {
         let start_height = 1;
 
         // Process test contract deployment on the first client.
-        let wasm_code = near_test_contracts::rs_contract().to_vec();
+        let wasm_code = unc_test_contracts::rs_contract().to_vec();
         let height = deploy_test_contract(
             &mut env,
             "test0".parse().unwrap(),
@@ -3641,7 +3641,7 @@ mod contract_precompilation_tests {
         let mut height = 1;
 
         // Process tiny contract deployment on the first client.
-        let tiny_wasm_code = near_test_contracts::trivial_contract().to_vec();
+        let tiny_wasm_code = unc_test_contracts::trivial_contract().to_vec();
         height = deploy_test_contract(
             &mut env,
             "test0".parse().unwrap(),
@@ -3654,7 +3654,7 @@ mod contract_precompilation_tests {
         height = produce_blocks_from_height(&mut env, 3 * EPOCH_LENGTH, height);
 
         // Process test contract deployment on the first client.
-        let wasm_code = near_test_contracts::rs_contract().to_vec();
+        let wasm_code = unc_test_contracts::rs_contract().to_vec();
         height = deploy_test_contract(
             &mut env,
             "test0".parse().unwrap(),
@@ -3719,7 +3719,7 @@ mod contract_precompilation_tests {
         let mut height = 1;
 
         // Process test contract deployment on the first client.
-        let wasm_code = near_test_contracts::rs_contract().to_vec();
+        let wasm_code = unc_test_contracts::rs_contract().to_vec();
         height = deploy_test_contract(
             &mut env,
             "test2".parse().unwrap(),

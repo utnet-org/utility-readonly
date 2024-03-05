@@ -1,4 +1,4 @@
-use near_primitives::hash::CryptoHash;
+use unc_primitives::hash::CryptoHash;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rand_chacha::ChaCha20Rng;
@@ -16,7 +16,7 @@ pub fn shuffle_receipt_proofs<ReceiptProofType>(
 #[cfg(test)]
 mod tests {
     use crate::sharding::shuffle_receipt_proofs;
-    use near_primitives::hash::CryptoHash;
+    use unc_primitives::hash::CryptoHash;
 
     #[test]
     pub fn receipt_randomness_reproducibility() {

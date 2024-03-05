@@ -5,10 +5,10 @@ use serde::ser::{Serialize, Serializer};
 use serde_json::json;
 use tokio;
 
-use near_jsonrpc_primitives::types;
-use near_jsonrpc_tests as test_utils;
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::Finality;
+use unc_jsonrpc_primitives::types;
+use unc_jsonrpc_tests as test_utils;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::Finality;
 
 static mut NODE_ADDR: Option<String> = None;
 static NODE_INIT: std::sync::Once = std::sync::Once::new();
@@ -88,7 +88,7 @@ impl JsonRpcRequest {
 
 impl Serialize for Base64String {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let encoded = near_primitives::serialize::to_base64(&self.0);
+        let encoded = unc_primitives::serialize::to_base64(&self.0);
         serializer.serialize_str(&encoded)
     }
 }

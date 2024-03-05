@@ -1,7 +1,7 @@
 use super::{RpcFrom, RpcInto};
-use near_client_primitives::types::NetworkInfoResponse;
-use near_client_primitives::types::{KnownProducer, PeerInfo};
-use near_jsonrpc_primitives::types::network_info::{
+use unc_client_primitives::types::NetworkInfoResponse;
+use unc_client_primitives::types::{KnownProducer, PeerInfo};
+use unc_jsonrpc_primitives::types::network_info::{
     RpcKnownProducer, RpcNetworkInfoError, RpcNetworkInfoResponse, RpcPeerInfo,
 };
 

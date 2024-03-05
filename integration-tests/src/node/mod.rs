@@ -5,20 +5,20 @@ pub use crate::node::process_node::ProcessNode;
 pub use crate::node::runtime_node::RuntimeNode;
 pub use crate::node::thread_node::ThreadNode;
 use crate::user::{AsyncUser, User};
-use near_chain_configs::Genesis;
-use near_crypto::{InMemorySigner, Signer};
-use near_jsonrpc_primitives::errors::ServerError;
-use near_primitives::num_rational::Ratio;
-use near_primitives::state_record::StateRecord;
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{AccountId, Balance, NumSeats};
-use near_primitives::validator_signer::InMemoryValidatorSigner;
-use near_primitives::views::AccountView;
-use near_vm_runner::ContractCode;
+use unc_chain_configs::Genesis;
+use unc_crypto::{InMemorySigner, Signer};
+use unc_jsonrpc_primitives::errors::ServerError;
+use unc_primitives::num_rational::Ratio;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{AccountId, Balance, NumSeats};
+use unc_primitives::validator_signer::InMemoryValidatorSigner;
+use unc_primitives::views::AccountView;
+use unc_vm_runner::ContractCode;
 use framework::config::{
     create_testnet_configs, create_testnet_configs_from_seeds, Config, GenesisExt,
 };
-use framework::NearConfig;
+use framework::UncConfig;
 use testlib::runtime_utils::{alice_account, bob_account};
 
 mod process_node;
@@ -40,10 +40,10 @@ pub enum NodeConfig {
     /// A complete node with network, RPC, client, consensus and all tasks running in a thead.
     /// Should be the default choice for the tests, since it provides the most control through the
     /// internal access.
-    Thread(NearConfig),
+    Thread(UncConfig),
     /// A complete noe running in a subprocess. Can be started and stopped, but besides that all
     /// interactions are limited to what is exposed through RPC.
-    Process(NearConfig),
+    Process(UncConfig),
 }
 
 pub trait Node: Send + Sync {
@@ -122,7 +122,7 @@ impl dyn Node {
     }
 }
 
-fn near_configs_to_node_configs(
+fn unc_configs_to_node_configs(
     configs: Vec<Config>,
     validator_signers: Vec<InMemoryValidatorSigner>,
     network_signers: Vec<InMemorySigner>,
@@ -131,7 +131,7 @@ fn near_configs_to_node_configs(
     let mut result = vec![];
     for i in 0..configs.len() {
         result.push(NodeConfig::Thread(
-            NearConfig::new(
+            UncConfig::new(
                 configs[i].clone(),
                 genesis.clone(),
                 (&network_signers[i]).into(),
@@ -146,11 +146,11 @@ fn near_configs_to_node_configs(
 pub fn create_nodes(num_nodes: usize, prefix: &str) -> Vec<NodeConfig> {
     let (configs, validator_signers, network_signers, genesis, _) =
         create_testnet_configs(1, num_nodes as NumSeats, 0, prefix, true, false, vec![]);
-    near_configs_to_node_configs(configs, validator_signers, network_signers, genesis)
+    unc_configs_to_node_configs(configs, validator_signers, network_signers, genesis)
 }
 
 pub fn create_nodes_from_seeds(seeds: Vec<String>) -> Vec<NodeConfig> {
-    let code = near_test_contracts::rs_contract();
+    let code = unc_test_contracts::rs_contract();
     let (configs, validator_signers, network_signers, mut genesis) =
         create_testnet_configs_from_seeds(seeds.clone(), 1, 0, true, false, vec![]);
     genesis.config.gas_price_adjustment_rate = Ratio::from_integer(0);
@@ -169,7 +169,7 @@ pub fn create_nodes_from_seeds(seeds: Vec<String>) -> Vec<NodeConfig> {
         records
             .push(StateRecord::Contract { account_id: seed.parse().unwrap(), code: code.to_vec() });
     }
-    near_configs_to_node_configs(configs, validator_signers, network_signers, genesis)
+    unc_configs_to_node_configs(configs, validator_signers, network_signers, genesis)
 }
 
 pub fn sample_two_nodes(num_nodes: usize) -> (usize, usize) {

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use near_chain::{Block, ChainStore, ChainStoreAccess};
-use near_primitives::hash::CryptoHash;
+use unc_chain::{Block, ChainStore, ChainStoreAccess};
+use unc_primitives::hash::CryptoHash;
 
 /// Iterate over the last N blocks in the blockchain
 pub struct LastNBlocksIterator {

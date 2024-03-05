@@ -1,15 +1,15 @@
 use chrono::{DateTime, Duration, Utc};
-use near_async::messaging::CanSend;
-use near_chain::Chain;
-use near_chain::{check_known, ChainStoreAccess};
-use near_client_primitives::types::SyncStatus;
-use near_network::types::PeerManagerMessageRequest;
-use near_network::types::{HighestHeightPeerInfo, NetworkRequests, PeerManagerAdapter};
-use near_o11y::log_assert;
-use near_primitives::block::Tip;
-use near_primitives::hash::CryptoHash;
-use near_primitives::static_clock::StaticClock;
-use near_primitives::types::{BlockHeight, BlockHeightDelta};
+use unc_async::messaging::CanSend;
+use unc_chain::Chain;
+use unc_chain::{check_known, ChainStoreAccess};
+use unc_client_primitives::types::SyncStatus;
+use unc_network::types::PeerManagerMessageRequest;
+use unc_network::types::{HighestHeightPeerInfo, NetworkRequests, PeerManagerAdapter};
+use unc_o11y::log_assert;
+use unc_primitives::block::Tip;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::static_clock::StaticClock;
+use unc_primitives::types::{BlockHeight, BlockHeightDelta};
 use rand::seq::IteratorRandom;
 use tracing::{debug, warn};
 
@@ -68,7 +68,7 @@ impl BlockSync {
         chain: &Chain,
         highest_height: BlockHeight,
         highest_height_peers: &[HighestHeightPeerInfo],
-    ) -> Result<bool, near_chain::Error> {
+    ) -> Result<bool, unc_chain::Error> {
         let _span = tracing::debug_span!(target: "sync", "run", sync = "BlockSync").entered();
         let head = chain.head()?;
         let header_head = chain.header_head()?;
@@ -126,7 +126,7 @@ impl BlockSync {
     }
 
     // Finds the last block on the canonical chain that is in store (processed).
-    fn get_last_processed_block(&self, chain: &Chain) -> Result<CryptoHash, near_chain::Error> {
+    fn get_last_processed_block(&self, chain: &Chain) -> Result<CryptoHash, unc_chain::Error> {
         // TODO: Can this function be replaced with `Chain::get_latest_known()`?
         // The current chain head may not be on the canonical chain.
         // Now we find the most recent block we know on the canonical chain.
@@ -139,7 +139,7 @@ impl BlockSync {
         while match chain.get_block_header_by_height(header.height()) {
             Ok(got_header) => got_header.hash() != header.hash(),
             Err(e) => match e {
-                near_chain::Error::DBNotFoundErr(_) => true,
+                unc_chain::Error::DBNotFoundErr(_) => true,
                 _ => return Err(e),
             },
         } {
@@ -158,7 +158,7 @@ impl BlockSync {
                     }
                 }
                 Err(e) => match e {
-                    near_chain::Error::DBNotFoundErr(_) => break,
+                    unc_chain::Error::DBNotFoundErr(_) => break,
                     _ => return Err(e),
                 },
             }
@@ -172,7 +172,7 @@ impl BlockSync {
         &mut self,
         chain: &Chain,
         highest_height_peers: &[HighestHeightPeerInfo],
-    ) -> Result<(), near_chain::Error> {
+    ) -> Result<(), unc_chain::Error> {
         // Update last request now because we want to update it whether or not
         // the rest of the logic succeeds.
         // TODO: If this code fails we should retry ASAP. Shouldn't we?
@@ -191,7 +191,7 @@ impl BlockSync {
             match chain.chain_store().get_next_block_hash(&next_hash) {
                 Ok(hash) => next_hash = hash,
                 Err(e) => match e {
-                    near_chain::Error::DBNotFoundErr(_) => break,
+                    unc_chain::Error::DBNotFoundErr(_) => break,
                     _ => return Err(e),
                 },
             }
@@ -302,18 +302,18 @@ enum BlockSyncDue {
 mod test {
     use std::sync::Arc;
 
-    use near_chain::test_utils::wait_for_all_blocks_in_processing;
-    use near_chain::{ChainGenesis, Provenance};
-    use near_crypto::{KeyType, PublicKey};
-    use near_network::test_utils::MockPeerManagerAdapter;
-    use near_o11y::testonly::TracingCapture;
+    use unc_chain::test_utils::wait_for_all_blocks_in_processing;
+    use unc_chain::{ChainGenesis, Provenance};
+    use unc_crypto::{KeyType, PublicKey};
+    use unc_network::test_utils::MockPeerManagerAdapter;
+    use unc_o11y::testonly::TracingCapture;
 
-    use near_primitives::network::PeerId;
-    use near_primitives::utils::MaybeValidated;
+    use unc_primitives::network::PeerId;
+    use unc_primitives::utils::MaybeValidated;
 
     use super::*;
     use crate::test_utils::TestEnv;
-    use near_network::types::PeerInfo;
+    use unc_network::types::PeerInfo;
 
     use std::collections::HashSet;
 

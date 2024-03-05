@@ -1,5 +1,5 @@
 [package]
-name = "near-stdx"
+name = "unc-stdx"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

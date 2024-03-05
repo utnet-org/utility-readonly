@@ -1,14 +1,14 @@
 //! Contract that adds keys and creates accounts
 
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, AccountId, Balance, Promise, PublicKey};
+use unc_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use unc_sdk::{env, unc_bindgen, AccountId, Balance, Promise, PublicKey};
 use std::str::FromStr;
 
-#[near_bindgen]
+#[unc_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct KeyAdder {}
 
-#[near_bindgen]
+#[unc_bindgen]
 impl KeyAdder {
     pub fn add_key(&mut self, public_key: String) -> Promise {
         let signer_id = env::signer_account_id();

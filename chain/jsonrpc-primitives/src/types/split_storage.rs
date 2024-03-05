@@ -1,4 +1,4 @@
-use near_primitives::views::SplitStorageInfoView;
+use unc_primitives::views::SplitStorageInfoView;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

@@ -5,8 +5,8 @@ use crate::cost::{
 use crate::parameter::{FeeParameter, Parameter};
 use crate::vm::VMKind;
 use crate::vm::{Config, StorageGetMode};
-use near_primitives_core::account::id::ParseAccountError;
-use near_primitives_core::types::AccountId;
+use unc_primitives_core::account::id::ParseAccountError;
+use unc_primitives_core::types::AccountId;
 use num_rational::Rational32;
 use std::collections::BTreeMap;
 

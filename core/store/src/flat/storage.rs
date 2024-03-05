@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-use near_primitives::errors::StorageError;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardUId;
-use near_primitives::state::FlatStateValue;
-use near_primitives::types::BlockHeight;
+use unc_primitives::errors::StorageError;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardUId;
+use unc_primitives::state::FlatStateValue;
+use unc_primitives::types::BlockHeight;
 use tracing::{debug, warn};
 
 use crate::flat::delta::{BlockWithChangesInfo, CachedFlatStateChanges};
@@ -486,11 +486,11 @@ mod tests {
     use crate::StorageError;
     use assert_matches::assert_matches;
 
-    use near_o11y::testonly::init_test_logger;
-    use near_primitives::hash::{hash, CryptoHash};
-    use near_primitives::shard_layout::ShardUId;
-    use near_primitives::state::FlatStateValue;
-    use near_primitives::types::BlockHeight;
+    use unc_o11y::testonly::init_test_logger;
+    use unc_primitives::hash::{hash, CryptoHash};
+    use unc_primitives::shard_layout::ShardUId;
+    use unc_primitives::state::FlatStateValue;
+    use unc_primitives::types::BlockHeight;
     use rand::{thread_rng, Rng};
     use std::collections::HashMap;
 
@@ -619,7 +619,7 @@ mod tests {
     #[test]
     fn skipped_heights() {
         // Create a linear chain where some heights are skipped.
-        let chain = MockChain::linear_chain_with_skips(5);
+        let chain = MockChain::liunc_chain_with_skips(5);
         let shard_uid = ShardUId::single_shard();
         let store = create_test_store();
         let mut store_update = store.store_update();
@@ -658,7 +658,7 @@ mod tests {
     fn flat_storage_sanity() {
         // 1. Create a chain with 10 blocks with no forks. Set flat head to be at block 0.
         //    Block i sets value for key &[1] to &[i].
-        let mut chain = MockChain::linear_chain(10);
+        let mut chain = MockChain::liunc_chain(10);
         let shard_uid = ShardUId::single_shard();
         let store = create_test_store();
         let mut store_update = store.store_update();
@@ -789,7 +789,7 @@ mod tests {
         init_test_logger();
         // 1. Create a chain with no forks. Set flat head to be at block 0.
         let num_blocks = 15;
-        let chain = MockChain::linear_chain(num_blocks);
+        let chain = MockChain::liunc_chain(num_blocks);
         let shard_uid = ShardUId::single_shard();
         let store = create_test_store();
         let mut store_update = store.store_update();
@@ -887,7 +887,7 @@ mod tests {
     fn flat_storage_with_no_changes() {
         init_test_logger();
         let num_blocks = 10;
-        let chain = MockChain::linear_chain(num_blocks);
+        let chain = MockChain::liunc_chain(num_blocks);
         let shard_uid = ShardUId::single_shard();
         let store = create_test_store();
         let mut store_update = store.store_update();
@@ -951,7 +951,7 @@ mod tests {
         // 1. Create a long chain with no forks. Set flat head to be at block 0.
         let num_blocks = 1000;
         let mut rng = thread_rng();
-        let chain = MockChain::linear_chain(num_blocks);
+        let chain = MockChain::liunc_chain(num_blocks);
         let shard_uid = ShardUId::single_shard();
         let store = create_test_store();
         let mut store_update = store.store_update();
@@ -1057,7 +1057,7 @@ mod tests {
         {
             tracing::info!("Case 1");
             let num_blocks = 10;
-            let chain = MockChain::linear_chain(num_blocks);
+            let chain = MockChain::liunc_chain(num_blocks);
             let store = create_test_store();
             let mut store_update = store.store_update();
             store_helper::set_flat_storage_status(
@@ -1113,7 +1113,7 @@ mod tests {
         {
             tracing::info!("Case 2");
             let num_blocks = 20;
-            let chain = MockChain::linear_chain(num_blocks);
+            let chain = MockChain::liunc_chain(num_blocks);
             let store = create_test_store();
             let mut store_update = store.store_update();
             store_helper::set_flat_storage_status(
@@ -1204,7 +1204,7 @@ mod tests {
         {
             tracing::info!("Case 3");
             let num_blocks = 20;
-            let chain = MockChain::linear_chain(num_blocks);
+            let chain = MockChain::liunc_chain(num_blocks);
             let store = create_test_store();
             let mut store_update = store.store_update();
             store_helper::set_flat_storage_status(

@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
-use near_primitives::checked_feature;
-use near_primitives::epoch_manager::epoch_info::EpochInfo;
-use near_primitives::epoch_manager::{EpochConfig, RngSeed};
-use near_primitives::epoch_manager::block_info::BlockInfo;
-use near_primitives::epoch_manager::block_summary::BlockSummary;
-use near_primitives::errors::{BlockError, EpochError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::{
+use unc_primitives::checked_feature;
+use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+use unc_primitives::epoch_manager::{EpochConfig, RngSeed};
+use unc_primitives::epoch_manager::block_info::BlockInfo;
+use unc_primitives::epoch_manager::block_summary::BlockSummary;
+use unc_primitives::errors::{BlockError, EpochError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::{
     AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason,
 };
 
@@ -112,17 +112,17 @@ mod old_validator_selection {
     use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
     use std::iter;
 
-    use near_primitives::epoch_manager::epoch_info::EpochInfo;
-    use near_primitives::epoch_manager::EpochConfig;
-    use near_primitives::errors::EpochError;
-    use near_primitives::types::validator_power::ValidatorPower;
-    use near_primitives::types::validator_frozen::ValidatorFrozen;
-    use near_primitives::types::{AccountId, Balance, NumSeats, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
-    use near_primitives::validator_mandates::ValidatorMandates;
-    use near_primitives::version::ProtocolVersion;
+    use unc_primitives::epoch_manager::epoch_info::EpochInfo;
+    use unc_primitives::epoch_manager::EpochConfig;
+    use unc_primitives::errors::EpochError;
+    use unc_primitives::types::validator_power::ValidatorPower;
+    use unc_primitives::types::validator_frozen::ValidatorFrozen;
+    use unc_primitives::types::{AccountId, Balance, NumSeats, ValidatorFrozenV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorPowerV1};
+    use unc_primitives::validator_mandates::ValidatorMandates;
+    use unc_primitives::version::ProtocolVersion;
     use rand::{RngCore, SeedableRng};
     use rand_hc::Hc128Rng;
-    use near_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+    use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
     use crate::proposals::find_threshold;
     use crate::types::RngSeed;
@@ -365,7 +365,7 @@ mod old_validator_selection {
     }
     #[cfg(test)]
     mod tests {
-        use near_primitives::hash::CryptoHash;
+        use unc_primitives::hash::CryptoHash;
 
         use crate::proposals::old_validator_selection::shuffle_duplicate_proposals;
 

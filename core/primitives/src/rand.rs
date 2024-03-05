@@ -1,6 +1,6 @@
 use aliases::Aliases;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::types::Power;
+use unc_primitives_core::types::Power;
 
 #[derive(
     Default, BorshSerialize, BorshDeserialize, serde::Serialize, Clone, Debug, PartialEq, Eq,

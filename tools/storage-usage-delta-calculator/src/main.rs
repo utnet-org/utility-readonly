@@ -1,8 +1,8 @@
-use near_chain_configs::{Genesis, GenesisValidationMode};
-use near_parameters::RuntimeConfigStore;
-use near_primitives::state_record::StateRecord;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_store::genesis::compute_genesis_storage_usage;
+use unc_chain_configs::{Genesis, GenesisValidationMode};
+use unc_parameters::RuntimeConfigStore;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_store::genesis::compute_genesis_storage_usage;
 use std::fs::File;
 use tracing::debug;
 
@@ -12,8 +12,8 @@ use tracing::debug;
 /// to get it
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let env_filter = near_o11y::EnvFilterBuilder::from_env().verbose(Some("")).finish().unwrap();
-    let _subscriber = near_o11y::default_subscriber(env_filter, &Default::default()).global();
+    let env_filter = unc_o11y::EnvFilterBuilder::from_env().verbose(Some("")).finish().unwrap();
+    let _subscriber = unc_o11y::default_subscriber(env_filter, &Default::default()).global();
     debug!(target: "storage-calculator", "Start");
 
     let genesis = Genesis::from_file("output.json", GenesisValidationMode::Full)?;

@@ -315,7 +315,7 @@ class NearNodeProxy:
 
     def new_locust_metadata(self, locust_name: str):
         return {
-            "request_type": "near-rpc",
+            "request_type": "unc-rpc",
             "name": locust_name,
             "start_time": time.time(),
             "response_time": 0,  # overwritten later  with end-to-end time
@@ -481,7 +481,7 @@ class NearUser(User):
 
     def __init__(self, environment):
         super().__init__(environment)
-        assert self.host is not None, "Near user requires the RPC node address"
+        assert self.host is not None, "unc user requires the RPC node address"
         self.node = NearNodeProxy(environment)
         self.id = NearUser.get_next_id()
         user_suffix = f"{self.id}_run{environment.parsed_options.run_id}"

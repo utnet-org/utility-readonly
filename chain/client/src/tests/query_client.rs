@@ -1,8 +1,8 @@
 use actix::System;
 use futures::{future, FutureExt};
-use near_chain::test_utils::ValidatorSchedule;
-use near_primitives::merkle::PartialMerkleTree;
-use near_primitives::test_utils::create_test_signer;
+use unc_chain::test_utils::ValidatorSchedule;
+use unc_primitives::merkle::PartialMerkleTree;
+use unc_primitives::test_utils::create_test_signer;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -12,24 +12,24 @@ use crate::{
     GetBlock, GetBlockWithMerkleTree, GetExecutionOutcomesForBlock, Query, QueryError, Status,
     TxStatus,
 };
-use near_actix_test_utils::run_actix;
-use near_chain_configs::DEFAULT_GC_NUM_EPOCHS_TO_KEEP;
-use near_crypto::{InMemorySigner, KeyType};
-use near_network::test_utils::MockPeerManagerAdapter;
-use near_network::types::PeerInfo;
-use near_network::types::{
+use unc_actix_test_utils::run_actix;
+use unc_chain_configs::DEFAULT_GC_NUM_EPOCHS_TO_KEEP;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_network::test_utils::MockPeerManagerAdapter;
+use unc_network::types::PeerInfo;
+use unc_network::types::{
     NetworkRequests, NetworkResponses, PeerManagerMessageRequest, PeerManagerMessageResponse,
 };
 
 use chrono::Utc;
-use near_o11y::testonly::init_test_logger;
-use near_o11y::WithSpanContextExt;
-use near_primitives::block::{Block, BlockHeader};
-use near_primitives::transaction::SignedTransaction;
-use near_primitives::types::{BlockId, BlockReference, EpochId};
-use near_primitives::utils::to_timestamp;
-use near_primitives::version::PROTOCOL_VERSION;
-use near_primitives::views::{QueryRequest, QueryResponseKind};
+use unc_o11y::testonly::init_test_logger;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::block::{Block, BlockHeader};
+use unc_primitives::transaction::SignedTransaction;
+use unc_primitives::types::{BlockId, BlockReference, EpochId};
+use unc_primitives::utils::to_timestamp;
+use unc_primitives::version::PROTOCOL_VERSION;
+use unc_primitives::views::{QueryRequest, QueryResponseKind};
 use num_rational::Ratio;
 
 /// Query account from view client
@@ -131,7 +131,7 @@ fn query_status_not_crash() {
             future::ready(())
         });
         actix::spawn(actor);
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -202,7 +202,7 @@ fn test_execution_outcome_for_chunk() {
             assert_eq!(outcomes[0].id, tx_hash);
             System::current().stop();
         });
-        near_network::test_utils::wait_or_panic(5000);
+        unc_network::test_utils::wait_or_panic(5000);
     });
 }
 
@@ -260,7 +260,7 @@ fn test_state_request() {
             assert!(res.is_some());
             System::current().stop();
         });
-        near_network::test_utils::wait_or_panic(50000);
+        unc_network::test_utils::wait_or_panic(50000);
     });
 }
 
@@ -387,6 +387,6 @@ fn test_garbage_collection() {
             ),
         );
 
-        near_network::test_utils::wait_or_panic(block_prod_time * target_height * 2 + 2000);
+        unc_network::test_utils::wait_or_panic(block_prod_time * target_height * 2 + 2000);
     })
 }

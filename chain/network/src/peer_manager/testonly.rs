@@ -21,11 +21,11 @@ use crate::types::{
     ReasonForBan,
 };
 use crate::PeerManagerActor;
-use near_async::messaging::IntoSender;
-use near_async::time;
-use near_o11y::WithSpanContextExt;
-use near_primitives::network::{AnnounceAccount, PeerId};
-use near_primitives::types::AccountId;
+use unc_async::messaging::IntoSender;
+use unc_async::time;
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::network::{AnnounceAccount, PeerId};
+use unc_primitives::types::AccountId;
 use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
@@ -548,7 +548,7 @@ impl ActorHandler {
 
 pub(crate) async fn start(
     clock: time::Clock,
-    store: Arc<dyn near_store::db::Database>,
+    store: Arc<dyn unc_store::db::Database>,
     cfg: config::NetworkConfig,
     chain: Arc<data::Chain>,
 ) -> ActorHandler {

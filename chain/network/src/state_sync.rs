@@ -1,4 +1,4 @@
-use near_store::ShardUId;
+use unc_store::ShardUId;
 
 /// State sync response from peers.
 #[derive(actix::Message, Debug)]

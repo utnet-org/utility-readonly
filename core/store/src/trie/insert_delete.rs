@@ -6,8 +6,8 @@ use crate::trie::{
 };
 use crate::{StorageError, Trie, TrieChanges};
 use borsh::BorshSerialize;
-use near_primitives::hash::{hash, CryptoHash};
-use near_primitives::state::ValueRef;
+use unc_primitives::hash::{hash, CryptoHash};
+use unc_primitives::state::ValueRef;
 
 pub(crate) struct NodesStorage {
     nodes: Vec<Option<TrieNodeWithSize>>,

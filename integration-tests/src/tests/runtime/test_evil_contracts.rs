@@ -1,6 +1,6 @@
 use crate::node::{Node, RuntimeNode};
-use near_primitives::errors::{ActionError, ActionErrorKind, FunctionCallError};
-use near_primitives::views::FinalExecutionStatus;
+use unc_primitives::errors::{ActionError, ActionErrorKind, FunctionCallError};
+use unc_primitives::views::FinalExecutionStatus;
 use std::mem::size_of;
 
 use assert_matches::assert_matches;
@@ -39,7 +39,7 @@ fn setup_test_contract(wasm_binary: &[u8]) -> RuntimeNode {
 
 #[test]
 fn test_evil_deep_trie() {
-    let node = setup_test_contract(near_test_contracts::rs_contract());
+    let node = setup_test_contract(unc_test_contracts::rs_contract());
     for i in 0..50 {
         println!("insertStrings #{}", i);
         let from = i * 10 as u64;
@@ -86,7 +86,7 @@ fn test_evil_deep_trie() {
 
 #[test]
 fn test_evil_deep_recursion() {
-    let node = setup_test_contract(near_test_contracts::rs_contract());
+    let node = setup_test_contract(unc_test_contracts::rs_contract());
     for n in [100u64, 1000, 10000, 100000, 1000000] {
         println!("{}", n);
         let n_bytes = n.to_le_bytes().to_vec();
@@ -111,7 +111,7 @@ fn test_evil_deep_recursion() {
 
 #[test]
 fn test_evil_abort() {
-    let node = setup_test_contract(near_test_contracts::rs_contract());
+    let node = setup_test_contract(unc_test_contracts::rs_contract());
     let res = node
         .user()
         .function_call(

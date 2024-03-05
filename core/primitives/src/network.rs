@@ -1,7 +1,7 @@
 use crate::hash::CryptoHash;
 use crate::types::{AccountId, EpochId};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_crypto::{KeyType, PublicKey, SecretKey, Signature};
+use unc_crypto::{KeyType, PublicKey, SecretKey, Signature};
 use std::fmt;
 use std::hash::Hash;
 use std::sync::Arc;

@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::serialize::{base64_display, from_base64};
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::serialize::{base64_display, from_base64};
 use std::str::FromStr;
 
 /// A wrapper for bytes slice which tries to guess best way to format it.
@@ -24,7 +24,7 @@ use std::str::FromStr;
 /// ```ignore
 /// tracing::trace!(target: "state",
 ///                 db_op = "insert",
-///                 key = %near_fmt::Bytes(key),
+///                 key = %unc_fmt::Bytes(key),
 ///                 size = value.len())
 /// ```
 ///
@@ -143,7 +143,7 @@ impl<'a> std::fmt::Display for AbbrBytes<Option<&'a [u8]>> {
 /// tracing::info!(target: "store",
 ///                op = "set",
 ///                col = %col,
-///                key = %near_fmt::StorageKey(key),
+///                key = %unc_fmt::StorageKey(key),
 ///                size = value.len())
 /// ```
 pub struct StorageKey<'a>(pub &'a [u8]);

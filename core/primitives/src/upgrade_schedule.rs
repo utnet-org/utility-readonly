@@ -1,5 +1,5 @@
 use chrono::{DateTime, NaiveDateTime, ParseError, Utc};
-use near_primitives_core::types::ProtocolVersion;
+use unc_primitives_core::types::ProtocolVersion;
 use std::env;
 
 /// Defines the point in time after which validators are expected to vote on the
@@ -26,7 +26,7 @@ impl ProtocolUpgradeVotingSchedule {
 
     /// This method creates an instance of the ProtocolUpgradeVotingSchedule.
     ///
-    /// It will first check if the NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE is
+    /// It will first check if the unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE is
     /// set in the environment and if so return the immediate upgrade schedule.
     /// This should only be used in tests, in particular in tests the in some
     /// way test uncd upgrades.
@@ -34,7 +34,7 @@ impl ProtocolUpgradeVotingSchedule {
     /// Otherwise it will parse the given string and return the corresponding
     /// upgrade schedule.
     pub fn from_env_or_str(s: &str) -> Result<Self, ParseError> {
-        let immediate_upgrade = env::var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE");
+        let immediate_upgrade = env::var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE");
         if let Ok(_) = immediate_upgrade {
             tracing::warn!("Setting immediate protocol upgrade. This is fine in tests but should be avoided otherwise");
             return Ok(Self::default());
@@ -235,7 +235,7 @@ mod tests {
     fn test_env_overwrite() {
         // The immediate protocol upgrade needs to be set for this test to pass in
         // the release branch where the protocol upgrade date is set.
-        std::env::set_var("NEAR_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
+        std::env::set_var("unc_TESTS_IMMEDIATE_PROTOCOL_UPGRADE", "1");
 
         assert_eq!(
             ProtocolUpgradeVotingSchedule::from_env_or_str("2999-02-03 23:59:59").unwrap(),

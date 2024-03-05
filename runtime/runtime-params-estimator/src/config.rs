@@ -1,6 +1,6 @@
 use crate::rocksdb::RocksDBTestConfig;
 use crate::Cost;
-use near_parameters::vm::VMKind;
+use unc_parameters::vm::VMKind;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

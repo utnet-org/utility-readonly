@@ -7,7 +7,7 @@
 # Local:
 # python tests/sanity/block_production.py
 # Remote:
-# NEAR_PYTEST_CONFIG=remote.json python tests/sanity/block_production.py
+# unc_PYTEST_CONFIG=remote.json python tests/sanity/block_production.py
 
 # Same for all tests that call start_cluster with a None config
 
@@ -100,7 +100,7 @@ while max_height < BLOCKS:
 
 assert min_common() + 2 >= BLOCKS, heights_report()
 
-doomslug_final_block = nodes[0].json_rpc('block', {'finality': 'near-final'})
+doomslug_final_block = nodes[0].json_rpc('block', {'finality': 'unc-final'})
 assert (doomslug_final_block['result']['header']['height'] >= BLOCKS - 10)
 
 nfg_final_block = nodes[0].json_rpc('block', {'finality': 'final'})

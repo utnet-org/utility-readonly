@@ -1,15 +1,15 @@
 use anyhow::Context;
 
-use near_chain_configs::{Genesis, GenesisValidationMode};
-use near_crypto::PublicKey;
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::state_record::StateRecord;
-use near_primitives::types::{AccountId, AccountInfo};
-use near_primitives::utils;
-use near_primitives::version::ProtocolVersion;
-use near_primitives_core::account::{AccessKey, Account};
-use near_primitives_core::types::{Balance, BlockHeightDelta, NumBlocks, NumSeats, NumShards, Power};
+use unc_chain_configs::{Genesis, GenesisValidationMode};
+use unc_crypto::PublicKey;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::state_record::StateRecord;
+use unc_primitives::types::{AccountId, AccountInfo};
+use unc_primitives::utils;
+use unc_primitives::version::ProtocolVersion;
+use unc_primitives_core::account::{AccessKey, Account};
+use unc_primitives_core::types::{Balance, BlockHeightDelta, NumBlocks, NumSeats, NumShards, Power};
 use num_rational::Rational32;
 use serde::ser::{SerializeSeq, Serializer};
 use std::collections::{hash_map, HashMap};
@@ -170,7 +170,7 @@ fn parse_extra_records(
     let mut records = HashMap::new();
 
     let mut result = Ok(());
-    near_chain_configs::stream_records_from_file(reader, |r| {
+    unc_chain_configs::stream_records_from_file(reader, |r| {
         match r {
             StateRecord::Account { account_id, account } => {
                 if account.code_hash() != CryptoHash::default() {
@@ -300,7 +300,7 @@ pub fn amend_genesis(
     let mut wanted = wanted_records(&validators, extra_records, num_bytes_account)?;
     let mut total_supply = 0;
 
-    near_chain_configs::stream_records_from_file(reader, |mut r| {
+    unc_chain_configs::stream_records_from_file(reader, |mut r| {
         match &mut r {
             StateRecord::AccessKey { account_id, public_key, access_key } => {
                 if let Some(a) = wanted.get_mut(account_id) {
@@ -396,16 +396,16 @@ pub fn amend_genesis(
 #[cfg(test)]
 mod test {
     use anyhow::Context;
-    use near_chain_configs::{get_initial_supply, Genesis, GenesisConfig};
-    use near_primitives::hash::CryptoHash;
-    use near_primitives::shard_layout::ShardLayout;
-    use near_primitives::state_record::StateRecord;
-    use near_primitives::static_clock::StaticClock;
-    use near_primitives::types::{AccountId, AccountInfo};
-    use near_primitives::utils;
-    use near_primitives::version::PROTOCOL_VERSION;
-    use near_primitives_core::account::{AccessKey, Account};
-    use near_primitives_core::types::{Balance, StorageUsage};
+    use unc_chain_configs::{get_initial_supply, Genesis, GenesisConfig};
+    use unc_primitives::hash::CryptoHash;
+    use unc_primitives::shard_layout::ShardLayout;
+    use unc_primitives::state_record::StateRecord;
+    use unc_primitives::static_clock::StaticClock;
+    use unc_primitives::types::{AccountId, AccountInfo};
+    use unc_primitives::utils;
+    use unc_primitives::version::PROTOCOL_VERSION;
+    use unc_primitives_core::account::{AccessKey, Account};
+    use unc_primitives_core::types::{Balance, StorageUsage};
     use num_rational::Rational32;
     use std::collections::{HashMap, HashSet};
     use std::str::FromStr;

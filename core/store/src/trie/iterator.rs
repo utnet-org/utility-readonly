@@ -1,4 +1,4 @@
-use near_primitives::hash::CryptoHash;
+use unc_primitives::hash::CryptoHash;
 
 use crate::trie::nibble_slice::NibbleSlice;
 use crate::trie::{TrieNode, TrieNodeWithSize, ValueHandle};
@@ -436,7 +436,7 @@ mod tests {
     use crate::trie::iterator::IterStep;
     use crate::trie::nibble_slice::NibbleSlice;
     use crate::Trie;
-    use near_primitives::shard_layout::ShardUId;
+    use unc_primitives::shard_layout::ShardUId;
 
     fn value() -> Option<Vec<u8>> {
         Some(vec![0])

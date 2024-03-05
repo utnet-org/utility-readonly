@@ -1,38 +1,38 @@
 use crate::proposals::proposals_to_block_summary;
 use crate::proposals::proposals_to_epoch_info;
 use crate::types::EpochInfoAggregator;
-use near_cache::SyncLruCache;
-use near_chain_configs::GenesisConfig;
-use near_chain_primitives::Error;
-use near_crypto::PublicKey;
-use near_primitives::checked_feature;
-use near_primitives::epoch_manager::block_info::{BlockInfo, BlockInfoV2};
-use near_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
-use near_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
-use near_primitives::epoch_manager::{
+use unc_cache::SyncLruCache;
+use unc_chain_configs::GenesisConfig;
+use unc_chain_primitives::Error;
+use unc_crypto::PublicKey;
+use unc_primitives::checked_feature;
+use unc_primitives::epoch_manager::block_info::{BlockInfo, BlockInfoV2};
+use unc_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
+use unc_primitives::epoch_manager::epoch_info::{EpochInfo, EpochSummary};
+use unc_primitives::epoch_manager::{
     AllEpochConfig, AllEpochConfigTestOverrides, EpochConfig, ShardConfig, SlashState,
     AGGREGATOR_KEY,
 };
-use near_primitives::errors::{BlockError, EpochError};
-use near_primitives::hash::CryptoHash;
-use near_primitives::shard_layout::ShardLayout;
-use near_primitives::types::validator_frozen::ValidatorFrozen;
-use near_primitives::types::validator_power::ValidatorPower;
-use near_primitives::types::validator_power_and_frozen::{
+use unc_primitives::errors::{BlockError, EpochError};
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::shard_layout::ShardLayout;
+use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_power::ValidatorPower;
+use unc_primitives::types::validator_power_and_frozen::{
     ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter,
 };
-use near_primitives::types::{
+use unc_primitives::types::{
     AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
     EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier,
     ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats,
 };
-use near_primitives::utils::height_to_bytes;
-use near_primitives::validator_mandates::AssignmentWeight;
-use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
-use near_primitives::views::{
+use unc_primitives::utils::height_to_bytes;
+use unc_primitives::validator_mandates::AssignmentWeight;
+use unc_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
+use unc_primitives::views::{
     CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView,
 };
-use near_store::{DBCol, Store, StoreUpdate};
+use unc_store::{DBCol, Store, StoreUpdate};
 use num_bigint::{BigInt, ToBigInt};
 use num_rational::Rational64;
 use num_traits::Zero;
@@ -1141,7 +1141,7 @@ impl EpochManager {
     // }
 
     fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let root_id_result: Result<AccountId, near_primitives::account::id::ParseAccountError> = "miner".parse::<AccountId>();
+        let root_id_result: Result<AccountId, unc_primitives::account::id::ParseAccountError> = "miner".parse::<AccountId>();
         let pkey = "ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv".parse::<PublicKey>();
         let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
             account_id: root_id_result.unwrap(),

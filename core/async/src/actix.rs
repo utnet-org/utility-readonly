@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt, TryFutureExt};
-use near_o11y::{WithSpanContext, WithSpanContextExt};
+use unc_o11y::{WithSpanContext, WithSpanContextExt};
 
 use crate::messaging::{CanSend, CanSendAsync};
 

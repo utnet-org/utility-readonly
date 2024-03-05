@@ -19,20 +19,20 @@ import mirror_utils
 def main():
     config = load_config()
 
-    near_root, source_nodes, target_node_dirs, traffic_data = mirror_utils.start_source_chain(
+    unc_root, source_nodes, target_node_dirs, traffic_data = mirror_utils.start_source_chain(
         config)
 
     target_nodes = [
-        spin_up_node(config, near_root, target_node_dirs[i],
+        spin_up_node(config, unc_root, target_node_dirs[i],
                      len(source_nodes) + 1 + i)
         for i in range(len(target_node_dirs))
     ]
 
-    mirror = mirror_utils.MirrorProcess(near_root,
+    mirror = mirror_utils.MirrorProcess(unc_root,
                                         mirror_utils.dot_near() /
                                         f'{mirror_utils.MIRROR_DIR}/source',
                                         online_source=True)
-    mirror_utils.send_traffic(near_root, source_nodes, traffic_data,
+    mirror_utils.send_traffic(unc_root, source_nodes, traffic_data,
                               mirror.restart_once)
 
     end_source_height = source_nodes[0].get_latest_block().height

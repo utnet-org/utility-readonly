@@ -1,7 +1,7 @@
-use near_chain::ChainStore;
-use near_chain_configs::GenesisValidationMode;
-use near_epoch_manager::EpochManager;
-use near_store::{Mode, NodeStorage};
+use unc_chain::ChainStore;
+use unc_chain_configs::GenesisValidationMode;
+use unc_epoch_manager::EpochManager;
+use unc_store::{Mode, NodeStorage};
 use framework::load_config;
 use std::path::Path;
 
@@ -18,13 +18,13 @@ impl UndoBlockCommand {
         home_dir: &Path,
         genesis_validation: GenesisValidationMode,
     ) -> anyhow::Result<()> {
-        let near_config = load_config(home_dir, genesis_validation)
+        let unc_config = load_config(home_dir, genesis_validation)
             .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
         let store_opener = NodeStorage::opener(
             home_dir,
-            near_config.config.archive,
-            &near_config.config.store,
+            unc_config.config.archive,
+            &unc_config.config.store,
             None,
         );
 
@@ -32,12 +32,12 @@ impl UndoBlockCommand {
         let store = storage.get_hot_store();
 
         let epoch_manager =
-            EpochManager::new_arc_handle(store.clone(), &near_config.genesis.config);
+            EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
 
         let mut chain_store = ChainStore::new(
             store,
-            near_config.genesis.config.genesis_height,
-            near_config.client_config.save_trie_changes,
+            unc_config.genesis.config.genesis_height,
+            unc_config.client_config.save_trie_changes,
         );
 
         if self.reset_only_body {

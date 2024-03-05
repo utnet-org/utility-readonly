@@ -129,7 +129,7 @@ class MetricsTracker:
     
     Usage:
         tracker = MetricsTracker(node)
-        assert tracker.get_int_metric_value("near-connections") == 2
+        assert tracker.get_int_metric_value("unc-connections") == 2
     """
 
     def __init__(self, node: cluster.BaseNode) -> None:
@@ -226,7 +226,7 @@ def chain_query(node, block_handler, *, block_hash=None, max_blocks=-1):
                 break
 
 
-def get_near_tempdir(subdir=None, *, clean=False):
+def get_unc_tempdir(subdir=None, *, clean=False):
     tempdir = pathlib.Path(tempfile.gettempdir()) / 'near'
     if subdir:
         tempdir = tempdir / subdir
@@ -243,14 +243,14 @@ def load_binary_file(filepath):
 
 def load_test_contract(
         filename: str = 'backwards_compatible_rs_contract.wasm') -> bytearray:
-    """Loads a WASM file from near-test-contracts package.
+    """Loads a WASM file from unc-test-contracts package.
 
     This is just a convenience function around load_binary_file which loads
-    files from ../runtime/near-test-contracts/res directory.  By default
+    files from ../runtime/unc-test-contracts/res directory.  By default
     test_contract_rs.wasm is loaded.
     """
     repo_dir = pathlib.Path(__file__).resolve().parents[2]
-    path = repo_dir / 'runtime/near-test-contracts/res' / filename
+    path = repo_dir / 'runtime/unc-test-contracts/res' / filename
     return load_binary_file(path)
 
 
@@ -262,7 +262,7 @@ def user_name():
 
 
 def collect_gcloud_config(num_nodes):
-    tempdir = get_near_tempdir()
+    tempdir = get_unc_tempdir()
     keys = []
     for i in range(num_nodes):
         node_dir = tempdir / f'node{i}'
@@ -509,15 +509,15 @@ def figure_out_sandbox_binary():
     }
     repo_dir = pathlib.Path(__file__).resolve().parents[2]
     # When run on NayDuck we end up with a binary called uncd in target/debug
-    # but when run locally the binary might be uncd-sandbox or near-sandbox
+    # but when run locally the binary might be uncd-sandbox or unc-sandbox
     # instead.  Try to figure out whichever binary is available and use that.
     for release in ('release', 'debug'):
         root = repo_dir / 'target' / release
-        for exe in ('uncd-sandbox', 'near-sandbox', 'uncd'):
+        for exe in ('uncd-sandbox', 'unc-sandbox', 'uncd'):
             if (root / exe).exists():
                 logger.info(
                     f'Using {(root / exe).relative_to(repo_dir)} binary')
-                config['near_root'] = str(root)
+                config['unc_root'] = str(root)
                 config['binary_name'] = exe
                 return config
 

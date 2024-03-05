@@ -7,13 +7,13 @@ use actix::System;
 use anyhow::Context;
 use mock_node::setup::{setup_mock_node, MockNode};
 use mock_node::MockNetworkConfig;
-use near_actix_test_utils::run_actix;
-use near_chain_configs::GenesisValidationMode;
-use near_crypto::{InMemorySigner, KeyType};
-use near_jsonrpc_client::JsonRpcClient;
-use near_network::tcp;
-use near_o11y::testonly::init_integration_logger;
-use near_primitives::types::BlockHeight;
+use unc_actix_test_utils::run_actix;
+use unc_chain_configs::GenesisValidationMode;
+use unc_crypto::{InMemorySigner, KeyType};
+use unc_jsonrpc_client::JsonRpcClient;
+use unc_network::tcp;
+use unc_o11y::testonly::init_integration_logger;
+use unc_primitives::types::BlockHeight;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
@@ -105,16 +105,16 @@ fn main() -> anyhow::Result<()> {
     init_integration_logger();
     let args: Cli = clap::Parser::parse();
     let home_dir = Path::new(&args.chain_history_home_dir);
-    let mut near_config = framework::config::load_config(home_dir, GenesisValidationMode::Full)
+    let mut unc_config = framework::config::load_config(home_dir, GenesisValidationMode::Full)
         .context("Error loading config")?;
-    near_config.validator_signer = None;
-    near_config.client_config.min_num_peers = 1;
+    unc_config.validator_signer = None;
+    unc_config.client_config.min_num_peers = 1;
     let signer = InMemorySigner::from_random("mock_node".parse().unwrap(), KeyType::ED25519);
-    near_config.network_config.node_key = signer.secret_key;
-    near_config.client_config.tracked_shards =
-        near_config.genesis.config.shard_layout.shard_ids().collect();
-    if near_config.rpc_config.is_none() {
-        near_config.rpc_config = Some(near_jsonrpc::RpcConfig::default());
+    unc_config.network_config.node_key = signer.secret_key;
+    unc_config.client_config.tracked_shards =
+        unc_config.genesis.config.shard_layout.shard_ids().collect();
+    if unc_config.rpc_config.is_none() {
+        unc_config.rpc_config = Some(unc_jsonrpc::RpcConfig::default());
     }
     let tempdir;
     let client_home_dir = match &args.client_home_dir {
@@ -148,7 +148,7 @@ fn main() -> anyhow::Result<()> {
         let MockNode { target_height, mut mock_peer, rpc_client } = setup_mock_node(
             Path::new(&client_home_dir),
             home_dir,
-            near_config,
+            unc_config,
             &network_config,
             client_height,
             network_height,

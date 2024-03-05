@@ -2,34 +2,34 @@ use actix::Addr;
 use anyhow::Context;
 use async_trait::async_trait;
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_chain_configs::GenesisValidationMode;
-use near_chain_primitives::error::QueryError as RuntimeQueryError;
-use near_client::{ClientActor, ViewClientActor};
-use near_client::{ProcessTxRequest, ProcessTxResponse};
-use near_client_primitives::types::{
+use unc_chain_configs::GenesisValidationMode;
+use unc_chain_primitives::error::QueryError as RuntimeQueryError;
+use unc_client::{ClientActor, ViewClientActor};
+use unc_client::{ProcessTxRequest, ProcessTxResponse};
+use unc_client_primitives::types::{
     GetBlock, GetBlockError, GetChunkError, GetExecutionOutcomeError, GetReceiptError, Query,
     QueryError, Status,
 };
-use near_crypto::{PublicKey, SecretKey};
-use near_indexer::{Indexer, StreamerMessage};
-use near_o11y::WithSpanContextExt;
-use near_primitives::hash::CryptoHash;
-use near_primitives::receipt::{Receipt, ReceiptEnum};
-use near_primitives::transaction::{
+use unc_crypto::{PublicKey, SecretKey};
+use unc_indexer::{Indexer, StreamerMessage};
+use unc_o11y::WithSpanContextExt;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::receipt::{Receipt, ReceiptEnum};
+use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteKeyAction, SignedTransaction, StakeAction,
     Transaction,
 };
-use near_primitives::types::{
+use unc_primitives::types::{
     AccountId, BlockHeight, BlockReference, Finality, TransactionOrReceiptId,
 };
-use near_primitives::views::{
+use unc_primitives::views::{
     ExecutionOutcomeWithIdView, ExecutionStatusView, QueryRequest, QueryResponseKind,
     SignedTransactionView,
 };
-use near_primitives_core::account::id::AccountType;
-use near_primitives_core::account::{AccessKey, AccessKeyPermission};
-use near_primitives_core::types::{Nonce, ShardId};
-use framework::config::NearConfig;
+use unc_primitives_core::account::id::AccountType;
+use unc_primitives_core::account::{AccessKey, AccessKeyPermission};
+use unc_primitives_core::types::{Nonce, ShardId};
+use framework::config::UncConfig;
 use rocksdb::DB;
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -337,10 +337,10 @@ impl From<GetChunkError> for ChainError {
     }
 }
 
-impl From<near_chain_primitives::Error> for ChainError {
-    fn from(err: near_chain_primitives::Error) -> Self {
+impl From<unc_chain_primitives::Error> for ChainError {
+    fn from(err: unc_chain_primitives::Error) -> Self {
         match err {
-            near_chain_primitives::Error::DBNotFoundErr(_) => Self::Unknown,
+            unc_chain_primitives::Error::DBNotFoundErr(_) => Self::Unknown,
             _ => Self::other(err),
         }
     }
@@ -481,8 +481,8 @@ struct TxMirror<T: ChainAccess> {
     secret: Option<[u8; crate::secret::SECRET_LEN]>,
 }
 
-fn open_db<P: AsRef<Path>>(home: P, config: &NearConfig) -> anyhow::Result<DB> {
-    let db_path = near_store::NodeStorage::opener(
+fn open_db<P: AsRef<Path>>(home: P, config: &UncConfig) -> anyhow::Result<DB> {
+    let db_path = unc_store::NodeStorage::opener(
         home.as_ref(),
         config.config.archive,
         &config.config.store,
@@ -873,10 +873,10 @@ impl<T: ChainAccess> TxMirror<T> {
         }
         let db =
             open_db(target_home.as_ref(), &target_config).context("failed to open mirror DB")?;
-        let target_indexer = Indexer::new(near_indexer::IndexerConfig {
+        let target_indexer = Indexer::new(unc_indexer::IndexerConfig {
             home_dir: target_home.as_ref().to_path_buf(),
-            sync_mode: near_indexer::SyncModeEnum::FromInterruption,
-            await_for_node_synced: near_indexer::AwaitForNodeSyncedEnum::StreamWhileSyncing,
+            sync_mode: unc_indexer::SyncModeEnum::FromInterruption,
+            await_for_node_synced: unc_indexer::AwaitForNodeSyncedEnum::StreamWhileSyncing,
             validate_genesis: false,
         })
         .context("failed to start target chain indexer")?;
@@ -1008,8 +1008,8 @@ impl<T: ChainAccess> TxMirror<T> {
                             if target_account.get_account_type() == AccountType::NearImplicitAccount
                             {
                                 let public_key =
-                                    PublicKey::from_near_implicit_account(&target_account)
-                                        .expect("must be near-implicit");
+                                    PublicKey::from_unc_implicit_account(&target_account)
+                                        .expect("must be unc-implicit");
                                 nonce_updates.insert((target_account, public_key));
                             }
                         }

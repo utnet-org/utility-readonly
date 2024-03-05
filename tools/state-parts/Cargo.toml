@@ -1,5 +1,5 @@
 [package]
-name = "near-state-parts"
+name = "unc-state-parts"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -20,28 +20,28 @@ sha2 = "0.10.6"
 tokio.workspace = true
 tracing.workspace = true
 
-near-async.workspace = true
-near-jsonrpc.workspace = true
-near-network.workspace = true
-near-o11y.workspace = true
-near-ping.workspace = true
-near-primitives.workspace = true
+unc-async.workspace = true
+unc-jsonrpc.workspace = true
+unc-network.workspace = true
+unc-o11y.workspace = true
+unc-ping.workspace = true
+unc-primitives.workspace = true
 
 [features]
 nightly = [
   "nightly_protocol",
-  "near-async/nightly",
-  "near-jsonrpc/nightly",
-  "near-network/nightly",
-  "near-o11y/nightly",
-  "near-ping/nightly",
-  "near-primitives/nightly",
+  "unc-async/nightly",
+  "unc-jsonrpc/nightly",
+  "unc-network/nightly",
+  "unc-o11y/nightly",
+  "unc-ping/nightly",
+  "unc-primitives/nightly",
 ]
 nightly_protocol = [
-  "near-async/nightly_protocol",
-  "near-jsonrpc/nightly_protocol",
-  "near-network/nightly_protocol",
-  "near-o11y/nightly_protocol",
-  "near-ping/nightly_protocol",
-  "near-primitives/nightly_protocol",
+  "unc-async/nightly_protocol",
+  "unc-jsonrpc/nightly_protocol",
+  "unc-network/nightly_protocol",
+  "unc-o11y/nightly_protocol",
+  "unc-ping/nightly_protocol",
+  "unc-primitives/nightly_protocol",
 ]

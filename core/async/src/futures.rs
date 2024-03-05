@@ -28,6 +28,6 @@ pub struct ActixFutureSpawner;
 
 impl FutureSpawner for ActixFutureSpawner {
     fn spawn_boxed(&self, description: &'static str, f: BoxFuture<'static, ()>) {
-        near_performance_metrics::actix::spawn(description, f);
+        unc_performance_metrics::actix::spawn(description, f);
     }
 }

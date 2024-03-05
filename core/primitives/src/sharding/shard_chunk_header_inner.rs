@@ -1,8 +1,8 @@
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
 use crate::types::{StateRoot, ValidatorFrozenV1};
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_primitives_core::hash::CryptoHash;
-use near_primitives_core::types::{Balance, BlockHeight, Gas, ShardId};
+use unc_primitives_core::hash::CryptoHash;
+use unc_primitives_core::types::{Balance, BlockHeight, Gas, ShardId};
 use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]

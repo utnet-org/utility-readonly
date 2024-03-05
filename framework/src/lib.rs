@@ -1,4 +1,4 @@
-pub use crate::config::{init_configs, load_config, load_test_config, NearConfig, UNC_BASE};
+pub use crate::config::{init_configs, load_config, load_test_config, UncConfig, UNC_BASE};
 use crate::entity_debug::EntityDebugHandlerImpl;
 use crate::metrics::spawn_trie_metrics_loop;
 pub use crate::runtime::NightshadeRuntime;
@@ -9,29 +9,29 @@ use actix::{Actor, Addr};
 use actix_rt::ArbiterHandle;
 use anyhow::Context;
 use cold_storage::ColdStoreLoopHandle;
-use near_async::actix::AddrWithAutoSpanContextExt;
-use near_async::messaging::{IntoSender, LateBoundSender};
-use near_async::time;
-use near_chain::state_snapshot_actor::{
+use unc_async::actix::AddrWithAutoSpanContextExt;
+use unc_async::messaging::{IntoSender, LateBoundSender};
+use unc_async::time;
+use unc_chain::state_snapshot_actor::{
     get_delete_snapshot_callback, get_make_snapshot_callback, SnapshotCallbacks, StateSnapshotActor,
 };
-use near_chain::types::RuntimeAdapter;
-use near_chain::{Chain, ChainGenesis};
-use near_chain_configs::ReshardingHandle;
-use near_chain_configs::SyncConfig;
-use near_chunks::shards_manager_actor::start_shards_manager;
-use near_client::sync::adapter::SyncAdapter;
-use near_client::{start_client, start_view_client, ClientActor, ConfigUpdater, ViewClientActor};
-use near_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
-use near_epoch_manager::EpochManager;
-use near_network::PeerManagerActor;
-use near_primitives::block::GenesisId;
-use near_store::flat::FlatStateValuesInliningMigrationHandle;
-use near_store::genesis::initialize_genesis_state;
-use near_store::metadata::DbKind;
-use near_store::metrics::spawn_db_metrics_loop;
-use near_store::{DBCol, Mode, NodeStorage, Store, StoreOpenerError};
-use near_telemetry::TelemetryActor;
+use unc_chain::types::RuntimeAdapter;
+use unc_chain::{Chain, ChainGenesis};
+use unc_chain_configs::ReshardingHandle;
+use unc_chain_configs::SyncConfig;
+use unc_chunks::shards_manager_actor::start_shards_manager;
+use unc_client::sync::adapter::SyncAdapter;
+use unc_client::{start_client, start_view_client, ClientActor, ConfigUpdater, ViewClientActor};
+use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::EpochManager;
+use unc_network::PeerManagerActor;
+use unc_primitives::block::GenesisId;
+use unc_store::flat::FlatStateValuesInliningMigrationHandle;
+use unc_store::genesis::initialize_genesis_state;
+use unc_store::metadata::DbKind;
+use unc_store::metrics::spawn_db_metrics_loop;
+use unc_store::{DBCol, Mode, NodeStorage, Store, StoreOpenerError};
+use unc_telemetry::TelemetryActor;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use tokio::sync::broadcast;
@@ -53,8 +53,8 @@ pub mod state_sync;
 pub mod test_utils;
 
 pub fn get_default_home() -> PathBuf {
-    if let Ok(near_home) = std::env::var("NEAR_HOME") {
-        return near_home.into();
+    if let Ok(unc_home) = std::env::var("unc_HOME") {
+        return unc_home.into();
     }
 
     if let Some(mut home) = dirs::home_dir() {
@@ -67,7 +67,7 @@ pub fn get_default_home() -> PathBuf {
 
 /// Opens node’s storage performing migrations and checks when necessary.
 ///
-/// If opened storage is an RPC store and `near_config.config.archive` is true,
+/// If opened storage is an RPC store and `unc_config.config.archive` is true,
 /// converts the storage to archival node.  Otherwise, if opening archival node
 /// with that field being false, prints a warning and sets the field to `true`.
 /// In other words, once store is archival, the node will act as archival nod
@@ -76,13 +76,13 @@ pub fn get_default_home() -> PathBuf {
 /// The end goal is to get rid of `archive` option in `config.json` file and
 /// have the type of the node be determined purely based on kind of database
 /// being opened.
-pub fn open_storage(home_dir: &Path, near_config: &mut NearConfig) -> anyhow::Result<NodeStorage> {
-    let migrator = migrations::Migrator::new(near_config);
+pub fn open_storage(home_dir: &Path, unc_config: &mut UncConfig) -> anyhow::Result<NodeStorage> {
+    let migrator = migrations::Migrator::new(unc_config);
     let opener = NodeStorage::opener(
         home_dir,
-        near_config.client_config.archive,
-        &near_config.config.store,
-        near_config.config.cold_store.as_ref(),
+        unc_config.client_config.archive,
+        &unc_config.config.store,
+        unc_config.config.cold_store.as_ref(),
     )
     .with_migrator(&migrator);
     let storage = match opener.open() {
@@ -121,7 +121,7 @@ pub fn open_storage(home_dir: &Path, near_config: &mut NearConfig) -> anyhow::Re
             ))
         },
         Err(StoreOpenerError::SnapshotError(err)) => {
-            use near_store::config::MigrationSnapshot;
+            use unc_store::config::MigrationSnapshot;
             let path = std::path::PathBuf::from("/path/to/snapshot/dir");
             let on = MigrationSnapshot::Path(path).format_example();
             let off = MigrationSnapshot::Enabled(false).format_example();
@@ -170,12 +170,12 @@ pub fn open_storage(home_dir: &Path, near_config: &mut NearConfig) -> anyhow::Re
         },
     }.with_context(|| format!("unable to open database at {}", opener.path().display()))?;
 
-    near_config.config.archive = storage.is_archive()?;
+    unc_config.config.archive = storage.is_archive()?;
     Ok(storage)
 }
 
 // Safely get the split store while checking that all conditions to use it are met.
-fn get_split_store(config: &NearConfig, storage: &NodeStorage) -> anyhow::Result<Option<Store>> {
+fn get_split_store(config: &UncConfig, storage: &NodeStorage) -> anyhow::Result<Option<Store>> {
     // SplitStore should only be used on archival nodes.
     if !config.config.archive {
         return Ok(None);
@@ -219,13 +219,13 @@ pub struct NearNode {
     pub resharding_handle: ReshardingHandle,
 }
 
-pub fn start_with_config(home_dir: &Path, config: NearConfig) -> anyhow::Result<NearNode> {
+pub fn start_with_config(home_dir: &Path, config: UncConfig) -> anyhow::Result<NearNode> {
     start_with_config_and_synchronization(home_dir, config, None, None)
 }
 
 pub fn start_with_config_and_synchronization(
     home_dir: &Path,
-    mut config: NearConfig,
+    mut config: UncConfig,
     // 'shutdown_signal' will notify the corresponding `oneshot::Receiver` when an instance of
     // `ClientActor` gets dropped.
     shutdown_signal: Option<broadcast::Sender<()>>,
@@ -307,7 +307,7 @@ pub fn start_with_config_and_synchronization(
     let network_adapter = Arc::new(LateBoundSender::default());
     let shards_manager_adapter = Arc::new(LateBoundSender::default());
     let client_adapter_for_shards_manager = Arc::new(LateBoundSender::default());
-    let adv = near_client::adversarial::Controls::new(config.client_config.archive);
+    let adv = unc_client::adversarial::Controls::new(config.client_config.archive);
 
     let view_client = start_view_client(
         config.validator_signer.as_ref().map(|signer| signer.validator_id().clone()),
@@ -386,9 +386,9 @@ pub fn start_with_config_and_synchronization(
     let mut rpc_servers = Vec::new();
     let network_actor = PeerManagerActor::spawn(
         time::Clock::real(),
-        storage.into_inner(near_store::Temperature::Hot),
+        storage.into_inner(unc_store::Temperature::Hot),
         config.network_config,
-        Arc::new(near_client::adapter::Adapter::new(client_actor.clone(), view_client.clone())),
+        Arc::new(unc_client::adapter::Adapter::new(client_actor.clone(), view_client.clone())),
         shards_manager_adapter.as_sender(),
         genesis_id,
     )
@@ -404,7 +404,7 @@ pub fn start_with_config_and_synchronization(
             runtime: view_runtime,
             store: hot_store,
         };
-        rpc_servers.extend(near_jsonrpc::start_http(
+        rpc_servers.extend(unc_jsonrpc::start_http(
             rpc_config,
             config.genesis.config.clone(),
             client_actor.clone(),
@@ -480,13 +480,13 @@ pub fn recompress_storage(home_dir: &Path, opts: RecompressOpts) -> anyhow::Resu
     let src_store = src_opener.open_in_mode(Mode::ReadOnly)?.get_hot_store();
 
     let final_head_height = if skip_columns.contains(&DBCol::PartialChunks) {
-        let tip: Option<near_primitives::block::Tip> =
-            src_store.get_ser(DBCol::BlockMisc, near_store::FINAL_HEAD_KEY)?;
+        let tip: Option<unc_primitives::block::Tip> =
+            src_store.get_ser(DBCol::BlockMisc, unc_store::FINAL_HEAD_KEY)?;
         anyhow::ensure!(
             tip.is_some(),
             "{}: missing {}; is this a freshly set up node? note that recompress_storage makes no sense on those",
             src_path.display(),
-            std::str::from_utf8(near_store::FINAL_HEAD_KEY).unwrap(),
+            std::str::from_utf8(unc_store::FINAL_HEAD_KEY).unwrap(),
         );
         tip.map(|tip| tip.height)
     } else {
@@ -552,7 +552,7 @@ pub fn recompress_storage(home_dir: &Path, opts: RecompressOpts) -> anyhow::Resu
         let chunk_tail = final_head_height.unwrap();
         info!(target: "recompress", %chunk_tail, "Setting chunk tail");
         let mut store_update = dst_store.store_update();
-        store_update.set_ser(DBCol::BlockMisc, near_store::CHUNK_TAIL_KEY, &chunk_tail)?;
+        store_update.set_ser(DBCol::BlockMisc, unc_store::CHUNK_TAIL_KEY, &chunk_tail)?;
         store_update.commit()?;
     }
 

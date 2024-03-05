@@ -1,33 +1,33 @@
 #[cfg(unix)]
 use anyhow::Context;
-use near_amend_genesis::AmendGenesisCommand;
-use near_chain_configs::GenesisValidationMode;
-use near_client::ConfigUpdater;
-use near_cold_store_tool::ColdStoreCommand;
-use near_database_tool::commands::DatabaseCommand;
-use near_dyn_configs::{UpdateableConfigLoader, UpdateableConfigLoaderError, UpdateableConfigs};
+use unc_amend_genesis::AmendGenesisCommand;
+use unc_chain_configs::GenesisValidationMode;
+use unc_client::ConfigUpdater;
+use unc_cold_store_tool::ColdStoreCommand;
+use unc_database_tool::commands::DatabaseCommand;
+use unc_dyn_configs::{UpdateableConfigLoader, UpdateableConfigLoaderError, UpdateableConfigs};
 #[cfg(feature = "new_epoch_sync")]
-use near_epoch_sync_tool::EpochSyncCommand;
-use near_flat_storage::commands::FlatStorageCommand;
-use near_fork_network::cli::ForkNetworkCommand;
-use near_jsonrpc_primitives::types::light_client::RpcLightClientExecutionProofResponse;
-use near_mirror::MirrorCommand;
-use near_network::tcp;
-use near_o11y::tracing_subscriber::EnvFilter;
-use near_o11y::{
+use unc_epoch_sync_tool::EpochSyncCommand;
+use unc_flat_storage::commands::FlatStorageCommand;
+use unc_fork_network::cli::ForkNetworkCommand;
+use unc_jsonrpc_primitives::types::light_client::RpcLightClientExecutionProofResponse;
+use unc_mirror::MirrorCommand;
+use unc_network::tcp;
+use unc_o11y::tracing_subscriber::EnvFilter;
+use unc_o11y::{
     default_subscriber, default_subscriber_with_opentelemetry, BuildEnvFilterError,
     EnvFilterBuilder,
 };
-use near_ping::PingCommand;
-use near_primitives::hash::CryptoHash;
-use near_primitives::merkle::compute_root_from_path;
-use near_primitives::types::{Gas, NumSeats, NumShards};
-use near_state_parts::cli::StatePartsCommand;
-use near_state_parts_dump_check::cli::StatePartsDumpCheckCommand;
-use near_state_viewer::StateViewerSubCommand;
-use near_store::db::RocksDB;
-use near_store::Mode;
-use near_undo_block::cli::UndoBlockCommand;
+use unc_ping::PingCommand;
+use unc_primitives::hash::CryptoHash;
+use unc_primitives::merkle::compute_root_from_path;
+use unc_primitives::types::{Gas, NumSeats, NumShards};
+use unc_state_parts::cli::StatePartsCommand;
+use unc_state_parts_dump_check::cli::StatePartsDumpCheckCommand;
+use unc_state_viewer::StateViewerSubCommand;
+use unc_store::db::RocksDB;
+use unc_store::Mode;
+use unc_undo_block::cli::UndoBlockCommand;
 use serde_json::Value;
 use std::fs::File;
 use std::io::BufReader;
@@ -64,7 +64,7 @@ impl NeardCmd {
             target: "uncd",
             version = crate::NEARD_VERSION,
             build = crate::NEARD_BUILD,
-            latest_protocol = near_primitives::version::PROTOCOL_VERSION
+            latest_protocol = unc_primitives::version::PROTOCOL_VERSION
         );
 
         #[cfg(feature = "test_features")]
@@ -166,7 +166,7 @@ pub(super) struct StateViewerCommand {
     /// cold is only available when cold_store is configured.
     /// Cold temperature actually means the split store will be used.
     #[clap(long, short = 't', default_value = "hot")]
-    store_temperature: near_store::Temperature,
+    store_temperature: unc_store::Temperature,
     #[clap(subcommand)]
     subcmd: StateViewerSubCommand,
 }
@@ -186,7 +186,7 @@ struct NeardOpts {
     unsafe_fast_startup: bool,
     /// Enables export of span data using opentelemetry protocol.
     #[clap(flatten)]
-    o11y: near_o11y::Options,
+    o11y: unc_o11y::Options,
 }
 
 impl NeardOpts {
@@ -337,16 +337,16 @@ pub(super) struct InitCmd {
 /// methods and is the only officially supported method of building the binary
 /// to run in production.
 ///
-/// The detection is done by checking that `NEAR_RELEASE_BUILD` environment
+/// The detection is done by checking that `unc_RELEASE_BUILD` environment
 /// variable was set to `release` during compilation (which is what Makefile
 /// sets) and that neither `nightly` nor `nightly_protocol` features are
 /// enabled.
 fn check_release_build(chain: &str) {
-    let is_release_build = option_env!("NEAR_RELEASE_BUILD") == Some("release")
+    let is_release_build = option_env!("unc_RELEASE_BUILD") == Some("release")
         && !cfg!(feature = "nightly")
         && !cfg!(feature = "nightly_protocol");
     if !is_release_build
-        && [near_primitives::chains::MAINNET, near_primitives::chains::TESTNET].contains(&chain)
+        && [unc_primitives::chains::MAINNET, unc_primitives::chains::TESTNET].contains(&chain)
     {
         warn!(
             target: "uncd",
@@ -452,70 +452,70 @@ impl RunCmd {
         home_dir: &Path,
         genesis_validation: GenesisValidationMode,
         verbose_target: Option<&str>,
-        o11y_opts: &near_o11y::Options,
+        o11y_opts: &unc_o11y::Options,
     ) {
         // Load configs from home.
-        let mut near_config = framework::config::load_config(home_dir, genesis_validation)
+        let mut unc_config = framework::config::load_config(home_dir, genesis_validation)
             .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
 
-        check_release_build(&near_config.client_config.chain_id);
+        check_release_build(&unc_config.client_config.chain_id);
 
         // Set current version in client config.
-        near_config.client_config.version = crate::neard_version();
+        unc_config.client_config.version = crate::neard_version();
         // Override some parameters from command line.
         if let Some(produce_empty_blocks) = self.produce_empty_blocks {
-            near_config.client_config.produce_empty_blocks = produce_empty_blocks;
+            unc_config.client_config.produce_empty_blocks = produce_empty_blocks;
         }
         if let Some(connect_to_reliable_peers_on_startup) =
             self.connect_to_reliable_peers_on_startup
         {
-            near_config.network_config.connect_to_reliable_peers_on_startup =
+            unc_config.network_config.connect_to_reliable_peers_on_startup =
                 connect_to_reliable_peers_on_startup;
         }
         if let Some(boot_nodes) = self.boot_nodes {
             if !boot_nodes.is_empty() {
-                near_config.network_config.peer_store.boot_nodes = boot_nodes
+                unc_config.network_config.peer_store.boot_nodes = boot_nodes
                     .split(',')
                     .map(|chunk| chunk.parse().expect("Failed to parse PeerInfo"))
                     .collect();
             }
         }
         if let Some(min_peers) = self.min_peers {
-            near_config.client_config.min_num_peers = min_peers;
+            unc_config.client_config.min_num_peers = min_peers;
         }
         if let Some(network_addr) = self.network_addr {
-            near_config.network_config.node_addr =
-                Some(near_network::tcp::ListenerAddr::new(network_addr));
+            unc_config.network_config.node_addr =
+                Some(unc_network::tcp::ListenerAddr::new(network_addr));
         }
         #[cfg(feature = "json_rpc")]
         if self.disable_rpc {
-            near_config.rpc_config = None;
+            unc_config.rpc_config = None;
         } else {
             if let Some(rpc_addr) = self.rpc_addr {
-                near_config.rpc_config.get_or_insert(Default::default()).addr =
+                unc_config.rpc_config.get_or_insert(Default::default()).addr =
                     tcp::ListenerAddr::new(rpc_addr.parse().unwrap());
             }
             if let Some(rpc_prometheus_addr) = self.rpc_prometheus_addr {
-                near_config.rpc_config.get_or_insert(Default::default()).prometheus_addr =
+                unc_config.rpc_config.get_or_insert(Default::default()).prometheus_addr =
                     Some(rpc_prometheus_addr);
             }
         }
         if let Some(telemetry_url) = self.telemetry_url {
             if !telemetry_url.is_empty() {
-                near_config.telemetry_config.endpoints.push(telemetry_url);
+                unc_config.telemetry_config.endpoints.push(telemetry_url);
             }
         }
         if self.archive {
-            near_config.client_config.archive = true;
+            unc_config.client_config.archive = true;
         }
         if self.max_gas_burnt_view.is_some() {
-            near_config.client_config.max_gas_burnt_view = self.max_gas_burnt_view;
+            unc_config.client_config.max_gas_burnt_view = self.max_gas_burnt_view;
         }
 
         #[cfg(feature = "sandbox")]
         {
-            if near_config.client_config.chain_id == near_primitives::chains::MAINNET
-                || near_config.client_config.chain_id == near_primitives::chains::TESTNET
+            if unc_config.client_config.chain_id == unc_primitives::chains::MAINNET
+                || unc_config.client_config.chain_id == unc_primitives::chains::TESTNET
             {
                 eprintln!(
                     "Sandbox node can only run dedicate localnet, cannot connect to a network"
@@ -534,9 +534,9 @@ impl RunCmd {
             let _subscriber_guard = default_subscriber_with_opentelemetry(
                 make_env_filter(verbose_target).unwrap(),
                 o11y_opts,
-                near_config.client_config.chain_id.clone(),
-                near_config.network_config.node_key.public_key().clone(),
-                near_config
+                unc_config.client_config.chain_id.clone(),
+                unc_config.network_config.node_key.public_key().clone(),
+                unc_config
                     .network_config
                     .validator
                     .as_ref()
@@ -560,7 +560,7 @@ impl RunCmd {
                 ..
             } = framework::start_with_config_and_synchronization(
                 home_dir,
-                near_config,
+                unc_config,
                 Some(tx_crash),
                 Some(config_updater),
             )
@@ -592,7 +592,7 @@ impl RunCmd {
             .await;
             actix::System::current().stop();
             // Disable the subscriber to properly shutdown the tracer.
-            near_o11y::reload(Some("error"), None, Some(near_o11y::OpenTelemetryLevel::OFF))
+            unc_o11y::reload(Some("error"), None, Some(unc_o11y::OpenTelemetryLevel::OFF))
                 .unwrap();
         });
         sys.run().unwrap();

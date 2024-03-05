@@ -10,12 +10,12 @@ use crate::stun;
 use crate::tcp;
 use crate::types::ROUTED_MESSAGE_TTL;
 use anyhow::Context;
-use near_async::time;
-use near_crypto::{KeyType, SecretKey};
-use near_primitives::network::PeerId;
-use near_primitives::test_utils::create_test_signer;
-use near_primitives::types::AccountId;
-use near_primitives::validator_signer::ValidatorSigner;
+use unc_async::time;
+use unc_crypto::{KeyType, SecretKey};
+use unc_primitives::network::PeerId;
+use unc_primitives::test_utils::create_test_signer;
+use unc_primitives::types::AccountId;
+use unc_primitives::validator_signer::ValidatorSigner;
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -102,7 +102,7 @@ pub struct NetworkConfig {
     pub handshake_timeout: time::Duration,
 
     /// Whether to re-establish connection to known reliable peers from previous uncd run(s).
-    /// See near_network::peer_manager::connection_store for details.
+    /// See unc_network::peer_manager::connection_store for details.
     pub connect_to_reliable_peers_on_startup: bool,
     /// Maximum time between refreshing the peer list.
     pub monitor_peers_max_period: time::Duration,
@@ -167,7 +167,7 @@ pub struct NetworkConfig {
 
     /// TEST-ONLY
     /// TODO(gprusak): make it pub(crate), once all integration tests
-    /// are merged into near_network.
+    /// are merged into unc_network.
     pub event_sink: Sink<Event>,
 }
 
@@ -496,7 +496,7 @@ mod test {
     use crate::network_protocol::{AccountData, VersionedAccountData};
     use crate::tcp;
     use crate::testonly::make_rng;
-    use near_async::time;
+    use unc_async::time;
 
     #[test]
     fn test_network_config() {
