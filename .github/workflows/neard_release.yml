@@ -19,7 +19,7 @@ jobs:
   binary-release:
     name: "Build and publish neard binary"
     runs-on: "ubuntu-20.04-16core"
-    environment: deploy
+    #environment: deploy
     permissions:
       id-token: write # required to use OIDC authentication
 
@@ -52,7 +52,7 @@ jobs:
   docker-release:
     name: "Build and publish nearcore Docker image"
     runs-on: "ubuntu-20.04-16core"
-    environment: deploy
+    #environment: deploy
     steps:
       - name: Checkout ${{ github.event.inputs.branch }} branch
         if: ${{ github.event_name == 'workflow_dispatch'}}

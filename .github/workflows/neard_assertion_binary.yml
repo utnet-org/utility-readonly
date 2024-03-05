@@ -16,7 +16,7 @@ jobs:
   binary-release:
     name: "Build and publish neard binary"
     runs-on: "ubuntu-20.04-16core"
-    environment: deploy
+    #environment: deploy
     permissions:
       id-token: write # required to use OIDC authentication
 
