@@ -2,14 +2,13 @@
 <br />
 
 <p align="center">
-<img src="docs/images/logo.gif" width="240">
+<img src="docs/images/logo.svg" width="240">
 </p>
 
 <br />
 <br />
 
-
-## Reference implementation of NEAR Protocol
+## Reference implementation of Utility
 
 ![Buildkite](https://img.shields.io/buildkite/0eae07525f8e44a19b48fa937813e2c21ee04aa351361cd851)
 ![Stable Status][stable-release]
@@ -24,12 +23,12 @@
 [ci-url]: https://buildkite.com/utnet-org/utility
 [codecov-badge]: https://codecov.io/gh/utnet-org/utility/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/utnet-org/utility
-[discord-badge]: https://img.shields.io/discord/490367152054992913.svg
-[discord-url]: https://near.chat
+[discord-badge]: https://img.shields.io/discord/1039485032772947978.svg
+[discord-url]: https://discord.gg/x97hvFTv
 [telegram-badge]: https://cdn.jsdelivr.net/gh/Patrolavia/telegram-badge@8fe3382b3fd3a1c533ba270e608035a27e430c2e/chat.svg
-[telegram-url]: https://t.me/cryptonear
+[telegram-url]: https://t.me/UtilityNetorg
 
-## About NEAR
+## About Utility
 
 NEAR's purpose is to enable community-driven innovation to benefit people around the world.
 
@@ -38,20 +37,20 @@ To achieve this purpose, *NEAR* provides a developer platform where developers a
 One of the components of *NEAR* is the NEAR Protocol, an infrastructure for server-less applications and smart contracts powered by a blockchain.
 NEAR Protocol is built to deliver usability and scalability of modern PaaS like Firebase at fraction of the prices that blockchains like Ethereum charge.
 
-Overall, *NEAR* provides a wide range of tools for developers to easily build applications:
- - [JS Client library][js-api] to connect to NEAR Protocol from your applications.
+Overall, *Utility* provides a wide range of tools for developers to easily build applications:
+ - [JS Client library][js-api] to connect to Utility Network from your applications.
  - [Rust][rust-sdk] and [JavaScript/TypeScript][js-sdk] SDKs to write smart contracts and stateful server-less functions.
  - [Numerous examples][examples-url] with links to hack on them right inside your browser.
  - [Lots of documentation][docs-url], with [Tutorials][tutorials-url] and [API docs][api-docs-url].
 
 [open-web-url]: https://techcrunch.com/2016/04/10/1301496/
-[js-api]: https://github.com/near/unc-api-js
-[rust-sdk]: https://github.com/near/unc-sdk-rs
-[js-sdk]: https://github.com/near/unc-sdk-js
-[examples-url]: https://near.dev
-[docs-url]: https://docs.near.org
-[tutorials-url]: https://docs.near.org/tutorials/welcome
-[api-docs-url]: https://docs.near.org/api/rpc/introduction
+[js-api]: https://github.com/utnet-org/unc-api-js
+[rust-sdk]: https://github.com/utnet-org/unc-sdk-rs
+[js-sdk]: https://github.com/utnet-org/unc-sdk-js
+[examples-url]: https://utnet.org
+[docs-url]: https://utnet.org/developers/docs
+[tutorials-url]: https://utnet.org/developers/docs
+[api-docs-url]: https://utnet.org/developers/docs
 
 ## Join the Network
 
@@ -68,7 +67,7 @@ You can join all the active networks:
 
 Check the `nearup` repository for [more details](https://github.com/near/nearup) on how to run with or without docker.
 
-To learn how to become validator, checkout [documentation](https://docs.near.org/docs/develop/node/validator/staking-and-delegation).
+To learn how to become validator, checkout [documentation](https://utnet.org/developers/docs).
 
 ## Contributing
 
