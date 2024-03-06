@@ -728,7 +728,7 @@ pub(crate) fn action_register_rsa2048_keys(
 pub(crate) fn action_create_rsa2048_challenge(
     _apply_state: &ApplyState,
     state_update: &mut TrieUpdate,
-    _account: &mut Account,
+    account: &mut Account,
     result: &mut ActionResult,
     account_id: &AccountId,
     challenge: &CreateRsa2048ChallengeAction,
@@ -748,6 +748,7 @@ pub(crate) fn action_create_rsa2048_challenge(
     let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
         Ok(parsed_args) => {
+            // empty bad validators
             if let Some(power_val) = parsed_args.get("power") {
                 match power_val.as_str() {
                     Some(power_str) => {
@@ -760,7 +761,7 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     power,
                                 ));
                                 // attach power to account
-                                _account.set_power(power);
+                                account.set_power(power);
                                 println!("Power (as u128): {}", power);
                             }
                             Err(_) => println!("Power value is not a valid u128 number"),

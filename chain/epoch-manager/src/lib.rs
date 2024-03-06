@@ -20,11 +20,7 @@ use near_primitives::types::validator_power::ValidatorPower;
 use near_primitives::types::validator_power_and_frozen::{
     ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter,
 };
-use near_primitives::types::{
-    AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
-    EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier,
-    ValidatorKickoutReason, ValidatorStats,
-};
+use near_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats};
 use near_primitives::utils::height_to_bytes;
 use near_primitives::validator_mandates::AssignmentWeight;
 use near_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
@@ -41,6 +37,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tracing::{debug, warn};
+use near_crypto::PublicKey;
 use types::BlockHeaderInfo;
 
 pub use crate::adapter::EpochManagerAdapter;
@@ -1096,13 +1093,12 @@ impl EpochManager {
                     let random_value = block_info.random_value();
                     let original_iter = block_info.validators_iter();
                     let bad_validators = self.get_bad_validator(1)?;
-                    println!("bad validators are : {:?}", bad_validators);
+                    println!("bad validators are : {:?}", bad_validators.clone());
                     let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
                         &original_iter,
                         &bad_validators,
                     );
-                    println!("filtered validators are : {:?}", filtered_iter);
-                    Self::choose_validator_vrf(filtered_iter, Self::hash_to_bigint(random_value))
+                    Self::choose_validator_vrf(&self,filtered_iter, Self::hash_to_bigint(random_value))
                 }
                 Err(e) => {
                     println!("Get block hash by height error {:?} at height {:?}", e, height - 10);
@@ -1145,18 +1141,19 @@ impl EpochManager {
 
     fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
          let root_id_result = "jamesavechives".parse::<AccountId>().unwrap();
-        // let pkey = "ed25519:3mda2kgqvbybK9sHEEuoDWjeeZodJe9Fo64GRYCGBiZF".parse::<PublicKey>();
-        // let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
-        //     account_id: root_id_result.unwrap(),
-        //     public_key: pkey.unwrap(),
-        //     power: 5000000000000,
-        //     frozen: 11000000000000000000000000000000,
-        // });
-        let validator = self.get_validator_by_account_id_block(&root_id_result)?;
+        let pkey = "ed25519:3mda2kgqvbybK9sHEEuoDWjeeZodJe9Fo64GRYCGBiZF".parse::<PublicKey>();
+        let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
+            account_id: root_id_result,
+            public_key: pkey.unwrap(),
+            power: 5000000000000,
+            frozen: 11000000000000000000000000000000,
+        });
+    //    let validator = self.get_validator_by_account_id_block(&root_id_result)?;
         Ok(validator)
     }
 
     fn choose_validator_vrf(
+        &self,
         validators_iter: ValidatorPowerAndFrozenIter,
         random_value: BigInt,
     ) -> Result<ValidatorPowerAndFrozen, BlockError> {
@@ -1169,7 +1166,8 @@ impl EpochManager {
         }
 
         if total_weight.is_zero() {
-            return Err(BlockError::ValidatorTotalPowerError(String::from("Total Power is zero")));
+        //    return Err(BlockError::ValidatorTotalPowerError(String::from("Total Power is zero")));
+            return Self::get_default_validator(&self);
         }
 
         let mut cumulative_weight = Zero::zero();
@@ -1369,21 +1367,21 @@ impl EpochManager {
             .ok_or_else(|| EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
     }
 
-    pub fn get_validator_by_account_id_block(
-        &self,
-        account_id: &AccountId,
-    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let height = if self.largest_final_height > 10 {
-            self.largest_final_height -10
-        } else {
-            self.largest_final_height
-        };
-        let block_hash = self.get_block_hash_by_height(height)?;
-        let block_info = self.get_block_info(&block_hash)?;
-        block_info
-            .get_validator_by_account(account_id)
-            .ok_or_else(|| BlockError::NotAValidator(account_id.clone(), height))
-    }
+    // pub fn get_validator_by_account_id_block(
+    //     &self,
+    //     account_id: &AccountId,
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let height = if self.largest_final_height > 10 {
+    //         self.largest_final_height -10
+    //     } else {
+    //         self.largest_final_height
+    //     };
+    //     let block_hash = self.get_block_hash_by_height(height)?;
+    //     let block_info = self.get_block_info(&block_hash)?;
+    //     block_info
+    //         .get_validator_by_account(account_id)
+    //         .ok_or_else(|| BlockError::NotAValidator(account_id.clone(), height))
+    // }
 
     /// Returns fisherman for given account id for given epoch.
     pub fn get_fisherman_by_account_id(
@@ -1953,35 +1951,60 @@ impl EpochManager {
             else {
                 todo!()
             };
-            let all_power_proposals: Vec<_> = all_power_proposals
-                .clone()
-                .into_iter()
-                .chain(block_header_info.power_proposals.clone().into_iter())
-                .collect();
-            let mut tmp_frozen_proposals: Vec<_> = block_header_info.frozen_proposals.clone()
-                .into_iter().collect();
-            // let all_frozen_proposals: Vec<_> = all_frozen_proposals
+            // let all_power_proposals: Vec<_> = all_power_proposals
             //     .clone()
             //     .into_iter()
-            //     .chain(block_header_info.frozen_proposals.clone().into_iter())
+            //     .chain(block_header_info.power_proposals.clone().into_iter())
             //     .collect();
+            // let mut tmp_frozen_proposals: Vec<_> = block_header_info.frozen_proposals.clone()
+            //     .into_iter().collect();
+            let all_frozen_proposals: Vec<_> = all_frozen_proposals
+                .clone()
+                .into_iter()
+                .chain(block_header_info.frozen_proposals.clone().into_iter())
+                .collect();
+            let mut tmp_power_proposals: Vec<_> = block_header_info.power_proposals.clone()
+                .into_iter().collect();
             // Process new proposals, ensuring bad validators are assigned frozen = 0
-            for proposal in all_frozen_proposals
+            // for proposal in all_frozen_proposals
+            //     .iter()
+            // {
+            //     if self.get_bad_validator(1)?.contains(&proposal.account_id()) {
+            //         // For bad validators, set frozen to 0 in a new proposal
+            //         tmp_frozen_proposals.push(ValidatorFrozen::new(
+            //             proposal.account_id().clone(),
+            //             proposal.public_key().clone(),
+            //             0, // Set frozen to 0
+            //         ));
+            //     } else {
+            //         // For all others, maintain existing proposal behavior
+            //         tmp_frozen_proposals.push(proposal.clone());
+            //     }
+            // }
+            // let all_frozen_proposals = tmp_frozen_proposals;
+            // if tmp_power_proposals.len() > 0 {
+            //     println!("all tmp power proposals : {:?}", tmp_power_proposals);
+            // }
+            //
+            // println!("all power proposals : {:?}", all_power_proposals);
+            for proposal in all_power_proposals
                 .iter()
             {
-                if self.get_bad_validator(1)?.contains(&proposal.account_id()) {
+                if self.get_bad_validator(1)?.contains(&proposal.account_id())  {
                     // For bad validators, set frozen to 0 in a new proposal
-                    tmp_frozen_proposals.push(ValidatorFrozen::new(
+                    tmp_power_proposals.push(ValidatorPower::new(
                         proposal.account_id().clone(),
                         proposal.public_key().clone(),
-                        0, // Set frozen to 0
+                        0, // Set power to 0
                     ));
-                } else {
+
+                } else if proposal.power() > 0 {
                     // For all others, maintain existing proposal behavior
-                    tmp_frozen_proposals.push(proposal.clone());
+                    tmp_power_proposals.push(proposal.clone());
+                //    println!("get good validator : {:?}", proposal.clone());
                 }
             }
-            let all_frozen_proposals = tmp_frozen_proposals;
+            let all_power_proposals = tmp_power_proposals;
             let block_info = BlockInfo::new(
                 block_header_info.hash,
                 block_header_info.height,
@@ -2054,9 +2077,6 @@ impl EpochManager {
             validator_kickout,
             validator_mandates, // end customized by James Savechives
         );
-        println!("the random value is : {:?}", block_header_info.random_value);
-        println!("the validators value is : {:?}", validators);
-        println!("the block producers settlement is : {:?}",block_producers_settlement);
         self.record_block_info(block_info, rng_seed)
     }
 
@@ -2171,8 +2191,8 @@ impl EpochManager {
         // println!("estimated next epoch start : {:?}",estimated_next_epoch_start);
         // println!("last finalized height : {:?}",block_info.last_finalized_height());
 
-        Ok(block_info.last_finalized_height() + 4 >= estimated_next_epoch_start)
-        // return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
+        Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
+    //     return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
     }
 
     /// Returns true, if given current block info, next block must include the approvals from the next
@@ -2285,11 +2305,9 @@ impl EpochManager {
     pub fn get_bad_validator(&self, height: u64) -> Result<Arc<Vec<AccountId>>, EpochError> {
         match self.store.get_ser::<Vec<AccountId>>(DBCol::BadValidator, &height_to_bytes(height))? {
             Some(bad_validators) => {
-                println!("get bad validators from db, in height : {:?}", height);
                 Ok(Arc::new(bad_validators))
             },
             None => {
-                println!("get nothing from db, in height : {:?}", height);
                 // let test_account = "node4-validator".parse::<AccountId>().unwrap();
                 let vec = Vec::new();
                 // vec.push(test_account);
@@ -2301,35 +2319,74 @@ impl EpochManager {
     #[allow(unused_mut)]
     pub fn add_bad_validator(&self,
                              store_update: &mut StoreUpdate,
-                             height: u64,
+                             _height: BlockHeight,
                              validator: AccountId
     ) -> Result<(), EpochError> {
-        let _the_height = if height > 1 {
-            height - 1
-        } else {
-            1
-        };
         let default_account = "default".parse::<AccountId>().unwrap();
         let vec = self.get_bad_validator(1)?;
         let mut new_vec = vec.clone().to_vec();
         if default_account!=validator {
             new_vec.push(validator);
         }
-        println!("new vec : {:?}, with height : {:?}",new_vec,height);
+        println!("new vec : {:?}, with height : {:?}",new_vec,1);
         store_update
             .set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec)
             .map_err(EpochError::from)?;
         Ok(())
     }
+
+    pub fn remove_bad_validator(
+        &self,
+        store_update: &mut StoreUpdate,
+        validator: AccountId,
+    ) -> Result<(), EpochError> {
+        let vec = self.get_bad_validator(1)?;
+        let new_vec: Vec<AccountId> = vec.iter()
+            .filter(|acc| **acc != validator) // Compare dereferenced `acc` with `validator`
+            .cloned() // Clone each AccountId that passes the filter
+            .collect();
+
+        println!("Updated vec: {:?}, with height: {:?}", new_vec, 1);
+        store_update
+            .set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec)
+            .map_err(EpochError::from)?;
+
+        Ok(())
+    }
+
+
     /// Get Block Hash by Block height
     ///
-    pub fn get_block_hash_by_height(&self, height: u64) -> Result<Arc<CryptoHash>, EpochError> {
-        self.block_height_hash.get_or_try_put(height, |height| {
-            self.store
-                .get_ser(DBCol::BlockHeight, &height_to_bytes(*height))?
-                .ok_or_else(|| EpochError::IOErr(height.to_string()))
-                .map(Arc::new)
-        })
+    // pub fn get_block_hash_by_height(&self, height: u64) -> Result<Arc<CryptoHash>, EpochError> {
+    //     self.block_height_hash.get_or_try_put(height, |height| {
+    //         self.store
+    //             .get_ser(DBCol::BlockHeight, &height_to_bytes(*height))?
+    //             .ok_or_else(|| EpochError::IOErr(height.to_string()))
+    //             .map(Arc::new)
+    //     })
+    // }
+    pub fn get_block_hash_by_height(&self, mut height: u64) -> Result<Arc<CryptoHash>, EpochError> {
+        const MAX_RETRIES: usize = 25;
+        let mut attempts = 0;
+
+        while attempts < MAX_RETRIES {
+            match self.block_height_hash.get_or_try_put(height, |height| {
+                self.store
+                    .get_ser(DBCol::BlockHeight, &height_to_bytes(*height))?
+                    .ok_or_else(|| EpochError::IOErr(format!("Block hash not found for height {}", height)))
+                    .map(Arc::new)
+            }) {
+                Ok(hash) => return Ok(hash),
+                Err(_) if height > 1 => {
+                    // Decrement the height and retry
+                    height -= 1;
+                    attempts += 1;
+                },
+                Err(e) => return Err(e), // Return the original error if retries exhausted or height <= 1
+            }
+        }
+
+        Err(EpochError::IOErr("Failed to find block hash after multiple retries".to_string()))
     }
     /// Get BlockInfo for a block
     /// # Errors

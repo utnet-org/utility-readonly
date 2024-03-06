@@ -1042,40 +1042,48 @@ impl ClientActor {
         } else {
             return Ok(());
         };
-        println!("Lastest know height from cache: {}",self.client.last_know_height);
-        println!("same count from cache : {}",self.client.same_height_count);
+        let loop1_max = self.client.doomslug.get_largest_approval_height();
+        let mut loop2_max = self.client.doomslug.get_largest_height_crossing_threshold();
         let bp_account =
             self.client.epoch_manager.get_block_producer_by_height(latest_known.height + 1)?;
         if self.client.last_know_height == latest_known.height && self.client.last_know_bp == bp_account{
             self.client.same_height_count += 1;
+            if loop2_max <= self.client.last_know_height {
+                loop2_max = latest_known.height + 1;
+            }
         }  else {
             self.client.same_height_count =0;
             self.client.last_know_height = latest_known.height;
             self.client.last_know_bp  = bp_account.clone();
         }
-        let loop1_max = self.client.doomslug.get_largest_approval_height();
-        let loop2_max = self.client.doomslug.get_largest_height_crossing_threshold();
-        if self.client.same_height_count > 10 {
-            // loop1_max = latest_known.height + 10;
-            // loop2_max = latest_known.height + 10;
-            // println!("latest know height : {}", latest_known.height);
-            // println!("larget height crossing : {}", self.client.doomslug.get_largest_height_crossing_threshold());
 
-            let root_account = "jamesavechives".parse::<AccountId>().unwrap();
-            if root_account != bp_account {
-                println!("save bad account : {:?}", bp_account);
+        let root_account = "jamesavechives".parse::<AccountId>().unwrap();
+        println!("same height count : {:?}, last_know_height : {:?}, bp is : {:?}, loop1_max: {:?}, loop2_max : {:?}", self.client.same_height_count,latest_known.height, bp_account,loop1_max,loop2_max);
+        if self.client.same_height_count > 25 && self.client.last_know_height == latest_known.height && self.client.last_know_bp == bp_account {
+
+
+            if root_account != bp_account
+            {
                 let vec = self.client.epoch_manager.get_bad_validator(1)?;
-                if vec.len() == 0 {
-                    let mut new_vec = vec.clone().to_vec();
+                let mut new_vec = (*vec).clone(); // Assuming vec is Arc<Vec<AccountId>>
+
+                if !new_vec.contains(&bp_account) {
                     new_vec.push(bp_account);
                     let mut store_update = self.client.chain.chain_store().store().store_update();
-                    store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec).expect("TODO: panic message");
-                    store_update.commit().expect("TODO: panic message");
+                    store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec)
+                        .expect("Failed to set new bad validator list");
+                    store_update.commit().expect("Failed to commit store update");
                 }
             }
-            // self.client.same_height_count =0;
-            // return Ok(());
+            self.client.same_height_count =0;
+        //    return Ok(());
         }
+        // else if self.client.last_know_height != latest_known.height{
+        //     let new_vec: Vec<AccountId> = Vec::new();
+        //     let mut store_update = self.client.chain.chain_store().store().store_update();
+        //     store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &new_vec).expect("TODO: panic message");
+        //     store_update.commit().expect("TODO: panic message");
+        // }
 
         // For debug purpose, we record the approvals we have seen so far to the future blocks
         for height in latest_known.height + 1..=loop1_max {
@@ -1096,32 +1104,41 @@ impl ClientActor {
 
             let next_block_producer_account =
                 self.client.epoch_manager.get_block_producer_by_height(height)?;
-            println!("height is : {}",height);
-            println!("me is : {:?}",me);
-            println!("next bp is : {:?}", next_block_producer_account);
             if me == next_block_producer_account {
-                let num_chunks = self
+                println!("producing block at height : {:?}",height);
+                let _num_chunks = self
                     .client
                     .num_chunk_headers_ready_for_inclusion(&epoch_id, &head.last_block_hash);
-                let have_all_chunks = head.height == 0
-                    || num_chunks == self.client.epoch_manager.shard_ids(&epoch_id).unwrap().len();
+                // let have_all_chunks = head.height == 0
+                //     || num_chunks == self.client.epoch_manager.shard_ids(&epoch_id).unwrap().len();
 
-                if self.client.doomslug.ready_to_produce_block(
+                let have_all_chunks = true;
+
+                if self.client.doomslug.ready_to_produce_block (
                     StaticClock::instant(),
                     height,
                     have_all_chunks,
                     log_block_production_info,
-                ) {
+                ){
                     if let Err(err) = self.produce_block(height) {
                         // If there is an error, report it and let it retry on the next loop step.
                         error!(target: "client", height, "Block production failed: {}", err);
                     } else {
                         self.post_block_production();
                     }
+                } else if  self.client.same_height_count > 20 && me == root_account {
+                    println!("specially produce block at height : {:?}",height);
+                    if let Err(err) = self.produce_block(height) {
+                        // If there is an error, report it and let it retry on the next loop step.
+                        error!(target: "client", height, "Block production failed: {}", err);
+                    } else {
+                        self.post_block_production();
+                    }
+                } else {
+                    println!("not ready to produce block at height : {:?}",height);
                 }
             }
         }
-
         Ok(())
     }
 
