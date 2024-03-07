@@ -64,10 +64,10 @@ make release
 
 You can join all the active networks:
 ```
-# mainnet or testnet
+# mainnet or testnet node init
 ./target/release/uncd --home ~/.unc  init --chain-id [testnet, mainnet] --download-genesis --download-config
 
-# localnet
+# localnet node init
 ./target/debug/uncd localnet
 
 # node run
