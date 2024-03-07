@@ -30,12 +30,7 @@
 
 ## About Utility
 
-NEAR's purpose is to enable community-driven innovation to benefit people around the world.
-
-To achieve this purpose, *NEAR* provides a developer platform where developers and entrepreneurs can create apps that put users back in control of their data and assets, which is the foundation of ["Open Web" movement][open-web-url].
-
-One of the components of *NEAR* is the NEAR Protocol, an infrastructure for server-less applications and smart contracts powered by a blockchain.
-NEAR Protocol is built to deliver usability and scalability of modern PaaS like Firebase at fraction of the prices that blockchains like Ethereum charge.
+Utility is a decentralized edge computing blockchain network composed of chips defined through the block chain provides resources for AI-directed computing and a variety of heterogeneous computing.
 
 Overall, *Utility* provides a wide range of tools for developers to easily build applications:
  - [JS Client library][js-api] to connect to Utility Network from your applications.
@@ -43,7 +38,6 @@ Overall, *Utility* provides a wide range of tools for developers to easily build
  - [Numerous examples][examples-url] with links to hack on them right inside your browser.
  - [Lots of documentation][docs-url], with [Tutorials][tutorials-url] and [API docs][api-docs-url].
 
-[open-web-url]: https://techcrunch.com/2016/04/10/1301496/
 [js-api]: https://github.com/utnet-org/unc-api-js
 [rust-sdk]: https://github.com/utnet-org/unc-sdk-rs
 [js-sdk]: https://github.com/utnet-org/unc-sdk-js
@@ -54,32 +48,32 @@ Overall, *Utility* provides a wide range of tools for developers to easily build
 
 ## Join the Network
 
-The easiest way to join the network, is by using the `nearup` command, which you can install as follows:
+The easiest way to join the network, is by using the `make` command, which you can install as follows:
 
 ```bash
-pip3 install --user nearup
+make release
 ```
 
 You can join all the active networks:
-* mainnet: `nearup run mainnet`
-* testnet: `nearup run testnet`
-* betanet: `nearup run betanet`
+* mainnet: `./target/debug/uncd mainnet`
+* testnet: `./target/debug/uncd testnet`
+* betanet: `./target/debug/uncd betanet`
 
-Check the `nearup` repository for [more details](https://github.com/near/nearup) on how to run with or without docker.
+Check the `utility` repository for [more details](https://github.com/utnet-org/utility/) on how to run with or without docker.
 
 To learn how to become validator, checkout [documentation](https://utnet.org/developers/docs).
 
 ## Contributing
 
 The workflow and details of setup to contribute are described in [CONTRIBUTING.md](CONTRIBUTING.md), and security policy is described in [SECURITY.md](SECURITY.md).
-To propose new protocol changes or standards use [Specification & Standards repository](https://github.com/nearprotocol/NEPs).
+To propose new protocol changes or standards use [Specification & Standards repository](https://github.com/utnet-org/utility/).
 
 ## Getting in Touch
 
 We use Zulip for semi-synchronous technical discussion, feel free to chime in:
 
-https://near.zulipchat.com/
+https://utility.zulipchat.com/
 
 For non-technical discussion and overall direction of the project, see our Discourse forum:
 
-https://gov.near.org
+https://gov.utility.org

@@ -1,4 +1,4 @@
-# NEAR Client Attributions
+# Utilty Client Attributions
 
 We have taken inspiration and few pieces of code from:
  * [OpenEthereum](https://github.com/openethereum/openethereum)

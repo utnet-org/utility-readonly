@@ -1,7 +1,7 @@
 Thank you for your interest in contributing to the Utility reference client!  We
 welcome contributions from everyone.  Below are various bits of information to
 help you get started.  If you require additional help, please reach out to us on
-our [zulip channel](https://near.zulipchat.com/).
+our [zulip channel](https://utility.zulipchat.com/).
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ not supported yet.
 To run a local Utility network with one node, use
 
 ```console
-$ cargo run -p uncd -- init # generates various configs in ~/.near
+$ cargo run -p uncd -- init # generates various configs in ~/.unc
 $ cargo run -p uncd -- run
 ```
 
@@ -31,19 +31,19 @@ You can now use your own node's HTTP RPC API (e.g.
 ```console
 $ http get http://localhost:3030/status
 $ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
-     params:='{"request_type": "view_account", "finality": "final", "account_id": "test.near"}'
+     params:='{"request_type": "view_account", "finality": "final", "account_id": "test.unc"}'
 ```
 
-The RPC is documented [here](https://docs.near.org/api/rpc/introduction), and
+The RPC is documented [here](https://utnet.org/developers/docs/api/rpc/introduction), and
 can be conveniently accessed from the command line [Utility
-CLI](https://docs.near.org/tools/unc-cli) utility.
+CLI](https://utnet.org/developers/docs/tools/unc-cli) utility.
 
 ## Next Steps
 
 To learn more about how framework works, skim through our guide to framework
 development:
 
-https://near.github.io/framework/
+https://utility.github.io/framework/
 
 If you are looking for relatively simple tasks to familiarise yourself with
 `framework`, please check out issues labeled with the `C-good-first-issue` label
@@ -56,7 +56,7 @@ help on our zulip channel.
 
 If you have an idea for an enhancement to the protocol itself, please make a
 proposal by following the [Utility Enhancement
-Proposal](https://github.com/near/NEPs/blob/master/neps/nep-0001.md) process.
+Proposal](https://github.com/utnet-org/NEPs/blob/master/neps/nep-0001.md) process.
 
 ## Pull Requests
 
@@ -154,7 +154,7 @@ and confirm that the commits are as expected.
 Once your change ends up in master, it will be released with the rest of the
 changes by other contributors on the regular release schedules.
 
-On [betanet](https://docs.near.org/docs/concepts/networks#betanet) we run
+On [betanet](https://utnet.org/developers/docs/concepts/networks#betanet) we run
 nightly build from master with all the nightly protocol features enabled. Every
 five weeks, we stabilize some protocol features and make a release candidate for
 testnet.  The process for feature stabilization can be found in [this
