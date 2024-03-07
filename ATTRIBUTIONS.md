@@ -1,10 +1,11 @@
-# NEAR Client Attributions
+# UNC Client Attributions
 
 We have taken inspiration and few pieces of code from:
  * [OpenEthereum](https://github.com/openethereum/openethereum)
  * [Parity Substrate](https://github.com/paritytech/substrate)
  * [Parity Trie](https://github.com/paritytech/trie)
  * [Grin](https://github.com/mimblewimble/grin/)
+ * [Near](https://github.com/near/nearcore)
 
 ## Licenses
 
@@ -1066,5 +1067,7 @@ Public License instead of this License.  But first, please read
       defend, and hold each Contributor harmless for any liability
       incurred by, or claims asserted against, such Contributor by reason
       of your accepting any such warranty or additional liability.
+
+### Near
 
    END OF TERMS AND CONDITIONS

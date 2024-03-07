@@ -1,6 +1,5 @@
 exclude = [
     # these are private repositories, presumably any link to it are in internal documentation only.
-    "^https://github.com/near/unc-ops",
     "^https://github.com/utnet-org/utility-private",
 
     # localhost is linked to refer to services supposed to be running on the host.
@@ -11,5 +10,4 @@ exclude = [
 
     # used as placeholders for a template
     "^https://github.com/utnet-org/utility/pull/XXXX$",
-    "^https://github.com/near/NEPs/blob/master/neps/nep-XXXX.md$",
 ]
