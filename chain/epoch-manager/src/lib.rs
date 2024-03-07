@@ -1017,6 +1017,12 @@ impl EpochManager {
                         block_info.epoch_id(),
                         block_info.height(),
                     )?;
+                    // Update bad validators in the database
+                    let mut store_update = self.store.store_update();
+                    let bad_validators: Vec<AccountId> = Vec::new();
+                    store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &bad_validators)
+                        .expect("Failed to update bad validators");
+                    store_update.commit().expect("Failed to commit store update");
                 }
 
                 let block_info = Arc::new(block_info);
@@ -1255,6 +1261,28 @@ impl EpochManager {
     }
 
     /// Returns the list of chunk validators for the given shard_id and height.
+    // pub fn get_chunk_validators(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     shard_id: ShardId,
+    //     height: BlockHeight,
+    // ) -> Result<HashMap<AccountId, AssignmentWeight>, EpochError> {
+    //     let epoch_info = self.get_epoch_info(epoch_id)?;
+    //     let chunk_validators_per_shard = epoch_info.sample_chunk_validators(height);
+    //     let chunk_validators =
+    //         chunk_validators_per_shard.get(shard_id as usize).ok_or_else(|| {
+    //             EpochError::ChunkValidatorSelectionError(format!(
+    //                 "Invalid shard ID {} for height {}, epoch {:?} for chunk validation",
+    //                 shard_id, height, epoch_id,
+    //             ))
+    //         })?;
+    //     Ok(chunk_validators
+    //         .iter()
+    //         .map(|(validator_id, seats)| {
+    //             (epoch_info.get_validator(*validator_id).take_account_id(), seats.clone())
+    //         })
+    //         .collect())
+    // }
     pub fn get_chunk_validators(
         &self,
         epoch_id: &EpochId,
@@ -1263,20 +1291,34 @@ impl EpochManager {
     ) -> Result<HashMap<AccountId, AssignmentWeight>, EpochError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
         let chunk_validators_per_shard = epoch_info.sample_chunk_validators(height);
-        let chunk_validators =
-            chunk_validators_per_shard.get(shard_id as usize).ok_or_else(|| {
-                EpochError::ChunkValidatorSelectionError(format!(
-                    "Invalid shard ID {} for height {}, epoch {:?} for chunk validation",
-                    shard_id, height, epoch_id,
-                ))
-            })?;
-        Ok(chunk_validators
+
+        // Get the chunk validators for the specific shard
+        let chunk_validators = chunk_validators_per_shard.get(shard_id as usize).ok_or_else(|| {
+            EpochError::ChunkValidatorSelectionError(format!(
+                "Invalid shard ID {} for height {}, epoch {:?} for chunk validation",
+                shard_id, height, epoch_id,
+            ))
+        })?;
+
+        // Fetch the list of bad validators
+        let bad_validators = self.get_bad_validator(height)?; // Assume this method exists and returns Vec<AccountId>
+
+        // Filter out bad validators from the chunk validators
+        let filtered_chunk_validators: HashMap<AccountId, AssignmentWeight> = chunk_validators
             .iter()
-            .map(|(validator_id, seats)| {
-                (epoch_info.get_validator(*validator_id).take_account_id(), seats.clone())
+            .filter_map(|(validator_id, seats)| {
+                let account_id = epoch_info.get_validator(*validator_id).take_account_id();
+                if bad_validators.contains(&account_id) {
+                    None // Exclude bad validators
+                } else {
+                    Some((account_id, seats.clone())) // Include good validators
+                }
             })
-            .collect())
+            .collect();
+
+        Ok(filtered_chunk_validators)
     }
+
 
     /// get_heuristic_block_approvers_ordered: block producers for epoch
     /// get_all_block_producers_ordered: block producers for epoch, slashing info
@@ -1345,26 +1387,71 @@ impl EpochManager {
     /// For given epoch_id, height and shard_id returns validator that is chunk producer.
     pub fn get_chunk_producer_info(
         &self,
-        epoch_id: &EpochId,
+        _epoch_id: &EpochId,
         height: BlockHeight,
-        shard_id: ShardId,
-    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
-        let epoch_info = self.get_epoch_info(epoch_id)?;
-        let validator_id = Self::chunk_producer_from_info(&epoch_info, height, shard_id);
-        Ok(epoch_info.get_validator(validator_id))
+        _shard_id: ShardId,
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+        // let epoch_info = self.get_epoch_info(epoch_id)?;
+        // let validator_id = Self::chunk_producer_from_info(&epoch_info, height, shard_id);
+        // Ok(epoch_info.get_validator(validator_id))
+        let producer = if height > 10 {
+            match self.get_block_hash_by_height(height - 10) {
+                Ok(block_hash) => {
+                    let block_info = self.get_block_info(&block_hash)?;
+
+                    let random_value = block_info.random_value();
+                    let original_iter = block_info.validators_iter();
+                    let bad_validators = self.get_bad_validator(1)?;
+                    println!("bad validators are : {:?}", bad_validators.clone());
+                    let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
+                        &original_iter,
+                        &bad_validators,
+                    );
+                    Self::choose_validator_vrf(&self,filtered_iter, Self::hash_to_bigint(random_value))
+                }
+                Err(e) => {
+                    println!("Get block hash by height error {:?} at height {:?}", e, height - 10);
+                    Self::get_default_validator(&self)
+                }
+            }
+        } else {
+            Self::get_default_validator(&self)
+        };
+        producer
     }
 
     /// Returns validator for given account id for given epoch.
     /// We don't require caller to know about EpochIds. Doesn't account for slashing.
+    // pub fn get_validator_by_account_id(
+    //     &self,
+    //     epoch_id: &EpochId,
+    //     account_id: &AccountId,
+    // ) -> Result<ValidatorPowerAndFrozen, EpochError> {
+    //     let epoch_info = self.get_epoch_info(epoch_id)?;
+    //     epoch_info
+    //         .get_validator_by_account(account_id)
+    //         .ok_or_else(|| EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
+    // }
+
     pub fn get_validator_by_account_id(
         &self,
         epoch_id: &EpochId,
         account_id: &AccountId,
-    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
+    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
         let epoch_info = self.get_epoch_info(epoch_id)?;
-        epoch_info
-            .get_validator_by_account(account_id)
-            .ok_or_else(|| EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
+        match epoch_info.get_validator_by_account(account_id){
+            Some(validator) => {
+                Ok(validator)
+            }
+            None => {
+                let root_id = "jamesavechives".parse::<AccountId>().unwrap();
+                if root_id == *account_id {
+                    Self::get_default_validator(&self)
+                } else {
+                    Err(BlockError::NotAValidator(account_id.clone(), 0))
+                }
+            }
+        }
     }
 
     // pub fn get_validator_by_account_id_block(
@@ -1951,13 +2038,6 @@ impl EpochManager {
             else {
                 todo!()
             };
-            // let all_power_proposals: Vec<_> = all_power_proposals
-            //     .clone()
-            //     .into_iter()
-            //     .chain(block_header_info.power_proposals.clone().into_iter())
-            //     .collect();
-            // let mut tmp_frozen_proposals: Vec<_> = block_header_info.frozen_proposals.clone()
-            //     .into_iter().collect();
             let all_frozen_proposals: Vec<_> = all_frozen_proposals
                 .clone()
                 .into_iter()
@@ -1965,32 +2045,23 @@ impl EpochManager {
                 .collect();
             let mut tmp_power_proposals: Vec<_> = block_header_info.power_proposals.clone()
                 .into_iter().collect();
-            // Process new proposals, ensuring bad validators are assigned frozen = 0
-            // for proposal in all_frozen_proposals
-            //     .iter()
-            // {
-            //     if self.get_bad_validator(1)?.contains(&proposal.account_id()) {
-            //         // For bad validators, set frozen to 0 in a new proposal
-            //         tmp_frozen_proposals.push(ValidatorFrozen::new(
-            //             proposal.account_id().clone(),
-            //             proposal.public_key().clone(),
-            //             0, // Set frozen to 0
-            //         ));
-            //     } else {
-            //         // For all others, maintain existing proposal behavior
-            //         tmp_frozen_proposals.push(proposal.clone());
-            //     }
-            // }
-            // let all_frozen_proposals = tmp_frozen_proposals;
+            let bad_validators = (*self.get_bad_validator(1)?).clone();
             // if tmp_power_proposals.len() > 0 {
-            //     println!("all tmp power proposals : {:?}", tmp_power_proposals);
+            //     let mut store_update = self.store.store_update();
+            //     // Remove bad validators from `bad_validators` based on `power_proposals`
+            //     bad_validators.retain(|validator| {
+            //         !block_header_info.power_proposals.iter().any(|proposal| proposal.account_id() == validator)
+            //     });
+            //     println!("after update, get the bad validators : {:?}", bad_validators);
+            //     // Update bad validators in the database
+            //     store_update.set_ser(DBCol::BadValidator, &height_to_bytes(1), &bad_validators)
+            //         .expect("Failed to update bad validators");
             // }
-            //
-            // println!("all power proposals : {:?}", all_power_proposals);
+
             for proposal in all_power_proposals
                 .iter()
             {
-                if self.get_bad_validator(1)?.contains(&proposal.account_id())  {
+                if bad_validators.contains(&proposal.account_id())  {
                     // For bad validators, set frozen to 0 in a new proposal
                     tmp_power_proposals.push(ValidatorPower::new(
                         proposal.account_id().clone(),

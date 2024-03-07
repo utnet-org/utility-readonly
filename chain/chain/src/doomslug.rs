@@ -127,7 +127,7 @@ pub struct Doomslug {
     /// Largest height for which we saw a block containing 1/2 endorsements in it
     largest_final_height: TrackableBlockHeightValue,
     /// Largest height for which we saw threshold approvals (and thus can potentially create a block)
-    largest_threshold_height: TrackableBlockHeightValue,
+    pub largest_threshold_height: TrackableBlockHeightValue,
     /// Largest target height of approvals that we've received
     largest_approval_height: TrackableBlockHeightValue,
     /// Information Doomslug tracks about the chain tip

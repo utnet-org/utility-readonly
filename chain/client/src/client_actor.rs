@@ -1050,6 +1050,7 @@ impl ClientActor {
             self.client.same_height_count += 1;
             if loop2_max <= self.client.last_know_height {
                 loop2_max = latest_known.height + 1;
+                self.client.doomslug.largest_threshold_height.set(loop2_max.clone());
             }
         }  else {
             self.client.same_height_count =0;
@@ -1126,7 +1127,8 @@ impl ClientActor {
                     } else {
                         self.post_block_production();
                     }
-                } else if  self.client.same_height_count > 20 && me == root_account {
+                }
+                else if  self.client.same_height_count > 20 {
                     println!("specially produce block at height : {:?}",height);
                     if let Err(err) = self.produce_block(height) {
                         // If there is an error, report it and let it retry on the next loop step.
@@ -1134,7 +1136,8 @@ impl ClientActor {
                     } else {
                         self.post_block_production();
                     }
-                } else {
+                }
+                else {
                     println!("not ready to produce block at height : {:?}",height);
                 }
             }
