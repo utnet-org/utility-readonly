@@ -1071,7 +1071,7 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "chainsync-loadtest"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -1230,7 +1230,7 @@ dependencies = [
 
 [[package]]
 name = "cold-store-tool"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.3.1",
@@ -2036,7 +2036,7 @@ dependencies = [
 
 [[package]]
 name = "estimator-warehouse"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2170,7 +2170,7 @@ dependencies = [
 
 [[package]]
 name = "framework"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-rt",
@@ -2382,7 +2382,7 @@ dependencies = [
 
 [[package]]
 name = "genesis-csv-to-json"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
@@ -2399,7 +2399,7 @@ dependencies = [
 
 [[package]]
 name = "genesis-populate"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "borsh 1.3.1",
  "clap",
@@ -2677,7 +2677,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.5.6",
+ "socket2 0.4.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -2770,7 +2770,7 @@ checksum = "206ca75c9c03ba3d4ace2460e57b189f39f43de612c2f85836e65c929701bb2d"
 
 [[package]]
 name = "indexer-example"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -2845,7 +2845,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-rt",
@@ -2994,7 +2994,7 @@ dependencies = [
 
 [[package]]
 name = "keypair-generator"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "clap",
  "framework",
@@ -3371,7 +3371,7 @@ dependencies = [
 
 [[package]]
 name = "mock-node"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-rt",
@@ -3462,7 +3462,7 @@ dependencies = [
 
 [[package]]
 name = "node-runtime"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 1.3.1",
@@ -4657,7 +4657,7 @@ dependencies = [
 
 [[package]]
 name = "restaked"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "clap",
  "framework",
@@ -4808,7 +4808,7 @@ dependencies = [
 
 [[package]]
 name = "runtime-params-estimator"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.3.1",
@@ -4849,7 +4849,7 @@ dependencies = [
 
 [[package]]
 name = "runtime-tester"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bolero",
  "cpu-time",
@@ -4875,7 +4875,7 @@ dependencies = [
 
 [[package]]
 name = "runtime-tester-fuzz"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "libfuzzer-sys",
  "runtime-tester",
@@ -5518,7 +5518,7 @@ dependencies = [
 
 [[package]]
 name = "speedy_sync"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "borsh 1.3.1",
  "clap",
@@ -5563,7 +5563,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "state-viewer"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -5612,7 +5612,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "storage-usage-delta-calculator"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "node-runtime",
@@ -5628,7 +5628,7 @@ dependencies = [
 
 [[package]]
 name = "store-validator"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "clap",
  "framework",
@@ -5845,7 +5845,7 @@ dependencies = [
 
 [[package]]
 name = "testlib"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "node-runtime",
  "once_cell",
@@ -5859,7 +5859,7 @@ dependencies = [
 
 [[package]]
 name = "themis"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -6390,7 +6390,7 @@ dependencies = [
 
 [[package]]
 name = "unc-actix-test-utils"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix-rt",
  "futures",
@@ -6400,7 +6400,7 @@ dependencies = [
 
 [[package]]
 name = "unc-amend-genesis"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.3.1",
@@ -6425,7 +6425,7 @@ dependencies = [
 
 [[package]]
 name = "unc-async"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "derive-enum-from-into",
@@ -6443,7 +6443,7 @@ dependencies = [
 
 [[package]]
 name = "unc-cache"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bencher",
  "lru",
@@ -6452,7 +6452,7 @@ dependencies = [
 
 [[package]]
 name = "unc-chain"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "assert_matches",
@@ -6492,7 +6492,7 @@ dependencies = [
 
 [[package]]
 name = "unc-chain-configs"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytesize",
@@ -6514,7 +6514,7 @@ dependencies = [
 
 [[package]]
 name = "unc-chain-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "chrono",
  "thiserror",
@@ -6525,7 +6525,7 @@ dependencies = [
 
 [[package]]
 name = "unc-chunks"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "assert_matches",
@@ -6559,7 +6559,7 @@ dependencies = [
 
 [[package]]
 name = "unc-chunks-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "unc-chain-primitives",
  "unc-primitives",
@@ -6567,7 +6567,7 @@ dependencies = [
 
 [[package]]
 name = "unc-client"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-rt",
@@ -6622,7 +6622,7 @@ dependencies = [
 
 [[package]]
 name = "unc-client-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "chrono",
@@ -6641,7 +6641,7 @@ dependencies = [
 
 [[package]]
 name = "unc-config-utils"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "json_comments",
@@ -6651,7 +6651,7 @@ dependencies = [
 
 [[package]]
 name = "unc-crypto"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "blake2",
  "bolero",
@@ -6682,7 +6682,7 @@ dependencies = [
 
 [[package]]
 name = "unc-database-tool"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.3.1",
@@ -6703,7 +6703,7 @@ dependencies = [
 
 [[package]]
 name = "unc-dyn-configs"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "once_cell",
@@ -6720,7 +6720,7 @@ dependencies = [
 
 [[package]]
 name = "unc-epoch-manager"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "borsh 1.3.1",
  "chrono",
@@ -6745,7 +6745,7 @@ dependencies = [
 
 [[package]]
 name = "unc-epoch-sync-tool"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -6760,7 +6760,7 @@ dependencies = [
 
 [[package]]
 name = "unc-flat-storage"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.3.1",
@@ -6778,14 +6778,14 @@ dependencies = [
 
 [[package]]
 name = "unc-fmt"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "unc-primitives-core",
 ]
 
 [[package]]
 name = "unc-fork-network"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -6811,7 +6811,7 @@ dependencies = [
 
 [[package]]
 name = "unc-indexer"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -6838,7 +6838,7 @@ dependencies = [
 
 [[package]]
 name = "unc-indexer-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -6847,7 +6847,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-cors",
@@ -6877,7 +6877,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc-adversarial-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "unc-network",
@@ -6886,7 +6886,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc-client"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix-http",
  "awc",
@@ -6899,7 +6899,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc-fuzz"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "arbitrary",
@@ -6917,7 +6917,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "arbitrary",
  "serde",
@@ -6932,7 +6932,7 @@ dependencies = [
 
 [[package]]
 name = "unc-jsonrpc-tests"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "awc",
@@ -6955,7 +6955,7 @@ dependencies = [
 
 [[package]]
 name = "unc-mainnet-res"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde_json",
  "unc-account-id",
@@ -6965,7 +6965,7 @@ dependencies = [
 
 [[package]]
 name = "unc-mirror"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -7007,7 +7007,7 @@ dependencies = [
 
 [[package]]
 name = "unc-network"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
@@ -7063,7 +7063,7 @@ dependencies = [
 
 [[package]]
 name = "unc-o11y"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "base64 0.21.7",
@@ -7092,7 +7092,7 @@ dependencies = [
 
 [[package]]
 name = "unc-parameters"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 1.3.1",
@@ -7111,7 +7111,7 @@ dependencies = [
 
 [[package]]
 name = "unc-performance-metrics"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "bitflags 1.3.2",
@@ -7128,7 +7128,7 @@ dependencies = [
 
 [[package]]
 name = "unc-performance-metrics-macros"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "quote",
  "syn 2.0.52",
@@ -7136,7 +7136,7 @@ dependencies = [
 
 [[package]]
 name = "unc-ping"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
@@ -7155,7 +7155,7 @@ dependencies = [
 
 [[package]]
 name = "unc-pool"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "borsh 1.3.1",
  "once_cell",
@@ -7167,7 +7167,7 @@ dependencies = [
 
 [[package]]
 name = "unc-primitives"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "arbitrary",
  "assert_matches",
@@ -7210,7 +7210,7 @@ dependencies = [
 
 [[package]]
 name = "unc-primitives-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "arbitrary",
  "base64 0.21.7",
@@ -7232,7 +7232,7 @@ dependencies = [
 
 [[package]]
 name = "unc-rpc-error-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "quote",
  "serde",
@@ -7242,7 +7242,7 @@ dependencies = [
 
 [[package]]
 name = "unc-rpc-error-macro"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "fs2",
  "serde",
@@ -7253,11 +7253,11 @@ dependencies = [
 
 [[package]]
 name = "unc-stable-hasher"
-version = "0.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "unc-state-parts"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -7276,7 +7276,7 @@ dependencies = [
 
 [[package]]
 name = "unc-state-parts-dump-check"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-web",
@@ -7299,11 +7299,11 @@ dependencies = [
 
 [[package]]
 name = "unc-stdx"
-version = "0.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "unc-store"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "actix-rt",
@@ -7349,7 +7349,7 @@ dependencies = [
 
 [[package]]
 name = "unc-telemetry"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "awc",
@@ -7367,7 +7367,7 @@ dependencies = [
 
 [[package]]
 name = "unc-test-contracts"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "arbitrary",
  "once_cell",
@@ -7379,7 +7379,7 @@ dependencies = [
 
 [[package]]
 name = "unc-undo-block"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -7395,7 +7395,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-compiler"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "enumset",
  "finite-wasm",
@@ -7412,7 +7412,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-compiler-singlepass"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "dynasm 2.0.0",
  "dynasmrt 2.0.0",
@@ -7434,7 +7434,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-compiler-test-derive"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "pretty_assertions",
  "proc-macro2",
@@ -7445,7 +7445,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-engine"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "backtrace",
  "cfg-if 1.0.0",
@@ -7469,7 +7469,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-runner"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "arbitrary",
@@ -7530,7 +7530,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-runner-fuzz"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "arbitrary",
  "libfuzzer-sys",
@@ -7544,7 +7544,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-test-api"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "cfg-if 1.0.0",
@@ -7573,7 +7573,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-test-generator"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "target-lexicon 0.12.14",
@@ -7581,7 +7581,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-types"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bolero",
  "indexmap 1.9.3",
@@ -7592,7 +7592,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-vm"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "backtrace",
  "cc",
@@ -7613,7 +7613,7 @@ dependencies = [
 
 [[package]]
 name = "unc-vm-wast"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "tempfile",
@@ -7624,7 +7624,7 @@ dependencies = [
 
 [[package]]
 name = "unc-wallet-contract"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "unc-primitives-core",
@@ -7633,7 +7633,7 @@ dependencies = [
 
 [[package]]
 name = "uncd"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
