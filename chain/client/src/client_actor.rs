@@ -4,7 +4,9 @@
 //! be put in Client.
 //! Unfortunately, this is not the case today. We are in the process of refactoring ClientActor
 //! https://github.com/near/nearcore/issues/7899
+#[allow(unused_imports)]
 use near_store::DBCol;
+#[allow(unused_imports)]
 use near_chain::ChainStoreAccess;
 use crate::adapter::{
     BlockApproval, BlockHeadersResponse, BlockResponse, ChunkEndorsementMessage,
@@ -65,6 +67,7 @@ use near_primitives::network::{AnnounceAccount, PeerId};
 use near_primitives::static_clock::StaticClock;
 use near_primitives::types::{AccountId, BlockHeight};
 use near_primitives::unwrap_or_return;
+#[allow(unused_imports)]
 use near_primitives::utils::{from_timestamp, height_to_bytes, MaybeValidated};
 use near_primitives::validator_signer::ValidatorSigner;
 use near_primitives::version::PROTOCOL_VERSION;
@@ -1047,6 +1050,7 @@ impl ClientActor {
         let bp_account =
             self.client.epoch_manager.get_block_producer_by_height(latest_known.height + 1)?;
         if self.client.last_know_height == latest_known.height && self.client.last_know_bp == bp_account{
+            println!("the bp_account is : {:?}", bp_account);
             self.client.same_height_count += 1;
             if loop2_max <= self.client.last_know_height {
                 loop2_max = latest_known.height + 1;
@@ -1057,11 +1061,10 @@ impl ClientActor {
             self.client.last_know_height = latest_known.height;
             self.client.last_know_bp  = bp_account.clone();
         }
-
+        #[allow(unused_variables)]
         let root_account = "jamesavechives".parse::<AccountId>().unwrap();
         println!("same height count : {:?}, last_know_height : {:?}, bp is : {:?}, loop1_max: {:?}, loop2_max : {:?}", self.client.same_height_count,latest_known.height, bp_account,loop1_max,loop2_max);
         if self.client.same_height_count > 25 && self.client.last_know_height == latest_known.height && self.client.last_know_bp == bp_account {
-
 
             if root_account != bp_account
             {
@@ -1077,7 +1080,6 @@ impl ClientActor {
                 }
             }
             self.client.same_height_count =0;
-        //    return Ok(());
         }
         // else if self.client.last_know_height != latest_known.height{
         //     let new_vec: Vec<AccountId> = Vec::new();

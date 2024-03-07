@@ -1117,33 +1117,6 @@ impl EpochManager {
         producer
     }
 
-    // pub fn kickout_block_producer_by_height(
-    //     &self,
-    //     height: BlockHeight,
-    //     validator: ValidatorPowerAndFrozen,
-    // )  {
-    //     // unstake the validator, so it will not be included in the future blocks
-    //
-    //     // update the lastest 10 history blocks' validators to exclude the bad validator
-    //     if height < 10 {
-    //         return;
-    //     }
-    //     for h in height-10..=height {
-    //         match self.get_block_hash_by_height(h) {
-    //             Ok(block_hash) => {
-    //                 let block_info = self.get_block_info(&block_hash)?;
-    //
-    //                 let random_value = block_info.random_value();
-    //                 let validators = block_info.validators_iter();
-    //                 Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
-    //             },
-    //             Err(e) => {
-    //                 println!("Get block hash by height error {:?} at height {:?}",e,height-10);
-    //                 Self::get_default_validator(&self)
-    //             },
-    //         }
-    //     }
-    // }
 
     fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
          let root_id_result = "jamesavechives".parse::<AccountId>().unwrap();

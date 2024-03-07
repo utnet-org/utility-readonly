@@ -58,6 +58,7 @@ near-state-parts-dump-check.workspace = true
 near-state-viewer.workspace = true
 near-store.workspace = true
 near-undo-block.workspace = true
+env_logger = "0.11.3"
 
 [build-dependencies]
 anyhow.workspace = true

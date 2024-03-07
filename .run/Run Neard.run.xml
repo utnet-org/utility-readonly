@@ -1,7 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Neard" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package neard --bin neard -- --home &quot;$USER_HOME$/.near/Near4&quot; run --boot-nodes &quot;ed25519:9e9JtarsJc3JR1PcnU6ykQgUmEf6LCAQi4ZjZjMuxrip@127.0.0.1:24567&quot;" />
+    <option name="command" value="run --package neard --bin neard -- --home &quot;$USER_HOME$/.near/Near3&quot;  run --boot-nodes &quot;ed25519:9e9JtarsJc3JR1PcnU6ykQgUmEf6LCAQi4ZjZjMuxrip@127.0.0.1:24567&quot;" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <envs />
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
@@ -9,7 +10,6 @@
     <option name="withSudo" value="false" />
     <option name="buildTarget" value="REMOTE" />
     <option name="backtrace" value="SHORT" />
-    <envs />
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
     <method v="2">
