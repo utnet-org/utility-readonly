@@ -125,6 +125,7 @@ mod old_validator_selection {
     use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
     use crate::proposals::find_threshold;
+    use crate::test_utils::block_info;
     use crate::types::RngSeed;
 
     pub fn proposals_to_epoch_info(
@@ -293,7 +294,6 @@ mod old_validator_selection {
         for index in block_producers_settlement.iter_mut() {
             *index = indices_to_keep.range(..*index).count() as u64;
         }
-
         // Collect proposals into block producer assignments.
         let mut chunk_producers_settlement: Vec<Vec<ValidatorId>> = vec![];
         let mut last_index: u64 = 0;

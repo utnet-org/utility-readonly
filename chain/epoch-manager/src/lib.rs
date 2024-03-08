@@ -857,7 +857,16 @@ impl EpochManager {
         last_block_hash: &CryptoHash,
         rng_seed: RngSeed,
     ) -> Result<(), EpochError> {
-        let epoch_summary = self.collect_blocks_info(block_info, last_block_hash)?;
+        let epoch_summary_1 = self.collect_blocks_info(block_info, last_block_hash)?;
+        let epoch_summary = EpochSummary{
+            prev_epoch_last_block_hash: epoch_summary_1.prev_epoch_last_block_hash,
+            all_power_proposals: (*block_info.all_power_propasals().clone()).to_vec(),
+            all_frozen_proposals: (*block_info.all_frozen_propasals().clone()).to_vec(),
+            validator_kickout: epoch_summary_1.validator_kickout,
+            validator_block_chunk_stats: epoch_summary_1.validator_block_chunk_stats,
+            next_version: epoch_summary_1.next_version,
+        };
+        println!("epoch summary : {:?}",epoch_summary);
         let epoch_info = self.get_epoch_info(block_info.epoch_id())?;
         let epoch_protocol_version = epoch_info.protocol_version();
         let validator_stake =
@@ -1985,9 +1994,9 @@ impl EpochManager {
             validator_kickout,
             validator_mandates, // end customized by James Savechives
         );
-        println!("the random value is : {:?}", block_header_info.random_value);
-        println!("the validators value is : {:?}", validators);
-        println!("the block producers settlement is : {:?}",block_producers_settlement);
+        // println!("the random value is : {:?}", block_header_info.random_value);
+        // println!("the validators value is : {:?}", validators);
+        // println!("the block producers settlement is : {:?}",block_producers_settlement);
         self.record_block_info(block_info, rng_seed)
     }
 
