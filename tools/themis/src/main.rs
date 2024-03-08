@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
         rules::has_lint_inheritance,
         rules::rust_version_matches_toolchain,
         rules::has_unified_rust_edition,
-        rules::author_is_near,
+        rules::author_is_hello,
         rules::publishable_has_license,
         rules::publishable_has_unified_license,
         rules::publishable_has_license_file,

@@ -171,10 +171,10 @@ pub fn has_unified_rust_edition(workspace: &Workspace) -> anyhow::Result<()> {
     Ok(())
 }
 
-const EXPECTED_AUTHOR: &str = "unc Inc <hello@nearprotocol.com>";
+const EXPECTED_AUTHOR: &str = "Hello Inc <hello@unc.com>";
 
 /// Ensure all crates have the appropriate author, non-exclusively of course.
-pub fn author_is_near(workspace: &Workspace) -> anyhow::Result<()> {
+pub fn author_is_hello(workspace: &Workspace) -> anyhow::Result<()> {
     let outliers = workspace
         .members
         .iter()

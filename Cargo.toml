@@ -1,6 +1,6 @@
 [workspace.package]
 version = "0.1.0" # managed by cargo-workspaces, see below
-authors = ["Unc Inc <hello@uncprotocol.com>"]
+authors = ["Hello Inc <hello@unc.com>"]
 edition = "2021"
 rust-version = "1.75.0"
 repository = "https://github.com/utnet-org/utility"
@@ -43,12 +43,11 @@ members = [
     "core/primitives",
     "core/primitives-core",
     "core/store",
+    "framework",
     "genesis-tools/genesis-csv-to-json",
     "genesis-tools/genesis-populate",
     "genesis-tools/keypair-generator",
     "integration-tests",
-    "framework",
-    "uncd",
     "runtime/unc-vm/test-api",
     "runtime/unc-vm/compiler",
     "runtime/unc-vm/compiler-singlepass",
@@ -91,6 +90,7 @@ members = [
     "utils/mainnet-res",
     "utils/unc-cache",
     "utils/stdx",
+    "uncd",
 ]
 
 [workspace.lints.rust]
@@ -189,7 +189,7 @@ lru = "0.7.2"
 memmap2 = "0.5"
 memoffset = "0.8"
 more-asserts = "0.2"
-unc-account-id = { git = "https://github.com/zwong91/unc-account-id-rs", features = ["internal_unstable", "serde", "borsh"], branch = "main" }
+unc-account-id = { version = "0.1.0", features = ["internal_unstable", "serde", "borsh"] }
 unc-actix-test-utils = { path = "test-utils/actix-test-utils" }
 unc-amend-genesis = { path = "tools/amend-genesis" }
 unc-database-tool= { path = "tools/database" }
