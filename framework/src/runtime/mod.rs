@@ -900,10 +900,10 @@ impl RuntimeAdapter for NightshadeRuntime {
         // the limit, we compute it heuristically from the gas limit and the
         // cost of roundtripping a byte of data through disk. For today's value
         // of parameters, this corresponds to about 13megs worth of
-        // transactions.
+        // transactions. from 13mega bytes limit to 4 mega bytes
         let size_limit = transactions_gas_limit
             / (runtime_config.wasm_config.ext_costs.gas_cost(ExtCosts::storage_write_value_byte)
-                + runtime_config.wasm_config.ext_costs.gas_cost(ExtCosts::storage_read_value_byte));
+                + runtime_config.wasm_config.ext_costs.gas_cost(ExtCosts::storage_read_value_byte)) / 3;
 
         while total_gas_burnt < transactions_gas_limit
             && total_size < size_limit
