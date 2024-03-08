@@ -680,14 +680,14 @@ impl EpochManagerAdapter for MockEpochManager {
         Ok(vec![])
     }
 
-    // fn get_block_producer(
-    //     &self,
-    //     epoch_id: &EpochId,
-    //     height: BlockHeight,
-    // ) -> Result<AccountId, EpochError> {
-    //     let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
-    //     Ok(validators[(height as usize) % validators.len()].account_id().clone())
-    // }
+    fn get_block_producer(
+        &self,
+        epoch_id: &EpochId,
+        height: BlockHeight,
+    ) -> Result<AccountId, EpochError> {
+        let validators = self.get_block_producers(self.get_valset_for_epoch(epoch_id)?);
+        Ok(validators[(height as usize) % validators.len()].account_id().clone())
+    }
 
 
     fn get_chunk_producer(
@@ -811,7 +811,8 @@ impl EpochManagerAdapter for MockEpochManager {
 
     fn verify_block_vrf(
         &self,
-         _block_hash: &CryptoHash,
+         _epoch_id: &EpochId,
+         _block_height: BlockHeight,
         _prev_random_value: &CryptoHash,
         _vrf_value: &unc_crypto::vrf::Value,
         _vrf_proof: &unc_crypto::vrf::Proof,
@@ -842,7 +843,7 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
-        let validator = self.get_block_producer_by_height(header.height())?;
+        let validator = self.get_block_producer(&header.epoch_id(), header.height())?;
         let validator_stake = &self.validators[&validator];
         Ok(header.verify_block_producer(validator_stake.public_key()))
     }
@@ -965,13 +966,7 @@ impl EpochManagerAdapter for MockEpochManager {
 
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
-    
-    fn get_block_producer_by_height(&self, _block_height: BlockHeight) -> Result<AccountId, EpochError> {
-        panic!("get_block_producer_by_hash not implemented for KeyValueRuntime");
-    }
-    fn add_bad_validator(&self,_height: BlockHeight, _validator: AccountId) -> Result<(), EpochError> {
-        todo!()
-    }
+
 }
 
 impl RuntimeAdapter for KeyValueRuntime {

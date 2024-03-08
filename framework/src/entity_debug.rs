@@ -48,7 +48,7 @@ impl EntityDebugHandlerImpl {
                     .ok_or_else(|| anyhow!("Block not found"))?;
                 let author = self
                     .epoch_manager
-                    .get_block_producer_by_height(block.header().height())?;
+                    .get_block_producer(block.header().epoch_id(),block.header().height())?;
                 Ok(serialize_entity(&BlockView::from_author_block(author, block)))
             }
             EntityQuery::BlockHashByHeight { block_height } => {

@@ -1,5 +1,5 @@
 use serde_json::Value;
-use unc_primitives::types::{AccountId, BlockHeight};
+use unc_primitives::types::{AccountId, BlockHeight, EpochId};
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
@@ -14,6 +14,7 @@ pub enum RpcProviderError {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, arbitrary::Arbitrary, PartialEq, Eq)]
 pub struct RpcProviderRequest {
+    pub epoch_id: EpochId,
     pub block_height: BlockHeight,
 }
 

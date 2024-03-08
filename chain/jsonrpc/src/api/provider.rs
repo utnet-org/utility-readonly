@@ -1,3 +1,4 @@
+use unc_primitives::types::EpochId;
 use serde_json::Value;
 
 use unc_client_primitives::types::{GetProviderError, GetProviderInfoError};
@@ -9,36 +10,41 @@ use unc_jsonrpc_primitives::types::provider::{
 use super::{RpcFrom, RpcRequest};
 
 impl RpcRequest for RpcProviderRequest {
-    fn parse(value: Value) -> Result<Self, RpcParseError> {
-        let block_height = value
-                .get("block_height")
-                .and_then(|v| v.as_u64())
-                .ok_or_else(|| RpcParseError("block_height not found or not a u64".parse().unwrap()))?;
-        Ok(Self { block_height })
-    }
     // fn parse(value: Value) -> Result<Self, RpcParseError> {
-    //     // Extract block_hash_str from value
-    //     let block_hash_str = value
-    //         .get("block_hash")
-    //         .and_then(|v| v.as_str())
-    //         .ok_or_else(|| RpcParseError("block_hash not found or not a string".parse().unwrap()))?;
-    //
-    //     // Decode the base58-encoded string to bytes
-    //     let bytes = bs58::decode(block_hash_str)
-    //         .into_vec()
-    //         .map_err(|_| RpcParseError("Invalid base58-encoded hash".parse().unwrap()))?;
-    //
-    //     // Ensure the decoded bytes have the correct length for a CryptoHash
-    //     if bytes.len() != 32 {
-    //         return Err(RpcParseError("Decoded hash does not match expected length".parse().unwrap()));
-    //     }
-    //
-    //     // Construct the CryptoHash from the decoded bytes
-    //     let block_hash = CryptoHash::try_from(bytes.as_slice())
-    //         .map_err(|_| RpcParseError("Failed to convert bytes to CryptoHash".parse().unwrap()))?;
-    //
-    //     Ok(Self { block_hash })
+    //     let block_height = value
+    //             .get("block_height")
+    //             .and_then(|v| v.as_u64())
+    //             .ok_or_else(|| RpcParseError("block_height not found or not a u64".parse().unwrap()))?;
+    //     Ok(Self { block_height })
     // }
+    fn parse(value: Value) -> Result<Self, RpcParseError> {
+        // Extract block_hash_str from value
+        let epoch_id_str = value
+            .get("epoch_id")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| RpcParseError("epoch_id not found or not a string".parse().unwrap()))?;
+
+        // Decode the base58-encoded string to bytes
+        let bytes = bs58::decode(epoch_id_str)
+            .into_vec()
+            .map_err(|_| RpcParseError("Invalid base58-encoded hash".parse().unwrap()))?;
+
+        // Ensure the decoded bytes have the correct length for a CryptoHash
+        if bytes.len() != 32 {
+            return Err(RpcParseError("Decoded hash does not match expected length".parse().unwrap()));
+        }
+
+        // Construct the CryptoHash from the decoded bytes
+        let epoch_id = EpochId::try_from(bytes.as_slice())
+            .map_err(|_| RpcParseError("Failed to convert bytes to CryptoHash".parse().unwrap()))?;
+
+            let block_height = value
+                    .get("block_height")
+                    .and_then(|v| v.as_u64())
+                    .ok_or_else(|| RpcParseError("block_height not found or not a u64".parse().unwrap()))?;
+
+        Ok(Self { epoch_id, block_height })
+    }
 
 }
 

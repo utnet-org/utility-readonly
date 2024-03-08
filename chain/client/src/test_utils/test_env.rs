@@ -329,12 +329,12 @@ impl TestEnv {
         assert_eq!(self.clients.len(), 1, "at the moment, this support only a single client");
 
         let tip = self.clients[0].chain.head().unwrap();
-        let _epoch_id = self.clients[0]
+        let epoch_id = self.clients[0]
             .epoch_manager
             .get_epoch_id_from_prev_block(&tip.last_block_hash)
             .unwrap();
         let block_producer =
-            self.clients[0].epoch_manager.get_block_producer_by_height(tip.height).unwrap();
+            self.clients[0].epoch_manager.get_block_producer(&epoch_id, tip.height).unwrap();
 
         let mut block = self.clients[0].produce_block(tip.height + 1).unwrap().unwrap();
         eprintln!("Producing block with version {protocol_version}");

@@ -857,7 +857,7 @@ impl JsonRpcHandler {
         unc_jsonrpc_primitives::types::provider::RpcProviderResponse,
         unc_jsonrpc_primitives::types::provider::RpcProviderError,
     > {
-        let provider_account = self.view_client_send(GetProvider(request_data.block_height)).await?;
+        let provider_account = self.view_client_send(GetProvider(request_data.epoch_id, request_data.block_height)).await?;
         Ok(unc_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_account })
     }
 

@@ -198,7 +198,7 @@ fn validate_double_sign(
     let left_block_header = BlockHeader::try_from_slice(&block_double_sign.left_block_header)?;
     let right_block_header = BlockHeader::try_from_slice(&block_double_sign.right_block_header)?;
     let block_producer = epoch_manager
-        .get_block_producer_by_height(left_block_header.height())?;
+        .get_block_producer(left_block_header.epoch_id(), left_block_header.height())?;
     if left_block_header.hash() != right_block_header.hash()
         && left_block_header.height() == right_block_header.height()
         && epoch_manager.verify_validator_signature(

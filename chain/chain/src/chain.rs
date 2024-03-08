@@ -753,7 +753,7 @@ impl Chain {
     /// Same as verify_header_signature except it does not verify that block producer hasn't been slashed
     fn partial_verify_orphan_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
         let block_producer =
-            self.epoch_manager.get_block_producer_by_height(header.height())?;
+            self.epoch_manager.get_block_producer(header.epoch_id(), header.height())?;
         // DEVNOTE: we pass head which is not necessarily on block's chain, but it's only used for
         // slashing info which we will ignore
         let head = self.head()?;
@@ -1990,7 +1990,8 @@ impl Chain {
         self.validate_header(header, provenance, challenges)?;
 
         self.epoch_manager.verify_block_vrf(
-            header.prev_hash(),
+            header.epoch_id(),
+            header.height(),
             &prev_random_value,
             block.vrf_value(),
             block.vrf_proof(),

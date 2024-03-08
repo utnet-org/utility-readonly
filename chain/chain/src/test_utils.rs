@@ -263,7 +263,7 @@ pub fn display_chain(me: &Option<AccountId>, chain: &mut Chain, tail: bool) {
             let maybe_block = chain_store.get_block(header.hash()).ok();
             let epoch_id = epoch_manager.get_epoch_id_from_prev_block(header.prev_hash()).unwrap();
             let block_producer =
-                epoch_manager.get_block_producer_by_height(header.height()).unwrap();
+                epoch_manager.get_block_producer(&epoch_id, header.height()).unwrap();
             debug!(
                 "{: >3} {} | {: >10} | parent: {: >3} {} | {}",
                 header.height(),

@@ -388,7 +388,7 @@ impl ClientActor {
 
         let mut blocks: HashMap<CryptoHash, DebugBlockStatus> = HashMap::new();
         let mut missed_heights: Vec<MissedHeightInfo> = Vec::new();
-        let mut _last_epoch_id = head.epoch_id;
+        let mut last_epoch_id = head.epoch_id;
         let initial_gas_price = self.client.chain.genesis_block().header().next_gas_price();
 
         let mut height_to_fetch = starting_height.unwrap_or(header_head.height);
@@ -410,7 +410,7 @@ impl ClientActor {
                         block_producer: self
                             .client
                             .epoch_manager
-                            .get_block_producer_by_height(height_to_fetch)
+                            .get_block_producer(&last_epoch_id, height_to_fetch)
                             .ok(),
                     });
                 }
@@ -444,7 +444,7 @@ impl ClientActor {
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer_by_height(block_header.height())
+                    .get_block_producer(block_header.epoch_id(), block_header.height())
                     .ok();
 
                 let chunks = match &block {
@@ -492,7 +492,7 @@ impl ClientActor {
                 );
                 // TODO(robin): using last epoch id when iterating in reverse height direction is
                 // not a good idea for calculating producer of missing heights. Revisit this.
-                _last_epoch_id = block_header.epoch_id().clone();
+                last_epoch_id = block_header.epoch_id().clone();
                 if let Some(prev_height) = block_header.prev_height() {
                     if block_header.height() != prev_height + 1 {
                         // This block was produced using a Skip approval; make sure to fetch the
@@ -552,7 +552,7 @@ impl ClientActor {
                 let block_producer = self
                     .client
                     .epoch_manager
-                    .get_block_producer_by_height(height)
+                    .get_block_producer(&epoch_id, height)
                     .map(|f| f.to_string())
                     .unwrap_or_default();
 

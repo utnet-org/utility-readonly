@@ -4,7 +4,6 @@ use crate::types::EpochInfoAggregator;
 use unc_cache::SyncLruCache;
 use unc_chain_configs::GenesisConfig;
 use unc_chain_primitives::Error;
-use unc_crypto::PublicKey;
 use unc_primitives::checked_feature;
 use unc_primitives::epoch_manager::block_info::{BlockInfo, BlockInfoV2};
 use unc_primitives::epoch_manager::block_summary::{BlockSummary, BlockSummaryV1};
@@ -19,12 +18,12 @@ use unc_primitives::shard_layout::ShardLayout;
 use unc_primitives::types::validator_frozen::ValidatorFrozen;
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::validator_power_and_frozen::{
-    ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter,
+    ValidatorPowerAndFrozen,
 };
 use unc_primitives::types::{
     AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId,
     EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier,
-    ValidatorKickoutReason, ValidatorPowerAndFrozenV1, ValidatorStats,
+    ValidatorKickoutReason, ValidatorStats,
 };
 use unc_primitives::utils::height_to_bytes;
 use unc_primitives::validator_mandates::AssignmentWeight;
@@ -33,9 +32,7 @@ use unc_primitives::views::{
     CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView,
 };
 use unc_store::{DBCol, Store, StoreUpdate};
-use num_bigint::{BigInt, ToBigInt};
 use num_rational::Rational64;
-use num_traits::Zero;
 use primitive_types::U256;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -1055,16 +1052,16 @@ impl EpochManager {
 
     /// Given epoch id and height, returns validator information that suppose to produce
     /// the block at that height. We don't require caller to know about EpochIds.
-    // pub fn get_block_producer_info(
-    //     &self,
-    //     epoch_id: &EpochId,
-    //     height: BlockHeight,
-    // ) -> Result<ValidatorPowerAndFrozen, EpochError> {
-    //     let epoch_info = self.get_epoch_info(epoch_id)?;
-    //     let validator_id = Self::block_producer_from_info(&epoch_info, height);
-    //
-    //     Ok(epoch_info.get_validator(validator_id))
-    // }
+    pub fn get_block_producer_info(
+        &self,
+        epoch_id: &EpochId,
+        height: BlockHeight,
+    ) -> Result<ValidatorPowerAndFrozen, EpochError> {
+        let epoch_info = self.get_epoch_info(epoch_id)?;
+        let validator_id = Self::block_producer_from_info(&epoch_info, height);
+
+        Ok(epoch_info.get_validator(validator_id))
+    }
 
     // pub fn get_block_producer_info_by_hash(
     //     &self,
@@ -1077,117 +1074,89 @@ impl EpochManager {
     //     Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
     // }
     //
-    fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
-        BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
-    }
+    // fn hash_to_bigint(hash: &CryptoHash) -> BigInt {
+    //     BigInt::from_bytes_be(num_bigint::Sign::Plus, hash.as_ref())
+    // }
 
-    pub fn get_block_producer_info_by_height(
-        &self,
-        height: BlockHeight,
-    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let producer = if height > 10 {
-            match self.get_block_hash_by_height(height - 10) {
-                Ok(block_hash) => {
-                    let block_info = self.get_block_info(&block_hash)?;
-
-                    let random_value = block_info.random_value();
-                    let original_iter = block_info.validators_iter();
-                    let bad_validators = self.get_bad_validator(height)?;
-                    //println!("bad validators are : {:?}", bad_validators);
-                    let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
-                        &original_iter,
-                        &bad_validators,
-                    );
-                    //println!("filtered validators are : {:?}", filtered_iter);
-                    Self::choose_validator_vrf(filtered_iter, Self::hash_to_bigint(random_value))
-                }
-                Err(e) => {
-                    println!("Get block hash by height error {:?} at height {:?}", e, height - 10);
-                    Self::get_default_validator(&self)
-                }
-            }
-        } else {
-            Self::get_default_validator(&self)
-        };
-        producer
-    }
-
-    // pub fn kickout_block_producer_by_height(
+    // pub fn get_block_producer_info_by_height(
     //     &self,
     //     height: BlockHeight,
-    //     validator: ValidatorPowerAndFrozen,
-    // )  {
-    //     // unstake the validator, so it will not be included in the future blocks
-    //
-    //     // update the lastest 10 history blocks' validators to exclude the bad validator
-    //     if height < 10 {
-    //         return;
-    //     }
-    //     for h in height-10..=height {
-    //         match self.get_block_hash_by_height(h) {
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let producer = if height > 10 {
+    //         match self.get_block_hash_by_height(height - 10) {
     //             Ok(block_hash) => {
     //                 let block_info = self.get_block_info(&block_hash)?;
     //
     //                 let random_value = block_info.random_value();
-    //                 let validators = block_info.validators_iter();
-    //                 Self::choose_validator_vrf(validators,Self::hash_to_bigint(random_value))
-    //             },
+    //                 let original_iter = block_info.validators_iter();
+    //                 let bad_validators = self.get_bad_validator(height)?;
+    //                 //println!("bad validators are : {:?}", bad_validators);
+    //                 let filtered_iter = ValidatorPowerAndFrozenIter::filter_bad_validators(
+    //                     &original_iter,
+    //                     &bad_validators,
+    //                 );
+    //                 //println!("filtered validators are : {:?}", filtered_iter);
+    //                 Self::choose_validator_vrf(filtered_iter, Self::hash_to_bigint(random_value))
+    //             }
     //             Err(e) => {
-    //                 println!("Get block hash by height error {:?} at height {:?}",e,height-10);
+    //                 println!("Get block hash by height error {:?} at height {:?}", e, height - 10);
     //                 Self::get_default_validator(&self)
-    //             },
+    //             }
     //         }
-    //     }
+    //     } else {
+    //         Self::get_default_validator(&self)
+    //     };
+    //     producer
     // }
 
-    fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let root_id_result: Result<AccountId, unc_primitives::account::id::ParseAccountError> = "miner".parse::<AccountId>();
-        let pkey = "ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv".parse::<PublicKey>();
-        let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
-            account_id: root_id_result.unwrap(),
-            public_key: pkey.unwrap(),
-            power: 5000000000000,
-            frozen: 50000000000000000000000000000000,
-        });
-        // let validator = self.get_validator_by_account_id(root_id_result)?;
-        Ok(validator)
-    }
+    // fn get_default_validator(&self) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let root_id_result: Result<AccountId, unc_primitives::account::id::ParseAccountError> = "miner".parse::<AccountId>();
+    //     let pkey = "ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv".parse::<PublicKey>();
+    //     let validator = ValidatorPowerAndFrozen::V1(ValidatorPowerAndFrozenV1 {
+    //         account_id: root_id_result.unwrap(),
+    //         public_key: pkey.unwrap(),
+    //         power: 5000000000000,
+    //         frozen: 50000000000000000000000000000000,
+    //     });
+    //     // let validator = self.get_validator_by_account_id(root_id_result)?;
+    //     Ok(validator)
+    // }
 
-    fn choose_validator_vrf(
-        validators_iter: ValidatorPowerAndFrozenIter,
-        random_value: BigInt,
-    ) -> Result<ValidatorPowerAndFrozen, BlockError> {
-        let mut total_weight: BigInt = Zero::zero();
-        for validator in validators_iter.clone() {
-            let validator_power = match validator {
-                ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
-            };
-            total_weight += validator_power;
-        }
-
-        if total_weight.is_zero() {
-            return Err(BlockError::ValidatorTotalPowerError(String::from("Total Power is zero")));
-        }
-
-        let mut cumulative_weight = Zero::zero();
-        let target = random_value % &total_weight;
-
-        for validator in validators_iter {
-            let validator_power = match validator {
-                ValidatorPowerAndFrozen::V1(ref v) => {
-                    v.power.to_bigint().unwrap_or_else(Zero::zero)
-                }
-            };
-            cumulative_weight += &validator_power;
-            if target < cumulative_weight {
-                return Ok(validator.clone());
-            }
-        }
-
-        return Err(BlockError::NoAvailableValidator(String::from(
-            "Block Producer is not available",
-        )));
-    }
+    // fn choose_validator_vrf(
+    //     validators_iter: ValidatorPowerAndFrozenIter,
+    //     random_value: BigInt,
+    // ) -> Result<ValidatorPowerAndFrozen, BlockError> {
+    //     let mut total_weight: BigInt = Zero::zero();
+    //     for validator in validators_iter.clone() {
+    //         let validator_power = match validator {
+    //             ValidatorPowerAndFrozen::V1(v) => v.power.to_bigint().unwrap_or_else(Zero::zero),
+    //         };
+    //         total_weight += validator_power;
+    //     }
+    //
+    //     if total_weight.is_zero() {
+    //         return Err(BlockError::ValidatorTotalPowerError(String::from("Total Power is zero")));
+    //     }
+    //
+    //     let mut cumulative_weight = Zero::zero();
+    //     let target = random_value % &total_weight;
+    //
+    //     for validator in validators_iter {
+    //         let validator_power = match validator {
+    //             ValidatorPowerAndFrozen::V1(ref v) => {
+    //                 v.power.to_bigint().unwrap_or_else(Zero::zero)
+    //             }
+    //         };
+    //         cumulative_weight += &validator_power;
+    //         if target < cumulative_weight {
+    //             return Ok(validator.clone());
+    //         }
+    //     }
+    //
+    //     return Err(BlockError::NoAvailableValidator(String::from(
+    //         "Block Producer is not available",
+    //     )));
+    // }
 
     /// Returns settlement of all block producers in current epoch, with indicator on whether they are slashed or not.
     pub fn get_all_block_producers_settlement(
@@ -1939,30 +1908,11 @@ impl EpochManager {
                 .into_iter()
                 .chain(block_header_info.power_proposals.clone().into_iter())
                 .collect();
-            let mut tmp_frozen_proposals: Vec<_> = block_header_info.frozen_proposals.clone()
-                .into_iter().collect();
-            // let all_frozen_proposals: Vec<_> = all_frozen_proposals
-            //     .clone()
-            //     .into_iter()
-            //     .chain(block_header_info.frozen_proposals.clone().into_iter())
-            //     .collect();
-            // Process new proposals, ensuring bad validators are assigned frozen = 0
-            for proposal in all_frozen_proposals
-                .iter()
-            {
-                if self.get_bad_validator(block_header_info.height)?.contains(&proposal.account_id()) {
-                    // For bad validators, set frozen to 0 in a new proposal
-                    tmp_frozen_proposals.push(ValidatorFrozen::new(
-                        proposal.account_id().clone(),
-                        proposal.public_key().clone(),
-                        0, // Set frozen to 0
-                    ));
-                } else {
-                    // For all others, maintain existing proposal behavior
-                    tmp_frozen_proposals.push(proposal.clone());
-                }
-            }
-            let all_frozen_proposals = tmp_frozen_proposals;
+            let all_frozen_proposals: Vec<_> = all_frozen_proposals
+                .clone()
+                .into_iter()
+                .chain(block_header_info.frozen_proposals.clone().into_iter())
+                .collect();
             let block_info = BlockInfo::new(
                 block_header_info.hash,
                 block_header_info.height,
@@ -2148,12 +2098,8 @@ impl EpochManager {
             // https://github.com/utnet-org/utility/issues/2522
             return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
         }
-        // println!("block info height : {:?}",block_info.height());
-        // println!("estimated next epoch start : {:?}",estimated_next_epoch_start);
-        // println!("last finalized height : {:?}",block_info.last_finalized_height());
 
-        Ok(block_info.last_finalized_height() + 4 >= estimated_next_epoch_start)
-        // return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
+        Ok(block_info.last_finalized_height() + 3 >= estimated_next_epoch_start)
     }
 
     /// Returns true, if given current block info, next block must include the approvals from the next
@@ -2261,44 +2207,6 @@ impl EpochManager {
             Err(EpochError::MissingBlock(_)) => Ok(false),
             Err(err) => Err(err),
         }
-    }
-
-    pub fn get_bad_validator(&self, height: u64) -> Result<Arc<Vec<AccountId>>, EpochError> {
-        match self.store.get_ser::<Vec<AccountId>>(DBCol::BadValidator, &height_to_bytes(height))? {
-            Some(bad_validators) => {
-
-                Ok(Arc::new(bad_validators))
-            },
-            None => {
-                //println!("get nothing from db");
-                let test_account = "node4-validator".parse::<AccountId>().unwrap();
-                let mut vec = Vec::new();
-                vec.push(test_account);
-                Ok(Arc::new(vec))
-            }, // Return an empty Vec if no record is found
-        }
-    }
-
-    #[allow(unused_mut)]
-    pub fn add_bad_validator(&self,
-                             store_update: &mut StoreUpdate,
-                             height: u64,
-                             validator: AccountId
-    ) -> Result<(), EpochError> {
-        let the_height = if height > 1 {
-            height - 1
-        } else {
-            1
-        };
-
-        let vec = self.get_bad_validator(the_height)?;
-        let mut new_vec = vec.clone().to_vec();
-        new_vec.push(validator);
-        println!("new vec : {:?}",new_vec);
-        store_update
-            .set_ser(DBCol::BadValidator, &height_to_bytes(height), &new_vec)
-            .map_err(EpochError::from)?;
-        Ok(())
     }
     /// Get Block Hash by Block height
     ///

@@ -519,6 +519,15 @@ impl StateRootNode {
 #[as_ref(forward)]
 pub struct EpochId(pub CryptoHash);
 
+
+impl TryFrom<&[u8]> for EpochId {
+    type Error = Box<dyn std::error::Error + Send + Sync>;
+
+    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+        Ok(EpochId(bytes.try_into()?))
+    }
+}
+
 impl std::str::FromStr for EpochId {
     type Err = Box<dyn std::error::Error + Send + Sync>;
 
@@ -527,6 +536,8 @@ impl std::str::FromStr for EpochId {
         Ok(EpochId(CryptoHash::from_str(epoch_id_str)?))
     }
 }
+
+
 /// TODO
 
 /// TODO
@@ -565,39 +576,6 @@ pub mod validator_power_and_frozen {
         collection: ValidatorPowerAndFrozenIterSource<'a>,
         curr_index: usize,
         len: usize,
-    }
-
-    impl<'a> ValidatorPowerAndFrozenIter<'a> {
-        pub fn filter_bad_validators(
-            original: &'a ValidatorPowerAndFrozenIter,
-            bad_validators: &'a Vec<AccountId>,
-        ) -> Self {
-            let filtered: Vec<ValidatorPowerAndFrozen> = match &original.collection {
-                ValidatorPowerAndFrozenIterSource::V1(collection) => {
-                    collection.iter()
-                        .filter(|&validator| !bad_validators.contains(&validator.account_id))
-                        .map(|v1| ValidatorPowerAndFrozen::V1(v1.clone())) // Convert each V1 to ValidatorPowerAndFrozen::V1
-                        .collect()
-                },
-                ValidatorPowerAndFrozenIterSource::V2(collection) => {
-                    collection.iter()
-                        .filter(|validator| {
-                            match validator {
-                                ValidatorPowerAndFrozen::V1(v1) => !bad_validators.contains(&v1.account_id),
-                                // Handle other variants as they are added
-                            }
-                        })
-                        .cloned() // No need to map since they are already the correct type
-                        .collect()
-                },
-            };
-
-            ValidatorPowerAndFrozenIter {
-                collection: ValidatorPowerAndFrozenIterSource::V2(Box::leak(filtered.clone().into_boxed_slice())), // Adjust as needed
-                curr_index: 0,
-                len: filtered.len(),
-            }
-        }
     }
 
 

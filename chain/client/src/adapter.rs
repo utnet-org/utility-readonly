@@ -32,7 +32,7 @@ pub(crate) struct TxStatusResponse(pub Box<FinalExecutionOutcomeView>);
 /// Request a provider.
 #[derive(actix::Message, Debug)]
 #[rtype(result = "Option<AccountId>")]
-pub(crate) struct ProviderRequest(pub BlockHeight);
+pub(crate) struct ProviderRequest(pub EpochId, pub BlockHeight);
 
 /// Provider response.
 #[derive(actix::Message, Debug)]
