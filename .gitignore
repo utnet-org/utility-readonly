@@ -62,3 +62,7 @@ rusty-tags.vi
 costs-*.txt
 names-to-stats.txt
 data_dump_*.bin
+
+my_script.sh
+```
+new_script.sh
