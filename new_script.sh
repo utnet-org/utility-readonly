@@ -4,10 +4,10 @@ sleep 2
 near create-account node4-validator --masterAccount jamesavechives --publicKey ed25519:7tnvJLon5BRLRUbs66wvVKyS8dmEddvrL4brjRievTwi
 
 # send money to new accounts
-near send jamesavechives node4-validator 300000000
+near send jamesavechives node4-validator 15000000
 ## stake new accounts
 #sleep 2
-near stake node4-validator ed25519:7tnvJLon5BRLRUbs66wvVKyS8dmEddvrL4brjRievTwi 100000000 --keyPath /Users/jameswalstonn/.near/Near4/validator_key.json
+near stake node4-validator ed25519:7tnvJLon5BRLRUbs66wvVKyS8dmEddvrL4brjRievTwi 10000000 --keyPath /Users/jameswalstonn/.near/Near4/validator_key.json
 
 
 # Register Rsa2048 keys
