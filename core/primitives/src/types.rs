@@ -519,15 +519,6 @@ impl StateRootNode {
 #[as_ref(forward)]
 pub struct EpochId(pub CryptoHash);
 
-
-impl TryFrom<&[u8]> for EpochId {
-    type Error = Box<dyn std::error::Error + Send + Sync>;
-
-    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
-        Ok(EpochId(bytes.try_into()?))
-    }
-}
-
 impl std::str::FromStr for EpochId {
     type Err = Box<dyn std::error::Error + Send + Sync>;
 
@@ -536,8 +527,6 @@ impl std::str::FromStr for EpochId {
         Ok(EpochId(CryptoHash::from_str(epoch_id_str)?))
     }
 }
-
-
 /// TODO
 
 /// TODO
@@ -571,15 +560,12 @@ pub mod validator_power_and_frozen {
     pub enum ValidatorPowerAndFrozen {
         V1(ValidatorPowerAndFrozenV1),
     }
-    #[derive(Clone, Debug)]
+    #[derive(Clone)]
     pub struct ValidatorPowerAndFrozenIter<'a> {
         collection: ValidatorPowerAndFrozenIterSource<'a>,
         curr_index: usize,
         len: usize,
     }
-
-
-
 
     impl<'a> ValidatorPowerAndFrozenIter<'a> {
         pub fn empty() -> Self {
@@ -627,7 +613,7 @@ pub mod validator_power_and_frozen {
             }
         }
     }
-    #[derive(Clone, Debug)]
+    #[derive(Clone)]
     enum ValidatorPowerAndFrozenIterSource<'a> {
         V1(&'a [ValidatorPowerAndFrozenV1]),
         V2(&'a [ValidatorPowerAndFrozen]),

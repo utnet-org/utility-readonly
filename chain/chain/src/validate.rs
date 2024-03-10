@@ -153,11 +153,7 @@ pub fn validate_chunk_with_chunk_extra_and_receipts_root(
     
     if chunk_header_power_proposals.len() != chunk_extra_power_proposals.len()
         || !chunk_extra_power_proposals.eq(chunk_header_power_proposals)
-    {
-        return Err(Error::InvalidValidatorProposals);
-    }
-    
-    if chunk_header_frozen_proposals.len() != chunk_extra_frozen_proposals.len()
+    || chunk_header_frozen_proposals.len() != chunk_extra_frozen_proposals.len()
         || !chunk_extra_frozen_proposals.eq(chunk_header_frozen_proposals)
     {
         return Err(Error::InvalidValidatorProposals);

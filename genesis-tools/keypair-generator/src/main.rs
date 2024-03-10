@@ -74,6 +74,7 @@ fn main() {
             for (i, key) in keys.into_iter().enumerate() {
                 println!("Key#{}", i);
                 println!("PK: {}", key.public_key());
+                println!("SK: {}", key);
                 println!();
                 if generate_config {
                     let account_id = account_id
@@ -96,6 +97,7 @@ fn main() {
         Some(("validator-key", _)) => {
             let key = SecretKey::from_random(KeyType::ED25519);
             println!("PK: {}", key.public_key());
+            println!("SK: {}", key);
             if generate_config {
                 let account_id =
                     account_id.expect("Account id must be specified if --generate-config is used");
@@ -110,6 +112,7 @@ fn main() {
         Some(("node-key", _args)) => {
             let key = SecretKey::from_random(KeyType::ED25519);
             println!("PK: {}", key.public_key());
+            println!("PK: {}", key);
             if generate_config {
                 let mut path = home_dir.to_path_buf();
                 path.push(framework::config::NODE_KEY_FILE);

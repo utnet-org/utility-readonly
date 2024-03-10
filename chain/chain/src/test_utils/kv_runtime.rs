@@ -689,6 +689,10 @@ impl EpochManagerAdapter for MockEpochManager {
         Ok(validators[(height as usize) % validators.len()].account_id().clone())
     }
 
+    fn get_block_producer_by_hash(&self, _block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
+        todo!()
+    }
+
 
     fn get_chunk_producer(
         &self,

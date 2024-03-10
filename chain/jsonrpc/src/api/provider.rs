@@ -35,8 +35,9 @@ impl RpcRequest for RpcProviderRequest {
         }
 
         // Construct the CryptoHash from the decoded bytes
-        let epoch_id = EpochId::try_from(bytes.as_slice())
-            .map_err(|_| RpcParseError("Failed to convert bytes to CryptoHash".parse().unwrap()))?;
+        let epoch_id : EpochId = epoch_id_str
+            .parse()
+            .map_err(|_| RpcParseError("Failed to parse epoch_id from base58".parse().unwrap()))?;
 
             let block_height = value
                     .get("block_height")

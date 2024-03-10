@@ -53,7 +53,7 @@ pub fn proposals_to_block_summary(
     minted_amount: Balance,
     next_version: ProtocolVersion,
 ) -> Result<BlockSummary, BlockError> {
-    crate::validator_selection::proposals_to_block_summary(
+    return crate::validator_selection::proposals_to_block_summary(
         epoch_config,
         this_block_hash,
         last_block_hash,
@@ -65,7 +65,7 @@ pub fn proposals_to_block_summary(
         validator_reward,
         minted_amount,
         next_version,
-    )
+    );
 }
 /// Calculates new seat assignments based on current seat assignments and proposals.
 pub fn proposals_to_epoch_info(
@@ -125,8 +125,7 @@ mod old_validator_selection {
     use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
 
     use crate::proposals::find_threshold;
-    use crate::test_utils::block_info;
-    use crate::types::RngSeed;
+        use crate::types::RngSeed;
 
     pub fn proposals_to_epoch_info(
         epoch_config: &EpochConfig,
@@ -294,6 +293,7 @@ mod old_validator_selection {
         for index in block_producers_settlement.iter_mut() {
             *index = indices_to_keep.range(..*index).count() as u64;
         }
+
         // Collect proposals into block producer assignments.
         let mut chunk_producers_settlement: Vec<Vec<ValidatorId>> = vec![];
         let mut last_index: u64 = 0;
@@ -321,7 +321,7 @@ mod old_validator_selection {
 
         // Old validator selection is not aware of chunk validator mandates.
         let validator_mandates: ValidatorMandates = Default::default();
-
+        
         Ok(EpochInfo::new(
             prev_epoch_info.epoch_height() + 1,
             final_proposals,

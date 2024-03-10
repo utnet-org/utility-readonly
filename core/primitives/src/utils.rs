@@ -22,7 +22,6 @@ use unc_primitives_core::account::id::{AccountId, AccountType};
 
 use std::mem::size_of;
 use std::ops::Deref;
-use unc_primitives_core::types::BlockHeight;
 
 pub mod min_heap;
 
@@ -354,10 +353,6 @@ fn create_nonce_with_nonce(base: &CryptoHash, salt: u64) -> CryptoHash {
 }
 
 pub fn index_to_bytes(index: u64) -> [u8; 8] {
-    index.to_le_bytes()
-}
-
-pub fn height_to_bytes(index: BlockHeight) -> [u8; 8] {
     index.to_le_bytes()
 }
 

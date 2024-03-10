@@ -461,6 +461,7 @@ pub fn proposals_to_epoch_info(
         .enumerate()
         .map(|(index, s)| (s.account_id().clone(), index as ValidatorId))
         .collect::<HashMap<_, _>>();
+
     Ok(EpochInfo::new(
         prev_epoch_info.epoch_height() + 1,
         all_validators,

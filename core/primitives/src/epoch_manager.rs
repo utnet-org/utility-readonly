@@ -812,22 +812,6 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn all_power_propasals(&self) -> &Vec<ValidatorPower> {
-            match self {
-                Self::V1(v1) => &v1.all_power_proposals,
-                Self::V2(v2) => &v2.all_power_proposals,
-            }
-        }
-
-        #[inline]
-        pub fn all_frozen_propasals(&self) -> &Vec<ValidatorFrozen> {
-            match self {
-                Self::V1(v1) => &v1.all_frozen_proposals,
-                Self::V2(v2) => &v2.all_frozen_proposals,
-            }
-        }
-
-        #[inline]
         pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
             match self {
                 Self::V1(v1) => &v1.frozen_change,
@@ -890,7 +874,7 @@ pub mod block_info {
                 Self::V2(v2) => v2.validators[validator_id as usize].account_id(),
             }
         }
-
+        
         #[inline]
         pub fn account_is_validator(&self, account_id: &AccountId) -> bool {
             match self {
@@ -1818,7 +1802,7 @@ use crate::epoch_manager::ValidatorWeight;
         }
     }
 
-    #[derive(BorshSerialize, BorshDeserialize, Debug)]
+    #[derive(BorshSerialize, BorshDeserialize)]
     pub struct EpochSummary {
         pub prev_epoch_last_block_hash: CryptoHash,
         /// Power proposals from the epoch, only the latest one per account

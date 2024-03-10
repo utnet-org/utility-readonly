@@ -218,15 +218,15 @@ impl Default for ReshardingConfig {
 }
 
 pub fn default_header_sync_initial_timeout() -> Duration {
-    Duration::from_secs(300)
+    Duration::from_secs(10)
 }
 
 pub fn default_header_sync_progress_timeout() -> Duration {
-    Duration::from_secs(60)
+    Duration::from_secs(2)
 }
 
 pub fn default_header_sync_stall_ban_timeout() -> Duration {
-    Duration::from_secs(3600)
+    Duration::from_secs(120)
 }
 
 pub fn default_state_sync_timeout() -> Duration {
@@ -238,11 +238,11 @@ pub fn default_header_sync_expected_height_per_second() -> u64 {
 }
 
 pub fn default_sync_check_period() -> Duration {
-    Duration::from_secs(300)
+    Duration::from_secs(10)
 }
 
 pub fn default_sync_step_period() -> Duration {
-    Duration::from_millis(300)
+    Duration::from_millis(10)
 }
 
 pub fn default_sync_height_threshold() -> u64 {
@@ -274,11 +274,11 @@ pub fn default_view_client_threads() -> usize {
 }
 
 pub fn default_log_summary_period() -> Duration {
-    Duration::from_secs(300)
+    Duration::from_secs(10)
 }
 
 pub fn default_view_client_throttle_period() -> Duration {
-    Duration::from_secs(900)
+    Duration::from_secs(30)
 }
 
 pub fn default_trie_viewer_state_size_limit() -> Option<u64> {
@@ -298,7 +298,7 @@ pub fn default_enable_multiline_logging() -> Option<bool> {
 }
 
 pub fn default_produce_chunk_add_transactions_time_limit() -> Option<Duration> {
-    Some(Duration::from_millis(6000))
+    Some(Duration::from_millis(200))
 }
 
 /// ClientConfig where some fields can be updated at runtime.
