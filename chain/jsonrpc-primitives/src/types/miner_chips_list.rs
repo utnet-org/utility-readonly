@@ -1,6 +1,5 @@
 use serde_json::Value;
 use unc_primitives::types::{AccountId};
-use unc_primitives::views::ChipView;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]
