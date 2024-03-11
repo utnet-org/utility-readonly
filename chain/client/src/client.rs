@@ -320,7 +320,7 @@ impl Client {
             &config.state_sync.sync,
             false,
         );
-        let num_block_producer_seats = config.num_block_producer_seats as usize;
+        let num_block_producer_seats: usize = config.num_block_producer_seats as usize;
         let data_parts = epoch_manager.num_data_parts();
         let parity_parts = epoch_manager.num_total_parts() - data_parts;
 

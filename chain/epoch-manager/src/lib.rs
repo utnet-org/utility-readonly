@@ -18,7 +18,7 @@ use unc_primitives::shard_layout::ShardLayout;
 use unc_primitives::types::validator_frozen::ValidatorFrozen;
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
-use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
+use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use unc_primitives::validator_mandates::AssignmentWeight;
 use unc_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use unc_primitives::views::{

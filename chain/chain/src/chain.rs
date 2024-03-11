@@ -313,7 +313,7 @@ impl Chain {
         );
         Ok(Block::genesis(
             chain_genesis.protocol_version,
-            genesis_chunks.into_iter().map(|chunk| chunk.take_header()).collect(),
+            genesis_chunks.into_iter().map(|chunk: ShardChunk| chunk.take_header()).collect(),
             chain_genesis.time,
             chain_genesis.height,
             chain_genesis.min_gas_price,
