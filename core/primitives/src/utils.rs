@@ -3,7 +3,7 @@ use std::convert::AsRef;
 use std::fmt;
 
 use chrono;
-use chrono::{DateTime, NaiveDateTime};
+use chrono::DateTime;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde;
