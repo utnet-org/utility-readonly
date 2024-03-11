@@ -16,3 +16,4 @@ pub mod status;
 pub mod transactions;
 pub mod validator;
 pub mod provider;
+pub mod miner_chips_list;

@@ -740,6 +740,16 @@ impl From<Challenge> for ChallengeView {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct ChipView {
+    pub power: Power,
+    pub serial_number: String,
+    pub bus_id: String,
+    pub p2: String,
+    pub public_key: String,
+    pub p2_size: usize,
+    pub public_key_size: usize,
+}
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct BlockHeaderView {
     pub height: BlockHeight,
     pub prev_height: Option<BlockHeight>,
@@ -1151,6 +1161,11 @@ impl From<ChunkHeaderView> for ShardChunkHeader {
     }
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct MinerChipsListView {
+    pub account_id: AccountId,
+    pub chips: Vec<ChipView>,
+}
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct BlockView {
     pub author: AccountId,
