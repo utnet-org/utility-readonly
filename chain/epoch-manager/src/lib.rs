@@ -160,7 +160,6 @@ pub struct EpochManager {
     reward_calculator: RewardCalculator,
     /// Genesis protocol version. Useful when there are protocol upgrades.
     genesis_protocol_version: ProtocolVersion,
-    genesis_num_block_producer_seats: NumSeats,
 
     /// Cache of epoch information.
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
@@ -281,14 +280,11 @@ impl EpochManager {
             .get_ser(DBCol::EpochInfo, AGGREGATOR_KEY)
             .map_err(EpochError::from)?
             .unwrap_or_default();
-let genesis_num_block_producer_seats =
-            config.for_protocol_version(genesis_protocol_version).num_block_producer_seats;
         let mut epoch_manager = EpochManager {
             store,
             config,
             reward_calculator,
             genesis_protocol_version,
-genesis_num_block_producer_seats,
             epochs_info: SyncLruCache::new(EPOCH_CACHE_SIZE),
             blocks_info: SyncLruCache::new(BLOCK_CACHE_SIZE),
             epoch_id_to_start: SyncLruCache::new(EPOCH_CACHE_SIZE),
