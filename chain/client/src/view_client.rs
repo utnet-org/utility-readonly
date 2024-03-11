@@ -14,7 +14,7 @@ use unc_chain::{
 };
 use unc_chain_configs::{ClientConfig, ProtocolConfigView};
 use unc_chain_primitives::error::EpochErrorResultToChainError;
-use unc_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
+use unc_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, MinerChipsList, MinerChipsListError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
 use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::EpochManagerAdapter;
 use unc_network::types::{
@@ -34,16 +34,8 @@ use unc_primitives::state_sync::{
     ShardStateSyncResponse, ShardStateSyncResponseHeader, ShardStateSyncResponseV3,
 };
 use unc_primitives::static_clock::StaticClock;
-use unc_primitives::types::{
-    AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId,
-    ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier,
-};
-use unc_primitives::views::{
-    BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView,
-    FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView,
-    MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, SplitStorageInfoView,
-    StateChangesKindsView, StateChangesView, TxExecutionStatus, TxStatusView,
-};
+use unc_primitives::types::{AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId, ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier};
+use unc_primitives::views::{BlockView, ChipView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView, FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView, MaintenanceWindowsView, MinerChipsListView, QueryRequest, QueryResponse, ReceiptView, SplitStorageInfoView, StateChangesKindsView, StateChangesView, TxExecutionStatus, TxStatusView};
 use unc_store::flat::{FlatStorageReadyStatus, FlatStorageStatus};
 use unc_store::{DBCol, COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY};
 use std::cmp::Ordering;
@@ -629,6 +621,32 @@ impl Handler<WithSpanContext<GetProvider>> for ViewClientActor {
             .get_block_producer(&epoch_id, height)
             .into_chain_error()?;
         Ok(block_author)
+    }
+}
+
+/// Handles retrieving miner chips list from the chain.
+impl Handler<WithSpanContext<MinerChipsList>> for ViewClientActor {
+    type Result = Result<MinerChipsListView, MinerChipsListError>;
+    #[perf]
+    fn handle(&mut self, msg: WithSpanContext<MinerChipsList>, _: &mut Self::Context) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        tracing::debug!(target: "client", ?msg);
+        let account_id = msg.0;
+        let chip0 = ChipView {
+            power: 5000000000,
+            serial_number: String::from("serialnumberabc000"),
+            bus_id: String::from("busidabc000"),
+            p2: String::from("p2abc000"),
+            public_key: String::from("publickeyabc000"),
+            p2_size: 120,
+            public_key_size: 235,
+        };
+        let mut chips = Vec::new();
+        chips.push(chip0);
+        Ok(MinerChipsListView{
+            account_id,
+            chips,
+        })
     }
 }
 

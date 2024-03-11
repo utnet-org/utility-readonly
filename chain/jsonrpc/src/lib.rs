@@ -17,7 +17,7 @@ use unc_client::{
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered, ProcessTxRequest,
     ProcessTxResponse, Query, Status, TxStatus, ViewClientActor,
 };
-use unc_client_primitives::types::{GetProvider, GetSplitStorageInfo};
+use unc_client_primitives::types::{MinerChipsList, GetProvider, GetSplitStorageInfo};
 pub use unc_jsonrpc_client as client;
 use unc_jsonrpc_primitives::errors::RpcError;
 use unc_jsonrpc_primitives::message::{Message, Request};
@@ -394,6 +394,9 @@ impl JsonRpcHandler {
             }
             "provider" => {
                 process_method_call(request, |params | self.get_provider(params)).await
+            }
+            "miner_chips_list" => {
+                process_method_call(request, |params | self.miner_chips_list(params)).await
             }
             _ => return Err(request),
         })
@@ -859,6 +862,18 @@ impl JsonRpcHandler {
     > {
         let provider_account = self.view_client_send(GetProvider(request_data.epoch_id, request_data.block_height)).await?;
         Ok(unc_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_account })
+    }
+
+    async fn miner_chips_list(
+        &self,
+        request_data: unc_jsonrpc_primitives::types::miner_chips_list::RpcMinerChipsListRequest,
+    ) -> Result<
+        unc_jsonrpc_primitives::types::miner_chips_list::RpcMinerChipsListResponse,
+        unc_jsonrpc_primitives::types::miner_chips_list::RpcMinerChipsListError,
+    > {
+        let account_id = request_data.account_id;
+        let chips = self.view_client_send(MinerChipsList(account_id.clone())).await?;
+        Ok(unc_jsonrpc_primitives::types::miner_chips_list::RpcMinerChipsListResponse{ account_id, chips: chips.chips })
     }
 
     async fn block(

@@ -21,6 +21,7 @@ mod transactions;
 mod validator;
 
 mod provider;
+mod miner_chips_list;
 
 pub(crate) trait RpcRequest: Sized {
     fn parse(value: Value) -> Result<Self, RpcParseError>;
