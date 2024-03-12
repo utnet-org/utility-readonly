@@ -15,6 +15,34 @@ use unc_primitives::epoch_manager::block_summary::BlockSummary;
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::types::validator_frozen::ValidatorFrozen;
 use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+
+fn remove_duplicate_power_proposals(power_proposals: Vec<ValidatorPower>) -> Vec<ValidatorPower> {
+    let mut unique_proposals_map: HashMap<_, _> = HashMap::new();
+
+    for proposal in power_proposals {
+        // Use account_id as the key for uniqueness.
+        // This overwrites any existing entry with the same account_id, effectively keeping only the last seen instance.
+        unique_proposals_map.insert(proposal.account_id().clone(), proposal);
+    }
+
+    // Extract the values (ValidatorPower instances) into a new Vec
+    let unique_proposals = unique_proposals_map.into_values().collect::<Vec<_>>();
+    unique_proposals
+}
+
+fn remove_duplicate_frozen_proposals(frozen_proposals: Vec<ValidatorFrozen>) -> Vec<ValidatorFrozen> {
+    let mut unique_proposals_map: HashMap<_, _> = HashMap::new();
+
+    for proposal in frozen_proposals {
+        // Use account_id as the key for uniqueness.
+        // This overwrites any existing entry with the same account_id, effectively keeping only the last seen instance.
+        unique_proposals_map.insert(proposal.account_id().clone(), proposal);
+    }
+
+    // Extract the values (ValidatorPower instances) into a new Vec
+    let unique_proposals = unique_proposals_map.into_values().collect::<Vec<_>>();
+    unique_proposals
+}
 /// Select providers for next block and generate block info
 pub fn proposals_to_block_summary(
     epoch_config: &EpochConfig,
@@ -29,11 +57,13 @@ pub fn proposals_to_block_summary(
     minted_amount: Balance,
     next_version: ProtocolVersion,
 ) -> Result<BlockSummary, BlockError> {
-    // debug_assert!(
-    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
-    //         == power_proposals.len(),
-    //     "Power proposals should not have duplicates"
-    // );
+    let power_proposals = remove_duplicate_power_proposals(power_proposals);
+    let frozen_proposals = remove_duplicate_frozen_proposals(frozen_proposals);
+    debug_assert!(
+        power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+            == power_proposals.len(),
+        "Power proposals should not have duplicates"
+    );
 
     debug_assert!(
         frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
@@ -264,11 +294,13 @@ pub fn proposals_to_epoch_info(
     next_version: ProtocolVersion,
     last_version: ProtocolVersion,
 ) -> Result<EpochInfo, EpochError> {
-    // debug_assert!(
-    //     power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
-    //         == power_proposals.len(),
-    //     "Power proposals should not have duplicates"
-    // );
+    let power_proposals = remove_duplicate_power_proposals(power_proposals);
+    let frozen_proposals = remove_duplicate_frozen_proposals(frozen_proposals);
+    debug_assert!(
+        power_proposals.iter().map(|power| power.account_id()).collect::<HashSet<_>>().len()
+            == power_proposals.len(),
+        "Power proposals should not have duplicates"
+    );
 
     debug_assert!(
         frozen_proposals.iter().map(|frozen| frozen.account_id()).collect::<HashSet<_>>().len()
