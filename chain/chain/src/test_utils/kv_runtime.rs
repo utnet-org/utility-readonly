@@ -32,10 +32,7 @@ use unc_primitives::transaction::{
 use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, Gas, Nonce, NumShards, ShardId, StateChangesForResharding, StateRoot, StateRootNode, ValidatorInfoIdentifier};
 use unc_primitives::validator_mandates::AssignmentWeight;
 use unc_primitives::version::{ProtocolVersion, PROTOCOL_VERSION};
-use unc_primitives::views::{
-    AccessKeyInfoView, AccessKeyList, CallResult, ContractCodeView, EpochValidatorInfo,
-    QueryRequest, QueryResponse, QueryResponseKind, ViewStateResult,
-};
+use unc_primitives::views::{AccessKeyInfoView, AccessKeyList, CallResult, ChipsList, ChipView, ContractCodeView, EpochValidatorInfo, QueryRequest, QueryResponse, QueryResponseKind, ViewStateResult};
 use unc_store::test_utils::TestTriesBuilder;
 use unc_store::{
     set_genesis_hash, set_genesis_state_roots, DBCol, ShardTries, StorageError, Store, StoreUpdate,
@@ -1246,6 +1243,20 @@ impl RuntimeAdapter for KeyValueRuntime {
                     keys: vec![AccessKeyInfoView {
                         public_key: PublicKey::empty(KeyType::ED25519),
                         access_key: AccessKey::full_access().into(),
+                    }],
+                }),
+                block_height,
+                block_hash: *block_hash,
+            }),
+            QueryRequest::ViewChipList { .. } => Ok(QueryResponse {
+                kind: QueryResponseKind::ChipList(ChipsList {
+                    chips: vec![ChipView {
+                        miner_id: "".to_string(),
+                        power: 0,
+                        bus_id: "".to_string(),
+                        public_key: "".to_string(),
+                        sn: "".to_string(),
+                        p2key: "".to_string(),
                     }],
                 }),
                 block_height,

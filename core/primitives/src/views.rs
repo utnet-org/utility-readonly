@@ -262,11 +262,27 @@ pub struct AccessKeyList {
     pub keys: Vec<AccessKeyInfoView>,
 }
 
+
 impl FromIterator<AccessKeyInfoView> for AccessKeyList {
     fn from_iter<I: IntoIterator<Item = AccessKeyInfoView>>(iter: I) -> Self {
         Self { keys: iter.into_iter().collect() }
     }
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct ChipsList {
+    pub chips: Vec<ChipView>,
+}
+
+
+impl FromIterator<ChipView> for ChipsList {
+    fn from_iter<I: IntoIterator<Item=ChipView>>(iter: I) -> Self {
+        ChipsList {
+            chips: iter.into_iter().collect(),
+        }
+    }
+}
+
 
 #[cfg_attr(feature = "deepsize_feature", derive(deepsize::DeepSizeOf))]
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -306,6 +322,7 @@ pub enum QueryResponseKind {
     CallResult(CallResult),
     AccessKey(AccessKeyView),
     AccessKeyList(AccessKeyList),
+    ChipList(ChipsList),
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -329,6 +346,9 @@ pub enum QueryRequest {
         public_key: PublicKey,
     },
     ViewAccessKeyList {
+        account_id: AccountId,
+    },
+    ViewChipList {
         account_id: AccountId,
     },
     CallFunction {
@@ -739,15 +759,14 @@ impl From<Challenge> for ChallengeView {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct ChipView {
-    pub power: Power,
-    pub serial_number: String,
-    pub bus_id: String,
-    pub p2: String,
+    pub miner_id: String,
     pub public_key: String,
-    pub p2_size: usize,
-    pub public_key_size: usize,
+    pub power: u64,
+    pub sn: String,
+    pub bus_id: String,
+    pub p2key: String,
 }
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct BlockHeaderView {

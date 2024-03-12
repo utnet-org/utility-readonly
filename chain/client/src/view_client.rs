@@ -304,6 +304,7 @@ impl ViewClientActor {
             QueryRequest::ViewState { account_id, .. } => account_id,
             QueryRequest::ViewAccessKey { account_id, .. } => account_id,
             QueryRequest::ViewAccessKeyList { account_id, .. } => account_id,
+            QueryRequest::ViewChipList { account_id, .. } => account_id,
             QueryRequest::CallFunction { account_id, .. } => account_id,
             QueryRequest::ViewCode { account_id, .. } => account_id,
         };
@@ -382,6 +383,15 @@ impl ViewClientActor {
                     block_height,
                 } => QueryError::ContractExecutionError {
                     vm_error: error_message,
+                    block_height,
+                    block_hash,
+                } ,
+                unc_chain::unc_chain_primitives::error::QueryError::UnknownChip {
+                    public_key,
+                    block_height,
+                    block_hash,
+                } => QueryError::UnknownChip {
+                    public_key,
                     block_height,
                     block_hash,
                 },
@@ -633,13 +643,12 @@ impl Handler<WithSpanContext<MinerChipsList>> for ViewClientActor {
         tracing::debug!(target: "client", ?msg);
         let account_id = msg.0;
         let chip0 = ChipView {
-            power: 5000000000,
-            serial_number: String::from("serialnumberabc000"),
-            bus_id: String::from("busidabc000"),
-            p2: String::from("p2abc000"),
-            public_key: String::from("publickeyabc000"),
-            p2_size: 120,
-            public_key_size: 235,
+            miner_id: "".to_string(),
+            power: 0,
+            bus_id: "".to_string(),
+            public_key: "".to_string(),
+            sn: "".to_string(),
+            p2key: "".to_string(),
         };
         let mut chips = Vec::new();
         chips.push(chip0);

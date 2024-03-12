@@ -299,6 +299,7 @@ impl JsonRpcHandler {
                     }
                     QueryRequest::ViewAccessKey { .. } => "query_view_access_key",
                     QueryRequest::ViewAccessKeyList { .. } => "query_view_access_key_list",
+                    QueryRequest::ViewChipList { .. } => "query_view_chip_list",
                     QueryRequest::CallFunction { .. } => "query_call_function",
                 };
                 (metrics_name.to_string(), process_query_response(self.query(params).await))

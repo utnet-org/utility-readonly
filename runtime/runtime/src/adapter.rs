@@ -6,7 +6,7 @@ use unc_primitives::types::{
     AccountId, BlockHeight, EpochHeight, EpochId, EpochInfoProvider, MerkleHash,
 };
 use unc_primitives::version::ProtocolVersion;
-use unc_primitives::views::ViewStateResult;
+use unc_primitives::views::{ChipView, ViewStateResult};
 use unc_vm_runner::ContractCode;
 
 /// Adapter for querying runtime.
@@ -57,6 +57,13 @@ pub trait ViewRuntimeAdapter {
         state_root: MerkleHash,
         account_id: &AccountId,
     ) -> Result<Vec<(PublicKey, AccessKey)>, crate::state_viewer::errors::ViewAccessKeyError>;
+    fn view_chip_list(
+        &self,
+        shard_uid: &ShardUId,
+        state_root: MerkleHash,
+        account_id: &AccountId,
+    ) -> Result<Vec<ChipView>, crate::state_viewer::errors::ViewChipError>
+    ;
 
     fn view_state(
         &self,

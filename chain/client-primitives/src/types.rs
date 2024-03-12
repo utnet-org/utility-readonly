@@ -600,6 +600,14 @@ pub enum QueryError {
         block_hash: unc_primitives::hash::CryptoHash,
     },
     #[error(
+    "Chip {public_key} does not exist while viewing at block #{block_height}"
+    )]
+    UnknownChip {
+        public_key: unc_crypto::PublicKey,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
+    },
+    #[error(
         "Contract code for contract ID {contract_account_id} has never been observed on the node at block #{block_height}"
     )]
     NoContractCode {

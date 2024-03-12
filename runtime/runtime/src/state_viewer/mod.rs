@@ -12,13 +12,14 @@ use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
 use unc_primitives::transaction::FunctionCallAction;
 use unc_primitives::trie_key::trie_key_parsers;
 use unc_primitives::types::{AccountId, EpochInfoProvider, Gas};
-use unc_primitives::views::{StateItem, ViewApplyState, ViewStateResult};
+use unc_primitives::views::{ChipView, StateItem, ViewApplyState, ViewStateResult};
 use unc_primitives_core::config::ViewConfig;
 use unc_store::{get_access_key, get_account, get_code, TrieUpdate};
 use unc_vm_runner::logic::ReturnData;
 use unc_vm_runner::ContractCode;
 use std::{str, sync::Arc, time::Instant};
 use tracing::debug;
+use crate::state_viewer::errors::ViewChipError;
 
 pub mod errors;
 
@@ -110,6 +111,114 @@ impl TrieViewer {
                 .collect::<Result<Vec<_>, errors::ViewAccessKeyError>>();
         access_keys
     }
+
+    #[allow(deprecated)]
+    pub fn view_chip_list(
+        &self,
+        state_update: &TrieUpdate,
+        account_id: &AccountId,
+    ) -> Result<Vec<ChipView>, ViewChipError> {
+        let prefix = trie_key_parsers::get_raw_prefix_for_rsa_keys(account_id);
+        let raw_prefix: &[u8] = prefix.as_ref();
+        let mut chip_views = Vec::new();
+
+        let iter_result = state_update
+            .iter(&prefix)
+            .map_err(|_| ViewChipError::InternalError {
+                error_message: "Failed to iterate over state_update".to_string(),
+            })?;
+
+        for key_result in iter_result {
+            let key = key_result.map_err(|_| ViewChipError::InternalError {
+                error_message: "Iteration error encountered".to_string(),
+            })?;
+
+            let public_key_str = &key[raw_prefix.len()..];
+
+            // Extract the part of the key that follows the prefix, if needed
+
+            let chip_action = unc_store::get_rsa2048_keys_raw(state_update, &key).map_err(|e| {
+                ViewChipError::InternalError {
+                    error_message: format!("Storage error encountered: {:?}", e),
+                }
+            })?
+                .ok_or_else(|| ViewChipError::InternalError {
+                    error_message: "Unexpected missing key from iterator".to_string(),
+                })?;
+
+            match serde_json::from_slice::<serde_json::Value>(&chip_action.args) {
+                Ok(parsed_args) => {
+                    let mut chip_view = ChipView {
+                        miner_id: String::new(),
+                        public_key: String::new(), // Assume initially empty, update if necessary
+                        power: 0,
+                        sn: String::new(),
+                        bus_id: String::new(),
+                        p2key: String::new(),
+                    };
+
+                    // Directly assign 'power'
+                    // if let Some(power_val) = parsed_args.get("power").and_then(|v| v.as_u64()) {
+                    //     chip_view.power = power_val;
+                    // }
+                    // Handle power field with dual-path parsing
+                    if let Some(power_val) = parsed_args.get("power") {
+                        if let Some(power_str) = power_val.as_str() {
+                            chip_view.power = power_str.parse::<u64>().unwrap_or(0);
+                        } else if let Some(power_number) = power_val.as_u64() {
+                            chip_view.power = power_number;
+                        } else {
+                            println!("Power value is not a string or a number that fits into u64");
+                        }
+                    }
+
+                    chip_view.public_key = base64::encode(public_key_str);
+
+                    // Extract 'sn' directly
+                    if let Some(sn_val) = parsed_args.get("sn").and_then(|v| v.as_str()) {
+                        chip_view.sn = sn_val.to_string();
+                    }
+
+                    // Extract 'public_key' directly
+                    if let Some(public_key_val) = parsed_args.get("public_key").and_then(|v| v.as_str()) {
+                        chip_view.public_key = public_key_val.to_string();
+                    }
+
+                    // Extract 'miner_id' directly
+                    if let Some(miner_id_val) = parsed_args.get("miner_id").and_then(|v| v.as_str()) {
+                        chip_view.miner_id = miner_id_val.to_string();
+                    }
+
+                    // Extract 'bus_id' directly
+                    if let Some(bus_id_val) = parsed_args.get("bus_id").and_then(|v| v.as_str()) {
+                        chip_view.bus_id = bus_id_val.to_string();
+                    }
+
+                    // Extract 'p2key' directly
+                    if let Some(p2key_val) = parsed_args.get("p2key").and_then(|v| v.as_str()) {
+                        chip_view.p2key = p2key_val.to_string();
+                    }
+
+                    // Example: Update public_key or other fields based on key_suffix if applicable
+                    // chip_view.public_key = String::from_utf8_lossy(key_suffix).to_string();
+
+                    // Continue to extract and assign other fields as needed
+
+                    chip_views.push(chip_view);
+                }
+                Err(_) => {
+                    // Handle parsing error
+                    return Err(ViewChipError::InternalError {
+                        error_message: "Failed to parse JSON from args".to_string(),
+                    });
+                }
+            }
+        }
+
+        Ok(chip_views)
+    }
+
+
 
     pub fn view_state(
         &self,
@@ -254,3 +363,12 @@ impl TrieViewer {
         }
     }
 }
+
+// Helper function to deserialize ChipView from binary format
+#[allow(dead_code)]
+fn deserialize_chip_view(encoded: &[u8]) -> Result<ChipView, Box<dyn std::error::Error>> {
+    // Directly deserialize the JSON data into ChipView
+    let chip_view = serde_json::from_slice::<ChipView>(encoded)?;
+    Ok(chip_view)
+}
+

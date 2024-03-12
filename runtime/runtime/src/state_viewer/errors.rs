@@ -31,6 +31,16 @@ pub enum ViewAccessKeyError {
 }
 
 #[derive(thiserror::Error, Debug)]
+pub enum ViewChipError {
+    #[error("Account ID \"{requested_account_id}\" is invalid")]
+    InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },
+    #[error("Access key for public key #{public_key} does not exist")]
+    ChipDoesNotExist { public_key: unc_crypto::PublicKey },
+    #[error("Internal error: #{error_message}")]
+    InternalError { error_message: String },
+}
+
+#[derive(thiserror::Error, Debug)]
 pub enum ViewStateError {
     #[error("Account ID \"{requested_account_id}\" is invalid")]
     InvalidAccountId { requested_account_id: unc_primitives::types::AccountId },

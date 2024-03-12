@@ -33,10 +33,7 @@ use unc_primitives::types::{
     ShardId, StateChangeCause, StateChangesForResharding, StateRoot, StateRootNode,
 };
 use unc_primitives::version::ProtocolVersion;
-use unc_primitives::views::{
-    AccessKeyInfoView, CallResult, QueryRequest, QueryResponse, QueryResponseKind, ViewApplyState,
-    ViewStateResult,
-};
+use unc_primitives::views::{AccessKeyInfoView, CallResult, ChipView, QueryRequest, QueryResponse, QueryResponseKind, ViewApplyState, ViewStateResult};
 use unc_store::config::StateSnapshotType;
 use unc_store::flat::FlatStorageManager;
 use unc_store::metadata::DbKind;
@@ -1154,6 +1151,26 @@ impl RuntimeAdapter for NightshadeRuntime {
                     block_hash: *block_hash,
                 })
             }
+            QueryRequest::ViewChipList { account_id } => {
+                let chip_list_result = self.view_chip_list(&shard_uid, *state_root, account_id).map_err(|err| {
+                    unc_chain::unc_chain_primitives::error::QueryError::from_view_chip_error(
+                        err,
+                        block_height,
+                        *block_hash,
+                    )
+                })?;
+
+                Ok(QueryResponse {
+                    kind: QueryResponseKind::ChipList(
+                        chip_list_result
+                            .into_iter()
+                            .map(|chip_view| chip_view) // Directly use ChipView instances
+                            .collect(),
+                    ),
+                    block_height,
+                    block_hash: *block_hash,
+                })
+            }
             QueryRequest::ViewAccessKey { account_id, public_key } => {
                 let access_key = self
                     .view_access_key(&shard_uid, *state_root, account_id, public_key)
@@ -1449,6 +1466,17 @@ impl node_runtime::adapter::ViewRuntimeAdapter for NightshadeRuntime {
     {
         let state_update = self.tries.new_trie_update_view(*shard_uid, state_root);
         self.trie_viewer.view_access_keys(&state_update, account_id)
+    }
+
+    fn view_chip_list(
+        &self,
+        shard_uid: &ShardUId,
+        state_root: MerkleHash,
+        account_id: &AccountId,
+    ) -> Result<Vec<ChipView>, node_runtime::state_viewer::errors::ViewChipError>
+    {
+        let state_update = self.tries.new_trie_update_view(*shard_uid, state_root);
+        self.trie_viewer.view_chip_list(&state_update, account_id)
     }
 
     fn view_state(
