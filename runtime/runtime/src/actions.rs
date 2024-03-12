@@ -26,7 +26,7 @@ use unc_primitives::version::{
     ProtocolFeature, ProtocolVersion, DELETE_KEY_STORAGE_USAGE_PROTOCOL_VERSION,
 };
 use unc_primitives_core::account::id::AccountType;
-use unc_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
+use unc_store::{get_access_key, get_code, get_rsa2048_keys, remove_access_key, remove_account, remove_rsa2048_keys, set_access_key, set_code, set_rsa2048_keys, StorageError, TrieUpdate};
 use unc_vm_runner::logic::errors::{
     CompilationError, FunctionCallError, InconsistentStateError, VMRunnerError,
 };
@@ -745,7 +745,8 @@ pub(crate) fn action_create_rsa2048_challenge(
 
     //FIXME： 计算发起challenge 的nonce 随机数
     // 直接使用 root证书里面的args, 如算力
-    let args = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap().args;
+    let registered_keys = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap();
+    let args = registered_keys.clone().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
         Ok(parsed_args) => {
             if let Some(power_val) = parsed_args.get("power") {
@@ -760,7 +761,9 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     power,
                                 ));
                                 // attach power to account
-                                _account.set_power(power);
+                                let mut total_power = _account.power();
+                                total_power += power;
+                                _account.set_power(total_power);
                                 println!("Power (as u128): {}", power);
                             }
                             Err(_) => println!("Power value is not a valid u128 number"),
@@ -780,6 +783,19 @@ pub(crate) fn action_create_rsa2048_challenge(
             return Ok(());
         }
     };
+    // remove from unc list and add to the miner list
+    remove_rsa2048_keys(
+        state_update,
+        root_id.clone(),
+        challenge.public_key.clone()
+    );
+    set_rsa2048_keys(
+        state_update,
+        account_id.clone(),
+        challenge.public_key.clone(),
+        &registered_keys,
+    );
+
     return Ok(());
 }
 
