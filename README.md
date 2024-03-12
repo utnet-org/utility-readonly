@@ -68,7 +68,7 @@ You can join all the active networks:
 ./target/release/uncd --home ~/.unc  init --chain-id [testnet, mainnet] --download-genesis --download-config
 
 # localnet node init
-./target/debug/uncd localnet
+./target/release/uncd localnet
 
 # node run
 ./target/release/uncd --home ~/.unc  run
