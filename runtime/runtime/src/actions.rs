@@ -761,9 +761,11 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     power,
                                 ));
                                 // attach power to account
-                                _account.set_power(_account.power().checked_add(power).ok_or_else(|| {
+                                let total_power = _account.power().checked_add(power).ok_or_else(|| {
                                     StorageError::StorageInconsistentState("Account power integer overflow".to_string())
-                                })?);
+                                })?;
+                                println!("original power is : {}, new power is : {}, total power is : {}", _account.power(), power.clone(),total_power.clone());
+                                _account.set_power(total_power);
                                 println!("Power (as u128): {}", power);
                             }
                             Err(_) => println!("Power value is not a valid u128 number"),
