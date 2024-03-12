@@ -3,7 +3,7 @@ use std::convert::AsRef;
 use std::fmt;
 
 use chrono;
-use chrono::{DateTime, NaiveDateTime};
+use chrono::DateTime;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde;
@@ -414,8 +414,7 @@ macro_rules! unwrap_or_return {
 pub fn from_timestamp(timestamp: u64) -> DateTime<chrono::Utc> {
     let secs = (timestamp / NS_IN_SECOND) as i64;
     let nsecs = (timestamp % NS_IN_SECOND) as u32;
-    let naive = NaiveDateTime::from_timestamp_opt(secs, nsecs).unwrap();
-    DateTime::from_naive_utc_and_offset(naive, chrono::Utc)
+    DateTime::from_timestamp(secs, nsecs).unwrap()
 }
 
 /// Converts DateTime UTC time into timestamp in ns.

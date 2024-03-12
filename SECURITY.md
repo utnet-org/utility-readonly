@@ -7,7 +7,7 @@ If you have any suggestions or comments about the security policy, please email 
 
 ## Reporting a vulnerability
 
-All security issues should be submitted on [hackenproof](https://hackenproof.com/near/unc-protocol). The team will review the submissions and decide whether they are eligible for bounty payouts. For more details, please check out the program description on the hackenproof website.
+All security issues should be submitted on [hackenproof](https://hackenproof.com/unc). The team will review the submissions and decide whether they are eligible for bounty payouts. For more details, please check out the program description on the hackenproof website.
 
 ## Handling & disclosure process
 

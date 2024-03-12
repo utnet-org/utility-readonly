@@ -141,7 +141,7 @@ pub const GENESIS_CONFIG_FILENAME: &str = "genesis.json";
 pub const NODE_KEY_FILE: &str = "node_key.json";
 pub const VALIDATOR_KEY_FILE: &str = "validator_key.json";
 
-pub const NETWORK_TELEMETRY_URL: &str = "https://explorer.{}.near.org/api/nodes";
+pub const NETWORK_TELEMETRY_URL: &str = "https://explorer.{}.unc.org/api/nodes";
 
 /// The rate at which the gas price can be adjusted (alpha in the formula).
 /// The formula is
@@ -783,7 +783,7 @@ fn generate_or_load_key(
                 ));
             }
         }
-        info!(target: "near", "Reusing key {} for {}", signer.public_key(), signer.account_id);
+        info!(target: "unc", "Reusing key {} for {}", signer.public_key(), signer.account_id);
         Ok(Some(signer))
     } else if let Some(account_id) = account_id {
         let signer = if let Some(seed) = test_seed {
@@ -791,7 +791,7 @@ fn generate_or_load_key(
         } else {
             InMemorySigner::from_random(account_id, KeyType::ED25519)
         };
-        info!(target: "near", "Using key {} for {}", signer.public_key(), signer.account_id);
+        info!(target: "unc", "Using key {} for {}", signer.public_key(), signer.account_id);
         signer
             .write_to_file(&path)
             .with_context(|| anyhow!("Failed saving key to ‘{}’", path.display()))?;
@@ -873,7 +873,7 @@ fn generate_or_load_keys(
             generate_or_load_key(dir, &config.validator_key_file, account_id, None)?;
         }
         _ => {
-            let account_id = account_id.unwrap_or_else(|| "test.near".parse().unwrap());
+            let account_id = account_id.unwrap_or_else(|| "test.unc".parse().unwrap());
             generate_or_load_key(dir, &config.validator_key_file, Some(account_id), test_seed)?;
         }
     }
@@ -1004,7 +1004,7 @@ pub fn init_configs(
         unc_primitives::chains::MAINNET => {
             let genesis = unc_mainnet_res::mainnet_genesis();
             genesis.to_file(dir.join(config.genesis_file));
-            info!(target: "near", "Generated mainnet genesis file in {}", dir.display());
+            info!(target: "unc", "Generated mainnet genesis file in {}", dir.display());
         }
         unc_primitives::chains::TESTNET => {
             if let Some(ref filename) = config.genesis_records_file {
@@ -1059,7 +1059,7 @@ pub fn init_configs(
             genesis.config.chain_id = chain_id.clone();
 
             genesis.to_file(dir.join(config.genesis_file));
-            info!(target: "near", "Generated for {chain_id} network node key and genesis file in {}", dir.display());
+            info!(target: "unc", "Generated for {chain_id} network node key and genesis file in {}", dir.display());
         }
         _ => {
             let validator_file = dir.join(&config.validator_key_file);
@@ -1080,7 +1080,7 @@ pub fn init_configs(
                 ShardLayout::v1(
                     (1..num_shards)
                         .map(|f| {
-                            AccountId::from_str(format!("shard{f}.test.near").as_str()).unwrap()
+                            AccountId::from_str(format!("shard{f}.test.unc").as_str()).unwrap()
                         })
                         .collect(),
                     None,
@@ -1130,7 +1130,7 @@ pub fn init_configs(
             };
             let genesis = Genesis::new(genesis_config, records.into())?;
             genesis.to_file(dir.join(config.genesis_file));
-            info!(target: "near", "Generated node key, validator key, genesis file in {}", dir.display());
+            info!(target: "unc", "Generated node key, validator key, genesis file in {}", dir.display());
         }
     }
     Ok(())
@@ -1260,7 +1260,7 @@ pub fn init_testnet_configs(
         log_config
             .write_to_file(&node_dir.join(LOG_CONFIG_FILENAME))
             .expect("Error writing log config");
-        info!(target: "near", "Generated node key, validator key, genesis file in {}", node_dir.display());
+        info!(target: "unc", "Generated node key, validator key, genesis file in {}", node_dir.display());
     }
 }
 
@@ -1273,7 +1273,7 @@ pub fn get_genesis_url(chain_id: &str) -> String {
 
 pub fn get_records_url(chain_id: &str) -> String {
     format!(
-        "https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/{}/records.json.xz",
+        "https://unc-s3.jongun2038.win/{}/records.json.xz",
         chain_id,
     )
 }
@@ -1286,28 +1286,28 @@ pub fn get_config_url(chain_id: &str) -> String {
 }
 
 pub fn download_genesis(url: &str, path: &Path) -> Result<(), FileDownloadError> {
-    info!(target: "near", "Downloading genesis file from: {} ...", url);
+    info!(target: "unc", "Downloading genesis file from: {} ...", url);
     let result = run_download_file(url, path);
     if result.is_ok() {
-        info!(target: "near", "Saved the genesis file to: {} ...", path.display());
+        info!(target: "unc", "Saved the genesis file to: {} ...", path.display());
     }
     result
 }
 
 pub fn download_records(url: &str, path: &Path) -> Result<(), FileDownloadError> {
-    info!(target: "near", "Downloading records file from: {} ...", url);
+    info!(target: "unc", "Downloading records file from: {} ...", url);
     let result = run_download_file(url, path);
     if result.is_ok() {
-        info!(target: "near", "Saved the records file to: {} ...", path.display());
+        info!(target: "unc", "Saved the records file to: {} ...", path.display());
     }
     result
 }
 
 pub fn download_config(url: &str, path: &Path) -> Result<(), FileDownloadError> {
-    info!(target: "near", "Downloading config file from: {} ...", url);
+    info!(target: "unc", "Downloading config file from: {} ...", url);
     let result = run_download_file(url, path);
     if result.is_ok() {
-        info!(target: "near", "Saved the config file to: {} ...", path.display());
+        info!(target: "unc", "Saved the config file to: {} ...", path.display());
     }
     result
 }
@@ -1490,21 +1490,21 @@ fn test_init_config_localnet() {
     assert_eq!(genesis.config.shard_layout.shard_ids().count(), 3);
     assert_eq!(
         account_id_to_shard_id(
-            &AccountId::from_str("foobar.near").unwrap(),
+            &AccountId::from_str("foobar.unc").unwrap(),
             &genesis.config.shard_layout
         ),
         0
     );
     assert_eq!(
         account_id_to_shard_id(
-            &AccountId::from_str("shard1.test.near").unwrap(),
+            &AccountId::from_str("shard1.test.unc").unwrap(),
             &genesis.config.shard_layout
         ),
         1
     );
     assert_eq!(
         account_id_to_shard_id(
-            &AccountId::from_str("shard2.test.near").unwrap(),
+            &AccountId::from_str("shard2.test.unc").unwrap(),
             &genesis.config.shard_layout
         ),
         2
@@ -1525,7 +1525,7 @@ fn test_init_config_localnet_keep_config_create_node_key() {
     init_configs(
         &temp_dir.path(),
         Some("localnet".to_string()),
-        Some(AccountId::from_str("account.near").unwrap()),
+        Some(AccountId::from_str("account.unc").unwrap()),
         Some("seed1"),
         3,
         false,
@@ -1558,7 +1558,7 @@ fn test_init_config_localnet_keep_config_create_node_key() {
     init_configs(
         &temp_dir.path(),
         Some("localnet".to_string()),
-        Some(AccountId::from_str("account.near").unwrap()),
+        Some(AccountId::from_str("account.unc").unwrap()),
         Some("seed1"),
         3,
         false,
@@ -1606,7 +1606,7 @@ fn test_config_from_file_skip_validation() {
         assert_eq!(want_gc, config.gc);
 
         assert_eq!(
-            vec!["https://explorer.mainnet.near.org/api/nodes".to_string()],
+            vec!["https://explorer.mainnet.unc.org/api/nodes".to_string()],
             config.telemetry.endpoints
         );
     }

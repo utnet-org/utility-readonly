@@ -1,6 +1,6 @@
 export DOCKER_BUILDKIT = 1
 export CARGO_BUILD_RUSTFLAGS = -D warnings
-export unc_RELEASE_BUILD = no
+export UNC_RELEASE_BUILD = no
 export CARGO_TARGET_DIR = target
 
 
@@ -29,7 +29,7 @@ release: uncd-release
 uncd: uncd-release
 	@echo 'uncd binary ready in ./target/release/uncd'
 
-uncd-release: unc_RELEASE_BUILD=release
+uncd-release: UNC_RELEASE_BUILD=release
 uncd-release:
 	cargo build -p uncd --release
 
@@ -42,7 +42,7 @@ debug: uncd-debug
 	$(MAKE) sandbox
 
 
-perf-release: unc_RELEASE_BUILD=release
+perf-release: UNC_RELEASE_BUILD=release
 perf-release:
 	CARGO_PROFILE_RELEASE_DEBUG=true cargo build -p uncd --release --features performance_stats
 	cargo build -p store-validator --release --features framework/performance_stats
@@ -67,7 +67,7 @@ nightly-debug:
 	cargo build -p genesis-populate --features framework/nightly,framework/performance_stats
 
 
-assertions-release: unc_RELEASE_BUILD=release
+assertions-release: UNC_RELEASE_BUILD=release
 assertions-release:
 	CARGO_PROFILE_RELEASE_DEBUG=true CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true cargo build -p uncd --release --features performance_stats
 
