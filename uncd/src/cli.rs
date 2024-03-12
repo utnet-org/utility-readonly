@@ -40,7 +40,7 @@ use tracing::{debug, error, info, warn};
 
 /// NEAR Protocol Node
 #[derive(clap::Parser)]
-#[clap(version = crate::NEARD_VERSION_STRING.as_str())]
+#[clap(version = crate::UNCD_VERSION_STRING.as_str())]
 #[clap(subcommand_required = true, arg_required_else_help = true)]
 pub(super) struct NeardCmd {
     #[clap(flatten)]
@@ -62,8 +62,8 @@ impl NeardCmd {
 
         info!(
             target: "uncd",
-            version = crate::NEARD_VERSION,
-            build = crate::NEARD_BUILD,
+            version = crate::UNCD_VERSION,
+            build = crate::UNCD_BUILD,
             latest_protocol = unc_primitives::version::PROTOCOL_VERSION
         );
 

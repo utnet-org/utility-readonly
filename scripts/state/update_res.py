@@ -35,7 +35,7 @@ SCRIPT_REPO_PATH = pathlib.Path(__file__).resolve().relative_to(REPO_FULL_PATH)
 def unc_init_genesis():
     with tempfile.TemporaryDirectory() as tempdir:
         args = ['--home', tempdir, 'init', '--chain-id', 'sample']
-        prebuilt_neard = os.environ.get("CURRENT_NEARD")
+        prebuilt_neard = os.environ.get("CURRENT_UNCD")
         if prebuilt_neard is not None:
             subprocess.check_call([prebuilt_neard] + args)
         else:

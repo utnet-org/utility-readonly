@@ -10,21 +10,21 @@ use std::env;
 use std::path::PathBuf;
 use std::time::Duration;
 
-static NEARD_VERSION: &str = env!("NEARD_VERSION");
-static NEARD_BUILD: &str = env!("NEARD_BUILD");
-static RUSTC_VERSION: &str = env!("NEARD_RUSTC_VERSION");
+static UNCD_VERSION: &str = env!("UNCD_VERSION");
+static UNCD_BUILD: &str = env!("UNCD_BUILD");
+static RUSTC_VERSION: &str = env!("UNCD_RUSTC_VERSION");
 
-static NEARD_VERSION_STRING: Lazy<String> = Lazy::new(|| {
+static UNCD_VERSION_STRING: Lazy<String> = Lazy::new(|| {
     format!(
         "(release {}) (build {}) (rustc {}) (protocol {}) (db {})",
-        NEARD_VERSION, NEARD_BUILD, RUSTC_VERSION, PROTOCOL_VERSION, DB_VERSION
+        UNCD_VERSION, UNCD_BUILD, RUSTC_VERSION, PROTOCOL_VERSION, DB_VERSION
     )
 });
 
 fn neard_version() -> Version {
     Version {
-        version: NEARD_VERSION.to_string(),
-        build: NEARD_BUILD.to_string(),
+        version: UNCD_VERSION.to_string(),
+        build: UNCD_BUILD.to_string(),
         rustc_version: RUSTC_VERSION.to_string(),
     }
 }
