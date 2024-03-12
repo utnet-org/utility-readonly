@@ -1,3 +1,4 @@
+use node_runtime::state_viewer::errors::ViewChipError;
 use unc_chain::unc_chain_primitives::error::QueryError;
 
 #[easy_ext::ext(FromStateViewerErrors)]
@@ -100,6 +101,31 @@ impl QueryError {
             } => Self::InternalError { error_message, block_height, block_hash },
         }
     }
+
+    pub fn from_view_chip_error(
+        error: node_runtime::state_viewer::errors::ViewChipError,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
+    ) -> QueryError {
+        match error {
+            ViewChipError::InvalidAccountId { requested_account_id } => Self::InvalidAccount {
+                requested_account_id,
+                block_height,
+                block_hash,
+            },
+            ViewChipError::ChipDoesNotExist { public_key } => Self::UnknownChip {
+                public_key,
+                block_height,
+                block_hash,
+            },
+            ViewChipError::InternalError { error_message } => Self::InternalError {
+                error_message,
+                block_height,
+                block_hash,
+            },
+        }
+    }
+
 
     pub fn from_epoch_error(
         error: unc_primitives::errors::EpochError,

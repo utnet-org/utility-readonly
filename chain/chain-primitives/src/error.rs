@@ -39,6 +39,12 @@ pub enum QueryError {
         block_height: unc_primitives::types::BlockHeight,
         block_hash: unc_primitives::hash::CryptoHash,
     },
+    #[error("Chip for account id {public_key} does not exist while viewing")]
+    UnknownChip {
+        public_key: unc_crypto::PublicKey,
+        block_height: BlockHeight,
+        block_hash: CryptoHash,
+    },
     #[error("Internal error occurred: {error_message}")]
     InternalError {
         error_message: String,

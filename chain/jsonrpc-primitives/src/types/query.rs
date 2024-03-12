@@ -54,6 +54,12 @@ pub enum RpcQueryError {
         block_height: unc_primitives::types::BlockHeight,
         block_hash: unc_primitives::hash::CryptoHash,
     },
+    #[error("Chip for public key {public_key} has never been observed on the node")]
+    UnknownChip {
+        public_key: unc_crypto::PublicKey,
+        block_height: unc_primitives::types::BlockHeight,
+        block_hash: unc_primitives::hash::CryptoHash,
+    },
     #[error("Function call returned an error: {vm_error}")]
     ContractExecutionError {
         vm_error: String,
@@ -81,6 +87,7 @@ pub enum QueryResponseKind {
     CallResult(unc_primitives::views::CallResult),
     AccessKey(unc_primitives::views::AccessKeyView),
     AccessKeyList(unc_primitives::views::AccessKeyList),
+    ChipList(unc_primitives::views::ChipsList),
 }
 
 impl From<RpcQueryError> for crate::errors::RpcError {

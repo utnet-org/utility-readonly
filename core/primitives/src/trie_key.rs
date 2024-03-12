@@ -439,6 +439,13 @@ pub mod trie_key_parsers {
         })
     }
 
+    pub fn get_raw_prefix_for_rsa_keys(account_id: &AccountId) -> Vec<u8> {
+        let mut res = Vec::with_capacity(col::RSA2048_KEY.len() * 2 + account_id.len());
+        res.push(col::RSA2048_KEY);
+        res.extend(account_id.as_bytes());
+        res.push(col::RSA2048_KEY);
+        res
+    }
     pub fn get_raw_prefix_for_access_keys(account_id: &AccountId) -> Vec<u8> {
         let mut res = Vec::with_capacity(col::ACCESS_KEY.len() * 2 + account_id.len());
         res.push(col::ACCESS_KEY);

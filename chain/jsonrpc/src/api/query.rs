@@ -66,6 +66,9 @@ fn parse_path_data(path: String, data: String) -> Result<RpcQueryRequest, RpcPar
                     .map_err(|_| RpcParseError("Invalid public key".to_string()))?,
             },
         },
+        "chip_list" => QueryRequest::ViewChipList {
+          account_id,
+        },
         "code" => QueryRequest::ViewCode { account_id },
         "contract" => QueryRequest::ViewState {
             account_id,
@@ -129,6 +132,9 @@ impl RpcFrom<QueryError> for RpcQueryError {
             QueryError::TooLargeContractState { contract_account_id, block_height, block_hash } => {
                 Self::TooLargeContractState { contract_account_id, block_height, block_hash }
             }
+            QueryError::UnknownChip { public_key, block_height, block_hash } => {
+                Self::UnknownChip {public_key, block_height, block_hash}
+            }
         }
     }
 }
@@ -165,6 +171,9 @@ impl RpcFrom<unc_primitives::views::QueryResponseKind>
             }
             unc_primitives::views::QueryResponseKind::AccessKeyList(access_key_list) => {
                 Self::AccessKeyList(access_key_list)
+            }
+            unc_primitives::views::QueryResponseKind::ChipList(chip_list) => {
+                Self::ChipList(chip_list)
             }
         }
     }

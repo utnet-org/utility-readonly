@@ -47,6 +47,10 @@ enum RpcQueryRequest {
         finality: Finality,
         account_id: String,
     },
+    ViewChipList {
+        finality: Finality,
+        account_id: String,
+    },
     CallFunction {
         finality: Finality,
         account_id: String,
