@@ -38,9 +38,9 @@ use tokio::sync::broadcast;
 use tokio::sync::broadcast::Receiver;
 use tracing::{debug, error, info, warn};
 
-/// NEAR Protocol Node
+/// UNC Protocol Node
 #[derive(clap::Parser)]
-#[clap(version = crate::NEARD_VERSION_STRING.as_str())]
+#[clap(version = crate::UNCD_VERSION_STRING.as_str())]
 #[clap(subcommand_required = true, arg_required_else_help = true)]
 pub(super) struct NeardCmd {
     #[clap(flatten)]
@@ -62,8 +62,8 @@ impl NeardCmd {
 
         info!(
             target: "uncd",
-            version = crate::NEARD_VERSION,
-            build = crate::NEARD_BUILD,
+            version = crate::UNCD_VERSION,
+            build = crate::UNCD_BUILD,
             latest_protocol = unc_primitives::version::PROTOCOL_VERSION
         );
 
@@ -201,9 +201,9 @@ impl NeardOpts {
 
 #[derive(clap::Parser)]
 pub(super) enum NeardSubCommand {
-    /// Initializes NEAR configuration
+    /// Initializes UNC configuration
     Init(InitCmd),
-    /// Runs NEAR node
+    /// Runs UNC node
     Run(RunCmd),
     /// Sets up local configuration with all necessary files (validator key, node key, genesis and
     /// config)
@@ -244,7 +244,7 @@ pub(super) enum NeardSubCommand {
     #[clap(alias = "verify_proof")]
     VerifyProof(VerifyProofSubCommand),
 
-    /// Connects to a NEAR node and sends ping messages to the accounts it sends
+    /// Connects to a UNC node and sends ping messages to the accounts it sends
     /// us after the handshake is completed, printing stats to stdout.
     Ping(PingCommand),
 
@@ -258,7 +258,7 @@ pub(super) enum NeardSubCommand {
     /// Testing tool for cold storage
     ColdStore(ColdStoreCommand),
 
-    /// Connects to a NEAR node and sends state parts requests after the handshake is completed.
+    /// Connects to a UNC node and sends state parts requests after the handshake is completed.
     StateParts(StatePartsCommand),
 
     /// Flat storage related tooling.
@@ -286,10 +286,10 @@ pub(super) enum NeardSubCommand {
 
 #[derive(clap::Parser)]
 pub(super) struct InitCmd {
-    /// Download the verified NEAR genesis file automatically.
+    /// Download the verified UNC genesis file automatically.
     #[clap(long)]
     download_genesis: bool,
-    /// Download the verified NEAR config file automatically.
+    /// Download the verified UNC config file automatically.
     #[clap(long)]
     download_config: bool,
     /// Makes block production fast (TESTING ONLY).

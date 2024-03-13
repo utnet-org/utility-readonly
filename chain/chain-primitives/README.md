@@ -1,3 +1,3 @@
 # unc-chain-primitives
 
-This crate hosts NEAR chain-related error types.
+This crate hosts UNC chain-related error types.

@@ -1,6 +1,6 @@
 # Chain configs crate
 
-This crate provides typed interfaces to the NEAR Genesis and Client Configs, together with the functions to validate their correctness.
+This crate provides typed interfaces to the UNC Genesis and Client Configs, together with the functions to validate their correctness.
 
 ## Genesis config
 Genesis config is the one that 'defines' the chain. It was set at the beginning and generally is not mutable. 

@@ -100,7 +100,7 @@ def wait_at_least_one_block():
         time.sleep(1.0)
 
 
-def get_amount_yoctonear(account_id, addr=LOCAL_ADDR, port=RPC_PORT):
+def get_amount_yoctounc(account_id, addr=LOCAL_ADDR, port=RPC_PORT):
     j = json_rpc('query', {
         'request_type': 'view_account',
         'finality': 'optimistic',

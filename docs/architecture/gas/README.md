@@ -1,6 +1,6 @@
 # Gas Cost Parameters
 
-Gas in NEAR Protocol solves two problems.
+Gas in UNC Protocol solves two problems.
 
 1. To avoid spam, validator nodes only perform work if a user's tokens are
    burned. Tokens are automatically converted to gas using the current gas
@@ -118,7 +118,7 @@ features, code should be added there to estimate the safe values of the new
 parameters. This section is for you if you are adding new features such as a new
 pre-compiled method or other host functions.
 
-Next up are more details on the specific costs that occur when executing NEAR
+Next up are more details on the specific costs that occur when executing UNC
 transactions, which help to understand existing parameters and how they are
 organized.
 
@@ -204,7 +204,7 @@ Not all runtime parameters are directly related to gas costs. Here is a brief
 overview.
 
 - **Gas economics config:** Defines the conversion rate when purchasing gas with
-  NEAR tokens and how gas rewards are split.
+  UNC tokens and how gas rewards are split.
 - **Storage usage config:** Costs in tokens, not gas, for storing data on chain.
 - **Account creation config:** Rules for account creation.
 - **Smart contract limits:** Rules for WASM execution.

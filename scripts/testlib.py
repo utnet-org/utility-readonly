@@ -63,7 +63,7 @@ def run_test(test_binary, isolate=True):
     if isolate:
         cmd = [
             'docker', 'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v',
-            f'{test_binary}:{test_binary}', 'nearprotocol/unc-test-runtime',
+            f'{test_binary}:{test_binary}', 'utility/unc-test-runtime',
             'bash', '-c', f'RUST_BACKTRACE=1 {test_binary}'
         ]
     else:

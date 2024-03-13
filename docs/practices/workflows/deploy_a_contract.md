@@ -35,7 +35,7 @@ Account alice.test.near
 
 ## Minimal Contract
 
-NEAR contracts are [WebAssembly](https://webassembly.org) blobs of bytes. To
+UNC contracts are [WebAssembly](https://webassembly.org) blobs of bytes. To
 create a contract, a contract developer typically uses an SDK for some
 high-level programming language, such as JavaScript, which takes care of
 producing the right `.wasm`.
@@ -254,7 +254,7 @@ http://localhost:9001/transactions/9WMwmTf6pnFMtj1KBqjJtkKvdFXS4kt3DHnYRnbFpJ9e
 Note that we pass `alice.test.near` twice: the first time to specify which contract
 we are calling, the second time to determine who calls the contract. That is,
 the second account is the one that spends tokens. In the following example `bob`
-spends NEAR to call the contact deployed to the `alice` account:
+spends UNC to call the contact deployed to the `alice` account:
 
 
 ```console

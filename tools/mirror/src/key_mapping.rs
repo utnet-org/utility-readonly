@@ -97,7 +97,7 @@ pub fn map_key(key: &PublicKey, secret: Option<&[u8; crate::secret::SECRET_LEN]>
     }
 }
 
-// If it's a NEAR-implicit account, interprets it as an ed25519 public key,
+// If it's a UNC-implicit account, interprets it as an ed25519 public key,
 // maps that and then returns the resulting implicit account. Otherwise does nothing.
 // We do this so that transactions creating an implicit account
 // by sending money will generate an account that we can control.

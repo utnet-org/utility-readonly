@@ -29,7 +29,7 @@ def coverage(test_binary):
         f'{os.getuid()}:{os.getgid()}', '-v', f'{test_binary}:{test_binary}',
         '-v', f'{src_dir}:{src_dir}', '-v',
         f'{coverage_output}:{coverage_output}',
-        'nearprotocol/unc-coverage-runtime', 'bash', '-c',
+        'utility/unc-coverage-runtime', 'bash', '-c',
         f'/usr/local/bin/kcov --include-pattern=framework --exclude-pattern=.so --verify {coverage_output} {test_binary}'
     ],
                          stdout=subprocess.PIPE,

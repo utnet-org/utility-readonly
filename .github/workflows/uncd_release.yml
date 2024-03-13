@@ -47,7 +47,7 @@ jobs:
         run: |
           echo $(git rev-parse HEAD) > latest
           BRANCH=$(git branch --show-current)
-          aws s3 cp --acl public-read latest s3://build.nearprotocol.com/unc/$(uname)/${BRANCH}/latest
+          aws s3 cp --acl public-read latest s3://build.utility.com/unc/$(uname)/${BRANCH}/latest
 
   docker-release:
     name: "Build and publish unc Docker image"

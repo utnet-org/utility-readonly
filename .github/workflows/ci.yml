@@ -112,7 +112,7 @@ jobs:
       - run: cargo llvm-cov show-env | grep -v RUSTFLAGS | tr -d "'" >> "$GITHUB_ENV"
       - run: echo "RUSTC_WORKSPACE_WRAPPER=$PWD/scripts/rustc-coverage-wrapper.sh" >> "$GITHUB_ENV"
       - run: cargo build --locked --profile dev-release -p uncd --bin uncd
-      - run: echo "CURRENT_NEARD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
+      - run: echo "CURRENT_UNCD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
       - run: cd pytest && python3 tests/sanity/backward_compatible.py
       - run: cargo llvm-cov report --profile dev-release --codecov --output-path py-backward-compat.json
       - uses: actions/upload-artifact@v3
@@ -141,7 +141,7 @@ jobs:
       - run: cargo llvm-cov show-env | grep -v RUSTFLAGS | tr -d "'" >> "$GITHUB_ENV"
       - run: echo "RUSTC_WORKSPACE_WRAPPER=$PWD/scripts/rustc-coverage-wrapper.sh" >> "$GITHUB_ENV"
       - run: cargo build --locked --profile dev-release -p uncd --bin uncd
-      - run: echo "CURRENT_NEARD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
+      - run: echo "CURRENT_UNCD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
       - run: echo "unc_ROOT=$PWD" >> "$GITHUB_ENV"
       - run: cd pytest && python3 tests/sanity/db_migration.py
       - run: cargo llvm-cov report --profile dev-release --codecov --output-path py-db-migration.json
@@ -209,7 +209,7 @@ jobs:
       - run: cargo llvm-cov show-env | grep -v RUSTFLAGS | tr -d "'" >> "$GITHUB_ENV"
       - run: echo "RUSTC_WORKSPACE_WRAPPER=$PWD/scripts/rustc-coverage-wrapper.sh" >> "$GITHUB_ENV"
       - run: cargo build --locked --profile dev-release -p uncd --bin uncd
-      - run: echo "CURRENT_NEARD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
+      - run: echo "CURRENT_UNCD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
       - run: python3 scripts/state/update_res.py check
       - run: cargo llvm-cov report --profile dev-release --codecov --output-path py-genesis-check.json
       - uses: actions/upload-artifact@v3
@@ -253,7 +253,7 @@ jobs:
       - run: cargo llvm-cov show-env | grep -v RUSTFLAGS | tr -d "'" >> "$GITHUB_ENV"
       - run: echo "RUSTC_WORKSPACE_WRAPPER=$PWD/scripts/rustc-coverage-wrapper.sh" >> "$GITHUB_ENV"
       - run: cargo build --locked --profile dev-release -p uncd --bin uncd
-      - run: echo "CURRENT_NEARD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
+      - run: echo "CURRENT_UNCD=$PWD/target/dev-release/uncd" >> "$GITHUB_ENV"
       - run: cd pytest && python3 tests/sanity/upgradable.py
       - run: cargo llvm-cov report --profile dev-release --codecov --output-path py-upgradability.json
       - uses: actions/upload-artifact@v3

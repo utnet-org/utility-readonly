@@ -76,7 +76,7 @@ unc_PYTEST_CONFIG=<path to config> python tests/sanity/block_production.py
 
 We differentiate between "regular" tests, or tests that spin up their cluster,
 either local or on the cloud, and "mocknet" tests, or tests that run against
-an existing live deployment of NEAR.
+an existing live deployment of UNC.
 
 In both cases, the test starts by importing the infrastructure and starting or
 connecting to a cluster

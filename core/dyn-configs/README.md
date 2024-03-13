@@ -1,4 +1,4 @@
-Dynamic config helpers for the NEAR codebase.
+Dynamic config helpers for the UNC codebase.
 
 This crate contains utilities that allow to reconfigure the node while it is running.
 

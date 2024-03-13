@@ -35,7 +35,7 @@ struct RunCmd {
     /// that does contain a secret, the mirror will refuse to start
     #[clap(long)]
     no_secret: bool,
-    /// Start a NEAR node for the source chain, instead of only using
+    /// Start a UNC node for the source chain, instead of only using
     /// whatever's currently stored in --source-home
     #[clap(long)]
     online_source: bool,

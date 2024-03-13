@@ -3,7 +3,7 @@
 <blockquote style="background: rgba(255, 200, 0, 0.1); border: 5px solid rgba(255, 200, 0, 0.4);">
 
 The intended audience of the information presented here is developers working
-on the implementation of the NEAR protocol.
+on the implementation of the UNC protocol.
 
 Are you a security researcher? Please report security vulnerabilities to
 [security@near.org](mailto:security@near.org).
@@ -17,7 +17,7 @@ Limit usage of framework-private to sensitive issues that need to be kept confid
 
 ## Details
 
-By nature, NEAR protocol ecosystem is community driven effort, welcoming everyone to make contribution; we believe in power of community and openness and bring a greater good. 
+By nature, UNC protocol ecosystem is community driven effort, welcoming everyone to make contribution; we believe in power of community and openness and bring a greater good. 
 In this regard, by default, contributors create an issue/PR in a public space, such as [framework](https://github.com/utnet-org/utility).
 
 However, from time to time, if a sensitive issue is discovered (e.g. security vulnerability), it cannot be tracked publicly; we need to limit the blast radius and conceal the issue from malicious actors. 

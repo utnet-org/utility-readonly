@@ -481,7 +481,7 @@ pub fn account_is_implicit(account_id: &AccountId, eth_implicit_accounts_enabled
 }
 
 /// Returns hex-encoded copy of the public key.
-/// This is a NEAR-implicit account ID which can be controlled by the corresponding ED25519 private key.
+/// This is a UNC-implicit account ID which can be controlled by the corresponding ED25519 private key.
 pub fn derive_unc_implicit_account_id(public_key: &ED25519PublicKey) -> AccountId {
     hex::encode(public_key).parse().unwrap()
 }

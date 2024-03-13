@@ -61,7 +61,7 @@ roots.
 In order to prove that a given receipt belongs to a given block, we will need to
 fetch some additional information.
 
-As NEAR is sharded, the receipts actually belong to “Chunks” not Blocks
+As UNC is sharded, the receipts actually belong to “Chunks” not Blocks
 themselves, so the first step is to find the correct chunk and fetch its
 `ChunkHeader`.
 
@@ -103,7 +103,7 @@ voila, we can confirm that it was really included.
 But how do we get the siblings on the path to the root? This is actually
 something that RPC nodes do return in their responses.
 
-If you ever looked closely at NEAR’s tx-status response, you can notice a
+If you ever looked closely at UNC’s tx-status response, you can notice a
 "proof" section there. For every receipt, you'd see something like this:
 
 ```

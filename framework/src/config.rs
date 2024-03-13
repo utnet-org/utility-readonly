@@ -58,10 +58,10 @@ pub const TESTING_INIT_STAKE: Balance = 50_000_000 * UNC_BASE;
 ///
 pub const TESTING_INIT_POWER: Power = 5;
 
-/// One NEAR, divisible by 10^24.
+/// One UNC, divisible by 10^24.
 pub const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
-/// Millinear, 1/1000 of NEAR.
+/// Millinear, 1/1000 of UNC.
 pub const MILLI_NEAR: Balance = UNC_BASE / 1000;
 
 /// Block production tracking delay.

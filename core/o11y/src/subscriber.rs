@@ -181,7 +181,7 @@ pub(crate) fn use_color_auto() -> bool {
     std::env::var_os("NO_COLOR").is_none() && is_terminal()
 }
 
-/// Constructs a subscriber set to the option appropriate for the NEAR code.
+/// Constructs a subscriber set to the option appropriate for the UNC code.
 ///
 /// Subscriber enables only logging.
 ///
@@ -232,7 +232,7 @@ pub fn default_subscriber(
     }
 }
 
-/// Constructs a subscriber set to the option appropriate for the NEAR code.
+/// Constructs a subscriber set to the option appropriate for the UNC code.
 ///
 /// The subscriber enables logging, tracing and io tracing.
 /// Subscriber creation needs an async runtime.

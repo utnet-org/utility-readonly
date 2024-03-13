@@ -1,7 +1,7 @@
-Observability (o11y) helpers for the NEAR codebase.
+Observability (o11y) helpers for the UNC codebase.
 
 This crate contains all sorts of utilities to enable a more convenient observability implementation
-in the NEAR codebase.
+in the UNC codebase.
 
 The are three infrastructures:
 

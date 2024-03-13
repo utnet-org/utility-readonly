@@ -115,7 +115,7 @@ const NUM_PARENTS_TO_CHECK_FINALITY: usize = 20;
 #[cfg(not(feature = "sandbox"))]
 const ACCEPTABLE_TIME_DIFFERENCE: i64 = 12 * 10;
 
-/// Private constant for 1 NEAR (copy from near/config.rs) used for reporting.
+/// Private constant for 1 UNC (copy from near/config.rs) used for reporting.
 const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
 /// apply_chunks may be called in two code paths, through process_block or through catchup_blocks

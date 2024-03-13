@@ -31,7 +31,7 @@ Let's take a deeper look.
 
 ## Internal perspective (Transactions & Receipts)
 
-One important thing to remember is that NEAR is sharded - so in all our
+One important thing to remember is that UNC is sharded - so in all our
 designs, we have to assume that each account is on a separate shard. So that the
 fact that some of them are colocated doesn't give any advantage.
 
@@ -295,7 +295,7 @@ So putting it all together would look like this:
 
 ![image](https://user-images.githubusercontent.com/91919554/200617392-00b9fa0c-2f15-40ad-9802-137ca9a5a15d.png)
 
-But wait - NEAR was saying that transfers are happening with 2 blocks - but here
+But wait - UNC was saying that transfers are happening with 2 blocks - but here
 I see that it took 3 blocks. What's wrong?
 
 The image above is a simplification, and reality is a little bit trickier -

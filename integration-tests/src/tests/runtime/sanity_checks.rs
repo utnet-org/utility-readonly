@@ -15,7 +15,7 @@ use testlib::runtime_utils::{add_test_contract, alice_account, bob_account};
 /// Initial balance used in tests.
 const TESTING_INIT_BALANCE: u128 = 1_000_000_000 * UNC_BASE;
 
-/// One NEAR, divisible by 10^24.
+/// One UNC, divisible by 10^24.
 const UNC_BASE: u128 = 1_000_000_000_000_000_000_000_000;
 
 /// Max prepaid amount of gas.

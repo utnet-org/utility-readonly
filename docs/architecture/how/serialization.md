@@ -1,6 +1,6 @@
 # Serialization: Borsh, Json, ProtoBuf
 
-If you spent some time looking at NEAR code, you’ll notice that we have
+If you spent some time looking at UNC code, you’ll notice that we have
 different methods of serializing structures into strings. So in this article,
 we’ll compare these different approaches, and explain how and where we’re using
 them.
@@ -25,7 +25,7 @@ message HandshakeFailure {
 
   // Data about the peer.
   PeerInfo peer_info = 2;
-  // GenesisId of the NEAR chain that the peer belongs to.
+  // GenesisId of the UNC chain that the peer belongs to.
   GenesisId genesis_id = 3;
 }
 ```

@@ -582,7 +582,7 @@ mod tests {
     /// Initial balance used in tests.
     const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * UNC_BASE;
 
-    /// One NEAR, divisible by 10^24.
+    /// One UNC, divisible by 10^24.
     const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
     fn test_limit_config() -> LimitConfig {

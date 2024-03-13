@@ -2,7 +2,7 @@
 
 [NEP-366](https://github.com/near/NEPs/pull/366) introduced the concept of meta
 transactions to unc Protocol. This feature allows users to execute transactions
-on NEAR without owning any gas or tokens. In order to enable this, users
+on UNC without owning any gas or tokens. In order to enable this, users
 construct and sign transactions off-chain. A third party (the relayer) is used
 to cover the fees of submitting and executing the transaction.
 
@@ -31,7 +31,7 @@ contract code checks that `predecessor_id` is `"Alice"` and if that is the case
 then the call is legitimately from Alice, as only she could create such a
 receipt according to the unc Protocol specification.
 
-The problem is, Alice has no NEAR tokens. She only has a NEAR account that
+The problem is, Alice has no UNC tokens. She only has a UNC account that
 someone else funded for her and she owns the private keys. She could create a
 signed transaction that would make the `ft_transfer("john", 10)` call. But
 validator nodes will not accept it, because she does not have the necessary unc
@@ -74,7 +74,7 @@ Alice does not have sufficient $FT and the transfer fails. To mitigate, the
 relayer should check the $FT balance of Alice first.
 
 Unfortunately, this still does not guarantee that the balance will be high
-enough once the meta transaction executes. The relayer could waste NEAR gas
+enough once the meta transaction executes. The relayer could waste UNC gas
 without compensation if Alice somehow reduces her $FT balance in just the right
 moment. Some level of trust between the relayer and its user is therefore
 required.
@@ -131,7 +131,7 @@ attacks. The NONCE must be chosen by Alice and compared to a NONCE stored on
 chain. This NONCE is stored on the access key information that gets initialized
 when creating an account. 
 
-Implicit accounts don't need to be initialized in order to receive NEAR tokens,
+Implicit accounts don't need to be initialized in order to receive UNC tokens,
 or even $FT. This means users could own $FT but no NONCE is stored on chain for
 them. This is problematic because we want to enable this exact use case with
 meta transactions, but we have no NONCE to create a meta transaction.
@@ -172,11 +172,11 @@ problem. But for the MVP, nothing along those lines has been approved.
 Meta transactions challenge the traditional ways of charging gas for actions. To
 see why, let's first list the normal flow of gas, outside of meta transactions.
 
-1. Gas is purchased (by deducting NEAR from the transaction signer account),
+1. Gas is purchased (by deducting UNC from the transaction signer account),
    when the transaction is converted into a receipt. The amount of gas is
    implicitly defined by the content of the receipt. For function calls, the
    caller decides explicitly how much gas is attached on top of the minimum
-   required amount. The NEAR token price per gas unit is dynamically adjusted on
+   required amount. The UNC token price per gas unit is dynamically adjusted on
    the blockchain. In today's framework code base, this happens as part of
    [`verify_and_charge_transaction`](https://github.com/utnet-org/utility/blob/4510472d69c059644bb2d2579837c6bd6d94f190/runtime/runtime/src/verifier.rs#L69)
    which gets called in

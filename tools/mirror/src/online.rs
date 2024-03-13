@@ -33,7 +33,7 @@ impl ChainAccess {
                 .with_context(|| format!("Error loading config from {:?}", home.as_ref()))?;
 
         let node = framework::start_with_config(home.as_ref(), config)
-            .context("failed to start NEAR node")?;
+            .context("failed to start UNC node")?;
         Ok(Self { view_client: node.view_client })
     }
 }

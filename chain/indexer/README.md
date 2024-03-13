@@ -1,18 +1,18 @@
-# NEAR Indexer
+# UNC Indexer
 
-NEAR Indexer is a micro-framework, which provides you with a stream of blocks that are recorded on NEAR network. It is useful to handle real-time "events" on the chain.
+UNC Indexer is a micro-framework, which provides you with a stream of blocks that are recorded on UNC network. It is useful to handle real-time "events" on the chain.
 
 ## Rationale
 
-As scaling dApps enter NEAR’s mainnet, an issue may arise: how do they quickly and efficiently access state from our deployed smart contracts, and cut out the cruft? Contracts may grow to have complex data structures and querying the network RPC may not be the optimal way to access state data. The NEAR Indexer Framework allows for streams to be captured and indexed in a customized manner. The typical use-case is for this data to make its way to a relational database. Seeing as this is custom per project, there is engineering work involved in using this framework.
+As scaling dApps enter UNC’s mainnet, an issue may arise: how do they quickly and efficiently access state from our deployed smart contracts, and cut out the cruft? Contracts may grow to have complex data structures and querying the network RPC may not be the optimal way to access state data. The UNC Indexer Framework allows for streams to be captured and indexed in a customized manner. The typical use-case is for this data to make its way to a relational database. Seeing as this is custom per project, there is engineering work involved in using this framework.
 
-NEAR Indexer is already in use for several new projects, namely, we index all the events for NEAR Blockchain Explorer, and we also dig into Access Keys and index all of them for NEAR Wallet passphrase recovery and multi-factor authentication. With NEAR Indexer you can do high-level aggregation as well as low-level introspection of all the events inside the blockchain.
+UNC Indexer is already in use for several new projects, namely, we index all the events for UNC Blockchain Explorer, and we also dig into Access Keys and index all of them for UNC Wallet passphrase recovery and multi-factor authentication. With UNC Indexer you can do high-level aggregation as well as low-level introspection of all the events inside the blockchain.
 
 We are going to build more Indexers in the future, and will also consider building Indexer integrations with streaming solutions like Kafka, RabbitMQ, ZeroMQ, and NoSQL databases. Feel free to [join our discussions](https://github.com/utnet-org/utility/issues/2996).
 
 See the [example](https://github.com/utnet-org/utility/tree/master/tools/indexer/example) for further technical details.
 
-## How to set up and test NEAR Indexer
+## How to set up and test UNC Indexer
 
 Before you proceed, make sure you have the following software installed:
 * [rustup](https://rustup.rs/) or Rust version that is mentioned in `rust-toolchain` file in the root of framework project.
@@ -21,7 +21,7 @@ Before you proceed, make sure you have the following software installed:
 
 Clone [framework](https://github.com/utnet-org/utility)
 
-To run the NEAR Indexer connected to a network we need to have configs and keys prepopulated. To generate configs for localnet do the following
+To run the UNC Indexer connected to a network we need to have configs and keys prepopulated. To generate configs for localnet do the following
 
 ```bash
 $ git clone git@github.com:utnet-org/utility.git
@@ -47,7 +47,7 @@ $ unc_ENV=local near --keyPath ~/.near/localnet/validator_key.json \
 
 ### testnet / betanet
 
-To run the NEAR Indexer connected to testnet or betanet we need to have configs and keys prepopulated, you can get them with the NEAR Indexer Example like above with a little change. Follow the instructions below to run non-validating node (leaving account ID empty).
+To run the UNC Indexer connected to testnet or betanet we need to have configs and keys prepopulated, you can get them with the UNC Indexer Example like above with a little change. Follow the instructions below to run non-validating node (leaving account ID empty).
 
 ```bash
 $ cargo run --release -- --home-dir ~/.near/testnet init --chain-id testnet --download
@@ -56,13 +56,13 @@ $ cargo run --release -- --home-dir ~/.near/testnet init --chain-id testnet --do
 The above code will download the official genesis config and generate necessary configs. You can replace `testnet` in the command above to different network ID `betanet`.
 
 **NB!** According to changes in `framework` config generation we don't fill all the necessary fields in the config file. While this issue is open <https://github.com/utnet-org/utility/issues/3156> you need to download config you want and replace the generated one manually.
- - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/testnet/config.json)
- - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/betanet/config.json)
- - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/mainnet/config.json)
+ - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/testnet/config.json)
+ - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/betanet/config.json)
+ - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/mainnet/config.json)
 
 Replace `config.json` in your `--home-dir` (e.g. `~/.near/testnet/config.json`) with downloaded one.
 
-Configs for the specified network are in the `--home-dir` provided folder. We need to ensure that NEAR Indexer follows all the necessary shards, so `"tracked_shards"` parameters in `~/.near/testnet/config.json` needs to be configured properly. For example, with a single shared network, you just add the shard #0 to the list:
+Configs for the specified network are in the `--home-dir` provided folder. We need to ensure that UNC Indexer follows all the necessary shards, so `"tracked_shards"` parameters in `~/.near/testnet/config.json` needs to be configured properly. For example, with a single shared network, you just add the shard #0 to the list:
 
 ```text
 ...
@@ -72,7 +72,7 @@ Configs for the specified network are in the `--home-dir` provided folder. We ne
 
 Hint: See the Tweaks section below to learn more about further configuration options.
 
-After that we can run NEAR Indexer.
+After that we can run UNC Indexer.
 
 
 ```bash
@@ -96,7 +96,7 @@ As already has been mentioned above, the most common tweak you need to apply is 
 
 You can choose Indexer Framework sync mode by setting what to stream:
  - `LatestSynced` - Real-time syncing, always taking the latest finalized block to stream
- - `FromInterruption` - Starts syncing from the block NEAR Indexer was interrupted last time
+ - `FromInterruption` - Starts syncing from the block UNC Indexer was interrupted last time
  - `BlockHeight(u64)` - Specific block height to start syncing from
 
  Refer to `main()` function in [Indexer Example](https://github.com/utnet-org/utility/blob/master/tools/indexer/example/src/main.rs)
@@ -110,9 +110,9 @@ Indexer Framework also exposes access to the internal APIs (see `Indexer::client
 ```
 
 
-## Who is using NEAR Indexer?
+## Who is using UNC Indexer?
 
 *This list is not exhaustive, feel free to submit your project by sending a pull request.*
 
-* [Indexer for NEAR Wallet](https://github.com/near/unc-indexer-for-wallet)
-* [Indexer for NEAR Explorer](https://github.com/near/unc-indexer-for-explorer)
+* [Indexer for UNC Wallet](https://github.com/near/unc-indexer-for-wallet)
+* [Indexer for UNC Explorer](https://github.com/near/unc-indexer-for-explorer)

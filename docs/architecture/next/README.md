@@ -1,5 +1,5 @@
 # How uncd will work
-The documents under this chapter are talking about the future of NEAR - what we're planning on improving and how.
+The documents under this chapter are talking about the future of UNC - what we're planning on improving and how.
 
 (This also means that they can get out of date quickly :-).
 

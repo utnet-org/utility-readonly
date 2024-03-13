@@ -73,7 +73,7 @@ def compile_package(package_name, is_release):
         exit(code)
 
 
-"""Checks if there is already everything setup on this machine, otherwise sets up NEAR node."""
+"""Checks if there is already everything setup on this machine, otherwise sets up UNC node."""
 
 
 def check_and_setup(nodocker,
@@ -127,7 +127,7 @@ def check_and_setup(nodocker,
         testnet_genesis_records = 'near/res/testnet_genesis_records_%s.json' % testnet_genesis_hash
         if not os.path.exists(testnet_genesis_records):
             print('Downloading testnet genesis records')
-            url = 'https://s3-us-west-1.amazonaws.com/testnet.nearprotocol.com/testnet_genesis_records_%s.json' % testnet_genesis_hash
+            url = 'https://s3-us-west-1.amazonaws.com/testnet.utility.com/testnet_genesis_records_%s.json' % testnet_genesis_hash
             urllib.urlretrieve(url, testnet_genesis_records)
         init_flags.extend([
             '--genesis-config', 'near/res/testnet_genesis_config.json',
@@ -189,11 +189,11 @@ def get_port(home_dir, net):
     return p + ":" + p
 
 
-"""Runs NEAR core inside the docker container for isolation and easy update with Watchtower."""
+"""Runs UNC core inside the docker container for isolation and easy update with Watchtower."""
 
 
 def run_docker(image, home_dir, boot_nodes, telemetry_url, verbose):
-    print("Starting NEAR client and Watchtower dockers...")
+    print("Starting UNC client and Watchtower dockers...")
     docker_stop_if_exists('watchtower')
     docker_stop_if_exists('framework')
     # Start framework container, mapping home folder and ports.
@@ -223,11 +223,11 @@ def run_docker(image, home_dir, boot_nodes, telemetry_url, verbose):
         "Node is running! \nTo check logs call: docker logs --follow framework")
 
 
-"""Runs NEAR core outside of docker."""
+"""Runs UNC core outside of docker."""
 
 
 def run_nodocker(home_dir, is_release, boot_nodes, telemetry_url, verbose):
-    print("Starting NEAR client...")
+    print("Starting UNC client...")
     print(
         "Autoupdate is not supported at the moment for runs outside of docker")
     cmd = ['./target/%s/uncd' % ('release' if is_release else 'debug')]

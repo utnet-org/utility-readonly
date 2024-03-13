@@ -35,7 +35,7 @@ import prometheus_client
 
 balance_gauge = prometheus_client.Gauge(
     'unc_e2e_account_balance',
-    'Balance of the test accounts running an end-to-end test. Measured in yoctonear.',
+    'Balance of the test accounts running an end-to-end test. Measured in yoctounc.',
     ['account'])
 
 
@@ -44,7 +44,7 @@ def do_ping(account, rpc_server):
     base_block_hash = mocknet_helpers.get_latest_block_hash(addr=rpc_server[0],
                                                             port=rpc_server[1])
     balance = mocknet_helpers.retry_and_ignore_errors(
-        lambda: mocknet_helpers.get_amount_yoctonear(
+        lambda: mocknet_helpers.get_amount_yoctounc(
             account_id, addr=rpc_server[0], port=rpc_server[1]))
     if balance is not None:
         balance_gauge.labels(account=account_id).set(balance)

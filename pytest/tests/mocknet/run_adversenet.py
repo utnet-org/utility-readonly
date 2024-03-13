@@ -151,8 +151,8 @@ if __name__ == '__main__':
                                (100 * len(good_validators)))
 
     logger.info(f'Starting chain {chain_id} with {len(all_nodes)} nodes. \n\
-        Good validators: {good_validators} each with stake {good_validator_stake} NEAR\n\
-        Bad validators: {bad_validators} each with stake {bad_validator_stake} NEAR\n\
+        Good validators: {good_validators} each with stake {good_validator_stake} UNC\n\
+        Bad validators: {bad_validators} each with stake {bad_validator_stake} UNC\n\
         RPC nodes: {rpcs}\n')
 
     answer = input("Enter y to continue: ")

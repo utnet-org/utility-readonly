@@ -76,11 +76,11 @@ class RosettaExecResult:
 
     @property
     def unc_hash(self) -> str:
-        """A NEAR transaction hash in base85.
+        """A UNC transaction hash in base85.
 
         Compared to `hash` it’s just the `<base58-hash>’ part of the Rosetta
-        identifier which is the NEAR transaction or receipt hash (depending on
-        what comes before the colon).  This can be used to query NEAR through
+        identifier which is the UNC transaction or receipt hash (depending on
+        what comes before the colon).  This can be used to query UNC through
         JSON RPC.
         """
         return self.identifier['hash'].split(':')[1]
@@ -238,7 +238,7 @@ class RosettaRPC:
 
     def transfer(self, *, src: key.Key, dst: key.Key, amount: int,
                  **kw) -> RosettaExecResult:
-        currency = {'symbol': 'NEAR', 'decimals': 24}
+        currency = {'symbol': 'UNC', 'decimals': 24}
         return self.exec_operations(
             src, {
                 'operation_identifier': {
@@ -271,7 +271,7 @@ class RosettaRPC:
 
     def ft_transfer(self, *, src: key.Key, dst: key.Key, amount: int,
                     **kw) -> RosettaExecResult:
-        currency = {'symbol': 'NEAR', 'decimals': 24}
+        currency = {'symbol': 'UNC', 'decimals': 24}
         return self.exec_operations(
             src, {
                 'operation_identifier': {
@@ -430,10 +430,10 @@ class RosettaTestCase(unittest.TestCase):
     def test_zero_balance_account(self) -> None:
         """Tests storage staking requirements for low-storage accounts.
 
-        Creates an implicit account by sending it 1 yoctoNEAR (not enough to
+        Creates an implicit account by sending it 1 yoctoUNC (not enough to
         cover storage). However, the zero-balance allowance established in
         NEP-448 should cover the storage staking requirement. Then, we
-        transfer 10**22 yoctoNEAR to the account, which should be enough to
+        transfer 10**22 yoctoUNC to the account, which should be enough to
         cover the storage staking requirement for the 6 full-access keys we
         then add to the account, exceeding the zero-balance account allowance.
         """
@@ -443,7 +443,7 @@ class RosettaTestCase(unittest.TestCase):
         validator = self.node.validator_key
         implicit = key.Key.implicit_account()
 
-        # first transfer 1 yoctoNEAR to create the account
+        # first transfer 1 yoctoUNC to create the account
         # not enough to cover storage, but the zero-balance allowance should cover it
         result = self.rosetta.transfer(src=validator, dst=implicit, amount=1)
 
@@ -461,13 +461,13 @@ class RosettaTestCase(unittest.TestCase):
         balances = self.rosetta.get_account_balances(
             account_id=implicit.account_id)
 
-        # even though 1 yoctoNEAR is not enough to cover the storage cost,
+        # even though 1 yoctoUNC is not enough to cover the storage cost,
         # since the account should be consuming less than 770 bytes of storage,
         # it should be allowed nonetheless.
         self.assertEqual(balances, [{
             'value': '1',
             'currency': {
-                'symbol': 'NEAR',
+                'symbol': 'UNC',
                 'decimals': 24
             }
         }])
@@ -494,7 +494,7 @@ class RosettaTestCase(unittest.TestCase):
         self.assertEqual(balances, [{
             'value': str(test_amount),
             'currency': {
-                'symbol': 'NEAR',
+                'symbol': 'UNC',
                 'decimals': 24
             }
         }])
@@ -553,7 +553,7 @@ class RosettaTestCase(unittest.TestCase):
                 'amount': {
                     'currency': {
                         'decimals': 24,
-                        'symbol': 'NEAR'
+                        'symbol': 'UNC'
                     },
                     'value': '1000000000000000000000000000000000'
                 },
@@ -569,7 +569,7 @@ class RosettaTestCase(unittest.TestCase):
                 'amount': {
                     'currency': {
                         'decimals': 24,
-                        'symbol': 'NEAR'
+                        'symbol': 'UNC'
                     },
                     'value': '950000000000000000000000000000000'
                 },
@@ -588,7 +588,7 @@ class RosettaTestCase(unittest.TestCase):
                 'amount': {
                     'currency': {
                         'decimals': 24,
-                        'symbol': 'NEAR'
+                        'symbol': 'UNC'
                     },
                     'value': '50000000000000000000000000000000'
                 },
@@ -818,7 +818,7 @@ class RosettaTestCase(unittest.TestCase):
                 'amount': {
                     'currency': {
                         'decimals': 24,
-                        'symbol': 'NEAR'
+                        'symbol': 'UNC'
                     },
                     'value': str(-value)
                 },
@@ -839,7 +839,7 @@ class RosettaTestCase(unittest.TestCase):
                 'amount': {
                     'currency': {
                         'decimals': 24,
-                        'symbol': 'NEAR'
+                        'symbol': 'UNC'
                     },
                     'value': str(-gas_payment)
                 },
@@ -885,7 +885,7 @@ class RosettaTestCase(unittest.TestCase):
                     'amount': {
                         'value': '10000000000000000000000',
                         'currency': {
-                            'symbol': 'NEAR',
+                            'symbol': 'UNC',
                             'decimals': 24
                         }
                     }
@@ -912,7 +912,7 @@ class RosettaTestCase(unittest.TestCase):
                     'amount': {
                         'currency': {
                             'decimals': 24,
-                            'symbol': 'NEAR'
+                            'symbol': 'UNC'
                         },
                         'value': '12524843062500000000'
                     },
@@ -963,7 +963,7 @@ class RosettaTestCase(unittest.TestCase):
                     'amount': {
                         'currency': {
                             'decimals': 24,
-                            'symbol': 'NEAR'
+                            'symbol': 'UNC'
                         },
                         'value': '-51109700000000000000'
                     },
@@ -999,7 +999,7 @@ class RosettaTestCase(unittest.TestCase):
                     'amount': {
                         'currency': {
                             'decimals': 24,
-                            'symbol': 'NEAR'
+                            'symbol': 'UNC'
                         },
                         'value': '-9948890300000000000000'
                     },
@@ -1030,7 +1030,7 @@ class RosettaTestCase(unittest.TestCase):
                     'amount': {
                         'currency': {
                             'decimals': 24,
-                            'symbol': 'NEAR'
+                            'symbol': 'UNC'
                         },
                         'value': '9948890300000000000000'
                     },

@@ -1,7 +1,7 @@
 # High level overview
 
 When mainnet launched, the uncd client stored all the chain's state in a single
-RocksDB column `DBCol::State`. This column embeds the entire [NEAR state
+RocksDB column `DBCol::State`. This column embeds the entire [UNC state
 trie](./trie.md) directly in the key-value database, using roughly
 `hash(borsh_encode(trie_node))` as the key to store a `trie_node`. This gives a
 content-addressed storage system that can easily self-verify.

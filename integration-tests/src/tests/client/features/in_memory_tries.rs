@@ -48,7 +48,7 @@ fn test_in_memory_trie_node_consistency() {
             None,
             1,
         ),
-        // We're going to send NEAR between accounts and then assert at the end
+        // We're going to send UNC between accounts and then assert at the end
         // that these transactions have been processed correctly, so here we set
         // the gas price to 0 so that we don't have to calculate gas cost.
         min_gas_price: 0,

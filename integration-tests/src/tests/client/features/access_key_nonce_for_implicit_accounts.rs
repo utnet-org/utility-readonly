@@ -113,9 +113,9 @@ fn test_transaction_hash_collision() {
     );
 }
 
-/// Helper for checking that duplicate transactions from NEAR-implicit accounts are properly rejected.
-/// It creates NEAR-implicit account, deletes it and creates again, so that nonce of the access
-/// key is updated. Then it tries to send tx from NEAR-implicit account with invalid nonce, which
+/// Helper for checking that duplicate transactions from UNC-implicit accounts are properly rejected.
+/// It creates UNC-implicit account, deletes it and creates again, so that nonce of the access
+/// key is updated. Then it tries to send tx from UNC-implicit account with invalid nonce, which
 /// should fail since the protocol upgrade.
 fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     protocol_version: ProtocolVersion,
@@ -136,7 +136,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     let signer1 = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
     let unc_implicit_account_id = unc_implicit_account_signer.account_id.clone();
 
-    // Send money to NEAR-implicit account, invoking its creation.
+    // Send money to UNC-implicit account, invoking its creation.
     let send_money_tx = SignedTransaction::send_money(
         1,
         "test1".parse().unwrap(),
@@ -148,7 +148,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     height = check_tx_processing(&mut env, send_money_tx, height, blocks_number);
     let block = env.clients[0].chain.get_block_by_height(height - 1).unwrap();
 
-    // Delete NEAR-implicit account.
+    // Delete UNC-implicit account.
     let delete_account_tx = SignedTransaction::delete_account(
         // Because AccessKeyNonceRange is enabled, correctness of this nonce is guaranteed.
         (height - 1) * unc_primitives::account::AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER,
@@ -161,7 +161,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     height = check_tx_processing(&mut env, delete_account_tx, height, blocks_number);
     let block = env.clients[0].chain.get_block_by_height(height - 1).unwrap();
 
-    // Send money to NEAR-implicit account again, invoking its second creation.
+    // Send money to UNC-implicit account again, invoking its second creation.
     let send_money_again_tx = SignedTransaction::send_money(
         2,
         "test1".parse().unwrap(),
@@ -173,7 +173,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     height = check_tx_processing(&mut env, send_money_again_tx, height, blocks_number);
     let block = env.clients[0].chain.get_block_by_height(height - 1).unwrap();
 
-    // Send money from NEAR-implicit account with incorrect nonce.
+    // Send money from UNC-implicit account with incorrect nonce.
     let send_money_from_unc_implicit_account_tx = SignedTransaction::send_money(
         1,
         unc_implicit_account_id.clone(),
@@ -185,7 +185,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     let response =
         env.clients[0].process_tx(send_money_from_unc_implicit_account_tx, false, false);
 
-    // Check that sending money from NEAR-implicit account with correct nonce is still valid.
+    // Check that sending money from UNC-implicit account with correct nonce is still valid.
     let send_money_from_unc_implicit_account_tx = SignedTransaction::send_money(
         (height - 1) * AccessKey::ACCESS_KEY_NONCE_RANGE_MULTIPLIER,
         unc_implicit_account_id,
@@ -199,7 +199,7 @@ fn get_status_of_tx_hash_collision_for_unc_implicit_account(
     response
 }
 
-/// Test that duplicate transactions from NEAR-implicit accounts are properly rejected.
+/// Test that duplicate transactions from UNC-implicit accounts are properly rejected.
 #[test]
 fn test_transaction_hash_collision_for_unc_implicit_account_fail() {
     let protocol_version = ProtocolFeature::AccessKeyNonceForImplicitAccounts.protocol_version();
@@ -217,7 +217,7 @@ fn test_transaction_hash_collision_for_unc_implicit_account_fail() {
     );
 }
 
-/// Test that duplicate transactions from NEAR-implicit accounts are not rejected until protocol upgrade.
+/// Test that duplicate transactions from UNC-implicit accounts are not rejected until protocol upgrade.
 #[test]
 fn test_transaction_hash_collision_for_unc_implicit_account_ok() {
     let protocol_version =

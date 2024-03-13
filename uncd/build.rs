@@ -1,6 +1,6 @@
 //! Generates uncd version information and stores it in environment variables.
 //!
-//! The build script sets `NEARD_VERSION` and `NEARD_BUILD` to be uncd version
+//! The build script sets `UNCD_VERSION` and `UNCD_BUILD` to be uncd version
 //! and build respectively.  Version is the official semver such as 1.24.1 if
 //! the executable is built from a release branch or `trunk` if it’s built from
 //! master.  Build is a `git describe` of the commit the binary was built at
@@ -108,11 +108,11 @@ fn try_main() -> Result<()> {
             anyhow::bail!("invalid ‘CARGO_PKG_VERSION’: {}", version)
         }
     };
-    println!("cargo:rustc-env=NEARD_VERSION={}", version);
+    println!("cargo:rustc-env=UNCD_VERSION={}", version);
 
-    println!("cargo:rustc-env=NEARD_BUILD={}", get_git_version()?);
+    println!("cargo:rustc-env=UNCD_BUILD={}", get_git_version()?);
 
-    println!("cargo:rustc-env=NEARD_RUSTC_VERSION={}", rustc_version::version()?);
+    println!("cargo:rustc-env=UNCD_RUSTC_VERSION={}", rustc_version::version()?);
 
     Ok(())
 }

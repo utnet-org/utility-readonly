@@ -526,7 +526,7 @@ if __name__ == '__main__':
     # It re-uses the same binary urls because it's quite easy to do it with the
     # framework-release buildkite and urls in the following format without commit
     # but only with the branch name:
-    # https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework/Linux/<branch-name>/uncd"
+    # https://s3-us-west-1.amazonaws.com/build.utility.com/framework/Linux/<branch-name>/uncd"
     update_binaries_parser = subparsers.add_parser(
         'update-binaries',
         help=

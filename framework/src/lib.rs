@@ -416,7 +416,7 @@ pub fn start_with_config_and_synchronization(
 
     rpc_servers.shrink_to_fit();
 
-    tracing::trace!(target: "diagnostic", key = "log", "Starting NEAR node with diagnostic activated");
+    tracing::trace!(target: "diagnostic", key = "log", "Starting UNC node with diagnostic activated");
 
     let mut arbiters =
         vec![client_arbiter_handle, shards_manager_arbiter_handle, trie_metrics_arbiter];

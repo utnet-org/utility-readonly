@@ -80,7 +80,7 @@ To learn how to become validator, checkout [documentation](https://docs.utnet-or
 ## Contributing
 
 The workflow and details of setup to contribute are described in [CONTRIBUTING.md](CONTRIBUTING.md), and security policy is described in [SECURITY.md](SECURITY.md).
-To propose new protocol changes or standards use [Specification & Standards repository](https://github.com/nearprotocol/NEPs).
+To propose new protocol changes or standards use [Specification & Standards repository](https://github.com/utility/NEPs).
 
 ## Getting in Touch
 

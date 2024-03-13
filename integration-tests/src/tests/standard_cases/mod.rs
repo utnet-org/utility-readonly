@@ -431,7 +431,7 @@ pub fn trying_to_create_implicit_account(node: impl Node, public_key: PublicKey)
         AccountType::EthImplicitAccount => {
             // This test uses `node_user.create_account` method that is normally used for NamedAccounts and should fail here.
             fee_helper.create_account_transfer_full_key_cost_fail_on_create_account()
-                // We add this fee analogously to the NEAR-implicit match arm above (without `add_access_key_fee`).
+                // We add this fee analogously to the UNC-implicit match arm above (without `add_access_key_fee`).
                 + fee_helper.gas_to_balance(create_account_fee)
         }
         AccountType::NamedAccount => std::panic!("must be implicit"),

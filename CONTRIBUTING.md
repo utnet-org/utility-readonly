@@ -1,4 +1,4 @@
-Thank you for your interest in contributing to the NEAR reference client!  We
+Thank you for your interest in contributing to the UNC reference client!  We
 welcome contributions from everyone.  Below are various bits of information to
 help you get started.  If you require additional help, please reach out to us on
 our [zulip channel](https://unc.zulipchat.com/).
@@ -18,7 +18,7 @@ Building framework requires a fairly recent Rust compiler (get it
 Sadly at the moment framework is only compatible with Linux and MacOS, Windows is
 not supported yet.
 
-To run a local NEAR network with one node, use
+To run a local UNC network with one node, use
 
 ```console
 $ cargo run -p uncd -- init # generates various configs in ~/.unc
@@ -35,7 +35,7 @@ $ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
 ```
 
 The RPC is documented [here](https://docs.unc.org/api/rpc/introduction), and
-can be conveniently accessed from the command line [NEAR
+can be conveniently accessed from the command line [UNC
 CLI](https://docs.unc.org/tools/unc-cli) utility.
 
 ## Next Steps
@@ -55,7 +55,7 @@ up-to-date, so if you do not find an interesting task to work on, please ask for
 help on our zulip channel.
 
 If you have an idea for an enhancement to the protocol itself, please make a
-proposal by following the [NEAR Enhancement
+proposal by following the [UNC Enhancement
 Proposal](https://github.com/unc/NEPs/blob/master/neps/nep-0001.md) process.
 
 ## Pull Requests

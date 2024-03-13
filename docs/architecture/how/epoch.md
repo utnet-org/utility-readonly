@@ -1,6 +1,6 @@
 # How Epoch Works
 
-This short document will tell you all you need to know about Epochs in NEAR
+This short document will tell you all you need to know about Epochs in UNC
 protocol.
 
 You can also find additional information about epochs in
@@ -38,7 +38,7 @@ Epoch length is set in the genesis config. Currently in mainnet it is set to 432
   "epoch_length": 43200
 ```
 
-See [the mainnet genesis](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/mainnet/genesis.json) for more details.
+See [the mainnet genesis](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/mainnet/genesis.json) for more details.
 
 This means that each epoch lasts around 15 hours.
 

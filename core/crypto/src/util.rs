@@ -98,10 +98,10 @@ impl<
 }
 
 impl PublicKey {
-    /// Create the implicit public key from an NEAR-implicit account ID.
+    /// Create the implicit public key from an UNC-implicit account ID.
     ///
     /// Returns `ImplicitPublicKeyError::AccountIsNotNearImplicit` if the given
-    /// account id is not a valid NEAR-implicit account ID.
+    /// account id is not a valid UNC-implicit account ID.
     /// See [`unc_account_id::AccountId#is_unc_implicit`] for the definition.
     pub fn from_unc_implicit_account(
         account_id: &unc_account_id::AccountId,

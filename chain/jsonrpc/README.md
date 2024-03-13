@@ -22,7 +22,7 @@ communicated through the CHANGELOG next to this file.
 2. We don't violate the guaranties described in the section above.
 3. We prefix new APIs with `EXPERIMENTAL_` (see the Experimental API Policies
    below).
-4. We document the API change on [NEAR Docs](https://docs.near.org/api/rpc/introduction)
+4. We document the API change on [UNC Docs](https://docs.near.org/api/rpc/introduction)
    BEFORE merging the change to framework.
 5. We log changes to the methods and API input/output structures through
    CHANGELOG.md file in the jsonrpc crate.
