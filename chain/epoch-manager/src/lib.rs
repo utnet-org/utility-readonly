@@ -659,7 +659,7 @@ impl EpochManager {
         let mut validator_kickout = HashMap::new();
 
         // Next protocol version calculation.
-        // Implements https://github.com/nearprotocol/NEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
+        // Implements https://github.com/utility/NEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
         let mut versions = HashMap::new();
         for (validator_id, version) in version_tracker {
             let stake = epoch_info.validator_frozen(validator_id);
@@ -1988,7 +1988,7 @@ impl EpochManager {
 
         if epoch_length <= 3 {
             // This is here to make epoch_manager tests pass. Needs to be removed, tracked in
-            // https://github.com/nearprotocol/nearcore/issues/2522
+            // https://github.com/utility/nearcore/issues/2522
             return Ok(block_info.height() + 1 >= estimated_next_epoch_start);
         }
 

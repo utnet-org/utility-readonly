@@ -488,7 +488,7 @@ pub enum ActionErrorKind {
     /// receipt validation.
     NewReceiptValidationError(ReceiptValidationError),
     /// Error occurs when a `CreateAccount` action is called on a UNC-implicit or ETH-implicit account.
-    /// See UNC-implicit account creation NEP: <https://github.com/nearprotocol/NEPs/pull/71>.
+    /// See UNC-implicit account creation NEP: <https://github.com/utility/NEPs/pull/71>.
     /// Also, see ETH-implicit account creation NEP: <https://github.com/near/NEPs/issues/518>.
     ///
     /// TODO(#8598): This error is named very poorly. A better name would be

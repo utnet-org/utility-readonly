@@ -17,7 +17,7 @@ You can run multiple tests in parallel, use `--pattern` to disambiguate.
 Configure the desirable generated load with the `--max-tps` flag, or disable load altogether with `--skip-load`.
 
 Example from the recent loadtest run:
-1) terraform apply -var="chain_id=mainnet" -var="size=big" -var="override_chain_id=rc3-22" -var="neard_binary_url=https://s3.us-west-1.amazonaws.com/build.nearprotocol.com/framework/Linux/1.23.0/1eaa01d6abc76757b2ef50a1a127f98576b750c4/uncd" -var="upgrade_neard_binary_url=https://unc-protocol-public.s3.ca-central-1.amazonaws.com/mocknet/uncd.rc3-22"
+1) terraform apply -var="chain_id=mainnet" -var="size=big" -var="override_chain_id=rc3-22" -var="neard_binary_url=https://s3.us-west-1.amazonaws.com/build.utility.com/framework/Linux/1.23.0/1eaa01d6abc76757b2ef50a1a127f98576b750c4/uncd" -var="upgrade_neard_binary_url=https://unc-protocol-public.s3.ca-central-1.amazonaws.com/mocknet/uncd.rc3-22"
 2) python3 tests/mocknet/load_test_spoon.py --chain-id=mainnet-spoon --pattern=rc3-22 --epoch-length=1000 --num-nodes=120 --max-tps=100 --script=add_and_delete --increasing-stakes=1 --progressive-upgrade --num-seats=100
 
 Things to look out for when running the test:

@@ -11,7 +11,7 @@ from configured_logger import logger
 
 _UNAME = os.uname()[0]
 _IS_DARWIN = _UNAME == 'Darwin'
-_BASEHREF = 'https://s3-us-west-1.amazonaws.com/build.nearprotocol.com'
+_BASEHREF = 'https://s3-us-west-1.amazonaws.com/build.utility.com'
 _REPO_DIR = pathlib.Path(__file__).resolve().parents[2]
 _OUT_DIR = _REPO_DIR / 'target/debug'
 _IS_NAYDUCK = bool(os.getenv('NAYDUCK'))

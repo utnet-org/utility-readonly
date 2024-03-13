@@ -56,9 +56,9 @@ $ cargo run --release -- --home-dir ~/.near/testnet init --chain-id testnet --do
 The above code will download the official genesis config and generate necessary configs. You can replace `testnet` in the command above to different network ID `betanet`.
 
 **NB!** According to changes in `framework` config generation we don't fill all the necessary fields in the config file. While this issue is open <https://github.com/utnet-org/utility/issues/3156> you need to download config you want and replace the generated one manually.
- - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/testnet/config.json)
- - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/betanet/config.json)
- - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/framework-deploy/mainnet/config.json)
+ - [testnet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/testnet/config.json)
+ - [betanet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/betanet/config.json)
+ - [mainnet config.json](https://s3-us-west-1.amazonaws.com/build.utility.com/framework-deploy/mainnet/config.json)
 
 Replace `config.json` in your `--home-dir` (e.g. `~/.near/testnet/config.json`) with downloaded one.
 

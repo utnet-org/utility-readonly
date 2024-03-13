@@ -37,4 +37,4 @@ jobs:
         run: |
           echo $(git rev-parse HEAD) > latest
           BRANCH=$(git branch --show-current)
-          aws s3 cp --acl public-read latest s3://build.nearprotocol.com/framework/$(uname)/${BRANCH}/latest-nightly
+          aws s3 cp --acl public-read latest s3://build.utility.com/framework/$(uname)/${BRANCH}/latest-nightly

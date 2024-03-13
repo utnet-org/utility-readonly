@@ -1104,7 +1104,7 @@ pub(crate) fn check_account_existence(
                     // public key. We've decided to make it an invalid transaction to have any other
                     // actions on the implicit hex accounts.
                     // The easiest way is to reject the `CreateAccount` action.
-                    // See https://github.com/nearprotocol/NEPs/pull/71
+                    // See https://github.com/utility/NEPs/pull/71
                     return Err(ActionErrorKind::OnlyImplicitAccountCreationAllowed {
                         account_id: account_id.clone(),
                     }
