@@ -726,9 +726,9 @@ pub(crate) fn action_register_rsa2048_keys(
 }
 
 pub(crate) fn action_create_rsa2048_challenge(
-    _apply_state: &ApplyState,
+    apply_state: &ApplyState,
     state_update: &mut TrieUpdate,
-    _account: &mut Account,
+    account: &mut Account,
     result: &mut ActionResult,
     account_id: &AccountId,
     challenge: &CreateRsa2048ChallengeAction,
@@ -761,11 +761,11 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     power,
                                 ));
                                 // attach power to account
-                                let total_power = _account.power().checked_add(power).ok_or_else(|| {
+                                let total_power = account.power().checked_add(power).ok_or_else(|| {
                                     StorageError::StorageInconsistentState("Account power integer overflow".to_string())
                                 })?;
-                                println!("original power is : {}, new power is : {}, total power is : {}", _account.power(), power.clone(),total_power.clone());
-                                _account.set_power(total_power);
+                                println!("original power is : {}, new power is : {}, total power is : {}", account.power(), power.clone(),total_power.clone());
+                                account.set_power(total_power);
                                 println!("Power (as u128): {}", power);
                             }
                             Err(_) => println!("Power value is not a valid u128 number"),
@@ -796,6 +796,22 @@ pub(crate) fn action_create_rsa2048_challenge(
         account_id.clone(),
         challenge.public_key.clone(),
         &registered_keys,
+    );
+
+    let storage_config = &apply_state.config.fees.storage_usage_config;
+    account.set_storage_usage(
+        account
+            .storage_usage()
+            .checked_add(
+                borsh::object_length(&challenge.public_key.clone()).unwrap() as u64
+                    + storage_config.num_extra_bytes_record,
+            )
+            .ok_or_else(|| {
+                StorageError::StorageInconsistentState(format!(
+                    "Storage usage integer overflow for account {}",
+                    account_id
+                ))
+            })?,
     );
 
     return Ok(());
