@@ -53,6 +53,7 @@ use std::ops::Range;
 use std::sync::Arc;
 use strum::IntoEnumIterator;
 use validator_power_view::ValidatorPowerView;
+use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
 use crate::views::validator_frozen_view::ValidatorFrozenView;
 use crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
 
@@ -1179,6 +1180,44 @@ impl From<ChunkHeaderView> for ShardChunkHeader {
         ShardChunkHeader::V3(header)
     }
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct AllMinersView {
+    pub total_power: Power,
+    pub miners: Vec<ValidatorPowerView>,
+}
+
+impl From<ValidatorPowerAndFrozenIter<'_>> for AllMinersView {
+    fn from(iter: ValidatorPowerAndFrozenIter) -> Self {
+        let mut total_power = 0; // Initialize total power
+        let mut miners = Vec::new(); // Initialize the vector to store ValidatorPowerView instances
+
+        // Iterate over each ValidatorPowerAndFrozen
+        for validator in iter {
+            match validator {
+                // Assuming we only deal with V1 here, similar logic could apply for other versions
+                ValidatorPowerAndFrozen::V1(v) => {
+                    total_power += v.power; // Accumulate the total power
+                    // Convert ValidatorPowerAndFrozen to ValidatorPowerView
+                    let miner = ValidatorPowerView::V1(ValidatorPowerViewV1 {
+                        account_id: v.account_id,
+                        public_key: v.public_key,
+                        power: v.power,
+                    });
+                    miners.push(miner); // Add the converted ValidatorPowerView to the miners vector
+                },
+                // Handle other variants as needed
+            }
+        }
+
+        // Create an instance of AllMinersView with the aggregated data
+        AllMinersView {
+            total_power,
+            miners,
+        }
+    }
+}
+
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct BlockView {

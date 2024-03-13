@@ -20,6 +20,7 @@ mod status;
 mod transactions;
 mod validator;
 mod provider;
+mod all_miners;
 
 pub(crate) trait RpcRequest: Sized {
     fn parse(value: Value) -> Result<Self, RpcParseError>;

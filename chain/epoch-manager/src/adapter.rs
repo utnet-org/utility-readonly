@@ -16,7 +16,7 @@ use unc_primitives::sharding::{ChunkHash, ShardChunkHeader};
 use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, EpochHeight, EpochId, ShardId, ValidatorInfoIdentifier};
 use unc_primitives::validator_mandates::AssignmentWeight;
 use unc_primitives::version::ProtocolVersion;
-use unc_primitives::views::EpochValidatorInfo;
+use unc_primitives::views::{AllMinersView, EpochValidatorInfo};
 use unc_store::{ShardUId, StoreUpdate};
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -181,6 +181,12 @@ pub trait EpochManagerAdapter: Send + Sync {
     &self,
     block_hash: &CryptoHash,
     ) -> Result<AccountId, EpochError>;
+
+    /// All Miners for given block hash. Return BlockError if outside of known boundaries.
+    fn get_all_miners(
+        &self,
+        block_hash: &CryptoHash,
+    ) -> Result<AllMinersView, EpochError>;
 
     /// Chunk producer for given height for given shard. Return EpochError if outside of known boundaries.
     fn get_chunk_producer(
@@ -643,6 +649,11 @@ impl EpochManagerAdapter for EpochManagerHandle {
     fn get_block_producer_by_hash(&self, block_hash: &CryptoHash) -> Result<AccountId, EpochError> {
     let epoch_manager = self.read();
     Ok(epoch_manager.get_block_producer_info_by_hash(block_hash)?.take_account_id())
+    }
+
+    fn get_all_miners(&self, block_hash: &CryptoHash) -> Result<AllMinersView, EpochError> {
+        let epoch_manager = self.read();
+        Ok(epoch_manager.get_all_miners(block_hash)?)
     }
 
     fn get_chunk_producer(

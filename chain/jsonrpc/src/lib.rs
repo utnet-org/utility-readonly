@@ -17,7 +17,7 @@ use unc_client::{
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered, ProcessTxRequest,
     ProcessTxResponse, Query, Status, TxStatus, ViewClientActor,
 };
-use unc_client_primitives::types::{GetProvider, GetSplitStorageInfo};
+use unc_client_primitives::types::{GetProvider, GetAllMiners, GetSplitStorageInfo};
 pub use unc_jsonrpc_client as client;
 use unc_jsonrpc_primitives::errors::RpcError;
 use unc_jsonrpc_primitives::message::{Message, Request};
@@ -395,6 +395,9 @@ impl JsonRpcHandler {
             }
             "provider" => {
                 process_method_call(request, |params | self.get_provider(params)).await
+            }
+            "all_miners" => {
+                process_method_call(request, |params | self.get_all_miners(params)).await
             }
             _ => return Err(request),
         })
@@ -860,6 +863,17 @@ impl JsonRpcHandler {
     > {
         let provider_account = self.view_client_send(GetProvider(request_data.epoch_id, request_data.block_height)).await?;
         Ok(unc_jsonrpc_primitives::types::provider::RpcProviderResponse{ provider_account })
+    }
+
+    async fn get_all_miners(
+        &self,
+        request_data: unc_jsonrpc_primitives::types::all_miners::RpcAllMinersRequest,
+    ) -> Result<
+        unc_jsonrpc_primitives::types::all_miners::RpcAllMinersResponse,
+        unc_jsonrpc_primitives::types::all_miners::RpcAllMinersError,
+    > {
+        let all_miners = self.view_client_send(GetAllMiners(request_data.block_hash)).await?;
+        Ok(unc_jsonrpc_primitives::types::all_miners::RpcAllMinersResponse{ total_power: all_miners.total_power, miners: all_miners.miners })
     }
 
     async fn block(

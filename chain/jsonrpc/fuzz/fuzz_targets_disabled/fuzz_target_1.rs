@@ -24,6 +24,7 @@ enum JsonRpcRequest {
     BroadcastTxAsync(RpcBroadcastTx),
     BroadcastTxCommit(RpcBroadcastTx),
     Provider(types::provider::RpcProviderRequest),
+    AllMiners(types::all_miners::RpcAllMinersRequest),
 }
 
 #[derive(Debug, arbitrary::Arbitrary, serde::Serialize)]
@@ -86,6 +87,7 @@ impl JsonRpcRequest {
             JsonRpcRequest::BroadcastTxAsync(request) => ("broadcast_tx_async", json!(request)),
             JsonRpcRequest::BroadcastTxCommit(request) => ("broadcast_tx_commit", json!(request)),
             JsonRpcRequest::Provider(request) => ("provider", json!(request)),
+            JsonRpcRequest::AllMiners(request) => ("all_miners", json!(request)),
         }
     }
 }

@@ -1,7 +1,7 @@
 //! Readonly view of the chain and state of the database.
 //! Useful for querying from RPC.
 
-use crate::adapter::{AnnounceAccountRequest, BlockHeadersRequest, BlockRequest, ProviderRequest, StateRequestHeader, StateRequestPart, StateResponse, TxStatusRequest, TxStatusResponse};
+use crate::adapter::{AnnounceAccountRequest, BlockHeadersRequest, BlockRequest, ProviderRequest,AllMinersRequest, StateRequestHeader, StateRequestPart, StateResponse, TxStatusRequest, TxStatusResponse};
 use crate::{
     metrics, sync, GetChunk, GetExecutionOutcomeResponse, GetNextLightClientBlock, GetStateChanges,
     GetStateChangesInBlock, GetValidatorInfo, GetValidatorOrdered,
@@ -14,7 +14,7 @@ use unc_chain::{
 };
 use unc_chain_configs::{ClientConfig, ProtocolConfigView};
 use unc_chain_primitives::error::EpochErrorResultToChainError;
-use unc_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError};
+use unc_client_primitives::types::{Error, GetBlock, GetBlockError, GetBlockProof, GetBlockProofError, GetBlockProofResponse, GetBlockWithMerkleTree, GetChunkError, GetExecutionOutcome, GetExecutionOutcomeError, GetExecutionOutcomesForBlock, GetGasPrice, GetGasPriceError, GetMaintenanceWindows, GetMaintenanceWindowsError, GetNextLightClientBlockError, GetProtocolConfig, GetProtocolConfigError, GetProvider, GetProviderError, GetAllMiners, GetReceipt, GetReceiptError, GetSplitStorageInfo, GetSplitStorageInfoError, GetStateChangesError, GetStateChangesWithCauseInBlock, GetStateChangesWithCauseInBlockForTrackedShards, GetValidatorInfoError, Query, QueryError, TxStatus, TxStatusError, GetAllMinersError};
 use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::EpochManagerAdapter;
 use unc_network::types::{
@@ -35,7 +35,7 @@ use unc_primitives::state_sync::{
 };
 use unc_primitives::static_clock::StaticClock;
 use unc_primitives::types::{AccountId, BlockHeight, BlockId, BlockReference, EpochReference, Finality, MaybeBlockId, ShardId, SyncCheckpoint, TransactionOrReceiptId, ValidatorInfoIdentifier};
-use unc_primitives::views::{BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView, FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView, MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, SplitStorageInfoView, StateChangesKindsView, StateChangesView, TxExecutionStatus, TxStatusView};
+use unc_primitives::views::{AllMinersView, BlockView, ChunkView, EpochValidatorInfo, ExecutionOutcomeWithIdView, ExecutionStatusView, FinalExecutionOutcomeView, FinalExecutionOutcomeViewEnum, GasPriceView, LightClientBlockView, MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, SplitStorageInfoView, StateChangesKindsView, StateChangesView, TxExecutionStatus, TxStatusView};
 use unc_store::flat::{FlatStorageReadyStatus, FlatStorageStatus};
 use unc_store::{DBCol, COLD_HEAD_KEY, FINAL_HEAD_KEY, HEAD_KEY};
 use std::cmp::Ordering;
@@ -631,6 +631,22 @@ impl Handler<WithSpanContext<GetProvider>> for ViewClientActor {
             .get_block_producer(&epoch_id, height)
             .into_chain_error()?;
         Ok(block_author)
+    }
+}
+
+/// Handles retrieving all miners from the chain.
+impl Handler<WithSpanContext<GetAllMiners>> for ViewClientActor {
+    type Result = Result<AllMinersView, GetAllMinersError>;
+    #[perf]
+    fn handle(&mut self, msg: WithSpanContext<GetAllMiners>, _: &mut Self::Context) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        tracing::debug!(target: "client", ?msg);
+        let block_hash= msg.0;
+        let all_miners = self
+            .epoch_manager
+            .get_all_miners(&block_hash)
+            .into_chain_error()?;
+        Ok(all_miners)
     }
 }
 
@@ -1300,6 +1316,27 @@ impl Handler<WithSpanContext<ProviderRequest>> for ViewClientActor {
         let ProviderRequest(epoch_id, height) = msg;
         if let Ok(producer) = self.epoch_manager.get_block_producer(&epoch_id, height) {
             Some(producer)
+        } else {
+            None
+        }
+    }
+}
+
+impl Handler<WithSpanContext<AllMinersRequest>> for ViewClientActor {
+    type Result = Option<AllMinersView>;
+    #[perf]
+    fn handle(
+        &mut self,
+        msg: WithSpanContext<AllMinersRequest>,
+        _ctx: &mut Self::Context,
+    ) -> Self::Result {
+        let (_span, msg) = handler_debug_span!(target: "client", msg);
+        tracing::debug!(target: "client", ?msg);
+        let _timer =
+            metrics::VIEW_CLIENT_MESSAGE_TIME.with_label_values(&["AllMinersRequest"]).start_timer();
+        let AllMinersRequest(block_hash) = msg;
+        if let Ok(all_miners) = self.epoch_manager.get_all_miners(&block_hash) {
+            Some(all_miners)
         } else {
             None
         }

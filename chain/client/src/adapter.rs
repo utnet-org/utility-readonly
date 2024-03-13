@@ -1,3 +1,4 @@
+use unc_primitives::views::AllMinersView;
 use crate::client_actor::ClientActor;
 use crate::view_client::ViewClientActor;
 use unc_network::types::{
@@ -13,8 +14,9 @@ use unc_primitives::hash::CryptoHash;
 use unc_primitives::network::{AnnounceAccount, PeerId};
 use unc_primitives::sharding::PartialEncodedChunk;
 use unc_primitives::transaction::SignedTransaction;
-use unc_primitives::types::{AccountId, BlockHeight, EpochId, ShardId};
+use unc_primitives::types::{AccountId, BlockHeight, EpochId, Power, ShardId};
 use unc_primitives::views::FinalExecutionOutcomeView;
+use unc_primitives::views::validator_power_view::ValidatorPowerView;
 
 /// Transaction status query
 #[derive(actix::Message, Debug)]
@@ -39,6 +41,19 @@ pub(crate) struct ProviderRequest(pub EpochId, pub BlockHeight);
 #[rtype(result = "()")]
 pub struct ProviderResponse {
     pub provider: AccountId,
+}
+
+/// Request all miners.
+#[derive(actix::Message, Debug)]
+#[rtype(result = "Option<AllMinersView>")]
+pub(crate) struct AllMinersRequest(pub CryptoHash);
+
+/// All Miners response.
+#[derive(actix::Message, Debug)]
+#[rtype(result = "()")]
+pub struct AllMinersResponse {
+    pub total_power: Power,
+    pub miners: Vec<ValidatorPowerView>,
 }
 
 /// Request a block.
