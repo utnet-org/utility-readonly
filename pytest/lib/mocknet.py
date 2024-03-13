@@ -1447,7 +1447,7 @@ def upgrade_node(node):
 STAKING_TIMEOUT = 60
 
 
-# If the available amount of whole NEAR tokens is above 10**3, then stakes all available amount.
+# If the available amount of whole UNC tokens is above 10**3, then stakes all available amount.
 # Runs only if `last_staking` is at least `STAKING_TIMEOUT` seconds in the past.
 def stake_available_amount(node_account, last_staking):
     # Repeat the staking transactions in case the validator selection algorithm changes.
@@ -1456,7 +1456,7 @@ def stake_available_amount(node_account, last_staking):
         # Make several attempts just in case the RPC node doesn't respond.
         for attempt in range(3):
             try:
-                stake_amount = node_account.get_amount_yoctonear()
+                stake_amount = node_account.get_amount_yoctounc()
                 logger.info(
                     f'Amount of {node_account.key.account_id} is {stake_amount}'
                 )

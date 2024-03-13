@@ -4,7 +4,7 @@ conclusions we made after evaluating a number of VM backends and frontends.
 # Criteria
 
 A number criteria have been used to evaluate a Wasm runtime for use in the implementation of the
-NEAR protocol. Some of the criteria are already listed in the [FAQ] document and this document
+UNC protocol. Some of the criteria are already listed in the [FAQ] document and this document
 gives a more thorough look. Listed roughly in the order of importance:
 
 * security – how well does the runtime deal with untrusted input;
@@ -17,11 +17,11 @@ gives a more thorough look. Listed roughly in the order of importance:
 
 # Requirements
 
-Within each criteria we have specific requirements relevant to the NEAR protocol.
+Within each criteria we have specific requirements relevant to the UNC protocol.
 
 ## Security
 
-NEAR protocol validators execute arbitrary Wasm code submitted by the participants of the network,
+UNC protocol validators execute arbitrary Wasm code submitted by the participants of the network,
 much like e.g. web browsers execute untrusted JavaScript code. It is critical that the runtime
 executes Wasm code in its own isolated, sandboxed environment, satisfying at least the following
 requirements:
@@ -45,7 +45,7 @@ Were a VM implementation to deviate from specification in some way, there's a no
 that a contract would invoke behaviours not intended by the contract authors (for example allow
 unauthorized users to transfer tokens.)
 
-In addition to this, the NEAR protocol adds a requirement that all executions of a Wasm program
+In addition to this, the UNC protocol adds a requirement that all executions of a Wasm program
 must be deterministic. In other words, it must not be possible to observe different execution
 results based on the environment within which the VM runs.
 
@@ -58,7 +58,7 @@ A particularly troublesome area of the specification in this regard relates to t
 support. The specification permits floating point operations to return a `NaN` result which the
 specification also permits to have multiple different bit representations and goes out of its way
 to specify the sign of the `NaN` result to be non-deterministic. The determinism and
-reproducibility requirements of the NEAR protocol make it necessary for the runtime to ensure NaN
+reproducibility requirements of the UNC protocol make it necessary for the runtime to ensure NaN
 signs and payloads are always deterministic.
 
 Another detail to keep an eye out is whether the floating point results are being rounded
@@ -82,7 +82,7 @@ reasonably correlated to the reliability one can expect from an implementation o
 
 ## Platform support
 
-The NEAR validator implementation currently targets `x86_64-linux`, both as an execution
+The UNC validator implementation currently targets `x86_64-linux`, both as an execution
 environment as well as to establish the cost model. For those reasons stellar support for this
 target is a hard requirement.
 
@@ -100,7 +100,7 @@ the initial code for execution (compilation) and how efficient are miscellaneous
 serialization and deserialization of the module.
 
 In order to realistically evaluate the performance of a runtime it is important to understand how
-the NEAR validator utilizes the runtime to implement its functionality. Somewhat simplified view
+the UNC validator utilizes the runtime to implement its functionality. Somewhat simplified view
 is:
 
 1. A module containing Wasm code in binary format is parsed and instrumented;
@@ -111,19 +111,19 @@ is:
    memory and the execution of the desired function begins (latency);
 5. The contract code is executed (throughput) and the results are returned to the validator.
 
-It is important to remember that the NEAR protocol charges fees for an operation before the
+It is important to remember that the UNC protocol charges fees for an operation before the
 operation is executed. For that reason, predictability of worst case execution time often matters
 more than the execution time in the typical case. It is important that we are able to deduce ahead
 of time what cost to assign to a given operation. Inability to do so can lead to significant
 undercharging and break the properties underlying the protocol.
 
 On a scale of trade-offs, performance is probably one of the less important metrics. Slower
-execution of a contract code doesn't make NEAR protocol unsound as an idea and only serves to
+execution of a contract code doesn't make UNC protocol unsound as an idea and only serves to
 impose stricter limits on what can be achieved on the network.
 
 ### Compilation
 
-The NEAR protocol charges gas fees to deploy a contract. One part of a deployment involves
+The UNC protocol charges gas fees to deploy a contract. One part of a deployment involves
 preparing the contract Wasm code for execution. This may involve instrumentation, compilation,
 serialization of the machine code and other similar operations.
 
@@ -141,17 +141,17 @@ linking). Only then it is possible to start executing the contract code.
 When executing a tiny function part of a larger contract these operations will dominate and
 contribute greatly to the observed latency of the contract execution. These overheads contribute to
 the fees paid by anybody using the protocol, making any unnecessary overhead a potential roadblock
-in NEAR protocol's adoption.
+in UNC protocol's adoption.
 
 ### Throughput
 
 The faster we can execute the contract code, the more elaborate are the ideas that developers can
-express via contracts running on the NEAR protocol. The cheaper it is to execute contracts, the
+express via contracts running on the UNC protocol. The cheaper it is to execute contracts, the
 more approachable and usable the protocol is, so runtime performance is a direct consequence of the
 usability of the whole system as a whole.
 
 One of the more costly operations that occurs in a typical contract quite often is accounting for
-gas fees. It is quite important that the runtime gives sufficient flexibility to the NEAR validator
+gas fees. It is quite important that the runtime gives sufficient flexibility to the UNC validator
 to implement such operations efficiently.
 
 # Evaluation
@@ -205,7 +205,7 @@ an in-depth explanation of the Cranelift's architecture.
 
 [clift-cg-primer]: https://blog.benj.me/2021/02/17/cranelift-codegen-primer/
 
-A Wasm codegen implementation in a browser shares many of the requirements with those of the NEAR
+A Wasm codegen implementation in a browser shares many of the requirements with those of the UNC
 protocol. Cranelift gets high scores for its Correctness, Reliability and Security properties.
 It supports targeting the Arm, s390x and x86_64 architectures as well as a variety of
 operating systems, netting it a high score on the platform support metric as well.

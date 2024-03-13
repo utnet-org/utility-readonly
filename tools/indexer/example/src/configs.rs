@@ -1,6 +1,6 @@
 use unc_indexer::unc_primitives::types::Gas;
 
-/// NEAR Indexer Example
+/// UNC Indexer Example
 /// Watches for stream of blocks from the chain
 #[derive(clap::Parser, Debug)]
 #[clap(version = "0.1", author = "unc Inc. <hello@nearprotocol.com>")]
@@ -16,7 +16,7 @@ pub(crate) struct Opts {
 #[derive(clap::Parser, Debug)]
 #[allow(clippy::large_enum_variant)]
 pub(crate) enum SubCommand {
-    /// Run NEAR Indexer Example. Start observe the network
+    /// Run UNC Indexer Example. Start observe the network
     Run,
     /// Initialize necessary configs
     Init(InitConfigArgs),
@@ -43,7 +43,7 @@ pub(crate) struct InitConfigArgs {
     #[clap(short, long)]
     pub genesis: Option<String>,
     #[clap(long)]
-    /// Download the verified NEAR genesis file automatically.
+    /// Download the verified UNC genesis file automatically.
     pub download_genesis: bool,
     /// Specify a custom download URL for the genesis-file.
     #[clap(long)]
@@ -52,7 +52,7 @@ pub(crate) struct InitConfigArgs {
     #[clap(long)]
     pub download_records_url: Option<String>,
     #[clap(long)]
-    /// Download the verified NEAR config file automatically.
+    /// Download the verified UNC config file automatically.
     pub download_config: bool,
     /// Specify a custom download URL for the config file.
     #[clap(long)]

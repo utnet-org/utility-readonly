@@ -12,7 +12,7 @@ from common.base import Account, Deploy, NearNodeProxy, NearUser, FunctionCall, 
 
 
 class FTContract:
-    # NEAR balance given to contracts, doesn't have to be much since users are
+    # UNC balance given to contracts, doesn't have to be much since users are
     # going to pay for storage
     INIT_BALANCE = NearUser.INIT_BALANCE
 
@@ -108,7 +108,7 @@ class TransferFT(FunctionCall):
                  sender: Account,
                  recipient_id: str,
                  how_much=1):
-        # Attach exactly 1 yoctoNEAR according to NEP-141 to avoid calls from restricted access keys
+        # Attach exactly 1 yoctoUNC according to NEP-141 to avoid calls from restricted access keys
         super().__init__(sender, ft.key.account_id, "ft_transfer", balance=1)
         self.ft = ft
         self.sender = sender

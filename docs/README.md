@@ -3,7 +3,7 @@
 Welcome to the framework development guide!
 
 The target audience of this guide are developers of framework itself. If you are
-a user of NEAR (either a contract developer, or validator running a node),
+a user of UNC (either a contract developer, or validator running a node),
 please refer to the user docs at <https://docs.near.org>.
 
 This guide is built with [mdBook](https://rust-lang.github.io/mdBook/)

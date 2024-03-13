@@ -766,7 +766,7 @@ def _(parser):
     parser.add_argument(
         "--funding-key",
         required=True,
-        help="account to use as source of NEAR for account creation")
+        help="account to use as source of UNC for account creation")
     parser.add_argument(
         "--max-workers",
         type=int,

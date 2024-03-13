@@ -148,7 +148,7 @@ pub struct ChainInfo {
     // It currently includes "block producers", "chunk producers" and "approvers".
     // They are collectively known as "validators".
     // Peers acting on behalf of these accounts have a higher
-    // priority on the NEAR network than other peers.
+    // priority on the UNC network than other peers.
     pub tier1_accounts: Arc<AccountKeys>,
 }
 

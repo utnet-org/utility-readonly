@@ -282,7 +282,7 @@ pub(crate) static GAS_PRICE: Lazy<Gauge> = Lazy::new(|| {
 });
 
 pub(crate) static BALANCE_BURNT: Lazy<Counter> = Lazy::new(|| {
-    try_create_counter("unc_balance_burnt", "Balance burnt by processed blocks in NEAR tokens")
+    try_create_counter("unc_balance_burnt", "Balance burnt by processed blocks in UNC tokens")
         .unwrap()
 });
 

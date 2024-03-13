@@ -3,17 +3,17 @@
 ## Theory of operations
 
  Operation execution cost (aka gas cost) is computed basing on the number of userland x86 instructions required to perform the
-particular operation in current NEAR runtime implementation. To compute this cost, we use instrumented QEMU binary
+particular operation in current UNC runtime implementation. To compute this cost, we use instrumented QEMU binary
 translating engine to execute required operations in the userland Linux simulator.
-Thus, to measure the execution cost we have to compile NEAR runtime benchmark for Linux, execute the benchmark under
+Thus, to measure the execution cost we have to compile UNC runtime benchmark for Linux, execute the benchmark under
 instrumented QEMU running in Docker, and count how many x86 instructions are executed between start and end of execution.
 
  Instrumentation of QEMU is implemented in the following manner. We install instrumentation callback which conditionally increments
 the instruction counter on every instruction during translation by QEMU's JIT, TCG. We activate counting when specific Linux syscall
 (currently, 0 aka sys_read) is executed with the certain arguments (file descriptor argument == 0xcafebabe or 0xcafebabf).
 On start event we clear instruction counter, on stop event we stop counting and return counted instructions into the buffer provided
-to read syscall. As result, NEAR benchmark will know the exact instruction counter passed between two moments and this value
-is the pure function of Docker image used, Rust compiler version and the NEAR implementation and is fully reproducible.
+to read syscall. As result, UNC benchmark will know the exact instruction counter passed between two moments and this value
+is the pure function of Docker image used, Rust compiler version and the UNC implementation and is fully reproducible.
 
 ## Usage
 

@@ -487,8 +487,8 @@ pub enum ActionErrorKind {
     /// Error occurs when a new `ActionReceipt` created by the `FunctionCall` action fails
     /// receipt validation.
     NewReceiptValidationError(ReceiptValidationError),
-    /// Error occurs when a `CreateAccount` action is called on a NEAR-implicit or ETH-implicit account.
-    /// See NEAR-implicit account creation NEP: <https://github.com/nearprotocol/NEPs/pull/71>.
+    /// Error occurs when a `CreateAccount` action is called on a UNC-implicit or ETH-implicit account.
+    /// See UNC-implicit account creation NEP: <https://github.com/nearprotocol/NEPs/pull/71>.
     /// Also, see ETH-implicit account creation NEP: <https://github.com/near/NEPs/issues/518>.
     ///
     /// TODO(#8598): This error is named very poorly. A better name would be
@@ -548,7 +548,7 @@ impl Display for InvalidTxError {
                 signer_id, balance, cost
             ),
             InvalidTxError::LackBalanceForState { signer_id, amount } => {
-                write!(f, "Failed to execute, because the account {:?} wouldn't have enough balance to cover storage, required to have {} yoctoNEAR more", signer_id, amount)
+                write!(f, "Failed to execute, because the account {:?} wouldn't have enough balance to cover storage, required to have {} yoctoUNC more", signer_id, amount)
             }
             InvalidTxError::CostOverflow => {
                 write!(f, "Transaction gas or balance cost is too high")
@@ -788,7 +788,7 @@ impl Display for ActionErrorKind {
             ),
             ActionErrorKind::LackBalanceForState { account_id, amount } => write!(
                 f,
-                "The account {} wouldn't have enough balance to cover storage, required to have {} yoctoNEAR more",
+                "The account {} wouldn't have enough balance to cover storage, required to have {} yoctoUNC more",
                 account_id, amount
             ),
             ActionErrorKind::TriesToUnstake { account_id } => {

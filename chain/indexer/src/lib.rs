@@ -34,13 +34,13 @@ pub struct InitConfigArgs {
     pub fast: bool,
     /// Genesis file to use when initializing testnet (including downloading)
     pub genesis: Option<String>,
-    /// Download the verified NEAR genesis file automatically.
+    /// Download the verified UNC genesis file automatically.
     pub download_genesis: bool,
     /// Specify a custom download URL for the genesis file.
     pub download_genesis_url: Option<String>,
     /// Specify a custom download URL for the records file.
     pub download_records_url: Option<String>,
-    /// Download the verified NEAR config file automatically.
+    /// Download the verified UNC config file automatically.
     pub download_config: bool,
     /// Specify a custom download URL for the config file.
     pub download_config_url: Option<String>,
@@ -50,12 +50,12 @@ pub struct InitConfigArgs {
     pub max_gas_burnt_view: Option<Gas>,
 }
 
-/// Enum to define a mode of syncing for NEAR Indexer
+/// Enum to define a mode of syncing for UNC Indexer
 #[derive(Debug, Clone)]
 pub enum SyncModeEnum {
     /// Real-time syncing, always taking the latest finalized block to stream
     LatestSynced,
-    /// Starts syncing from the block NEAR Indexer was interrupted last time
+    /// Starts syncing from the block UNC Indexer was interrupted last time
     FromInterruption,
     /// Specific block height to start syncing from
     BlockHeight(u64),
@@ -70,12 +70,12 @@ pub enum AwaitForNodeSyncedEnum {
     StreamWhileSyncing,
 }
 
-/// NEAR Indexer configuration to be provided to `Indexer::new(IndexerConfig)`
+/// UNC Indexer configuration to be provided to `Indexer::new(IndexerConfig)`
 #[derive(Debug, Clone)]
 pub struct IndexerConfig {
     /// Path to `home_dir` where configs and keys can be found
     pub home_dir: std::path::PathBuf,
-    /// Mode of syncing for NEAR Indexer instance
+    /// Mode of syncing for UNC Indexer instance
     pub sync_mode: SyncModeEnum,
     /// Whether await for node to be synced or not
     pub await_for_node_synced: AwaitForNodeSyncedEnum,

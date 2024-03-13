@@ -105,7 +105,7 @@ used to pay for all on-chain transactions. When running in the distributed mode,
 it will first create a funding account for each worker instance and those are
 used to pay for transactions.
 
-As the load generator is currently configured, it will consume 1M NEAR from the
+As the load generator is currently configured, it will consume 1M UNC from the
 master funding account for each worker instance spawned. So, if you run with 64
 workers with 1000 users, it will consume 64M unc. It's recommended to have a
 funding key with billions of unc.

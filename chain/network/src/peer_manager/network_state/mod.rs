@@ -120,9 +120,9 @@ pub(crate) struct NetworkState {
     pub connection_store: connection_store::ConnectionStore,
     /// List of peers to which we should re-establish a connection
     pub pending_reconnect: Mutex<Vec<PeerInfo>>,
-    /// A graph of the whole NEAR network.
+    /// A graph of the whole UNC network.
     pub graph: Arc<crate::routing::Graph>,
-    /// A sparsified graph of the whole NEAR network.
+    /// A sparsified graph of the whole UNC network.
     /// TODO(saketh): deprecate graph above, rename this to RoutingTable
     pub graph_v2: Arc<crate::routing::GraphV2>,
 

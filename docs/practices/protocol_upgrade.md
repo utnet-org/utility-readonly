@@ -7,7 +7,7 @@ this process.
 
 ### Background
 
-At NEAR, we use the term protocol version to mean the version of the blockchain
+At UNC, we use the term protocol version to mean the version of the blockchain
 protocol and is separate from the version of some specific client (such as framework),
 since the protocol version defines the protocol rather than some specific
 implementation of the protocol. More concretely, for each epoch, there is a

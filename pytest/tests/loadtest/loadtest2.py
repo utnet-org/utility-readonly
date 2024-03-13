@@ -166,7 +166,7 @@ class TransferFT(Transaction):
             json.dumps(args).encode('utf-8'),
             # About enough gas per call to fit N such transactions into an average block.
             self.tgas * account.TGAS,
-            # Gotta attach exactly 1 yoctoNEAR according to NEP-141 to avoid calls from restricted access keys
+            # Gotta attach exactly 1 yoctoUNC according to NEP-141 to avoid calls from restricted access keys
             1,
             sender.use_nonce(),
             block_hash)
@@ -185,7 +185,7 @@ class TransferNear(Transaction):
     def send(self, node, block_hash):
         sender = ACCOUNTS[self.sender]
         logger.debug(
-            f"sending {self.how_much} NEAR from {sender.key.account_id} to {self.recipient_id}"
+            f"sending {self.how_much} UNC from {sender.key.account_id} to {self.recipient_id}"
         )
         tx = transaction.sign_payment_tx(sender.key, self.recipient_id,
                                          int(self.how_much * 1E24),
@@ -366,7 +366,7 @@ def main():
         '--contract-key',
         required='--setup-cluster' not in sys.argv,
         help=
-        'account to deploy contract to and use as source of NEAR for account creation'
+        'account to deploy contract to and use as source of UNC for account creation'
     )
     parser.add_argument('--accounts',
                         default=1000,
@@ -375,7 +375,7 @@ def main():
         '--no-account-topup',
         default=False,
         action='store_true',
-        help='Fill accounts with additional NEAR prior to testing')
+        help='Fill accounts with additional UNC prior to testing')
     parser.add_argument('--shards', default=10, help='number of shards')
     parser.add_argument('--executors',
                         default=2,

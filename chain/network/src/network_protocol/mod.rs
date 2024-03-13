@@ -314,7 +314,7 @@ pub struct AdvertisedPeerDistance {
 }
 
 /// Struct shared by a peer listing the distances it has to other peers
-/// in the NEAR network.
+/// in the UNC network.
 ///
 /// It includes a collection of signed edges forming a spanning tree
 /// which verifiably achieves the advertised routing distances.

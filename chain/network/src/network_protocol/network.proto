@@ -70,7 +70,7 @@ message PeerInfo {
   bytes borsh = 1;
 }
 
-// sha256 hash of the borsh-encoded NEAR Block.
+// sha256 hash of the borsh-encoded UNC Block.
 message CryptoHash {
   // sha256 hash (32 bytes)
   bytes hash = 1;
@@ -94,7 +94,7 @@ message AnnounceAccount {
   bytes borsh = 1;
 }
 
-// Wrapper of the borsh-encoded NEAR chain block.
+// Wrapper of the borsh-encoded UNC chain block.
 // https://github.com/utnet-org/utility/blob/1a4edefd0116f7d1e222bc96569367a02fe64199/core/primitives/src/block.rs#L77
 message Block {
   bytes borsh = 1;
@@ -111,20 +111,20 @@ message StateResponseInfo {
   bytes borsh = 1;
 }
 
-// Unique identifier of the NEAR chain.
+// Unique identifier of the UNC chain.
 message GenesisId {
   // Name of the chain (for example "mainnet").
   string chain_id = 1;
-  // Hash of the genesis block(?) of the NEAR chain.
+  // Hash of the genesis block(?) of the UNC chain.
   CryptoHash hash = 2;
 }
 
 // Basic information about the chain view maintained by a peer.
 message PeerChainInfo {
   GenesisId genesis_id = 1;
-  // Height of the highest NEAR chain block known to a peer.
+  // Height of the highest UNC chain block known to a peer.
   uint64 height = 2;
-  // Shards of the NEAR chain tracked by the peer.
+  // Shards of the UNC chain tracked by the peer.
   repeated uint64 tracked_shards = 3;
   // Whether the peer is an archival node.
   bool archival = 4;
@@ -140,13 +140,13 @@ message PeerChainInfo {
 //     A may retry the Handshake with a different payload.
 message Handshake {
   // The protocol_version that the sender wants to use for communication.
-  // Currently NEAR protocol and NEAR network protocol are versioned together
+  // Currently UNC protocol and UNC network protocol are versioned together
   // (it may change in the future), however peers may communicate with the newer version
-  // of the NEAR network protol, than the NEAR protocol version approved by the quorum of
+  // of the UNC network protol, than the UNC protocol version approved by the quorum of
   // the validators. If B doesn't support protocol_version, it sends back HandshakeFailure
   // with reason ProtocolVersionMismatch.
   uint32 protocol_version = 1;
-  // Oldest version of the NEAR network protocol that the peer supports.
+  // Oldest version of the UNC network protocol that the peer supports.
   uint32 oldest_supported_version = 2;
   // PeerId of the sender.
   PublicKey sender_peer_id = 3;
@@ -156,7 +156,7 @@ message Handshake {
   PublicKey target_peer_id = 4;
   // TCP port on which sender is listening for inbound connections.
   uint32 sender_listen_port = 5;
-  // Basic info about the NEAR chain that the sender belongs to.
+  // Basic info about the UNC chain that the sender belongs to.
   // Sender expects receiver to belong to the same chain.
   // In case of mismatch, receiver sends back HandshakeFailure with 
   // reason GenesisMismatch.
@@ -192,11 +192,11 @@ message HandshakeFailure {
 
   // Data about the peer.
   PeerInfo peer_info = 2;
-  // GenesisId of the NEAR chain that the peer belongs to.
+  // GenesisId of the UNC chain that the peer belongs to.
   GenesisId genesis_id = 3;
-  // Newest NEAR network version supported by the peer.
+  // Newest UNC network version supported by the peer.
   uint32 version = 4;
-  // Oldest NEAR network version supported by the peer.
+  // Oldest UNC network version supported by the peer.
   uint32 oldest_supported_version = 5;
 }
 
@@ -249,7 +249,7 @@ message AccountData {
 
 // Message sent whenever the sender learns about new connections
 // between the peers in the network (I think).
-// It provides a view of the whole NEAR network to each peer.
+// It provides a view of the whole UNC network to each peer.
 //
 // Edges constitute a graph between PeerIds, signed by both of
 // the peers. This is one of the first messages sent after Handshake.
@@ -257,11 +257,11 @@ message AccountData {
 // Afterwards only the graph delta (changed edges) are included.
 //
 // Accounts provides a mapping AccountId -> PeerId, providing knowledge
-// about which NEAR peer controls which NEAR account.
+// about which UNC peer controls which UNC account.
 message RoutingTableUpdate {
   reserved 3,4;
   repeated Edge edges = 1;
-  // list of known NEAR validator accounts 
+  // list of known UNC validator accounts 
   repeated AnnounceAccount accounts = 2;
 }
 
@@ -272,7 +272,7 @@ message AdvertisedPeerDistance {
 }
 
 /// Message shared by a peer listing the distances it has to other peers
-/// in the NEAR network.
+/// in the UNC network.
 ///
 /// It includes a collection of signed edges forming a spanning tree
 /// which verifiably achieves the advertised routing distances.
@@ -334,7 +334,7 @@ message PeersResponse {
   repeated PeerInfo direct_peers = 2;
 }
 
-// Request to send back headers of the NEAR chain blocks.
+// Request to send back headers of the UNC chain blocks.
 // Receiver finds in block_hashes the first hash of a block it knows about
 // and rends back BlockHeadersResponse with block headers following that block.
 // At most 512 block headers are returned:
@@ -347,17 +347,17 @@ message BlockHeadersRequest {
   repeated CryptoHash block_hashes = 1;
 }
 
-// A collection of headers of the NEAR chain blocks.
+// A collection of headers of the UNC chain blocks.
 message BlockHeadersResponse {
   repeated BlockHeader block_headers = 1;
 }
 
-// Request to send back a NEAR chain block with a given hash.
+// Request to send back a UNC chain block with a given hash.
 message BlockRequest {
   CryptoHash block_hash = 1;
 }
 
-// NEAR chain Block.
+// UNC chain Block.
 // It might be send both as a response to BlockRequest,
 // or unsolicitated in case a new Block is being broadcasted.
 message BlockResponse {
@@ -442,7 +442,7 @@ message SyncSnapshotHosts {
   repeated SnapshotHostInfo hosts = 1;
 }
 
-// PeerMessage is a wrapper of all message types exchanged between NEAR nodes.
+// PeerMessage is a wrapper of all message types exchanged between UNC nodes.
 // The wire format of a single message M consists of len(M)+4 bytes:
 // <len(M)> : 4 bytes : little endian uint32
 // <M> : N bytes : binary encoded protobuf PeerMessage M

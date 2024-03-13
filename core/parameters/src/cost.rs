@@ -511,7 +511,7 @@ impl StorageUsageConfig {
 
 /// Helper functions for computing Transfer fees.
 /// In case of implicit account creation they include extra fees for the CreateAccount and
-/// AddFullAccessKey (for NEAR-implicit account only) actions that are implicit.
+/// AddFullAccessKey (for UNC-implicit account only) actions that are implicit.
 /// We can assume that no overflow will happen here.
 pub fn transfer_exec_fee(
     cfg: &RuntimeFeesConfig,

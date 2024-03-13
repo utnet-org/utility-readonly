@@ -1,6 +1,6 @@
 # Malicious producers in phase 2 of sharding.
 
-In this document, we'll compare the impact of the hypothetical malicious producer on the NEAR system (both in the current setup and how it will work when phase2 is implemented).
+In this document, we'll compare the impact of the hypothetical malicious producer on the UNC system (both in the current setup and how it will work when phase2 is implemented).
 
 ## Current state (Phase 1)
 
@@ -89,11 +89,11 @@ Things that we'll have to figure out in the future:
 In the example above, we'd successfully slash the ``C1`` producer - but was it  
 enough?
 
-Currently (with 4 shards) you need around 20k NEAR to become a chunk producer. 
+Currently (with 4 shards) you need around 20k UNC to become a chunk producer. 
 If we increase the number of shards to 100, it would drop the minimum stake to 
-around 1k NEAR.
+around 1k UNC.
 
-In such scenario, by sacrificing 1k NEAR, the malicious node can cause the 
+In such scenario, by sacrificing 1k UNC, the malicious node can cause the 
 system to rollback a couple blocks (potentially having bad impact on the bridge 
 contracts etc).
 

@@ -1,6 +1,6 @@
 # How Epoch Works
 
-This short document will tell you all you need to know about Epochs in NEAR
+This short document will tell you all you need to know about Epochs in UNC
 protocol.
 
 You can also find additional information about epochs in

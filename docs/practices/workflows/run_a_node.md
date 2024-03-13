@@ -361,9 +361,9 @@ Transactions are submitted via RPC as well. Submitting a transaction manually
 with `http` is going to be cumbersome though — transactions are borsh encoded
 to bytes, then signed, then encoded in base64 for JSON.
 
-So we will use the official [NEAR CLI] utility.
+So we will use the official [UNC CLI] utility.
 
-[NEAR CLI]: https://docs.near.org/tools/unc-cli
+[UNC CLI]: https://docs.near.org/tools/unc-cli
 
 Install it via `npm`:
 
@@ -417,7 +417,7 @@ Saving key to 'undefined/local/bob.test.near.json'
 Account bob.test.near for network "local" was created.
 
 $ unc_ENV=local near send alice.test.near bob.test.near 10
-Sending 10 NEAR to bob.test.near from alice.test.near
+Sending 10 UNC to bob.test.near from alice.test.near
 Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Transaction Id BBPndo6gR4X8pzoDK7UQfoUXp5J8WDxkf8Sq75tK5FFT
 To see the transaction in the transaction explorer, please open this url in your browser
@@ -431,7 +431,7 @@ to do multiple commands to avoid repetition:
 $ export unc_ENV=local
 ```
 
-NEAR CLI printouts are not always the most useful or accurate, but this seems to
+UNC CLI printouts are not always the most useful or accurate, but this seems to
 work.
 
 Note that `near` automatically creates keypairs and stores them at
@@ -464,7 +464,7 @@ some amount of tokens was deducted to account for transaction fees.
 
 ## Recap
 
-Great! So we've learned how to run our very own single-node NEAR network using a
+Great! So we've learned how to run our very own single-node UNC network using a
 binary we've built from source. The steps are:
 
 - Create configs with `cargo run --profile dev-release -p uncd -- init`

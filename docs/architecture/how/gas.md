@@ -13,7 +13,7 @@ transaction object, we write `SignedTransaction`._
 The topic is split into several sections.
 
 1. [Gas Flow](#gas-flow)
-    - [Buying Gas](#buying-gas-for-a-transaction): How are NEAR tokens converted to gas?
+    - [Buying Gas](#buying-gas-for-a-transaction): How are UNC tokens converted to gas?
     - [Burning Gas](#burning-gas): Who receives burnt tokens?
     - [Gas in Contract Calls](#gas-in-contract-calls): How is gas attached to calls?
     - [Contract Reward](#contract-reward): How smart contract earn a reward.
@@ -32,7 +32,7 @@ in more details.
 ### Buying Gas for a Transaction
 
 A signer pays all the gas required for a transaction upfront. However, there is
-no explicit act of buying gas. Instead, the fee is subtracted directly in NEAR
+no explicit act of buying gas. Instead, the fee is subtracted directly in UNC
 tokens from the balance of the signer's account. If we ignore all the details
 explained further down, the fee is calculated as `gas amount` * `gas price`.
 
@@ -178,8 +178,8 @@ burn gas at the given block height. Confusingly, this is not the same price at
 which gas is purchased.
 (See [Effective Gas Purchase Price](#effective-gas-price).)
 
-The price is measured in NEAR tokens per unit of gas. It dynamically changes in
-the range between 0.1 NEAR per Pgas and 2 NEAR per Pgas, based on demand. (1
+The price is measured in UNC tokens per unit of gas. It dynamically changes in
+the range between 0.1 UNC per Pgas and 2 UNC per Pgas, based on demand. (1
 Pgas = 1000 Tgas corresponds to a full chunk.)
 
 The block producer has to set this field following the exact formula as defined

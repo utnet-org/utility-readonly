@@ -21,7 +21,7 @@ use std::net::SocketAddr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 /// Represents a connection to a peer, and provides only minimal functionality.
-/// Almost none of the usual NEAR network logic is implemented, and the user
+/// Almost none of the usual UNC network logic is implemented, and the user
 /// will receive messages via the recv() function and send messages via
 /// send_message() and send_routed_message()
 pub struct Connection {
@@ -218,7 +218,7 @@ fn new_handshake(
 }
 
 impl Connection {
-    /// Connect to the NEAR node at `peer_id`@`addr`. The inputs are used to build out handshake,
+    /// Connect to the UNC node at `peer_id`@`addr`. The inputs are used to build out handshake,
     /// and this function will return a `Peer` when a handshake has been received successfully.
     pub async fn connect(
         addr: SocketAddr,

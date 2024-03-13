@@ -269,7 +269,7 @@ fn check_meta_tx_fn_call(
     tx_result
 }
 
-/// The simplest non-empty meta transaction: Transferring some NEAR tokens.
+/// The simplest non-empty meta transaction: Transferring some UNC tokens.
 ///
 /// Note: The expectation is that the relayer pays for the tokens sent, as
 /// specified in NEP-366.
@@ -560,7 +560,7 @@ fn meta_tx_delete_account() {
 
 /// Test the canonical example for meta transactions: A fungible token transfer.
 ///
-/// Scenario: Bob sends some Carol-FT to David without requiring any NEAR tokens
+/// Scenario: Bob sends some Carol-FT to David without requiring any UNC tokens
 /// to purchase gas. Alice acts as a relayer.
 #[test]
 fn meta_tx_ft_transfer() {
@@ -673,7 +673,7 @@ fn ft_transfer_action(receiver: &str, amount: u128) -> (Action, u64) {
     (action, num_bytes as u64)
 }
 
-/// Add NEAR token balance to maintain the storage of an account, which
+/// Add UNC token balance to maintain the storage of an account, which
 /// registers the user in the fungible contract account.
 fn ft_register_action(receiver: &str) -> Action {
     let args: Vec<u8> = format!(
@@ -825,7 +825,7 @@ fn meta_tx_create_eth_implicit_account_fails() {
 /// in the same meta transaction.
 ///
 /// This is expected to fail with `AccountDoesNotExist`, known limitation of NEP-366.
-/// In case of NEAR-implicit accounts it only works with accounts that already exist
+/// In case of UNC-implicit accounts it only works with accounts that already exist
 /// because it needs to do a nonce check against the access key,
 /// which can only exist if the account exists.
 /// In case of ETH-implicit accounts the access key does not exist anyway.
@@ -875,7 +875,7 @@ fn meta_tx_create_and_use_eth_implicit_account() {
 /// pays for the storage and the user could delete the account and cash in,
 /// hence this workflow is not ideal from all circumstances.
 ///
-/// Using the account should only work for NEAR-implicit accounts,
+/// Using the account should only work for UNC-implicit accounts,
 /// as ETH-implicit accounts do not have access keys
 /// and they can only be used by calling associated smart contract.
 fn meta_tx_create_implicit_account(new_account: AccountId) {

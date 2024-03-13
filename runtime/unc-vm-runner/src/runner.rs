@@ -25,7 +25,7 @@ pub(crate) type VMResult<T = VMOutcome> = Result<T, VMRunnerError>;
 
 /// Validate and run the specified contract.
 ///
-/// This is the entry point for executing a NEAR protocol contract. Before the
+/// This is the entry point for executing a UNC protocol contract. Before the
 /// entry point (as specified by the `method_name` argument) of the contract
 /// code is executed, the contract will be validated (see
 /// [`crate::prepare::prepare_contract`]), instrumented (e.g. for gas
@@ -74,7 +74,7 @@ pub fn run(
 pub trait VM {
     /// Validate and run the specified contract.
     ///
-    /// This is the entry point for executing a NEAR protocol contract. Before
+    /// This is the entry point for executing a UNC protocol contract. Before
     /// the entry point (as specified by the `method_name` argument) of the
     /// contract code is executed, the contract will be validated (see
     /// [`crate::prepare::prepare_contract`]), instrumented (e.g. for gas

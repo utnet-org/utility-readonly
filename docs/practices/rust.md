@@ -39,7 +39,7 @@ Rust has some great tooling, which is also documented:
 * For IDE support, see [IntelliJ Rust](https://www.jetbrains.com/rust/) if you
   like JetBrains products or
   [rust-analyzer](https://rust-analyzer.github.io/manual.html) if you use any
-  other editor (fun fact: NEAR was one of the sponsors of rust-analyzer!).
+  other editor (fun fact: UNC was one of the sponsors of rust-analyzer!).
 * [Rustup](https://rust-lang.github.io/rustup/) manages versions of Rust
   itself. It's unobtrusive, so feel free to skip this.
 

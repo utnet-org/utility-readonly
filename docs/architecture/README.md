@@ -24,7 +24,7 @@ the nodes agree (using a distributed consensus algorithm) on a particular
 sequence of transactions. Once transaction sequence is established, each node
 applies transactions to the current state. Because transactions are fully
 deterministic, each node in the network ends up with identical state. To allow
-greater scalability, NEAR protocol uses sharding, which allows a node to hold
+greater scalability, UNC protocol uses sharding, which allows a node to hold
 only a small subset (shard) of the whole state.
 
 `uncd` is a stateful, restartable process. When `uncd` starts, the node
@@ -170,7 +170,7 @@ answers queries without interfering with the operations of `Client`.
 
 ### `chain/network`
 
-This crate contains the entire implementation of the p2p network used by NEAR
+This crate contains the entire implementation of the p2p network used by UNC
 blockchain nodes.
 
 Two important structs here: `PeerManagerActor` and `Peer`. Peer manager
@@ -218,7 +218,7 @@ returns a `ApplyResult`, which includes state changes, execution outcomes, etc.
 
 `VMLogic` contains all the implementations of host functions and is the
 interface between runtime and wasm. `VMLogic` is constructed when runtime
-applies function call actions. In `VMLogic`, interaction with NEAR blockchain
+applies function call actions. In `VMLogic`, interaction with UNC blockchain
 happens in the following two ways:
 
 * `VMContext`, which contains lightweight information such as current block
@@ -235,7 +235,7 @@ supports different wasm compilers including wasmer0, wasmer2, and wasmtime
 through compile-time feature flags. Currently we use wasmer0 and wasmer2 in
 production. The `imports` module exposes host functions defined in
 `unc-vm-logic` to WASM code. In other words, it defines the ABI of the
-contracts on NEAR.
+contracts on UNC.
 
 ### `uncd`
 

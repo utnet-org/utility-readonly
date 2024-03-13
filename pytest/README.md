@@ -172,7 +172,7 @@ When executed on NayDuck, tests have access to `uncd`,
 `genesis-populate` and `restaked` binaries in `../target/debug` or
 `../target/release` directory (depending if the test has been
 scheduled with `--release` flag) just as if they were executed on
-local machine.  Similarly, freshly built NEAR test contracts will be
+local machine.  Similarly, freshly built UNC test contracts will be
 located in `../runtime/unc-test-contracts/res` directory.
 
 The `NAYDUCK=1`, `NIGHTLY_RUNNER=1` and `NAYDUCK_TIMEOUT=<timeout>`

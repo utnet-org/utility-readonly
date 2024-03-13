@@ -584,12 +584,12 @@ pub fn create_user_test_signer(account_name: &AccountIdRef) -> InMemorySigner {
     }
 }
 
-/// A fixed NEAR-implicit account for which tests can know the private key.
+/// A fixed UNC-implicit account for which tests can know the private key.
 pub fn unc_implicit_test_account() -> AccountId {
     "061b1dd17603213b00e1a1e53ba060ad427cef4887bd34a5e0ef09010af23b0a".parse().unwrap()
 }
 
-/// Private key for the fixed NEAR-implicit test account.
+/// Private key for the fixed UNC-implicit test account.
 pub fn unc_implicit_test_account_secret() -> SecretKey {
     "ed25519:5roj6k68kvZu3UEJFyXSfjdKGrodgZUfFLZFpzYXWtESNsLWhYrq3JGi4YpqeVKuw1m9R2TEHjfgWT1fjUqB1DNy".parse().unwrap()
 }

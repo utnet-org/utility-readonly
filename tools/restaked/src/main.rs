@@ -53,7 +53,7 @@ fn main() {
             Arg::new("stake-amount")
                 .long("stake-amount")
                 .default_value("0")
-                .help("Stake amount in NEAR, if 0 is used it restakes last seen staked amount")
+                .help("Stake amount in UNC, if 0 is used it restakes last seen staked amount")
                 .action(clap::ArgAction::Set),
         )
         .get_matches();

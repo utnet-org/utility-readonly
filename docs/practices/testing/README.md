@@ -18,7 +18,7 @@
 
 # Tests hierarchy
 
-In the NEAR Reference Client we largely split tests into three categories:
+In the UNC Reference Client we largely split tests into three categories:
 
 1. **Relatively cheap sanity or fast fuzz tests:** It includes all the `#[test]`
    Rust tests not decorated by features. Our repo is configured in such a way

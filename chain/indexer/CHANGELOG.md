@@ -2,12 +2,12 @@
 
 ## 1.32.x
 
-* Add `nightly` feature to NEAR Indexer Framework to respect this feature for `framework` lib (requried for `betanet`)
+* Add `nightly` feature to UNC Indexer Framework to respect this feature for `framework` lib (requried for `betanet`)
 
 ## 1.26.0
 
-* `state_changes` field is moved from the top-level `StreamerMessage` to `IndexerShard` struct to align better with the sharded nature of NEAR protocol. In the future, when framework will be able to track only a subset of shards, this API will work naturally, so we take pro-active measures to solidify the APIs
-* All the NEAR Indexer Framework types were extracted to a separate crate `unc-indexer-primitives`
+* `state_changes` field is moved from the top-level `StreamerMessage` to `IndexerShard` struct to align better with the sharded nature of UNC protocol. In the future, when framework will be able to track only a subset of shards, this API will work naturally, so we take pro-active measures to solidify the APIs
+* All the UNC Indexer Framework types were extracted to a separate crate `unc-indexer-primitives`
 * Increase the streamer size from 16 to 100 in order to increase the speed of streaming messages (affects reindexing jobs)
 
 ## Breaking changes
@@ -36,7 +36,7 @@ Since the change of reading genesis method to optimize memory usage. You'd be ab
 
 ## 0.9.1
 
-* Introduce a hot-fix. Execution outcome for local receipt might appear not in the same block as the receipt. Local receipts are not saved in database and unable to be fetched. To include a receipt in `IndexerExecutionOutcomeWithReceipt` and prevent NEAR Indexer Framework from panic we fetch previous blocks to find corresponding local receipt to include.
+* Introduce a hot-fix. Execution outcome for local receipt might appear not in the same block as the receipt. Local receipts are not saved in database and unable to be fetched. To include a receipt in `IndexerExecutionOutcomeWithReceipt` and prevent UNC Indexer Framework from panic we fetch previous blocks to find corresponding local receipt to include.
 
 ## 0.9.0 (do not use this version, it contains a bug)
 
@@ -49,7 +49,7 @@ Since the change of reading genesis method to optimize memory usage. You'd be ab
 ## Breaking changes
 
 * `IndexerChunkView` doesn't contain field `receipt_execution_outcomes` anymore, this field has been moved to `IndexerShard`
-* `StreamerMessage` structure was aligned more with NEAR Protocol specification and now looks like:
+* `StreamerMessage` structure was aligned more with UNC Protocol specification and now looks like:
   ```
   StreamerMessage {
     block: BlockView,

@@ -13,7 +13,7 @@ details of how they are computed can change without a protocol version bump.
 ## Example Transaction Gas Profile
 
 You can query the gas profile of a transaction with
-[NEAR CLI](https://docs.near.org/tools/unc-cli).
+[UNC CLI](https://docs.near.org/tools/unc-cli).
 
 ```bash
 unc_ENV=mainnet near tx-status 8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw  \
