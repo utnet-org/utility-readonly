@@ -1181,11 +1181,6 @@ impl From<ChunkHeaderView> for ShardChunkHeader {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct MinerChipsListView {
-    pub account_id: AccountId,
-    pub chips: Vec<ChipView>,
-}
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct BlockView {
     pub author: AccountId,
     pub header: BlockHeaderView,
