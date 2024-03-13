@@ -1252,6 +1252,7 @@ impl RuntimeAdapter for KeyValueRuntime {
             }),
             QueryRequest::ViewChipList { .. } => Ok(QueryResponse {
                 kind: QueryResponseKind::ChipList(ChipsList {
+                    total_power: 0,
                     chips: vec![ChipView {
                         miner_id: "".to_string(),
                         power: 0,

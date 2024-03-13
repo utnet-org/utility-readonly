@@ -272,14 +272,21 @@ impl FromIterator<AccessKeyInfoView> for AccessKeyList {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct ChipsList {
+    pub total_power: Power,
     pub chips: Vec<ChipView>,
 }
 
 
 impl FromIterator<ChipView> for ChipsList {
     fn from_iter<I: IntoIterator<Item=ChipView>>(iter: I) -> Self {
+        let chips: Vec<ChipView> = iter.into_iter().collect();
+
+        // Calculate total power by summing up the power of each chip
+        let total_power: u64 = chips.iter().map(|chip| chip.power).sum();
+
         ChipsList {
-            chips: iter.into_iter().collect(),
+            total_power,
+            chips,
         }
     }
 }
