@@ -21,9 +21,7 @@ use unc_primitives::types::validator_power_and_frozen::{ValidatorPowerAndFrozen,
 use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use unc_primitives::validator_mandates::AssignmentWeight;
 use unc_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
-use unc_primitives::views::{
-    CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView,
-};
+use unc_primitives::views::{AllMinersView, CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView};
 use unc_store::{DBCol, Store, StoreUpdate};
 use num_rational::Rational64;
 use primitive_types::U256;
@@ -1027,6 +1025,18 @@ impl EpochManager {
             }
         }
         Ok(store_update)
+    }
+
+    /// Given block hash, return all the miners
+    pub fn get_all_miners(
+        &self,
+        block_hash: &CryptoHash,
+        // height: BlockHeight,
+    ) -> Result<AllMinersView, BlockError> {
+        let block_info = self.get_block_info(block_hash)?;
+        let validators = block_info.validators_iter();
+        let all_miners_view: AllMinersView = validators.into();
+        Ok(all_miners_view)
     }
 
     /// Given epoch id and height, returns validator information that suppose to produce

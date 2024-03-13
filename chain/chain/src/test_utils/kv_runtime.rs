@@ -1,3 +1,4 @@
+use unc_primitives::views::AllMinersView;
 use super::ValidatorSchedule;
 use crate::types::{
     ApplyChunkBlockContext, ApplyChunkResult, ApplyChunkShardContext, ApplyResultForResharding,
@@ -968,6 +969,7 @@ impl EpochManagerAdapter for MockEpochManager {
     #[cfg(feature = "new_epoch_sync")]
     fn force_update_aggregator(&self, _epoch_id: &EpochId, _hash: &CryptoHash) {}
 
+fn get_all_miners(&self, _: &CryptoHash) -> Result<AllMinersView, EpochError> { todo!() }
 }
 
 impl RuntimeAdapter for KeyValueRuntime {

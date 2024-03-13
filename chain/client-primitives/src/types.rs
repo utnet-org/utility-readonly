@@ -10,7 +10,7 @@ use unc_primitives::types::{
     AccountId, BlockHeight, BlockReference, EpochId, EpochReference, MaybeBlockId, ShardId,
     TransactionOrReceiptId,
 };
-use unc_primitives::views::{BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView, GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, ShardSyncDownloadView, SplitStorageInfoView, StateChangesKindsView, StateChangesRequestView, StateChangesView, SyncStatusView, TxStatusView};
+use unc_primitives::views::{AllMinersView, BlockView, ChunkView, DownloadStatusView, EpochValidatorInfo, ExecutionOutcomeWithIdView, GasPriceView, LightClientBlockLiteView, LightClientBlockView, MaintenanceWindowsView, QueryRequest, QueryResponse, ReceiptView, ShardSyncDownloadView, SplitStorageInfoView, StateChangesKindsView, StateChangesRequestView, StateChangesView, SyncStatusView, TxStatusView};
 pub use unc_primitives::views::{StatusResponse, StatusSyncInfo};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -405,10 +405,53 @@ impl From<EpochError> for GetProviderError {
 }
 
 
+
 impl Message for crate::types::GetProvider {
     type Result = Result<AccountId, crate::types::GetProviderError>;
 }
 
+/// Actor message requesting block provider by EpochId and BlockHeight.
+#[derive(Debug)]
+pub struct GetAllMiners(pub CryptoHash);
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetAllMinersError {
+    #[error("IO Error: {error_message}")]
+    IOError { error_message: String },
+    #[error("Block either has never been observed on the node or has been garbage collected: {error_message}")]
+    UnknownBlock { error_message: String },
+    // NOTE: Currently, the underlying errors are too broad, and while we tried to handle
+    // expected cases, we cannot statically guarantee that no other errors will be returned
+    // in the future.
+    // TODO #3851: Remove this variant once we can exhaustively match all the underlying errors
+    #[error("It is a bug if you receive this error type, please, report this incident: https://github.com/utnet-org/utility/issues/new/choose. Details: {error_message}")]
+    Unreachable { error_message: String },
+}
+
+impl From<unc_chain_primitives::Error> for crate::types::GetAllMinersError {
+    fn from(error: unc_chain_primitives::Error) -> Self {
+        match error {
+            unc_chain_primitives::Error::IOErr(error) => {
+                Self::IOError { error_message: error.to_string() }
+            }
+            unc_chain_primitives::Error::DBNotFoundErr(error_message) => {
+                Self::UnknownBlock { error_message }
+            }
+            _ => Self::Unreachable { error_message: error.to_string() },
+        }
+    }
+}
+
+impl From<EpochError> for crate::types::GetAllMinersError {
+    fn from(error: EpochError) -> Self {
+        Self::IOError { error_message: error.to_string() }
+    }
+}
+
+
+impl Message for crate::types::GetAllMiners {
+    type Result = Result<AllMinersView, crate::types::GetAllMinersError>;
+}
 
 /// Actor message requesting block by id, hash or sync state.
 #[derive(Debug)]
