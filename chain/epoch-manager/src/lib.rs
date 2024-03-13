@@ -1888,9 +1888,12 @@ impl EpochManager {
             validator_mandates
             // end customized by James Savechives
         );
-        // println!("the random value is : {:?}", block_header_info.random_value);
-        // println!("the validators value is : {:?}", validators);
-        println!("the block producers settlement from block_info is : {:?}",block_producers_settlement);
+
+        debug!(target: "epoch_manager", "the random value is: {:?}, the validators value is: {:?}, the block producers settlement from block_info is: {:?}",
+        block_header_info.random_value,
+        validators,
+        block_producers_settlement);
+
         self.record_block_info(block_info, rng_seed)
 
     }
