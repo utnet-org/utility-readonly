@@ -58,6 +58,7 @@ unc-state-parts-dump-check.workspace = true
 unc-state-viewer.workspace = true
 unc-store.workspace = true
 unc-undo-block.workspace = true
+env_logger = "0.11.3"
 
 [build-dependencies]
 anyhow.workspace = true
