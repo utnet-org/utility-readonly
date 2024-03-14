@@ -70,6 +70,23 @@ const EXPECT_ACCOUNT_EXISTS: &str = "account exists, checked above";
 
 /// Contains information to update validators accounts at the first block of a new epoch.
 #[derive(Debug)]
+pub struct ValidatorAccountsUpdateInBlock {
+    /// Maximum power across last 3 epochs.
+    pub power_info: HashMap<AccountId, Power>,
+    /// Maximum frozen across last 3 epochs.
+    pub frozen_info: HashMap<AccountId, Balance>,
+    /// Rewards to distribute to validators.
+    pub validator_rewards: HashMap<AccountId, Balance>,
+    /// Power proposals from the last chunk.
+    pub last_power_proposals: HashMap<AccountId, Power>,
+    /// Frozen proposals from the last chunk.
+    pub last_frozen_proposals: HashMap<AccountId, Balance>,
+    /// The ID of the protocol treasury account if it belongs to the current shard.
+    pub protocol_treasury_account_id: Option<AccountId>,
+    /// Accounts to slash and the slashed amount (None means everything)
+    pub slashing_info: HashMap<AccountId, Option<Balance>>,
+}
+#[derive(Debug)]
 pub struct ValidatorAccountsUpdate {
     /// Maximum power across last 3 epochs.
     pub power_info: HashMap<AccountId, Power>,
@@ -1020,45 +1037,46 @@ impl Runtime {
     /// Iterates over the validators in the current shard and updates their accounts to return stake
     /// and allocate rewards. Also updates protocol treasury account if it belongs to the current
     /// shard.
-    fn update_validator_accounts(
+
+    fn update_validator_accounts_in_block(
         &self,
         state_update: &mut TrieUpdate,
         validator_accounts_update: &ValidatorAccountsUpdate,
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        // for (account_id, max_of_power) in &validator_accounts_update.power_info {
-        //     if let Some(mut account) = get_account(state_update, account_id)? {
-        //         if account.power() < *max_of_power {
-        //             return Err(StorageError::StorageInconsistentState(format!(
-        //                 "FATAL: powering invariant does not hold. \
-        //                  Account power {} is less than maximum of power {} in the past three epochs",
-        //                 account.power(),
-        //                 max_of_power)).into());
-        //         }
-        //         let last_power_proposal =
-        //             *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
-        //         let return_power = account
-        //             .power()
-        //             .checked_sub(max(*max_of_power, last_power_proposal))
-        //             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-        //         debug!(target: "runtime", "account {} return power {}", account_id, return_power);
-        //         account.set_power(
-        //             account
-        //                 .power()
-        //                 .checked_sub(return_power)
-        //                 .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-        //         );
-        //         set_account(state_update, account_id.clone(), &account);
-        //     } else if *max_of_power > 0 {
-        //         // if max_of_power > 0, it means that the account must have power
-        //         // and therefore must exist
-        //         return Err(StorageError::StorageInconsistentState(format!(
-        //             "Account {} with max of power {} is not found",
-        //             account_id, max_of_power
-        //         ))
-        //         .into());
-        //     }
-        // }
+        for (account_id, max_of_power) in &validator_accounts_update.power_info {
+            if let Some(account) = get_account(state_update, account_id)? {
+                if account.power() < *max_of_power {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: powering invariant does not hold. \
+                         Account power {} is less than maximum of power {} in the past three epochs",
+                        account.power(),
+                        max_of_power)).into());
+                }
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
+                let return_power = account
+                    .power()
+                    .checked_sub(max(*max_of_power, last_power_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
+                // account.set_power(
+                //     account
+                //         .power()
+                //         .checked_sub(return_power)
+                //         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                // );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
+                ))
+                .into());
+            }
+        }
 
         for (account_id, max_of_frozen) in &validator_accounts_update.frozen_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
@@ -1076,13 +1094,13 @@ impl Runtime {
                        account_id, account.locked(), max_of_frozen
                 );
                 // customized by james savechives
-                // if account.locked() < *max_of_frozen {
-                //     return Err(StorageError::StorageInconsistentState(format!(
-                //         "FATAL: staking invariant does not hold. \
-                //          Account frozen {} is less than maximum of locked {} in the past three epochs",
-                //         account.locked(),
-                //         max_of_frozen)).into());
-                // }
+                if account.locked() < *max_of_frozen {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: staking invariant does not hold. \
+                         Account frozen {} is less than maximum of locked {} in the past three epochs",
+                        account.locked(),
+                        max_of_frozen)).into());
+                }
                 let last_frozen_proposal =
                     *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
                 let return_frozen = account
@@ -1169,6 +1187,157 @@ impl Runtime {
 
         Ok(())
     }
+
+    #[allow(dead_code)]
+    fn update_validator_accounts(
+        &self,
+        state_update: &mut TrieUpdate,
+        validator_accounts_update: &ValidatorAccountsUpdate,
+        stats: &mut ApplyStats,
+    ) -> Result<(), RuntimeError> {
+        for (account_id, max_of_power) in &validator_accounts_update.power_info {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                if account.power() < *max_of_power {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: powering invariant does not hold. \
+                         Account power {} is less than maximum of power {} in the past three epochs",
+                        account.power(),
+                        max_of_power)).into());
+                }
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
+                let return_power = account
+                    .power()
+                    .checked_sub(max(*max_of_power, last_power_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
+                account.set_power(
+                    account
+                        .power()
+                        .checked_sub(return_power)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_power > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of power {} is not found",
+                    account_id, max_of_power
+                ))
+                    .into());
+            }
+        }
+
+        for (account_id, max_of_frozen) in &validator_accounts_update.frozen_info {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
+                    debug!(target: "runtime", "account {} adding reward {} to locked {}", account_id, reward, account.locked());
+                    account.set_locked(
+                        account
+                            .locked()
+                            .checked_add(*reward)
+                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                    );
+                }
+                debug!(target: "runtime",
+                       "account {} locked {} max_of_frozen: {}",
+                       account_id, account.locked(), max_of_frozen
+                );
+                if account.locked() < *max_of_frozen {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: staking invariant does not hold. \
+                         Account power {} is less than maximum of locked {} in the past three epochs",
+                        account.locked(),
+                        max_of_frozen)).into());
+                }
+                let last_frozen_proposal =
+                    *validator_accounts_update.last_frozen_proposals.get(account_id).unwrap_or(&0);
+                let return_frozen = account
+                    .locked()
+                    .checked_sub(max(*max_of_frozen, last_frozen_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                debug!(target: "runtime", "account {} return frozen {}", account_id, return_frozen);
+                account.set_locked(
+                    account
+                        .locked()
+                        .checked_sub(return_frozen)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_frozen > 0 {
+                // if max_of_power > 0, it means that the account must have power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of locked {} is not found",
+                    account_id, max_of_frozen
+                ))
+                    .into());
+            }
+        }
+        // Slash only to the accounts that are in the current shard.
+        for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                let amount_to_slash = stake.unwrap_or(account.locked());
+                debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.locked(), account_id);
+                if account.locked() < amount_to_slash {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: staking invariant does not hold. Account locked {} is less than slashed {}",
+                        account.locked(), amount_to_slash)).into());
+                }
+                stats.slashed_burnt_amount = stats
+                    .slashed_burnt_amount
+                    .checked_add(amount_to_slash)
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                account.set_locked(
+                    account
+                        .locked()
+                        .checked_sub(amount_to_slash)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            } else {
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} to slash is not found",
+                    account_id
+                ))
+                    .into());
+            }
+        }
+
+        if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
+            // If protocol treasury stakes, then the rewards was already distributed above.
+            if !validator_accounts_update.power_info.contains_key(account_id) {
+                let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
+                    StorageError::StorageInconsistentState(format!(
+                        "Protocol treasury account {} is not found",
+                        account_id
+                    ))
+                })?;
+                let treasury_reward = *validator_accounts_update
+                    .validator_rewards
+                    .get(account_id)
+                    .ok_or_else(|| {
+                        StorageError::StorageInconsistentState(format!(
+                            "Validator reward for the protocol treasury account {} is not found",
+                            account_id
+                        ))
+                    })?;
+                account.set_amount(
+                    account
+                        .amount()
+                        .checked_add(treasury_reward)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+                set_account(state_update, account_id.clone(), &account);
+            }
+        }
+        state_update.commit(StateChangeCause::ValidatorAccountsUpdate);
+
+        Ok(())
+    }
+
+
 
     pub fn apply_migrations(
         &self,
@@ -1257,7 +1426,7 @@ impl Runtime {
         let mut stats = ApplyStats::default();
 
         if let Some(validator_accounts_update) = validator_accounts_update {
-            self.update_validator_accounts(
+            self.update_validator_accounts_in_block(
                 &mut state_update,
                 validator_accounts_update,
                 &mut stats,
