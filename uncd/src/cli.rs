@@ -182,7 +182,7 @@ struct NeardOpts {
     home: PathBuf,
     /// Skips consistency checks of genesis.json (and records.json) upon startup.
     /// Let's you start `uncd` slightly faster.
-    #[clap(long)]
+    #[clap(long, default_value_t = false)]
     unsafe_fast_startup: bool,
     /// Enables export of span data using opentelemetry protocol.
     #[clap(flatten)]

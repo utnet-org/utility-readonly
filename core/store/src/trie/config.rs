@@ -1,10 +1,6 @@
 use crate::config::TrieCacheConfig;
 use crate::StoreConfig;
 use unc_primitives::shard_layout::ShardUId;
-use unc_primitives::types::AccountId;
-use std::str::FromStr;
-use tracing::error;
-
 /// Default memory limit, if nothing else is configured.
 /// It is chosen to correspond roughly to the old limit, which was
 /// 50k entries * TRIE_LIMIT_CACHED_VALUE_SIZE.
@@ -27,10 +23,6 @@ pub struct TrieConfig {
     pub view_shard_cache_config: TrieCacheConfig,
     pub enable_receipt_prefetching: bool,
 
-    /// Configured accounts will be prefetched as SWEAT token account, if predecessor is listed as sender.
-    pub sweat_prefetch_receivers: Vec<AccountId>,
-    /// List of allowed predecessor accounts for SWEAT prefetching.
-    pub sweat_prefetch_senders: Vec<AccountId>,
     /// List of shards we will load into memory.
     pub load_mem_tries_for_shards: Vec<ShardUId>,
     pub load_mem_tries_for_all_shards: bool,
@@ -45,18 +37,6 @@ impl TrieConfig {
         this.view_shard_cache_config = config.view_trie_cache.clone();
 
         this.enable_receipt_prefetching = config.enable_receipt_prefetching;
-        for account in &config.sweat_prefetch_receivers {
-            match AccountId::from_str(account) {
-                Ok(account_id) => this.sweat_prefetch_receivers.push(account_id),
-                Err(e) => error!(target: "config", "invalid account id {account}: {e}"),
-            }
-        }
-        for account in &config.sweat_prefetch_senders {
-            match AccountId::from_str(account) {
-                Ok(account_id) => this.sweat_prefetch_senders.push(account_id),
-                Err(e) => error!(target: "config", "invalid account id {account}: {e}"),
-            }
-        }
         this.load_mem_tries_for_shards = config.load_mem_tries_for_shards.clone();
         this.load_mem_tries_for_all_shards = config.load_mem_tries_for_all_shards;
 

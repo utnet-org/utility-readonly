@@ -10,7 +10,7 @@ use unc_o11y::tracing::error;
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::shard_layout::ShardUId;
 use unc_primitives::trie_key::TrieKey;
-use unc_primitives::types::{AccountId, ShardId, StateRoot};
+use unc_primitives::types::{ShardId, StateRoot};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -78,10 +78,6 @@ pub struct PrefetchApi {
     pub(crate) prefetching: PrefetchStagingArea,
 
     pub enable_receipt_prefetching: bool,
-    /// Configured accounts will be prefetched as SWEAT token account, if predecessor is listed as receiver.
-    pub sweat_prefetch_receivers: Vec<AccountId>,
-    /// List of allowed predecessor accounts for SWEAT prefetching.
-    pub sweat_prefetch_senders: Vec<AccountId>,
 
     pub shard_uid: ShardUId,
 }
@@ -403,8 +399,6 @@ impl PrefetchApi {
         trie_config: &TrieConfig,
     ) -> (Self, PrefetchingThreadsHandle) {
         let (work_queue_tx, work_queue_rx) = crossbeam::channel::bounded(MAX_QUEUED_WORK_ITEMS);
-        let sweat_prefetch_receivers = trie_config.sweat_prefetch_receivers.clone();
-        let sweat_prefetch_senders = trie_config.sweat_prefetch_senders.clone();
         let enable_receipt_prefetching = trie_config.enable_receipt_prefetching;
 
         let this = Self {
@@ -412,8 +406,6 @@ impl PrefetchApi {
             work_queue_rx,
             prefetching: PrefetchStagingArea::new(shard_uid.shard_id()),
             enable_receipt_prefetching,
-            sweat_prefetch_receivers,
-            sweat_prefetch_senders,
             shard_uid,
         };
         let (shutdown_tx, shutdown_rx) = crossbeam::channel::bounded(1);
