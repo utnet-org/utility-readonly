@@ -40,6 +40,12 @@ fn main() -> anyhow::Result<()> {
         env::set_var("RUST_BACKTRACE", "1");
     }
 
+    if env::var("RUST_LOG").is_err() {
+        // Enable backtraces on panics by default.
+        env::set_var("RUST_LOG", "debug");
+    }
+    env_logger::init();
+
     rayon::ThreadPoolBuilder::new()
         .stack_size(8 * 1024 * 1024)
         .build_global()
