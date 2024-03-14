@@ -44,12 +44,10 @@
 use unc_o11y::metrics::prometheus;
 use unc_o11y::metrics::prometheus::core::GenericCounter;
 use unc_primitives::receipt::{Receipt, ReceiptEnum};
-use unc_primitives::transaction::{Action, SignedTransaction};
+use unc_primitives::transaction::SignedTransaction;
 use unc_primitives::trie_key::TrieKey;
-use unc_primitives::types::AccountId;
 use unc_primitives::types::StateRoot;
 use unc_store::{PrefetchApi, PrefetchError, Trie};
-use sha2::Digest;
 use tracing::{debug, warn};
 
 use crate::metrics;
@@ -91,29 +89,13 @@ impl TriePrefetcher {
         receipts: &[Receipt],
     ) -> Result<(), PrefetchError> {
         for receipt in receipts.iter() {
-            if let ReceiptEnum::Action(action_receipt) = &receipt.receipt {
+            if let ReceiptEnum::Action(_action_receipt) = &receipt.receipt {
                 let account_id = receipt.receiver_id.clone();
 
                 // general-purpose account prefetching
                 if self.prefetch_api.enable_receipt_prefetching {
                     let trie_key = TrieKey::Account { account_id: account_id.clone() };
                     self.prefetch_trie_key(trie_key)?;
-                }
-
-                // SWEAT specific argument prefetcher
-                if self.prefetch_api.sweat_prefetch_receivers.contains(&account_id)
-                    && self.prefetch_api.sweat_prefetch_senders.contains(&receipt.predecessor_id)
-                {
-                    for action in &action_receipt.actions {
-                        if let Action::FunctionCall(fn_call) = action {
-                            if fn_call.method_name == "record_batch" {
-                                self.prefetch_sweat_record_batch(
-                                    account_id.clone(),
-                                    &fn_call.args,
-                                )?;
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -179,41 +161,6 @@ impl TriePrefetcher {
         res
     }
 
-    /// Prefetcher specifically tuned for SWEAT record batch
-    ///
-    /// Temporary hack, consider removing after merging flat storage, see
-    /// <https://github.com/utnet-org/utility/issues/7327>.
-    fn prefetch_sweat_record_batch(
-        &self,
-        account_id: AccountId,
-        arg: &[u8],
-    ) -> Result<(), PrefetchError> {
-        if let Ok(json) = serde_json::de::from_slice::<serde_json::Value>(arg) {
-            if json.is_object() {
-                if let Some(list) = json.get("steps_batch") {
-                    if let Some(list) = list.as_array() {
-                        for tuple in list.iter() {
-                            if let Some(tuple) = tuple.as_array() {
-                                if let Some(user_account) = tuple.first().and_then(|a| a.as_str()) {
-                                    let hashed_account =
-                                        sha2::Sha256::digest(user_account.as_bytes()).into_iter();
-                                    let mut key = vec![0x74, 0x00];
-                                    key.extend(hashed_account);
-                                    let trie_key = TrieKey::ContractData {
-                                        account_id: account_id.clone(),
-                                        key: key.to_vec(),
-                                    };
-                                    unc_o11y::io_trace!(count: "prefetch");
-                                    self.prefetch_trie_key(trie_key)?;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
