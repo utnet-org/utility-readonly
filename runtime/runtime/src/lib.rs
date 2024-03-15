@@ -1038,6 +1038,7 @@ impl Runtime {
     /// and allocate rewards. Also updates protocol treasury account if it belongs to the current
     /// shard.
 
+    #[allow(dead_code)]
     fn update_validator_accounts_in_block(
         &self,
         state_update: &mut TrieUpdate,
@@ -1426,7 +1427,7 @@ impl Runtime {
         let mut stats = ApplyStats::default();
 
         if let Some(validator_accounts_update) = validator_accounts_update {
-            self.update_validator_accounts_in_block(
+            self.update_validator_accounts(
                 &mut state_update,
                 validator_accounts_update,
                 &mut stats,

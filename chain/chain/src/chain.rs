@@ -441,7 +441,7 @@ impl Chain {
                 for chunk in genesis_chunks {
                     store_update.save_chunk(chunk.clone());
                 }
-                store_update.merge(epoch_manager.add_validator_proposals(BlockHeaderInfo::new(
+                store_update.merge(epoch_manager.add_validator_proposals_for_blocks(BlockHeaderInfo::new(
                     genesis.header(),
                     // genesis height is considered final
                     chain_genesis.height,
@@ -1462,7 +1462,7 @@ impl Chain {
                 chain_store_update.get_block_height(header.last_final_block())?;
             let epoch_manager_update = self
                 .epoch_manager
-                .add_validator_proposals(BlockHeaderInfo::new(header, last_finalized_height))?;
+                .add_validator_proposals_for_blocks(BlockHeaderInfo::new(header, last_finalized_height))?;
             chain_store_update.merge(epoch_manager_update);
             chain_store_update.commit()?;
 

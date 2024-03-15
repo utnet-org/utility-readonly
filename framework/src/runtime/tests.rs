@@ -214,14 +214,15 @@ impl TestEnv {
         }
 
         epoch_manager
-            .add_validator_proposals(BlockHeaderInfo {
+            .add_validator_proposals_for_blocks(BlockHeaderInfo {
                 prev_hash: CryptoHash::default(),
                 hash: genesis_hash,
                 random_value: [0; 32].as_ref().try_into().unwrap(),
                 height: 0,
                 last_finalized_height: 0,
                 last_finalized_block_hash: CryptoHash::default(),
-                proposals: vec![],
+                power_proposals: vec![],
+                frozen_proposals: vec![],
                 slashed_validators: vec![],
                 chunk_mask: vec![],
                 total_supply: genesis_total_supply,
@@ -291,7 +292,8 @@ impl TestEnv {
                 height: self.head.height + 1,
                 last_finalized_height: self.head.height.saturating_sub(1),
                 last_finalized_block_hash: self.head.last_block_hash,
-                proposals: self.last_proposals.clone(),
+                power_proposals: self.last_proposals.clone(),
+                frozen_proposals: self.last_proposals.clone(),
                 slashed_validators: challenges_result,
                 chunk_mask,
                 total_supply: self.runtime.genesis_config.total_supply,
@@ -693,7 +695,8 @@ fn test_state_sync() {
                 height: i,
                 last_finalized_height: i.saturating_sub(2),
                 last_finalized_block_hash: prev_hash,
-                proposals: new_env.last_proposals,
+                power_proposals: new_env.last_proposals.clone(),
+                frozen_proposals: new_env.last_proposals,
                 slashed_validators: vec![],
                 chunk_mask: vec![true],
                 total_supply: new_env.runtime.genesis_config.total_supply,

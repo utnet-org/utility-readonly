@@ -387,7 +387,7 @@ impl NightshadeRuntime {
         //     }
         // };
         // start customized by James Savechives
-        let validator_accounts_update_in_block = {
+        let validator_accounts_update = {
             let epoch_manager = self.epoch_manager.read();
             let shard_layout = epoch_manager.get_shard_layout(&epoch_id)?;
             debug!(target: "runtime",
@@ -513,7 +513,7 @@ impl NightshadeRuntime {
             .runtime
             .apply(
                 trie,
-                &validator_accounts_update_in_block,
+                &validator_accounts_update,
                 &apply_state,
                 receipts,
                 transactions,
