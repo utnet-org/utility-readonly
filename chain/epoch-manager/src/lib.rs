@@ -702,18 +702,19 @@ impl EpochManager {
             validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Slashed);
         }
 
-        for (account_id, power_proposal) in all_power_proposals {
-            if !slashed_validators.contains_key(&account_id) {
-                if power_proposal.power() == 0
-                    && *next_epoch_info.power_change().get(&account_id).unwrap_or(&0) != 0
-                {
-                    validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Unpowered);
-                }
-                power_proposals.push(power_proposal.clone());
-            }
+        for (_account_id, power_proposal) in all_power_proposals.clone() {
+            // if !slashed_validators.contains_key(&account_id) {
+            //     if power_proposal.power() == 0
+            //         && *next_epoch_info.power_change().get(&account_id).unwrap_or(&0) != 0
+            //     {
+            //         validator_kickout.insert(account_id.clone(), ValidatorKickoutReason::Unpowered);
+            //     }
+            //     power_proposals.push(power_proposal.clone());
+            // }
+            power_proposals.push(power_proposal.clone());
         }
 
-        for (account_id, frozen_proposal) in all_frozen_proposals {
+        for (account_id, frozen_proposal) in all_frozen_proposals.clone() {
             if !slashed_validators.contains_key(&account_id) {
                 if frozen_proposal.frozen() == 0
                     && *next_epoch_info.frozen_change().get(&account_id).unwrap_or(&0) != 0
@@ -739,11 +740,11 @@ impl EpochManager {
             prev_validator_kickout,
         );
         validator_kickout.extend(kickout);
-        // debug!(
-        //     target: "epoch_manager",
-        //     "All power proposals: {:?}, All frozen proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
-        //     all_power_proposals.clone(), all_frozen_proposals.clone(), validator_kickout.clone(), block_validator_tracker.clone(), chunk_validator_tracker.clone()
-        // );
+        debug!(
+            target: "epoch_manager",
+            "All power proposals: {:?}, All frozen proposals: {:?}, Kickouts: {:?}, Block Tracker: {:?}, Shard Tracker: {:?}",
+            all_power_proposals.clone(), all_frozen_proposals.clone(), validator_kickout.clone(), block_validator_tracker.clone(), chunk_validator_tracker.clone()
+        );
 
         Ok(EpochSummary {
             prev_epoch_last_block_hash,
@@ -841,7 +842,7 @@ impl EpochManager {
         rng_seed: RngSeed,
     ) -> Result<(), EpochError> {
         let epoch_summary = self.collect_blocks_info(block_info, last_block_hash)?;
-                let epoch_info = self.get_epoch_info(block_info.epoch_id())?;
+        let epoch_info = self.get_epoch_info(block_info.epoch_id())?;
         let epoch_protocol_version = epoch_info.protocol_version();
         let validator_stake =
             epoch_info.validators_iter().map(|r| r.account_and_frozen()).collect::<HashMap<_, _>>();
@@ -1456,7 +1457,7 @@ impl EpochManager {
 
         // let slashing_info = self.compute_double_sign_slashing_info(last_block_hash)?;
         let slashing_info = HashMap::default();
-        debug!(target: "epoch_manager", "stake_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
+        debug!(target: "epoch_manager", "power_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
         Ok((power_info, frozen_info, validator_reward, slashing_info))
     }
     pub fn compute_power_return_info(
@@ -1535,7 +1536,7 @@ impl EpochManager {
         }
 
         let slashing_info = self.compute_double_sign_slashing_info(last_block_hash)?;
-        debug!(target: "epoch_manager", "stake_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
+        debug!(target: "epoch_manager", "power_info: {:?}, frozen_info: {:?}, validator_reward: {:?}", power_info, frozen_info, validator_reward);
         Ok((power_info, frozen_info, validator_reward, slashing_info))
     }
 
@@ -1767,7 +1768,59 @@ impl EpochManager {
         })
     }
 
+    #[allow(dead_code)]
     pub fn add_validator_proposals(
+        &mut self,
+        block_header_info: BlockHeaderInfo,
+    ) -> Result<StoreUpdate, EpochError> {
+        // Check that genesis block doesn't have any proposals.
+        assert!(
+            block_header_info.height > 0
+                || (block_header_info.power_proposals.is_empty()
+                && block_header_info.frozen_proposals.is_empty()
+                && block_header_info.slashed_validators.is_empty())
+        );
+        debug!(target: "epoch_manager",
+            height = block_header_info.height,
+            power_proposals = ?block_header_info.power_proposals,
+            frozen_proposals = ?block_header_info.frozen_proposals,
+            "add_validator_proposals");
+        // Deal with validator proposals and epoch finishing.
+        let block_info = BlockInfo::new(
+            block_header_info.hash,
+            block_header_info.height,
+            block_header_info.last_finalized_height,
+            block_header_info.last_finalized_block_hash,
+            block_header_info.prev_hash,
+            block_header_info.power_proposals,
+            block_header_info.frozen_proposals,
+            block_header_info.chunk_mask,
+            block_header_info.slashed_validators,
+            block_header_info.total_supply,
+            block_header_info.latest_protocol_version,
+            block_header_info.timestamp_nanosec,
+            Default::default(),
+            vec![],
+            Default::default(),
+            vec![],
+            vec![],
+            vec![],
+            Default::default(),
+            Default::default(),
+            Default::default(),
+            Default::default(),
+            0,
+            0,
+            vec![],
+            vec![],
+            Default::default(),
+            Default::default());
+        let rng_seed = block_header_info.random_value.0;
+        self.record_block_info(block_info, rng_seed)
+    }
+
+    #[allow(dead_code)]
+    pub fn add_validator_proposals_for_blocks(
         &mut self,
         block_header_info: BlockHeaderInfo,
     ) -> Result<StoreUpdate, EpochError> {
@@ -1813,7 +1866,7 @@ impl EpochManager {
                 chunk_producers_settlement,
                 fishermen,
                 fishermen_to_index,
-                power_change,
+                power_change : _power_change,
                 frozen_change,
                 validator_reward,
                 seat_price,
@@ -1823,8 +1876,19 @@ impl EpochManager {
                 validator_kickout,
                 validator_mandates, ..
             }) = &*self.get_block_info(&block_header_info.prev_hash)? else { todo!() };
-            let all_power_proposals : Vec<_> = all_power_proposals.clone().into_iter().chain(block_header_info.power_proposals.clone().into_iter()).collect();
-            let all_frozen_proposals : Vec<_> = all_frozen_proposals.clone().into_iter().chain(block_header_info.frozen_proposals.clone().into_iter()).collect();
+            let all_power_proposals : Vec<_> = remove_duplicate_power_proposals(all_power_proposals.clone().into_iter().chain(block_header_info.power_proposals.clone().into_iter()).collect());
+            let all_frozen_proposals : Vec<_> = remove_duplicate_frozen_proposals(all_frozen_proposals.clone().into_iter().chain(block_header_info.frozen_proposals.clone().into_iter()).collect());
+                let mut updated_power_change: BTreeMap<AccountId, Power> = BTreeMap::new();
+
+                for proposal in all_power_proposals.clone().iter() {
+                    // Destructure the proposal to get the account_id and power
+                    let (account_id, proposal_power) = proposal.clone().account_and_power();
+
+                    // Check if the account_id exists in `updated_power_change` and update its power
+                    updated_power_change.entry(account_id)
+                        .and_modify(|e| *e += proposal_power) // If exists, add the new power
+                        .or_insert(proposal_power); // If not, insert the new power
+                }
             let block_info = BlockInfo::new(
                 block_header_info.hash,
                 block_header_info.height,
@@ -1846,7 +1910,7 @@ impl EpochManager {
                 chunk_producers_settlement.clone(),
                 fishermen.clone(),
                 fishermen_to_index.clone(),
-                power_change.clone(),
+                updated_power_change,
                 frozen_change.clone(),
                 validator_reward.clone(),
                 seat_price.clone(),
@@ -1948,6 +2012,34 @@ impl EpochManager {
         // To Do
         Ok(0)
     }
+}
+
+fn remove_duplicate_power_proposals(power_proposals: Vec<ValidatorPower>) -> Vec<ValidatorPower> {
+    let mut unique_proposals_map: HashMap<_, _> = HashMap::new();
+
+    for proposal in power_proposals {
+        // Use account_id as the key for uniqueness.
+        // This overwrites any existing entry with the same account_id, effectively keeping only the last seen instance.
+        unique_proposals_map.insert(proposal.account_id().clone(), proposal);
+    }
+
+    // Extract the values (ValidatorPower instances) into a new Vec
+    let unique_proposals = unique_proposals_map.into_values().collect::<Vec<_>>();
+    unique_proposals
+}
+
+fn remove_duplicate_frozen_proposals(frozen_proposals: Vec<ValidatorFrozen>) -> Vec<ValidatorFrozen> {
+    let mut unique_proposals_map: HashMap<_, _> = HashMap::new();
+
+    for proposal in frozen_proposals {
+        // Use account_id as the key for uniqueness.
+        // This overwrites any existing entry with the same account_id, effectively keeping only the last seen instance.
+        unique_proposals_map.insert(proposal.account_id().clone(), proposal);
+    }
+
+    // Extract the values (ValidatorPower instances) into a new Vec
+    let unique_proposals = unique_proposals_map.into_values().collect::<Vec<_>>();
+    unique_proposals
 }
 
 /// Private utilities for EpochManager.
@@ -2386,4 +2478,6 @@ impl EpochManager {
 
         Ok(result)
     }
+
+
 }

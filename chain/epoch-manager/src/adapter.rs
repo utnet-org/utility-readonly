@@ -232,6 +232,11 @@ pub trait EpochManagerAdapter: Send + Sync {
         block_header_info: BlockHeaderInfo,
     ) -> Result<StoreUpdate, EpochError>;
 
+    fn add_validator_proposals_for_blocks(
+        &self,
+        block_header_info: BlockHeaderInfo,
+    ) -> Result<StoreUpdate, EpochError>;
+
     /// Amount of tokens minted in given epoch.
     fn get_epoch_minted_amount(&self, epoch_id: &EpochId) -> Result<Balance, EpochError>;
 
@@ -716,6 +721,14 @@ impl EpochManagerAdapter for EpochManagerHandle {
     ) -> Result<StoreUpdate, EpochError> {
         let mut epoch_manager = self.write();
         epoch_manager.add_validator_proposals(block_header_info)
+    }
+
+    fn add_validator_proposals_for_blocks(
+        &self,
+        block_header_info: BlockHeaderInfo,
+    ) -> Result<StoreUpdate, EpochError> {
+        let mut epoch_manager = self.write();
+        epoch_manager.add_validator_proposals_for_blocks(block_header_info)
     }
 
     fn get_epoch_minted_amount(&self, epoch_id: &EpochId) -> Result<Balance, EpochError> {

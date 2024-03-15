@@ -704,7 +704,7 @@ pub(crate) fn replay_chain(
             let header = chain_store.get_block_header(&block_hash).unwrap().clone();
             println!("Height: {}, header: {:#?}", height, header);
             epoch_manager
-                .add_validator_proposals(BlockHeaderInfo::new(
+                .add_validator_proposals_for_blocks(BlockHeaderInfo::new(
                     &header,
                     chain_store.get_block_height(header.last_final_block()).unwrap(),
                 ))

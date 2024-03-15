@@ -490,7 +490,7 @@ impl<'a> ChainUpdate<'a> {
 
         let epoch_manager_update = self
             .epoch_manager
-            .add_validator_proposals(BlockHeaderInfo::new(block.header(), last_finalized_height))?;
+            .add_validator_proposals_for_blocks(BlockHeaderInfo::new(block.header(), last_finalized_height))?;
         self.chain_store_update.merge(epoch_manager_update);
 
         #[cfg(feature = "new_epoch_sync")]

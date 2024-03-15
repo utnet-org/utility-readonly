@@ -233,7 +233,7 @@ impl GenesisBuilder {
 
         store_update.merge(
             self.epoch_manager
-                .add_validator_proposals(BlockHeaderInfo::new(genesis.header(), 0))
+                .add_validator_proposals_for_blocks(BlockHeaderInfo::new(genesis.header(), 0))
                 .unwrap(),
         );
         store_update

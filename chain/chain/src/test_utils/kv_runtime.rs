@@ -766,6 +766,13 @@ impl EpochManagerAdapter for MockEpochManager {
         Ok(self.store.store_update())
     }
 
+    fn add_validator_proposals_for_blocks(
+        &self,
+        _block_header_info: BlockHeaderInfo,
+    ) -> Result<StoreUpdate, EpochError> {
+        Ok(self.store.store_update())
+    }
+
     fn get_epoch_minted_amount(&self, _epoch_id: &EpochId) -> Result<Balance, EpochError> {
         Ok(0)
     }

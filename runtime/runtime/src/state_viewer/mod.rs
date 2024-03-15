@@ -135,6 +135,13 @@ impl TrieViewer {
 
             let public_key_str = &key[raw_prefix.len()..];
 
+            let public_key = PublicKey::try_from_slice(public_key_str)
+                .map_err(|_| errors::ViewChipError::InternalError {
+                    error_message: format!(
+                        "Unexpected invalid public key {:?} received from store",
+                        public_key_str
+                    ),
+                })?;
             // Extract the part of the key that follows the prefix, if needed
 
             let chip_action = unc_store::get_rsa2048_keys_raw(state_update, &key).map_err(|e| {
@@ -172,7 +179,7 @@ impl TrieViewer {
                         }
                     }
 
-                    chip_view.public_key = base64::encode(public_key_str);
+                    chip_view.public_key = public_key.to_string();
 
                     // Extract 'sn' directly
                     if let Some(sn_val) = parsed_args.get("sn").and_then(|v| v.as_str()) {

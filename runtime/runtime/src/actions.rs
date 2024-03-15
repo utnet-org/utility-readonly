@@ -754,16 +754,17 @@ pub(crate) fn action_create_rsa2048_challenge(
                     Some(power_str) => {
                         match power_str.parse::<u64>() {
                             Ok(power) => {
+                                // compute total power
+                                let total_power = account.power().checked_add(power).ok_or_else(|| {
+                                    StorageError::StorageInconsistentState("Account power integer overflow".to_string())
+                                })?;
                                 // push power to validator proposal
                                 result.validator_power_proposals.push(ValidatorPower::new(
                                     account_id.clone(),
                                     challenge.challenge_key.clone().into(),
-                                    power,
+                                    total_power.clone(),
                                 ));
                                 // attach power to account
-                                let total_power = account.power().checked_add(power).ok_or_else(|| {
-                                    StorageError::StorageInconsistentState("Account power integer overflow".to_string())
-                                })?;
                                 println!("original power is : {}, new power is : {}, total power is : {}", account.power(), power.clone(),total_power.clone());
                                 account.set_power(total_power);
                                 println!("Power (as u128): {}", power);
