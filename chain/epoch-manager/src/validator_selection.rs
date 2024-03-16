@@ -406,74 +406,75 @@ pub fn proposals_to_epoch_info(
     }
 
     let chunk_producers_settlement = if checked_feature!("stable", ChunkOnlyProducers, next_version)
-    {
-        let minimum_validators_per_shard =
-            epoch_config.validator_selection_config.minimum_validators_per_shard as usize;
-        let shard_assignment = assign_shards(
-            chunk_producers,
-            shard_ids.len() as NumShards,
-            minimum_validators_per_shard,
-        )
-        .map_err(|_| EpochError::NotEnoughValidators {
-            num_validators: num_chunk_producers as u64,
-            num_shards: shard_ids.len() as NumShards,
-        })?;
-
-        let mut chunk_producers_settlement: Vec<Vec<ValidatorId>> =
-            shard_assignment.iter().map(|vs| Vec::with_capacity(vs.len())).collect();
-        let mut i = all_validators.len();
-        // Here we assign validator ids to all chunk only validators
-        for (shard_validators, shard_validator_ids) in
-            shard_assignment.into_iter().zip(chunk_producers_settlement.iter_mut())
         {
-            for validator in shard_validators {
-                debug_assert_eq!(i, all_validators.len());
-                match validator_to_index.entry(validator.account_id().clone()) {
-                    hash_map::Entry::Vacant(entry) => {
-                        let validator_id = i as ValidatorId;
-                        entry.insert(validator_id);
-                        shard_validator_ids.push(validator_id);
-                        all_validators.push(validator);
-                        i += 1;
-                    }
-                    // Validators which have an entry in the validator_to_index map
-                    // have already been inserted into `all_validators`.
-                    hash_map::Entry::Occupied(entry) => {
-                        let validator_id = *entry.get();
-                        shard_validator_ids.push(validator_id);
+            let minimum_validators_per_shard =
+                epoch_config.validator_selection_config.minimum_validators_per_shard as usize;
+            let shard_assignment = assign_shards(
+                chunk_producers,
+                shard_ids.len() as NumShards,
+                minimum_validators_per_shard,
+            )
+            .map_err(|_| EpochError::NotEnoughValidators {
+                num_validators: num_chunk_producers as u64,
+                num_shards: shard_ids.len() as NumShards,
+            })?;
+
+            let mut chunk_producers_settlement: Vec<Vec<ValidatorId>> =
+                shard_assignment.iter().map(|vs| Vec::with_capacity(vs.len())).collect();
+            let mut i = all_validators.len();
+            // Here we assign validator ids to all chunk only validators
+            for (shard_validators, shard_validator_ids) in
+                shard_assignment.into_iter().zip(chunk_producers_settlement.iter_mut())
+            {
+                for validator in shard_validators {
+                    debug_assert_eq!(i, all_validators.len());
+                    match validator_to_index.entry(validator.account_id().clone()) {
+                        hash_map::Entry::Vacant(entry) => {
+                            let validator_id = i as ValidatorId;
+                            entry.insert(validator_id);
+                            shard_validator_ids.push(validator_id);
+                            all_validators.push(validator);
+                            i += 1;
+                        }
+                        // Validators which have an entry in the validator_to_index map
+                        // have already been inserted into `all_validators`.
+                        hash_map::Entry::Occupied(entry) => {
+                            let validator_id = *entry.get();
+                            shard_validator_ids.push(validator_id);
+                        }
                     }
                 }
             }
-        }
-        chunk_producers_settlement
-    } else {
-        if chunk_producers.is_empty() {
-            // All validators tried to unstake?
-            return Err(EpochError::NotEnoughValidators {
-                num_validators: 0u64,
-                num_shards: shard_ids.len() as NumShards,
-            });
-        }
-        let mut id = 0usize;
-        // Here we assign validators to chunks (we try to keep number of shards assigned for
-        // each validator as even as possible). Note that in prod configuration number of seats
-        // per shard is the same as maximal number of block producers, so normally all
-        // validators would be assigned to all chunks
-        shard_ids
-            .iter()
-            .map(|&shard_id| shard_id as usize)
-            .map(|shard_id| {
-                (0..epoch_config.num_block_producer_seats_per_shard[shard_id]
-                    .min(block_producers_settlement.len() as u64))
-                    .map(|_| {
-                        let res = block_producers_settlement[id];
-                        id = (id + 1) % block_producers_settlement.len();
-                        res
-                    })
-                    .collect()
-            })
-            .collect()
-    };
+            chunk_producers_settlement
+        } else {
+            if chunk_producers.is_empty() {
+                // All validators tried to unstake?
+                return Err(EpochError::NotEnoughValidators {
+                    num_validators: 0u64,
+                    num_shards: shard_ids.len() as NumShards,
+                });
+            }
+            let mut id = 0usize;
+            // Here we assign validators to chunks (we try to keep number of shards assigned for
+            // each validator as even as possible). Note that in prod configuration number of seats
+            // per shard is the same as maximal number of block producers, so normally all
+            // validators would be assigned to all chunks
+            shard_ids
+                .iter()
+                .map(|&shard_id| shard_id as usize)
+                .map(|shard_id| {
+                    (0..epoch_config.num_block_producer_seats_per_shard[shard_id]
+                        .min(block_producers_settlement.len() as u64))
+                        .map(|_| {
+                            let res = block_producers_settlement[id];
+                            id = (id + 1) % block_producers_settlement.len();
+                            res
+                        })
+                        .collect()
+                })
+                .collect()
+        };
+
 
     let validator_mandates = if checked_feature!("stable", ChunkValidation, next_version) {
         // TODO(#10014) determine required stake per mandate instead of reusing seat price.
