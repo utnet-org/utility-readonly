@@ -299,18 +299,7 @@ impl EpochManager {
             // Missing genesis epoch, means that there is no validator initialize yet.
             let genesis_epoch_config =
                 epoch_manager.config.for_protocol_version(genesis_protocol_version);
-            let epoch_info = proposals_to_epoch_info(
-                &genesis_epoch_config,
-                [0; 32],
-                &EpochInfo::default(),
-                power_validators.clone(),
-                frozen_validators.clone(),
-                HashMap::default(),
-                validator_reward.clone(),
-                0,
-                genesis_protocol_version,
-                genesis_protocol_version,
-            )?;
+            let epoch_info = proposals_to_epoch_info(&genesis_epoch_config, [0; 32], &EpochInfo::default(), power_validators.clone(), frozen_validators.clone(), HashMap::default(), validator_reward.clone(), 0, genesis_protocol_version, genesis_protocol_version)?;
             // Dummy block info.
             // Artificial block we add to simplify implementation: dummy block is the
             // parent of genesis block that points to itself.
@@ -851,14 +840,31 @@ impl EpochManager {
         self.save_epoch_validator_info(store_update, block_info.epoch_id(), &epoch_summary)?;
 
         let EpochSummary {
-            all_power_proposals,
-            all_frozen_proposals,
-            validator_kickout,
+        //    all_power_proposals,
+        //    all_frozen_proposals,
+        //    validator_kickout,
             validator_block_chunk_stats,
             next_version,
             ..
         } = epoch_summary;
-
+        // start james savechives
+        let (
+            all_power_proposals,
+            all_frozen_proposals,
+            validator_kickout,
+        ): (Vec<ValidatorPower>, Vec<ValidatorFrozen>, HashMap<AccountId, ValidatorKickoutReason>) = match block_info { // Assuming last_block_summary is wrapped in an Arc
+            BlockInfo::V1(summary) => {
+                // Now you can access the fields of BlockSummaryV1 through `summary`
+                (summary.clone().all_power_proposals, summary.clone().all_frozen_proposals, summary.clone().validator_kickout)
+                // Add more fields as needed
+            },
+            BlockInfo::V2(summary) => {
+                // Now you can access the fields of BlockSummaryV1 through `summary`
+                (summary.clone().all_power_proposals, summary.clone().all_frozen_proposals, summary.clone().validator_kickout)
+                // Add more fields as needed
+            },
+        };
+        // end james savechives
         let (validator_reward, minted_amount) = {
             let last_epoch_last_block_hash =
                 *self.get_block_info(block_info.epoch_first_block())?.prev_hash();
@@ -1866,7 +1872,7 @@ impl EpochManager {
                 chunk_producers_settlement,
                 fishermen,
                 fishermen_to_index,
-                power_change : _power_change,
+                power_change,
                 frozen_change,
                 validator_reward,
                 seat_price,
@@ -1878,17 +1884,7 @@ impl EpochManager {
             }) = &*self.get_block_info(&block_header_info.prev_hash)? else { todo!() };
             let all_power_proposals : Vec<_> = remove_duplicate_power_proposals(all_power_proposals.clone().into_iter().chain(block_header_info.power_proposals.clone().into_iter()).collect());
             let all_frozen_proposals : Vec<_> = remove_duplicate_frozen_proposals(all_frozen_proposals.clone().into_iter().chain(block_header_info.frozen_proposals.clone().into_iter()).collect());
-                let mut updated_power_change: BTreeMap<AccountId, Power> = BTreeMap::new();
 
-                for proposal in all_power_proposals.clone().iter() {
-                    // Destructure the proposal to get the account_id and power
-                    let (account_id, proposal_power) = proposal.clone().account_and_power();
-
-                    // Check if the account_id exists in `updated_power_change` and update its power
-                    updated_power_change.entry(account_id)
-                        .and_modify(|e| *e += proposal_power) // If exists, add the new power
-                        .or_insert(proposal_power); // If not, insert the new power
-                }
             let block_info = BlockInfo::new(
                 block_header_info.hash,
                 block_header_info.height,
@@ -1910,7 +1906,7 @@ impl EpochManager {
                 chunk_producers_settlement.clone(),
                 fishermen.clone(),
                 fishermen_to_index.clone(),
-                updated_power_change,
+                power_change.clone(),
                 frozen_change.clone(),
                 validator_reward.clone(),
                 seat_price.clone(),

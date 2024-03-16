@@ -9,9 +9,7 @@ use unc_primitives::errors::{BlockError, EpochError};
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::validator_frozen::ValidatorFrozen;
-use unc_primitives::types::{
-    AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason,
-};
+use unc_primitives::types::{AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason};
 
 /// Find threshold of stake per seat, given provided stakes and required number of seats.
 pub(crate) fn find_threshold(
