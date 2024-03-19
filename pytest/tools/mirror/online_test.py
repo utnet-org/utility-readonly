@@ -29,7 +29,7 @@ def main():
     ]
 
     mirror = mirror_utils.MirrorProcess(unc_root,
-                                        mirror_utils.dot_near() /
+                                        mirror_utils.dot_unc() /
                                         f'{mirror_utils.MIRROR_DIR}/source',
                                         online_source=True)
     mirror_utils.send_traffic(unc_root, source_nodes, traffic_data,

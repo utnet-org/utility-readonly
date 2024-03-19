@@ -156,7 +156,7 @@ fn test_execution_outcome_for_chunk() {
             let transaction = SignedTransaction::send_money(
                 1,
                 "test".parse().unwrap(),
-                "near".parse().unwrap(),
+                "unc".parse().unwrap(),
                 &signer,
                 10,
                 block_hash,

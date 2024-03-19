@@ -23,7 +23,7 @@ then execute the test file using python.  For example:
     python3 tests/sanity/one_val.py
 
 After the test finishes, log files and other result data from running
-each node will be located in a `~/.near/test#_finished` directory
+each node will be located in a `~/.unc/test#_finished` directory
 (where `#` is index of the node starting with zero).
 
 Note that running the tests using `pytest` command is not supported
@@ -54,7 +54,7 @@ Prerequisites:
 
 Steps:
 
-1. Choose or upload a near binary here: https://console.cloud.google.com/storage/browser/nearprotocol_nearcore_release?project=unc-core
+1. Choose or upload a unc binary here: https://console.cloud.google.com/storage/browser/nearprotocol_unc_release?project=unc-core
 2. Fill the binary filename in remote.json.  Modify zones as needed,
    they’ll be used in round-robin manner.
 3. `unc_PYTEST_CONFIG=remote.json python tests/...`

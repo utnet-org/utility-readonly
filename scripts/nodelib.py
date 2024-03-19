@@ -30,9 +30,9 @@ def docker_init(image, home_dir, init_flags):
     subprocess.check_output(['mkdir', '-p', home_dir])
     subprocess.check_output([
         'docker', 'run', '-u', USER, '-v',
-        '%s:/srv/near' % home_dir, '-v',
-        os.path.abspath('near/res') +
-        ':/near/res', image, 'near', '--home=/srv/near', 'init'
+        '%s:/srv/unc' % home_dir, '-v',
+        os.path.abspath('unc/res') +
+        ':/unc/res', image, 'unc', '--home=/srv/unc', 'init'
     ] + init_flags)
 
 
@@ -123,14 +123,14 @@ def check_and_setup(nodocker,
             init_flags.append('--account-id=%s' % account_id)
 
     if chain_id == 'testnet':
-        testnet_genesis_hash = open('near/res/testnet_genesis_hash').read()
-        testnet_genesis_records = 'near/res/testnet_genesis_records_%s.json' % testnet_genesis_hash
+        testnet_genesis_hash = open('unc/res/testnet_genesis_hash').read()
+        testnet_genesis_records = 'unc/res/testnet_genesis_records_%s.json' % testnet_genesis_hash
         if not os.path.exists(testnet_genesis_records):
             print('Downloading testnet genesis records')
             url = 'https://s3-us-west-1.amazonaws.com/testnet.utility.com/testnet_genesis_records_%s.json' % testnet_genesis_hash
             urllib.urlretrieve(url, testnet_genesis_records)
         init_flags.extend([
-            '--genesis-config', 'near/res/testnet_genesis_config.json',
+            '--genesis-config', 'unc/res/testnet_genesis_config.json',
             '--genesis-records', testnet_genesis_records, '--genesis-hash',
             testnet_genesis_hash
         ])
@@ -210,7 +210,7 @@ def run_docker(image, home_dir, boot_nodes, telemetry_url, verbose):
     subprocess.check_output([
         'docker', 'run', '-u', USER, '-d', '-p', rpc_port, '-p', network_port,
         '-v',
-        '%s:/srv/near' % home_dir, '-v', '/tmp:/tmp', '--ulimit', 'core=-1',
+        '%s:/srv/unc' % home_dir, '-v', '/tmp:/tmp', '--ulimit', 'core=-1',
         '--name', 'framework', '--restart', 'unless-stopped'
     ] + envs + [image])
     # Start Watchtower that will automatically update the framework container when new version appears.

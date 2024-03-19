@@ -47,18 +47,18 @@ fn process_blocks_with_storage_usage_fix(
         let state_update = TrieUpdate::new(trie);
         use unc_primitives::account::Account;
         let mut account_unc_raw = state_update
-            .get(&TrieKey::Account { account_id: "near".parse().unwrap() })
+            .get(&TrieKey::Account { account_id: "unc".parse().unwrap() })
             .unwrap()
             .unwrap()
             .clone();
-        let account_near = Account::try_from_slice(&mut account_unc_raw).unwrap();
+        let account_unc = Account::try_from_slice(&mut account_unc_raw).unwrap();
         let mut account_test0_raw = state_update
             .get(&TrieKey::Account { account_id: "test0".parse().unwrap() })
             .unwrap()
             .unwrap()
             .clone();
         let account_test0 = Account::try_from_slice(&mut account_test0_raw).unwrap();
-        check_storage_usage("near".parse().unwrap(), i, account_near.storage_usage());
+        check_storage_usage("unc".parse().unwrap(), i, account_unc.storage_usage());
         check_storage_usage("test0".parse().unwrap(), i, account_test0.storage_usage());
     }
 }
@@ -69,7 +69,7 @@ fn test_fix_storage_usage_migration() {
     process_blocks_with_storage_usage_fix(
         unc_primitives::chains::MAINNET.to_string(),
         |account_id: AccountId, block_height: u64, storage_usage: u64| {
-            if account_id == "near" && block_height >= 11 {
+            if account_id == "unc" && block_height >= 11 {
                 assert_eq!(storage_usage, 4378);
             } else {
                 assert_eq!(storage_usage, 182);

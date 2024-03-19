@@ -232,7 +232,7 @@ apply_transactions shard_id=2
         GET State "AQAAAAIAAADmfv7wvCpBrGJFy+mL+pzTjsk2P1JUJ6YXcG5HTLoRCg==" size=75
         GET State "AQAAAAIAAADuEnH+UuDiYtKW0CuSi5liK5JpUBPpaQRf6ugoxLF0aA==" size=107
         GET State "AQAAAAIAAABeexjixWIrTeBJmTF/MHFtOsoDu0p6lqzBcV7h53tzNw==" size=72
-      process_receipt receipt_id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 predecessor=system receiver=c_shark.near id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 shard_cache_hit=10 shard_cache_miss=21
+      process_receipt receipt_id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 predecessor=system receiver=c_shark.unc id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 shard_cache_hit=10 shard_cache_miss=21
         GET State "AQAAAAIAAACkJdKqSLeMpWHx6a9DzI7+7Qq8m0oD7/HYW1G7x1evnw==" size=46
         GET State "AQAAAAIAAADxHFCA8zRUJlrqcnbDxfYfaUthL5l18+qWOlTvSXCDHw==" size=107
         GET State "AQAAAAIAAADhj0eE87gawa7lBqyUkGhiieQV4q5rvdrJ8Ie1Haz6hg==" size=363

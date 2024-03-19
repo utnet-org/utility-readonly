@@ -18,7 +18,7 @@ To create a new crypto hash:
 Also, prefer doing parse + unwrap:
 
 ```rust
-let alice: AccountId = "alice.near".parse().unwrap();
+let alice: AccountId = "alice.unc".parse().unwrap();
 ```
 
 ### Signatures

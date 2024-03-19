@@ -559,7 +559,7 @@ mod tests {
             "boundary_accounts": [
               "aurora",
               "aurora-0",
-              "kkuuue2akv_1630967379.near"
+              "kkuuue2akv_1630967379.unc"
             ],
             "shards_split_map": [
               [
@@ -585,7 +585,7 @@ mod tests {
             "boundary_accounts": [
               "aurora",
               "aurora-0",
-              "kkuuue2akv_1630967379.near",
+              "kkuuue2akv_1630967379.unc",
               "tge-lockup.sweat"
             ],
             "shards_split_map": [

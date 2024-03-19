@@ -243,7 +243,7 @@ mod tests {
     fn test_unc_prefix() {
         assert!(check_metric_unc_prefix("unc_abc").is_ok());
         assert!(check_metric_unc_prefix("flat_storage_head_height").is_ok());
-        assert!(check_metric_unc_prefix("near").is_err());
+        assert!(check_metric_unc_prefix("unc").is_err());
         assert!(check_metric_unc_prefix("abc").is_err());
     }
 }

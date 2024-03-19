@@ -66,7 +66,7 @@ def upload_to_s3(file_lines: list, account: str) -> str:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Send logs to near.')
+    parser = argparse.ArgumentParser(description='Send logs to unc.')
     parser.add_argument('--log_file',
                         type=str,
                         help='Absolute path to log file.',

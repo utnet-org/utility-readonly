@@ -84,7 +84,7 @@ def prompt_setup_flags(args):
 
 def start_neard_runner(node):
     cmd_utils.run_in_background(node, f'/home/ubuntu/uncd-runner/venv/bin/python /home/ubuntu/uncd-runner/neard_runner.py ' \
-        '--home /home/ubuntu/uncd-runner --uncd-home /home/ubuntu/.near ' \
+        '--home /home/ubuntu/uncd-runner --uncd-home /home/ubuntu/.unc ' \
         '--uncd-logs /home/ubuntu/uncd-logs --port 3000', 'uncd-runner.txt')
 
 

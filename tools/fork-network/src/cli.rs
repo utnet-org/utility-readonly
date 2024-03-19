@@ -205,7 +205,7 @@ impl ForkNetworkCommand {
     }
 
     /// Checks if a DB snapshot exists.
-    /// If a snapshot doesn't exist, then creates it at `~/.near/data/fork-snapshot`.
+    /// If a snapshot doesn't exist, then creates it at `~/.unc/data/fork-snapshot`.
     fn snapshot_db(
         &self,
         store: Store,
@@ -438,11 +438,11 @@ impl ForkNetworkCommand {
         Ok((state_roots, block_hash, epoch_id, block_height))
     }
 
-    /// Checks that `~/.near/data/fork-snapshot/data` exists.
-    /// Deletes files (not directories) in `~/.near/data`
-    /// Moves everything from `~/.near/data/fork-snapshot/data/` to `~/.near/data`.
-    /// Deletes `~/.near/data/fork-snapshot/data`.
-    /// Moves `~/.near/genesis.json.backup` to `~/.near/genesis.json`.
+    /// Checks that `~/.unc/data/fork-snapshot/data` exists.
+    /// Deletes files (not directories) in `~/.unc/data`
+    /// Moves everything from `~/.unc/data/fork-snapshot/data/` to `~/.unc/data`.
+    /// Deletes `~/.unc/data/fork-snapshot/data`.
+    /// Moves `~/.unc/genesis.json.backup` to `~/.unc/genesis.json`.
     fn reset(self, unc_config: &UncConfig, home_dir: &Path) -> anyhow::Result<()> {
         let store_path =
             home_dir.join(unc_config.config.store.path.clone().unwrap_or(PathBuf::from("data")));
@@ -770,7 +770,7 @@ impl ForkNetworkCommand {
         Ok((new_state_roots, new_validator_accounts))
     }
 
-    /// Makes a new genesis and writes it to `~/.near/genesis.json`.
+    /// Makes a new genesis and writes it to `~/.unc/genesis.json`.
     fn make_and_write_genesis(
         &self,
         epoch_length: u64,

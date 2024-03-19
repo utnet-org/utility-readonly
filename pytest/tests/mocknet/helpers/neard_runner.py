@@ -244,13 +244,13 @@ class NeardRunner:
     def neard_init(self):
         # We make uncd init save files to self.tmp_unc_home_path() just to make it
         # a bit cleaner, so we can init to a non-existent directory and then move
-        # the files we want to the real near home without having to remove it first
+        # the files we want to the real unc home without having to remove it first
         cmd = [
             self.data['binaries'][0]['system_path'], '--home',
             self.tmp_unc_home_path(), 'init'
         ]
         if not self.is_traffic_generator():
-            cmd += ['--account-id', f'{socket.gethostname()}.near']
+            cmd += ['--account-id', f'{socket.gethostname()}.unc']
         subprocess.check_call(cmd)
 
         with open(self.tmp_unc_home_path('config.json'), 'r') as f:
@@ -754,7 +754,7 @@ class NeardRunner:
                         'V1': {
                             'boundary_accounts': [
                                 'aurora', 'aurora-0',
-                                'kkuuue2akv_1630967379.near'
+                                'kkuuue2akv_1630967379.unc'
                             ],
                             'shards_split_map': [[0, 1, 2, 3]],
                             'to_parent_shard_map': [0, 0, 0, 0],

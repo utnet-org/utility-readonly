@@ -35,7 +35,6 @@ venv
 # Integration tests
 create-unc-app/
 unc-api-js/
-nearlib_release_test/
 test-keys/
 tmp/
 

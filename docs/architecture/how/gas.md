@@ -4,7 +4,7 @@ This page describes the technical details around gas during the lifecycle of a
 _transaction_(*) while giving an intuition for why things are the way they are
 from a technical perspective. For a more practical, user-oriented angle, please
 refer to the [gas section in the official protocol
-documentation](https://docs.near.org/concepts/basics/transactions/gas).
+documentation](https://docs.unc.org/concepts/basics/transactions/gas).
 
 (*) _For this page, a transaction shall refer to the set of all recursively
 generated receipts by a `SignedTransaction`. When referring to only the original
@@ -12,16 +12,17 @@ transaction object, we write `SignedTransaction`._
 
 The topic is split into several sections.
 
-1. [Gas Flow](#gas-flow)
-    - [Buying Gas](#buying-gas-for-a-transaction): How are UNC tokens converted to gas?
-    - [Burning Gas](#burning-gas): Who receives burnt tokens?
-    - [Gas in Contract Calls](#gas-in-contract-calls): How is gas attached to calls?
-    - [Contract Reward](#contract-reward): How smart contract earn a reward.
-2. [Gas Price](#gas-price): 
-    - [Block-Level Gas Price](#block-level-gas-price): How the block-level gas price is determined.
-    - [Pessimistic Gas Price](#pessimistic-gas-price): How worst-case gas pricing is estimated.
-    - [Effective Gas Purchase Cost](#effective-gas-purchase-cost): The cost paid for a receipt.
-3. [Tracking Gas](#tracking-gas-in-receipts): How the system keeps track of purchased gas during the transaction execution.
+- [Gas](#gas)
+  - [Gas Flow](#gas-flow)
+    - [Buying Gas for a Transaction](#buying-gas-for-a-transaction)
+    - [Burning Gas](#burning-gas)
+    - [Gas in Contract Calls](#gas-in-contract-calls)
+    - [Contract Reward](#contract-reward)
+  - [Gas Price](#gas-price)
+    - [Block-Level Gas Price](#block-level-gas-price)
+    - [Pessimistic Gas Price](#pessimistic-gas-price)
+    - [Effective Gas Purchase Cost](#effective-gas-purchase-cost)
+  - [Tracking Gas in Receipts](#tracking-gas-in-receipts)
 
 ## Gas Flow
 
@@ -120,7 +121,7 @@ this second limit is obsolete with the current configuration where the two limit
 are equal.
 
 Since protocol version 53, with the stabilization of
-[NEP-264](https://github.com/near/NEPs/blob/master/neps/nep-0264.md), contract
+[NEP-264](https://github.com/unc/NEPs/blob/master/neps/nep-0264.md), contract
 developers do not have to specify the absolute amount of gas to attach to calls.
 `promise_batch_action_function_call_weight` allows to specify a ratio of unspent
 gas that is computed after the current call has finished. This allows attaching

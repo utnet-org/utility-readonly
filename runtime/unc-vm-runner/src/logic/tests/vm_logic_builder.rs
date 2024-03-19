@@ -66,10 +66,10 @@ impl VMLogicBuilder {
 
 fn get_context() -> VMContext {
     VMContext {
-        current_account_id: "alice.near".parse().unwrap(),
-        signer_account_id: "bob.near".parse().unwrap(),
+        current_account_id: "alice.unc".parse().unwrap(),
+        signer_account_id: "bob.unc".parse().unwrap(),
         signer_account_pk: vec![0, 1, 2, 3, 4],
-        predecessor_account_id: "carol.near".parse().unwrap(),
+        predecessor_account_id: "carol.unc".parse().unwrap(),
         input: vec![0, 1, 2, 3, 4],
         block_height: 10,
         block_timestamp: 42,

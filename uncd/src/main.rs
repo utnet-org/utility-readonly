@@ -21,7 +21,7 @@ static UNCD_VERSION_STRING: Lazy<String> = Lazy::new(|| {
     )
 });
 
-fn neard_version() -> Version {
+fn uncd_version() -> Version {
     Version {
         version: UNCD_VERSION.to_string(),
         build: UNCD_BUILD.to_string(),

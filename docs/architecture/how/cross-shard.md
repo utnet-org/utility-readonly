@@ -9,16 +9,16 @@ shard 1).
 Imagine, we run the following command in the command line:
 
 ```console
-$ unc_ENV=local near send shard0 shard1 500
+$ UNC_ENV=local unc send shard0 shard1 500
 ```
 
 What happens under the hood? How is this transaction changed into receipts and
-processed by near?
+processed by unc?
 
 ## From Explorer perspective
 
 If you look at a simple token transfer in explorer
-([example](https://explorer.near.org/transactions/79gPsyYRG2xghr6oNLpMbdjP2jpafjVT35no9atS6zUf)),
+([example](https://explorer.unc.org/transactions/79gPsyYRG2xghr6oNLpMbdjP2jpafjVT35no9atS6zUf)),
 you can see that it is broken into three separate sections:
 
 * convert transaction into receipt ( executed in block B )

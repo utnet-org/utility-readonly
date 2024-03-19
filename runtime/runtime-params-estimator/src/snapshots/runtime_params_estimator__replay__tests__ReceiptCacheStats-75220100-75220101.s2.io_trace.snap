@@ -79,7 +79,7 @@ expression: output
         SHARD CACHE         63.16% hit rate
         CHUNK CACHE not accessed
 
-      process_receipt receiver=c_shark.near receipt_id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 block=2zB2oBqRj8dFECSaBeGP6hGGDs7KowYBVwcVfq8Ukjf9
+      process_receipt receiver=c_shark.unc receipt_id=7g8RkfXrPdQ9uHqNctnNv2BF9H3xJxv2XN68VjnJczo7 block=2zB2oBqRj8dFECSaBeGP6hGGDs7KowYBVwcVfq8Ukjf9
         GET   21 State  
         DB GET               21 requests for a total of     2190 B
         DB SET                0 requests for a total of        0 B

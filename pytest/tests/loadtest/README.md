@@ -38,8 +38,8 @@ env unc_ROOT=../target/release/ python3 tests/loadtest/loadtest2.py --fungible-t
 Or, you can set up a network yourself, and point the script at your local node’s RPC endpoint:
 
 ```
-env unc_ROOT=../target/release/ python3 tests/stress/perf_ft_transfer.py --fungible-token-wasm=$PWD/../../FT/res/fungible_token.wasm --accounts=1000 --executors=4 --contract-key=~/.near/node.json
+env unc_ROOT=../target/release/ python3 tests/stress/perf_ft_transfer.py --fungible-token-wasm=$PWD/../../FT/res/fungible_token.wasm --accounts=1000 --executors=4 --contract-key=~/.unc/node.json
 ```
 
 As seen in commands above, you will need a fungible token contract to test with. There's one you
-can get from the `near/unc-examples` repository.
+can get from the `unc/unc-examples` repository.

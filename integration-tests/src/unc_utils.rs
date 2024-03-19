@@ -111,19 +111,19 @@ pub fn setup_configs_with_epoch_length(
 
     let (port1, port2) =
         (tcp::ListenerAddr::reserve_for_test(), tcp::ListenerAddr::reserve_for_test());
-    let mut near1 = load_test_config("test1", port1, genesis.clone());
-    near1.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test2", *port2)]);
-    near1.client_config.min_num_peers = 1;
-    near1.client_config.epoch_sync_enabled = false;
-    near1.client_config.state_sync_enabled = true;
+    let mut unc1 = load_test_config("test1", port1, genesis.clone());
+    unc1.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test2", *port2)]);
+    unc1.client_config.min_num_peers = 1;
+    unc1.client_config.epoch_sync_enabled = false;
+    unc1.client_config.state_sync_enabled = true;
 
-    let mut near2 = load_test_config("test2", port2, genesis.clone());
-    near2.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test1", *port1)]);
-    near2.client_config.min_num_peers = 1;
-    near2.client_config.epoch_sync_enabled = false;
-    near2.client_config.state_sync_enabled = true;
+    let mut unc2 = load_test_config("test2", port2, genesis.clone());
+    unc2.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test1", *port1)]);
+    unc2.client_config.min_num_peers = 1;
+    unc2.client_config.epoch_sync_enabled = false;
+    unc2.client_config.state_sync_enabled = true;
 
-    (genesis, genesis_block, near1, near2)
+    (genesis, genesis_block, unc1, unc2)
 }
 
 pub fn setup_configs() -> (Genesis, Block, UncConfig, UncConfig) {

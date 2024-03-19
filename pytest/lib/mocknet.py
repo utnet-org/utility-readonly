@@ -31,22 +31,22 @@ SECRET_KEY = 'ed25519:3cCk8KUWBySGCxBcn1syMoY5u73wx5eaPLRbQcMi23LwBA3aLsqEbA33Ww
 TX_OUT_FILE = '/home/ubuntu/tx_events'
 WASM_FILENAME = 'simple_contract.wasm'
 
-TREASURY_ACCOUNT = 'test.near'
-MASTER_ACCOUNT = 'near'
-SKYWARD_ACCOUNT = 'skyward.near'
-SKYWARD_TOKEN_ACCOUNT = 'token.skyward.near'
-TOKEN1_ACCOUNT = 'token1.near'
-TOKEN2_ACCOUNT = 'token2.near'
-TOKEN2_OWNER_ACCOUNT = 'account.token2.near'
-ACCOUNT1_ACCOUNT = 'account1.near'
+TREASURY_ACCOUNT = 'test.unc'
+MASTER_ACCOUNT = 'unc'
+SKYWARD_ACCOUNT = 'skyward.unc'
+SKYWARD_TOKEN_ACCOUNT = 'token.skyward.unc'
+TOKEN1_ACCOUNT = 'token1.unc'
+TOKEN2_ACCOUNT = 'token2.unc'
+TOKEN2_OWNER_ACCOUNT = 'account.token2.unc'
+ACCOUNT1_ACCOUNT = 'account1.unc'
 
 TMUX_STOP_SCRIPT = '''
-while tmux has-session -t near; do
-tmux kill-session -t near || true
+while tmux has-session -t unc; do
+tmux kill-session -t unc || true
 done
 '''
 
-PYTHON_DIR = '/home/ubuntu/.near/pytest/'
+PYTHON_DIR = '/home/ubuntu/.unc/pytest/'
 
 PYTHON_SETUP_SCRIPT = f'''
 rm -rf {PYTHON_DIR}
@@ -123,7 +123,7 @@ def node_account_name(node_name):
     # Assuming node_name is a hostname and looks like
     # 'mocknet-betanet-spoon-abcd' or 'mocknet-zxcv'.
     parts = node_name.split('-')
-    return f'{parts[-1]}-load-test.near'
+    return f'{parts[-1]}-load-test.unc'
 
 
 # Constructs an account name given the basic account name.
@@ -138,7 +138,7 @@ def load_testing_account_id(node_account_id, i):
 
 def get_validator_account(node):
     return Key.from_json(
-        download_and_read_json(node, '/home/ubuntu/.near/validator_key.json'))
+        download_and_read_json(node, '/home/ubuntu/.unc/validator_key.json'))
 
 
 def list_validators(node):
@@ -250,7 +250,7 @@ def start_load_test_helpers(
 
 def get_log(node):
     target_file = f'./logs/{node.instance_name}.log'
-    node.machine.download('/home/ubuntu/near.log', target_file)
+    node.machine.download('/home/ubuntu/unc.log', target_file)
 
 
 def get_logs(nodes):
@@ -258,7 +258,7 @@ def get_logs(nodes):
 
 
 def get_epoch_length_in_blocks(node):
-    config = download_and_read_json(node, '/home/ubuntu/.near/genesis.json')
+    config = download_and_read_json(node, '/home/ubuntu/.unc/genesis.json')
     epoch_length_in_blocks = config['epoch_length']
     return epoch_length_in_blocks
 
@@ -462,7 +462,7 @@ def kill_proccess_script(pid):
 
 def get_unc_pid(machine):
     p = machine.run(
-        "ps aux | grep 'near.* run' | grep -v grep | awk '{print $2}'")
+        "ps aux | grep 'unc.* run' | grep -v grep | awk '{print $2}'")
     return p.stdout.strip()
 
 
@@ -521,7 +521,7 @@ def neard_amend_genesis_path(node):
     raise Exception(f'`uncd.upgrade amend-genesis` not available')
 
 
-# We assume that the nodes already have the .near directory with the files
+# We assume that the nodes already have the .unc directory with the files
 # node_key.json, validator_key.json and config.json.
 def create_and_upload_genesis(
     validator_nodes,
@@ -543,9 +543,9 @@ def create_and_upload_genesis(
     rpc_node_names = [node.instance_name for node in rpc_nodes]
     assert '-spoon' in chain_id, f'Expecting chain_id like "testnet-spoon" or "mainnet-spoon", got {chain_id}'
     chain_id_in = chain_id.split('-spoon')[0]
-    genesis_filename_in = f'/home/ubuntu/.near/{chain_id_in}-genesis/genesis.json'
-    records_filename_in = f'/home/ubuntu/.near/{chain_id_in}-genesis/records.json'
-    config_filename_in = f'/home/ubuntu/.near/{chain_id_in}-genesis/config.json'
+    genesis_filename_in = f'/home/ubuntu/.unc/{chain_id_in}-genesis/genesis.json'
+    records_filename_in = f'/home/ubuntu/.unc/{chain_id_in}-genesis/records.json'
+    config_filename_in = f'/home/ubuntu/.unc/{chain_id_in}-genesis/config.json'
     stamp = time.strftime('%Y%m%d-%H%M%S', time.gmtime())
     done_filename = f'/home/ubuntu/genesis_update_done_{stamp}.txt'
     uncd = neard_amend_genesis_path(validator_nodes[1])
@@ -556,7 +556,7 @@ def create_and_upload_genesis(
             genesis_filename_in=genesis_filename_in,
             records_filename_in=records_filename_in,
             config_filename_in=config_filename_in,
-            out_dir='/home/ubuntu/.near/',
+            out_dir='/home/ubuntu/.unc/',
             chain_id=chain_id,
             validator_keys=validator_keys,
             rpc_nodes=rpc_node_names,
@@ -794,7 +794,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
 
     VALIDATOR_BALANCE = (10**2) * ONE_NEAR
     RPC_BALANCE = (10**1) * ONE_NEAR
-    TREASURY_ACCOUNT = 'test.near'
+    TREASURY_ACCOUNT = 'test.unc'
     TREASURY_BALANCE = (10**7) * ONE_NEAR
     LOAD_TESTER_BALANCE = (10**4) * ONE_NEAR
 
@@ -935,7 +935,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
 
     genesis_config['records'] = records
     for node in [node for (node, _) in validator_node_and_stakes] + rpc_nodes:
-        upload_json(node, '/home/ubuntu/.near/genesis.json', genesis_config)
+        upload_json(node, '/home/ubuntu/.unc/genesis.json', genesis_config)
 
 
 def download_and_read_json(node, filename):
@@ -969,19 +969,19 @@ def upload_json(node, filename, data):
 
 def get_node_addr(node, port):
     node_key_json = download_and_read_json(node,
-                                           '/home/ubuntu/.near/node_key.json')
+                                           '/home/ubuntu/.unc/node_key.json')
     return f'{node_key_json["public_key"]}@{node.ip}:{port}'
 
 
 def get_validator_account_id(node):
     node_key_json = download_and_read_json(
-        node, '/home/ubuntu/.near/validator_key.json')
+        node, '/home/ubuntu/.unc/validator_key.json')
     return node_key_json["account_id"]
 
 
 def get_validator_key(node):
     node_key_json = download_and_read_json(
-        node, '/home/ubuntu/.near/validator_key.json')
+        node, '/home/ubuntu/.unc/validator_key.json')
     return node_key_json["account_id"], node_key_json["public_key"]
 
 
@@ -989,7 +989,7 @@ def get_node_keys(node):
     logger.info(f'get_node_keys from {node.instance_name}')
     node_key_json = download_and_read_json(
         node,
-        '/home/ubuntu/.near/node_key.json',
+        '/home/ubuntu/.unc/node_key.json',
     )
     return node_key_json['public_key'], node_key_json['secret_key']
 
@@ -997,7 +997,7 @@ def get_node_keys(node):
 def init_validator_key(node):
     account_id = node_account_name(node.instance_name)
     node.machine.run(
-        f'dir=$(mktemp -d) && /home/ubuntu/uncd --home $dir init --account-id {account_id} && mv $dir/validator_key.json /home/ubuntu/.near/validator_key.json'
+        f'dir=$(mktemp -d) && /home/ubuntu/uncd --home $dir init --account-id {account_id} && mv $dir/validator_key.json /home/ubuntu/.unc/validator_key.json'
     )
 
 
@@ -1052,17 +1052,17 @@ def create_and_upload_config_file_from_default(nodes, chain_id, overrider=None):
         copied_config = json.loads(json.dumps(config_json))
         if overrider:
             overrider(node, copied_config)
-        upload_json(node, '/home/ubuntu/.near/config.json', copied_config)
+        upload_json(node, '/home/ubuntu/.unc/config.json', copied_config)
 
 
 def update_existing_config_file(nodes, overrider=None):
     for node in nodes:
         config_json = download_and_read_json(
             nodes[0],
-            '/home/ubuntu/.near/config.json',
+            '/home/ubuntu/.unc/config.json',
         )
         overrider(node, config_json)
-        upload_json(node, '/home/ubuntu/.near/config.json', config_json)
+        upload_json(node, '/home/ubuntu/.unc/config.json', config_json)
 
 
 def start_nodes(nodes, upgrade_schedule=None):
@@ -1077,7 +1077,7 @@ def stop_nodes(nodes):
 
 
 def clear_data(nodes):
-    pmap(lambda node: node.machine.run('rm -rf /home/ubuntu/.near/data'), nodes)
+    pmap(lambda node: node.machine.run('rm -rf /home/ubuntu/.unc/data'), nodes)
 
 
 def neard_start_script(node, upgrade_schedule=None, epoch_height=None):
@@ -1087,11 +1087,11 @@ def neard_start_script(node, upgrade_schedule=None, epoch_height=None):
     else:
         neard_binary = '/home/ubuntu/uncd'
     return '''
-        sudo mv /home/ubuntu/near.log /home/ubuntu/near.log.1 2>/dev/null
-        sudo mv /home/ubuntu/near.upgrade.log /home/ubuntu/near.upgrade.log.1 2>/dev/null
-        sudo rm -rf /home/ubuntu/.near/data
-        tmux new -s near -d bash
-        tmux send-keys -t near 'RUST_BACKTRACE=full RUST_LOG=debug,actix_web=info {neard_binary} run 2>&1 | tee -a {neard_binary}.log' C-m
+        sudo mv /home/ubuntu/unc.log /home/ubuntu/unc.log.1 2>/dev/null
+        sudo mv /home/ubuntu/unc.upgrade.log /home/ubuntu/unc.upgrade.log.1 2>/dev/null
+        sudo rm -rf /home/ubuntu/.unc/data
+        tmux new -s unc -d bash
+        tmux send-keys -t unc 'RUST_BACKTRACE=full RUST_LOG=debug,actix_web=info {neard_binary} run 2>&1 | tee -a {neard_binary}.log' C-m
     '''.format(neard_binary=shlex.quote(neard_binary))
 
 
@@ -1130,7 +1130,7 @@ def reset_data(node, retries=0):
         m = node.machine
         stop_node(node)
         logger.info(f'Clearing data directory of node {m.name}')
-        start_process = m.run('bash', input='rm -r /home/ubuntu/.near')
+        start_process = m.run('bash', input='rm -r /home/ubuntu/.unc')
         assert start_process.returncode == 0, m.name + '\n' + start_process.stderr
     except:
         if retries < 3:
@@ -1416,10 +1416,10 @@ def get_epoch_height(rpc_nodes, prev_epoch_height):
 def neard_restart_script(node):
     neard_binary = '/home/ubuntu/uncd.upgrade'
     return '''
-        tmux send-keys -t near C-c
-        sudo mv /home/ubuntu/near.log /home/ubuntu/near.log.1 2>/dev/null
-        sudo mv /home/ubuntu/near.upgrade.log /home/ubuntu/near.upgrade.log.1 2>/dev/null
-        tmux send-keys -t near 'RUST_BACKTRACE=full RUST_LOG=debug,actix_web=info {neard_binary} run 2>&1 | tee -a {neard_binary}.log' C-m
+        tmux send-keys -t unc C-c
+        sudo mv /home/ubuntu/unc.log /home/ubuntu/unc.log.1 2>/dev/null
+        sudo mv /home/ubuntu/unc.upgrade.log /home/ubuntu/unc.upgrade.log.1 2>/dev/null
+        tmux send-keys -t unc 'RUST_BACKTRACE=full RUST_LOG=debug,actix_web=info {neard_binary} run 2>&1 | tee -a {neard_binary}.log' C-m
     '''.format(neard_binary=shlex.quote(neard_binary))
 
 

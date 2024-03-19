@@ -28,7 +28,7 @@ if __name__ == '__main__':
                         help='filter results by these keys')
     args = parser.parse_args()
 
-    url = 'https://{}.{}.near.org'.format(
+    url = 'https://{}.{}.unc.org'.format(
         'archival-rpc' if args.archive else 'rpc', args.chain)
 
     def get_block_id(block_id):

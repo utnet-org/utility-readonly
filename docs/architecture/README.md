@@ -31,7 +31,7 @@ only a small subset (shard) of the whole state.
 connects to the network and starts processing blocks (block is a batch of
 transactions, processed together; transactions are batched into blocks for
 greater efficiency). The results of processing are persisted in the database.
-RocksDB is used for storage. Usually, the node's data is found in the `~/.near`
+RocksDB is used for storage. Usually, the node's data is found in the `~/.unc`
 directory. The node can be stopped at any moment and be restarted later. While
 the node is offline it misses the block, so, after a restart, the sync process
 kicks in which brings the node up-to-speed with the network by downloading the
@@ -45,7 +45,7 @@ Major components of framework:
   node, the transaction propagates through the network, until it is included in
   some block. Similarly, a client can send an HTTP request to a node to learn
   about current state of the blockchain. The **JSON RPC** interface is documented
-  [here](https://docs.near.org/api/rpc/introduction).
+  [here](https://docs.unc.org/api/rpc/introduction).
 
 * **Network**. If RPC is aimed "outside" the blockchain, "network" is how peer
   `uncd` nodes communicate with each other within the blockchain. RPC carries
@@ -106,7 +106,7 @@ actual entry point and it starts all the actors.
 
 `JsonRpcHandler::process` in the `jsonrpc` crate is the RPC entry point. It
 implements the public API of a node, which is documented
-[here](https://docs.near.org/api/rpc/introduction).
+[here](https://docs.unc.org/api/rpc/introduction).
 
 `PeerManagerActor::spawn` in the `network` is an entry for the other point of
 contract with the outside world -- the peer-to-peer network.

@@ -12,10 +12,10 @@ use testlib::runtime_utils::alice_account;
 fn create_thread_nodes_rpc() -> Vec<ThreadNode> {
     init_test_module_logger("runtime");
     let nodes = create_nodes_from_seeds(vec![
-        "alice.near".to_string(),
-        "bob.near".to_string(),
-        "carol.near".to_string(),
-        "dan.near".to_string(),
+        "alice.unc".to_string(),
+        "bob.unc".to_string(),
+        "carol.unc".to_string(),
+        "dan.unc".to_string(),
     ]);
     let mut nodes: Vec<_> = nodes
         .into_iter()

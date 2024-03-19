@@ -388,8 +388,8 @@ pub(crate) static PRODUCE_AND_DISTRIBUTE_CHUNK_TIME: Lazy<HistogramVec> = Lazy::
 ///
 /// Sets metrics which export node’s max supported protocol version, used
 /// database version and build information.  The latter is taken from
-/// `neard_version` argument.
-pub(crate) fn export_version(neard_version: &unc_primitives::version::Version) {
+/// `uncd_version` argument.
+pub(crate) fn export_version(uncd_version: &unc_primitives::version::Version) {
     NODE_PROTOCOL_VERSION.set(unc_primitives::version::PROTOCOL_VERSION.into());
     NODE_PROTOCOL_UPGRADE_VOTING_START
         .set(unc_primitives::version::PROTOCOL_UPGRADE_SCHEDULE.timestamp());
@@ -397,9 +397,9 @@ pub(crate) fn export_version(neard_version: &unc_primitives::version::Version) {
     NODE_BUILD_INFO.reset();
     NODE_BUILD_INFO
         .with_label_values(&[
-            &neard_version.version,
-            &neard_version.build,
-            &neard_version.rustc_version,
+            &uncd_version.version,
+            &uncd_version.build,
+            &uncd_version.rustc_version,
         ])
         .inc();
 }

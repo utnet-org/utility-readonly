@@ -6,7 +6,7 @@ use unc_indexer::unc_primitives::types::Gas;
 #[clap(version = "0.1", author = "unc Inc. <hello@utility.com>")]
 #[clap(subcommand_required = true, arg_required_else_help = true)]
 pub(crate) struct Opts {
-    /// Sets a custom config dir. Defaults to ~/.near/
+    /// Sets a custom config dir. Defaults to ~/.unc/
     #[clap(short, long)]
     pub home_dir: Option<std::path::PathBuf>,
     #[clap(subcommand)]

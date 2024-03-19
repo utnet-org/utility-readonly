@@ -227,7 +227,7 @@ def chain_query(node, block_handler, *, block_hash=None, max_blocks=-1):
 
 
 def get_unc_tempdir(subdir=None, *, clean=False):
-    tempdir = pathlib.Path(tempfile.gettempdir()) / 'near'
+    tempdir = pathlib.Path(tempfile.gettempdir()) / 'unc'
     if subdir:
         tempdir = tempdir / subdir
     if clean and tempdir.exists():
@@ -273,7 +273,7 @@ def collect_gcloud_config(num_nodes):
             host = gcloud.get(f'pytest-node-{user_name()}-{i}')
             for filename in ('config.json', 'signer0_key.json',
                              'validator_key.json', 'node_key.json'):
-                host.download(f'/home/bowen_nearprotocol_com/.near/{filename}',
+                host.download(f'/home/bowen_nearprotocol_com/.unc/{filename}',
                               str(node_dir))
         with open(node_dir / 'signer0_key.json') as f:
             key = json.load(f)

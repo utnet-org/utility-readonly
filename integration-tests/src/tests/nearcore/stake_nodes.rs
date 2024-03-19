@@ -48,7 +48,7 @@ fn init_test_staking(
 ) -> Vec<TestNode> {
     init_integration_logger();
 
-    let seeds = (0..num_node_seats).map(|i| format!("near.{}", i)).collect::<Vec<_>>();
+    let seeds = (0..num_node_seats).map(|i| format!("unc.{}", i)).collect::<Vec<_>>();
     let mut genesis =
         Genesis::test(seeds.iter().map(|s| s.parse().unwrap()).collect(), num_validator_seats);
     genesis.config.epoch_length = epoch_length;
@@ -64,7 +64,7 @@ fn init_test_staking(
 
     let configs = (0..num_node_seats).map(|i| {
         let mut config = load_test_config(
-            &format!("near.{}", i),
+            &format!("unc.{}", i),
             if i == 0 { first_node } else { tcp::ListenerAddr::reserve_for_test() },
             genesis.clone(),
         );
@@ -77,7 +77,7 @@ fn init_test_staking(
         }
         if i != 0 {
             config.network_config.peer_store.boot_nodes =
-                convert_boot_nodes(vec![("near.0", *first_node)]);
+                convert_boot_nodes(vec![("unc.0", *first_node)]);
         }
         config.client_config.min_num_peers = num_node_seats as usize - 1;
         config.client_config.epoch_sync_enabled = false;
@@ -89,7 +89,7 @@ fn init_test_staking(
             let genesis_hash = genesis_hash(&config.genesis);
             let framework::NearNode { client, view_client, .. } =
                 start_with_config(paths[i], config.clone()).expect("start_with_config");
-            let account_id = format!("near.{}", i).parse::<AccountId>().unwrap();
+            let account_id = format!("unc.{}", i).parse::<AccountId>().unwrap();
             let signer = Arc::new(InMemorySigner::from_seed(
                 account_id.clone(),
                 KeyType::ED25519,
@@ -162,11 +162,11 @@ fn test_stake_nodes() {
                         if validators
                             == vec![
                                 ValidatorInfo {
-                                    account_id: "near.0".parse().unwrap(),
+                                    account_id: "unc.0".parse().unwrap(),
                                     is_slashed: false,
                                 },
                                 ValidatorInfo {
-                                    account_id: "near.1".parse().unwrap(),
+                                    account_id: "unc.1".parse().unwrap(),
                                     is_slashed: false,
                                 },
                             ]
@@ -260,7 +260,7 @@ fn test_validator_kickout() {
                     let actor = actor.then(move |res| {
                         let expected: Vec<_> = (num_nodes / 2..num_nodes)
                             .map(|i| ValidatorInfo {
-                                account_id: AccountId::try_from(format!("near.{}", i)).unwrap(),
+                                account_id: AccountId::try_from(format!("unc.{}", i)).unwrap(),
                                 is_slashed: false,
                             })
                             .collect();
@@ -433,11 +433,11 @@ fn test_validator_join() {
                     let actor = actor.then(move |res| {
                         let expected = vec![
                             ValidatorInfo {
-                                account_id: "near.0".parse().unwrap(),
+                                account_id: "unc.0".parse().unwrap(),
                                 is_slashed: false,
                             },
                             ValidatorInfo {
-                                account_id: "near.2".parse().unwrap(),
+                                account_id: "unc.2".parse().unwrap(),
                                 is_slashed: false,
                             },
                         ];

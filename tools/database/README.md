@@ -11,7 +11,7 @@ of keys and values within RocksDB.
 
 To run the script, use the following example:
 ```bash
-cargo run --bin uncd -- --home /home/ubuntu/.near database analyse-data-size-distribution --column State --top_k 50
+cargo run --bin uncd -- --home /home/ubuntu/.unc database analyse-data-size-distribution --column State --top_k 50
 ```
 The arguments are as follows:
 
@@ -46,7 +46,7 @@ It is intended as a collection of commands that perform small db modifications.
 Changes DbKind of a DB described in config (cold or hot).  
 Example usage:
 ```bash
-cargo run --bin uncd -- --home /home/ubuntu/.near database change-db-kind --new-kind RPC change-cold
+cargo run --bin uncd -- --home /home/ubuntu/.unc database change-db-kind --new-kind RPC change-cold
 ```
 
 In this example we change DbKind of the cold db to RPC (for some reason).  
@@ -82,11 +82,11 @@ take no additional disk space due to hardlinking all the files.
 
 Example usage:
 ```bash
-cargo run --bin uncd -- --home /home/ubuntu/.near database make-snapshot --destination /home/ubuntu/.near/data/snapshot
+cargo run --bin uncd -- --home /home/ubuntu/.unc database make-snapshot --destination /home/ubuntu/.unc/data/snapshot
 ```
 
-In this example all `.sst` files from `/home/ubuntu/.near/data` will be also
-available in `/home/ubuntu/.near/data/snapshot`
+In this example all `.sst` files from `/home/ubuntu/.unc/data` will be also
+available in `/home/ubuntu/.unc/data/snapshot`
 
 This command can be helpful before attempting activities that can potentially
 corrupt the database.

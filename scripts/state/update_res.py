@@ -2,10 +2,10 @@
 """Checks or updates contents of framework/res/genesis_config.json file.
 
 * `update_res.py` updates framework/res/genesis_config.json to current
-  `near init` version without any records.
+  `unc init` version without any records.
 
 * `update_res.py check` checks whether framework/res/genesis_config.json
-  file matches what `near init` generates.
+  file matches what `unc init` generates.
 """
 
 import collections
@@ -35,9 +35,9 @@ SCRIPT_REPO_PATH = pathlib.Path(__file__).resolve().relative_to(REPO_FULL_PATH)
 def unc_init_genesis():
     with tempfile.TemporaryDirectory() as tempdir:
         args = ['--home', tempdir, 'init', '--chain-id', 'sample']
-        prebuilt_neard = os.environ.get("CURRENT_UNCD")
-        if prebuilt_neard is not None:
-            subprocess.check_call([prebuilt_neard] + args)
+        prebuilt_uncd = os.environ.get("CURRENT_UNCD")
+        if prebuilt_uncd is not None:
+            subprocess.check_call([prebuilt_uncd] + args)
         else:
             subprocess.check_call(
                 ['cargo', 'run', '-p', 'uncd', '--bin', 'uncd', '--'] + args)
@@ -46,7 +46,7 @@ def unc_init_genesis():
     genesis['records'] = []
     # To avoid the genesis config changing each time
     genesis['genesis_time'] = '1970-01-01T00:00:00.000000000Z'
-    # Secret key is seeded from test.near
+    # Secret key is seeded from test.unc
     genesis['validators'][0][
         'public_key'] = 'ed25519:9BmAFNRTa5mRRXpSAm6MxSEeqRASDGNh2FuuwZ4gyxTw'
     return genesis
@@ -65,7 +65,7 @@ def check_res():
         got_genesis = json.load(rd)
     if want_genesis != got_genesis:
         sys.exit(
-            f'`{GENESIS_REPO_PATH}` does not match `near init` generated one\n'
+            f'`{GENESIS_REPO_PATH}` does not match `unc init` generated one\n'
             f'Please update by running `{SCRIPT_REPO_PATH}` script')
 
 

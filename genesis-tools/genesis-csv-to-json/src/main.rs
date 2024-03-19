@@ -16,7 +16,7 @@ fn main() {
                 .long("home")
                 .default_value(get_default_home().into_os_string())
                 .value_parser(clap::value_parser!(PathBuf))
-                .help("Directory for config and data (default \"~/.near\")")
+                .help("Directory for config and data (default \"~/.unc\")")
                 .action(clap::ArgAction::Set),
         )
         .arg(Arg::new("chain-id").long("chain-id").action(clap::ArgAction::Set))

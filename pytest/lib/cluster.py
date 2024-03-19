@@ -589,9 +589,9 @@ class GCloudNode(BaseNode):
             raise Exception()
 
     def _upload_config_files(self, node_dir):
-        self.machine.run('bash', input='mkdir -p ~/.near')
+        self.machine.run('bash', input='mkdir -p ~/.unc')
         self.machine.upload(os.path.join(node_dir, '*.json'),
-                            f'/home/{self.machine.username}/.near/')
+                            f'/home/{self.machine.username}/.unc/')
         self.validator_key = Key.from_json_file(
             os.path.join(node_dir, "validator_key.json"))
         self.node_key = Key.from_json_file(
@@ -603,7 +603,7 @@ class GCloudNode(BaseNode):
     def _download_binary(self, binary):
         p = self.machine.run('bash',
                              input=f'''
-/snap/bin/gsutil cp gs://nearprotocol_nearcore_release/{binary} uncd
+/snap/bin/gsutil cp gs://protocol_unc_release/{binary} uncd
 chmod +x uncd
 ''')
         if p.returncode != 0:
@@ -625,7 +625,7 @@ chmod +x uncd
         extra_env = " ".join(extra_env)
         self.machine.run_detach_tmux(
             extra_env +
-            " ".join(self._get_command_line('.', '.near', boot_node)))
+            " ".join(self._get_command_line('.', '.unc', boot_node)))
         self.wait_for_rpc(timeout=30)
 
     def kill(self):
@@ -675,7 +675,7 @@ chmod +x uncd
         with open(os.path.join(self.node_dir, "validator_key.json"), 'w+') as f:
             json.dump(new_key.to_json(), f)
         self.machine.upload(os.path.join(self.node_dir, 'validator_key.json'),
-                            f'/home/{self.machine.username}/.near/')
+                            f'/home/{self.machine.username}/.unc/')
 
 
 def spin_up_node(config,
@@ -880,12 +880,12 @@ def start_cluster(num_nodes,
     if not config:
         config = load_config()
 
-    dot_near = pathlib.Path.home() / '.near'
-    if (dot_near / 'test0').exists():
+    dot_unc = pathlib.Path.home() / '.unc'
+    if (dot_unc / 'test0').exists():
         unc_root = config['unc_root']
         node_dirs = [
-            str(dot_near / name)
-            for name in os.listdir(dot_near)
+            str(dot_unc / name)
+            for name in os.listdir(dot_unc)
             if name.startswith('test') and not name.endswith('_finished')
         ]
     else:

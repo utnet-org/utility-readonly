@@ -33,8 +33,8 @@ def mkdir_clean(dirname):
         dirname.mkdir()
 
 
-def dot_near():
-    return pathlib.Path.home() / '.near'
+def dot_unc():
+    return pathlib.Path.home() / '.unc'
 
 
 def ordinal_to_addr(port, ordinal):
@@ -42,8 +42,8 @@ def ordinal_to_addr(port, ordinal):
 
 
 def copy_genesis(home):
-    shutil.copy(dot_near() / 'test0/forked/genesis.json', home / 'genesis.json')
-    shutil.copy(dot_near() / 'test0/forked/records.json', home / 'records.json')
+    shutil.copy(dot_unc() / 'test0/forked/genesis.json', home / 'genesis.json')
+    shutil.copy(dot_unc() / 'test0/forked/records.json', home / 'records.json')
 
 
 def init_target_dir(uncd,
@@ -60,7 +60,7 @@ def init_target_dir(uncd,
         subprocess.check_output(args, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         sys.exit(f'"uncd init" command failed: output: {e.stdout}')
-    shutil.copy(dot_near() / 'test0/config.json', home / 'config.json')
+    shutil.copy(dot_unc() / 'test0/config.json', home / 'config.json')
 
     with open(home / 'config.json', 'r') as f:
         config = json.load(f)
@@ -87,7 +87,7 @@ def init_target_dirs(uncd, last_ordinal, target_validators):
             boot_node_home = dirs[0]
         else:
             boot_node_home = None
-        home = dot_near() / f'test_target_{account_id}'
+        home = dot_unc() / f'test_target_{account_id}'
         dirs.append(home)
         init_target_dir(uncd,
                         home,
@@ -101,13 +101,13 @@ def init_target_dirs(uncd, last_ordinal, target_validators):
 
 def create_forked_chain(config, unc_root, source_node_homes,
                         target_validators):
-    mkdir_clean(dot_near() / MIRROR_DIR)
+    mkdir_clean(dot_unc() / MIRROR_DIR)
     binary_name = config.get('binary_name', 'uncd')
     uncd = os.path.join(unc_root, binary_name)
     try:
         subprocess.check_output([
             uncd, "--home",
-            dot_near() / 'test0', "view-state", "dump-state", "--stream"
+            dot_unc() / 'test0', "view-state", "dump-state", "--stream"
         ],
                                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
@@ -118,42 +118,42 @@ def create_forked_chain(config, unc_root, source_node_homes,
             'mirror',
             'prepare',
             '--records-file-in',
-            dot_near() / 'test0/output/records.json',
+            dot_unc() / 'test0/output/records.json',
             '--records-file-out',
-            dot_near() / 'test0/output/mirror-records.json',
+            dot_unc() / 'test0/output/mirror-records.json',
             '--secret-file-out',
-            dot_near() / 'test0/output/mirror-secret.json',
+            dot_unc() / 'test0/output/mirror-secret.json',
         ],
                                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         sys.exit(f'"mirror prepare" command failed: output: {e.stdout}')
 
-    os.rename(source_node_homes[-1], dot_near() / f'{MIRROR_DIR}/source')
+    os.rename(source_node_homes[-1], dot_unc() / f'{MIRROR_DIR}/source')
     ordinal = len(source_node_homes) - 1
-    with open(dot_near() / f'{MIRROR_DIR}/source/config.json', 'r') as f:
+    with open(dot_unc() / f'{MIRROR_DIR}/source/config.json', 'r') as f:
         config = json.load(f)
         config['network']['boot_nodes'] = read_addr_pk(source_node_homes[0])
         config['network']['addr'] = ordinal_to_addr(24567, ordinal)
         config['rpc']['addr'] = ordinal_to_addr(3030, ordinal)
-    with open(dot_near() / f'{MIRROR_DIR}/source/config.json', 'w') as f:
+    with open(dot_unc() / f'{MIRROR_DIR}/source/config.json', 'w') as f:
         json.dump(config, f)
 
     dirs = init_target_dirs(uncd, ordinal, target_validators)
 
-    target_dir = dot_near() / f'{MIRROR_DIR}/target'
+    target_dir = dot_unc() / f'{MIRROR_DIR}/target'
     init_target_dir(uncd,
                     target_dir,
                     len(source_node_homes) + len(dirs),
                     dirs[0],
                     validator_account=None)
-    shutil.copy(dot_near() / 'test0/output/mirror-secret.json',
+    shutil.copy(dot_unc() / 'test0/output/mirror-secret.json',
                 target_dir / 'mirror-secret.json')
 
-    os.mkdir(dot_near() / 'test0/forked')
-    genesis_file_in = dot_near() / 'test0/output/genesis.json'
-    genesis_file_out = dot_near() / 'test0/forked/genesis.json'
-    records_file_in = dot_near() / 'test0/output/mirror-records.json'
-    records_file_out = dot_near() / 'test0/forked/records.json'
+    os.mkdir(dot_unc() / 'test0/forked')
+    genesis_file_in = dot_unc() / 'test0/output/genesis.json'
+    genesis_file_out = dot_unc() / 'test0/forked/genesis.json'
+    records_file_in = dot_unc() / 'test0/output/mirror-records.json'
+    records_file_out = dot_unc() / 'test0/forked/records.json'
 
     validators = []
     for d in dirs:
@@ -165,7 +165,7 @@ def create_forked_chain(config, unc_root, source_node_homes,
             'amount': '700000000000000'
         })
 
-    validators_file = dot_near() / 'test0/forked/validators.json'
+    validators_file = dot_unc() / 'test0/forked/validators.json'
     with open(validators_file, 'w') as f:
         json.dump(validators, f)
 
@@ -229,13 +229,13 @@ class MirrorProcess:
         env = os.environ.copy()
         env["RUST_LOG"] = "actix_web=warn,mio=warn,tokio_util=warn,actix_server=warn,actix_http=warn,indexer=info," + env.get(
             "RUST_LOG", "debug")
-        with open(dot_near() / f'{MIRROR_DIR}/stdout', 'ab') as stdout, \
-            open(dot_near() / f'{MIRROR_DIR}/stderr', 'ab') as stderr:
+        with open(dot_unc() / f'{MIRROR_DIR}/stdout', 'ab') as stdout, \
+            open(dot_unc() / f'{MIRROR_DIR}/stderr', 'ab') as stderr:
             args = [
                 self.uncd, 'mirror', 'run', "--source-home", self.source_home,
                 "--target-home",
-                dot_near() / f'{MIRROR_DIR}/target/', '--secret-file',
-                dot_near() / f'{MIRROR_DIR}/target/mirror-secret.json'
+                dot_unc() / f'{MIRROR_DIR}/target/', '--secret-file',
+                dot_unc() / f'{MIRROR_DIR}/target/mirror-secret.json'
             ]
             if self.online_source:
                 args.append('--online-source')
@@ -251,7 +251,7 @@ class MirrorProcess:
         logger.info('stopping mirror process')
         self.process.terminate()
         self.process.wait()
-        with open(dot_near() / f'{MIRROR_DIR}/stderr', 'ab') as stderr:
+        with open(dot_unc() / f'{MIRROR_DIR}/stderr', 'ab') as stderr:
             stderr.write(
                 b'<><><><><><><><><><><><> restarting <><><><><><><><><><><><><><><><><><><><>\n'
             )

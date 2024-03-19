@@ -41,7 +41,7 @@ pub fn cares_about_shard_this_or_next_epoch(
     is_me: bool,
     shard_tracker: &ShardTracker,
 ) -> bool {
-    // TODO(robin-near): I think we only need the shard_tracker if is_me is false.
+    // TODO: I think we only need the shard_tracker if is_me is false.
     shard_tracker.care_about_shard(account_id, parent_hash, shard_id, is_me)
         || shard_tracker.will_care_about_shard(account_id, parent_hash, shard_id, is_me)
 }

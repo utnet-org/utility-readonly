@@ -105,7 +105,7 @@ def check_view_call(legacy_url, split_url):
     logger.info(f"Checking view call.")
 
     # This is the example contract function call from
-    # https://docs.near.org/api/rpc/contracts#call-a-contract-function
+    # https://docs.unc.org/api/rpc/contracts#call-a-contract-function
     params = {
         "request_type": "call_function",
         "finality": "final",

@@ -10,8 +10,8 @@ number of shards.
 ## Specification
 
 The resharding is described in more detail in the following NEPs:
-* [NEP-0040](https://github.com/near/NEPs/blob/master/specs/Proposals/0040-split-states.md)
-* [NEP-0508](https://github.com/near/NEPs/pull/508) - TODO - once merged use the master link
+* [NEP-0040](https://github.com/unc/NEPs/blob/master/specs/Proposals/0040-split-states.md)
+* [NEP-0508](https://github.com/unc/NEPs/pull/508) - TODO - once merged use the master link
 
 ## Shard layout
 
@@ -30,16 +30,16 @@ be added in the future.
 * simple nightshade - Splits the accounts into 4 shards. 
 * simple nightshade v2 - Splits the accounts into 5 shards. 
 
-**IMPORTANT**: Using alphabetical order applies to the full account name, so ``a.near`` could belong to
- shard 0, while ``z.a.near`` to shard 3.
+**IMPORTANT**: Using alphabetical order applies to the full account name, so ``a.unc`` could belong to
+ shard 0, while ``z.a.unc`` to shard 3.
 
 Currently in mainnet & testnet, we use the fixed shard split (which is defined in ``get_simple_nightshade_layout``):
 
-``vec!["aurora", "aurora-0", "kkuuue2akv_1630967379.near"]``
+``vec!["aurora", "aurora-0", "kkuuue2akv_1630967379.unc"]``
 
-In the near future we are planning on switching to simple nightshade v2 (which is defined in ``get_simple_nightshade_layout_v2``)
+In the unc future we are planning on switching to simple nightshade v2 (which is defined in ``get_simple_nightshade_layout_v2``)
 
-``vec!["aurora", "aurora-0", "kkuuue2akv_1630967379.near", "tge-lockup.sweat"]``
+``vec!["aurora", "aurora-0", "kkuuue2akv_1630967379.unc", "tge-lockup.sweat"]``
 
 
 ## Shard layout changes

@@ -4,14 +4,14 @@ This chapter describes framework's approach to documentation. There are three
 primary types of documentation to keep in mind:
 
 * [**The UNC Protocol Specification**](https://nomicon.io)
-  ([source code](https://github.com/near/NEPs)) is the formal description of
+  ([source code](https://github.com/unc/NEPs)) is the formal description of
   the UNC protocol. The reference framework implementation and any other UNC
   client implementations must follow this specification.
-* [**User docs**](https://docs.near.org) ([source code](https://github.com/near/docs))
+* [**User docs**](https://docs.unc.org) ([source code](https://github.com/unc/docs))
   explain what is UNC and how to participate in the network. In particular,
   they contain information pertinent to the users of UNC: validators and
   smart contract developers.
-* [**Documentation for framework developers**](https://near.github.io/framework/)
+* [**Documentation for framework developers**](https://unc.github.io/framework/)
   ([source code](https://github.com/utnet-org/utility/tree/master/docs)) is the
   book you are reading right now! The target audience here is the contributors
   to the main implementation of the UNC protocol (framework).

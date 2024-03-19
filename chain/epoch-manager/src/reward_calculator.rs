@@ -166,7 +166,7 @@ mod tests {
             num_blocks_per_year: 1000000,
             epoch_length,
             protocol_reward_rate: Ratio::new(0, 1),
-            protocol_treasury_account: "near".parse().unwrap(),
+            protocol_treasury_account: "unc".parse().unwrap(),
             online_min_threshold: Ratio::new(9, 10),
             online_max_threshold: Ratio::new(1, 1),
             num_seconds_per_year: 1000000,
@@ -201,7 +201,7 @@ mod tests {
         assert_eq!(
             result.0,
             HashMap::from([
-                ("near".parse().unwrap(), 0u128),
+                ("unc".parse().unwrap(), 0u128),
                 ("test1".parse().unwrap(), 0u128),
                 ("test2".parse().unwrap(), 0u128)
             ])
@@ -217,7 +217,7 @@ mod tests {
             num_blocks_per_year: 1000,
             epoch_length,
             protocol_reward_rate: Ratio::new(0, 10),
-            protocol_treasury_account: "near".parse().unwrap(),
+            protocol_treasury_account: "unc".parse().unwrap(),
             online_min_threshold: Ratio::new(9, 10),
             online_max_threshold: Ratio::new(99, 100),
             num_seconds_per_year: 1000,
@@ -260,11 +260,11 @@ mod tests {
             epoch_length * NUM_NS_IN_SECOND,
         );
         // Total reward is 10_000_000. Divided by 3 equal stake validators - each gets 3_333_333.
-        // test1 with 94.5% online gets 50% because of linear between (0.99-0.9) online.
+        // test1 with 94.5% online gets 50% because of liunc between (0.99-0.9) online.
         assert_eq!(
             result.0,
             HashMap::from([
-                ("near".parse().unwrap(), 0),
+                ("unc".parse().unwrap(), 0),
                 ("test1".parse().unwrap(), 1_666_666u128),
                 ("test2".parse().unwrap(), 3_333_333u128),
                 ("test3".parse().unwrap(), 0u128)
@@ -282,7 +282,7 @@ mod tests {
             num_blocks_per_year: 1000,
             epoch_length,
             protocol_reward_rate: Ratio::new(0, 10),
-            protocol_treasury_account: "near".parse().unwrap(),
+            protocol_treasury_account: "unc".parse().unwrap(),
             online_min_threshold: Ratio::new(9, 10),
             online_max_threshold: Ratio::new(99, 100),
             num_seconds_per_year: 1000,
@@ -342,7 +342,7 @@ mod tests {
             assert_eq!(
                 result.0,
                 HashMap::from([
-                    ("near".parse().unwrap(), 0),
+                    ("unc".parse().unwrap(), 0),
                     ("test1".parse().unwrap(), 1_250_000u128),
                     ("test2".parse().unwrap(), 2_500_000u128),
                     ("test3".parse().unwrap(), 1_250_000u128),
@@ -364,7 +364,7 @@ mod tests {
             // half a day
             epoch_length,
             protocol_reward_rate: Ratio::new(1, 10),
-            protocol_treasury_account: "near".parse().unwrap(),
+            protocol_treasury_account: "unc".parse().unwrap(),
             online_min_threshold: Ratio::new(9, 10),
             online_max_threshold: Ratio::new(1, 1),
             num_seconds_per_year: 60 * 60 * 24 * 365,

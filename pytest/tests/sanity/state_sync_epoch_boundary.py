@@ -61,7 +61,7 @@ assert 'result' in result and 'error' not in result, (
 
 
 # Generates traffic for all possible shards.
-# Assumes that `test0`, `test1`, `near` all belong to different shards.
+# Assumes that `test0`, `test1`, `unc` all belong to different shards.
 def random_workload_until(target, nonce, keys, target_node):
     last_height = -1
     while True:
@@ -87,11 +87,11 @@ def random_workload_until(target, nonce, keys, target_node):
             if random.random() < 0.3:
                 key_from, account_to = boot_node.signer_key, node1.signer_key.account_id
             elif random.random() < 0.3:
-                key_from, account_to = boot_node.signer_key, "near"
+                key_from, account_to = boot_node.signer_key, "unc"
             elif random.random() < 0.5:
                 key_from, account_to = node1.signer_key, boot_node.signer_key.account_id
             else:
-                key_from, account_to = node1.signer_key, "near"
+                key_from, account_to = node1.signer_key, "unc"
             payment_tx = transaction.sign_payment_tx(key_from, account_to, 1,
                                                      nonce, last_block_hash)
             boot_node.send_tx(payment_tx).get('result')

@@ -1,4 +1,4 @@
-use crate::nearcore_utils::{add_blocks, setup_configs_with_epoch_length};
+use crate::unc_utils::{add_blocks, setup_configs_with_epoch_length};
 use crate::test_helpers::heavy_test;
 use actix::Actor;
 use actix_rt::System;
@@ -141,7 +141,7 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
     heavy_test(|| {
         init_integration_logger();
 
-        let (genesis, genesis_block, mut near1_base, mut near2_base) =
+        let (genesis, genesis_block, mut unc1_base, mut unc2_base) =
             setup_configs_with_epoch_length(50);
 
         let dir1_base =
@@ -150,8 +150,8 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
             tempfile::Builder::new().prefix("epoch_sync_info_in_header_sync_2").tempdir().unwrap();
         let epoch_ids_base = Arc::new(RwLock::new(HashSet::new()));
 
-        let near1 = near1_base.clone();
-        let near2 = near2_base.clone();
+        let unc1 = unc1_base.clone();
+        let unc2 = unc2_base.clone();
         let dir1_path = dir1_base.path();
         let dir2_path = dir2_base.path();
         let epoch_ids = epoch_ids_base.clone();
@@ -159,7 +159,7 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
         run_actix(async move {
             // Start first node
             let framework::NearNode { client: client1, .. } =
-                start_with_config(dir1_path, near1).expect("start_with_config");
+                start_with_config(dir1_path, unc1).expect("start_with_config");
 
             // Generate 4 epochs + 10 blocks
             let signer = create_test_signer("other");
@@ -174,7 +174,7 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
 
             // Start second node
             let framework::NearNode { view_client: view_client2, .. } =
-                start_with_config(dir2_path, near2).expect("start_with_config");
+                start_with_config(dir2_path, unc2).expect("start_with_config");
 
             // Wait for second node's headers to sync.
             // Timeout here means that header sync is not working.
@@ -206,8 +206,8 @@ fn test_continuous_epoch_sync_info_population_on_header_sync() {
             opener.open_in_mode(ReadOnly).unwrap()
         };
 
-        let store1 = open_read_only_storage(dir1_base.path(), &mut near1_base).get_hot_store();
-        let store2 = open_read_only_storage(dir2_base.path(), &mut near2_base).get_hot_store();
+        let store1 = open_read_only_storage(dir1_base.path(), &mut unc1_base).get_hot_store();
+        let store2 = open_read_only_storage(dir2_base.path(), &mut unc2_base).get_hot_store();
 
         // Check that for every epoch second store has EpochSyncInfo.
         // And that values in both stores are the same.

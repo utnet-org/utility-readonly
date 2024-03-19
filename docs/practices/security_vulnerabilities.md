@@ -6,7 +6,7 @@ The intended audience of the information presented here is developers working
 on the implementation of UNC.
 
 Are you a security researcher? Please report security vulnerabilities to
-[security@near.org](mailto:security@near.org).
+[security@unc.org](mailto:security@unc.org).
 
 </blockquote>
 

@@ -39,7 +39,7 @@ as you adhere to the rules and don’t reuse the same field ids).
 
 ## Borsh
 
-Borsh is our custom serializer ([link](https://github.com/near/borsh)), that we use
+Borsh is our custom serializer ([link](https://github.com/unc/borsh)), that we use
 mostly for things that have to be hashed.
 
 The main feature of Borsh is that, there are no two binary representations that

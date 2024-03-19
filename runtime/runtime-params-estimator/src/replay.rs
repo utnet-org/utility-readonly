@@ -250,14 +250,14 @@ apply_transactions shard_id=0
         apply num_transactions=1 shard_cache_hit=10 shard_cache_miss=1
             process_transaction tx_hash=txHash0 shard_cache_miss=1 shard_cache_hit=20
                 GET State "'stateKey0'" size=300
-            process_receipt receipt_id=id0 predecessor=system receiver=alice.near id=id0 shard_cache_miss=2 shard_cache_hit=6
+            process_receipt receipt_id=id0 predecessor=system receiver=alice.unc id=id0 shard_cache_miss=2 shard_cache_hit=6
                 GET State "'stateKey1'" size=10
                 GET State "'stateKey2'" size=20
-            process_receipt receipt_id=id1 predecessor=system receiver=bob.near id=id1 shard_cache_hit=18 shard_cache_miss=3 shard_cache_too_large=1
+            process_receipt receipt_id=id1 predecessor=system receiver=bob.unc id=id1 shard_cache_hit=18 shard_cache_miss=3 shard_cache_too_large=1
                 GET State "'stateKey3'" size=100
                 GET State "'stateKey4'" size=200
                 GET State "'stateKey5'" size=9000
-            process_receipt receipt_id=id2 predecessor=system receiver=alice.near id=id2 shard_cache_miss=1 shard_cache_hit=6
+            process_receipt receipt_id=id2 predecessor=system receiver=alice.unc id=id2 shard_cache_miss=1 shard_cache_hit=6
                 GET State "'stateKey6'" size=30
                 attached_deposit
                 input
@@ -265,7 +265,7 @@ apply_transactions shard_id=0
                 read_register
                 storage_read READ key=StorageKey0 size=1000 tn_db_reads=20 tn_mem_reads=0 shard_cache_hit=19 shard_cache_miss=1
                     GET State "'stateKey7'" size=5
-            process_receipt receipt_id=id3 predecessor=utiha.near receiver=alice.near id=id3 shard_cache_miss=0 shard_cache_hit=15
+            process_receipt receipt_id=id3 predecessor=utiha.unc receiver=alice.unc id=id3 shard_cache_miss=0 shard_cache_hit=15
             GET State "'stateKey8'" size=300
         GET State "'stateKey9'" size=400
 GET State "'stateKey10'" size=500
@@ -335,7 +335,7 @@ GET State "'stateKey10'" size=500
 
     #[track_caller]
     fn check_account_filter(mode: ReplayMode) {
-        let account = Some("alice.near".to_owned());
+        let account = Some("alice.unc".to_owned());
         // trace path not used, will be read from in-memory input instead
         let trace = PathBuf::new();
         let cmd = ReplayCmd { trace, mode, account };

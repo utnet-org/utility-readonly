@@ -39,7 +39,7 @@ fn setup_runtime_node_with_contract(wasm_binary: &[u8]) -> RuntimeNode {
     // Create a `RuntimeNode`. Load `RuntimeConfig` from `RuntimeConfigStore`
     // to ensure we are using the latest configuration.
     let mut genesis =
-        Genesis::test(vec![alice_account(), bob_account(), "carol.near".parse().unwrap()], 3);
+        Genesis::test(vec![alice_account(), bob_account(), "carol.unc".parse().unwrap()], 3);
     add_test_contract(&mut genesis, &alice_account());
     add_test_contract(&mut genesis, &bob_account());
     let runtime_config_store = RuntimeConfigStore::new(None);

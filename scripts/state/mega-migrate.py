@@ -19,7 +19,7 @@ import json
 import os
 
 filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        '../../near/res/testnet.json')
+                        '../../unc/res/testnet.json')
 with open(filename) as fd:
     q = json.load(rd)
 

@@ -13,7 +13,7 @@ python3 endtoend/endtoend.py
     --port 3030
     --public-key <public_key of test accounts>
     --private-key <private key of test account>
-    --rpc-server-addr rpc.testnet.near.org
+    --rpc-server-addr rpc.testnet.unc.org
     --rpc-server-port 80
     --metrics-port 3040
 """

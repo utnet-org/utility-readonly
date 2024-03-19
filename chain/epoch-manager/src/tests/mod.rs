@@ -60,7 +60,7 @@ fn test_power_validator() {
         vec![],
         change_power(vec![("test1".parse().unwrap(), amount_powered)]),
         vec![],
-        reward(vec![("near".parse().unwrap(), 0)]),
+        reward(vec![("unc".parse().unwrap(), 0)]),
         0,
         4,
     );
@@ -105,7 +105,7 @@ fn test_power_validator() {
         ]),
         vec![],
         // only the validator who produced the block in this epoch gets the reward since epoch length is 1
-        reward(vec![("test1".parse().unwrap(), 0), ("near".parse().unwrap(), 0)]),
+        reward(vec![("test1".parse().unwrap(), 0), ("unc".parse().unwrap(), 0)]),
         0,
         4,
     );
@@ -165,7 +165,7 @@ fn test_validator_change_of_stake() {
         vec![
             ("test1".parse().unwrap(), 0),
             ("test2".parse().unwrap(), 0),
-            ("near".parse().unwrap(), 0),
+            ("unc".parse().unwrap(), 0),
         ],
     );
     matches!(
@@ -366,7 +366,7 @@ fn test_validator_kickout() {
         epoch_info,
         vec![
             ("test2".parse().unwrap(), 0),
-            ("near".parse().unwrap(), 0),
+            ("unc".parse().unwrap(), 0),
             ("test1".parse().unwrap(), 0),
         ],
     );
@@ -405,7 +405,7 @@ fn test_validator_unstake() {
         vec![
             ("test1".parse().unwrap(), 0),
             ("test2".parse().unwrap(), 0),
-            ("near".parse().unwrap(), 0),
+            ("unc".parse().unwrap(), 0),
         ],
     );
 
@@ -422,7 +422,7 @@ fn test_validator_unstake() {
         vec![
             ("test1".parse().unwrap(), 0),
             ("test2".parse().unwrap(), 0),
-            ("near".parse().unwrap(), 0),
+            ("unc".parse().unwrap(), 0),
         ],
     );
 
@@ -434,7 +434,7 @@ fn test_validator_unstake() {
     check_fishermen(&epoch_info, &[]);
     check_stake_change(&epoch_info, vec![("test2".parse().unwrap(), amount_staked)]);
     check_kickout(&epoch_info, &[]);
-    check_reward(&epoch_info, vec![("test2".parse().unwrap(), 0), ("near".parse().unwrap(), 0)]);
+    check_reward(&epoch_info, vec![("test2".parse().unwrap(), 0), ("unc".parse().unwrap(), 0)]);
 }
 
 #[test]
@@ -671,7 +671,7 @@ fn test_validator_reward_one_validator() {
         num_blocks_per_year: 50,
         epoch_length,
         protocol_reward_rate: Ratio::new(1, 10),
-        protocol_treasury_account: "near".parse().unwrap(),
+        protocol_treasury_account: "unc".parse().unwrap(),
         online_min_threshold: Ratio::new(90, 100),
         online_max_threshold: Ratio::new(99, 100),
         num_seconds_per_year: 50,
@@ -736,7 +736,7 @@ fn test_validator_reward_one_validator() {
         epoch_length * NUM_NS_IN_SECOND,
     );
     let test2_reward = *validator_reward.get(AccountIdRef::new_or_panic("test2")).unwrap();
-    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("near")).unwrap();
+    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("unc")).unwrap();
 
     let epoch_info = epoch_manager.get_epoch_info(&EpochId(h[2])).unwrap();
     check_validators(&epoch_info, &[("test2", stake_amount + test2_reward)]);
@@ -751,7 +751,7 @@ fn test_validator_reward_one_validator() {
     check_kickout(&epoch_info, &[]);
     check_reward(
         &epoch_info,
-        vec![("test2".parse().unwrap(), test2_reward), ("near".parse().unwrap(), protocol_reward)],
+        vec![("test2".parse().unwrap(), test2_reward), ("unc".parse().unwrap(), protocol_reward)],
     );
     assert_eq!(epoch_info.minted_amount(), inflation);
 }
@@ -769,7 +769,7 @@ fn test_validator_reward_weight_by_stake() {
         num_blocks_per_year: 50,
         epoch_length,
         protocol_reward_rate: Ratio::new(1, 10),
-        protocol_treasury_account: "near".parse().unwrap(),
+        protocol_treasury_account: "unc".parse().unwrap(),
         online_min_threshold: Ratio::new(90, 100),
         online_max_threshold: Ratio::new(99, 100),
         num_seconds_per_year: 50,
@@ -836,7 +836,7 @@ fn test_validator_reward_weight_by_stake() {
     let test1_reward = *validator_reward.get(AccountIdRef::new_or_panic("test1")).unwrap();
     let test2_reward = *validator_reward.get(AccountIdRef::new_or_panic("test2")).unwrap();
     assert_eq!(test1_reward, test2_reward * 2);
-    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("near")).unwrap();
+    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("unc")).unwrap();
 
     let epoch_info = epoch_manager.get_epoch_info(&EpochId(h[2])).unwrap();
     check_validators(
@@ -857,7 +857,7 @@ fn test_validator_reward_weight_by_stake() {
         vec![
             ("test1".parse().unwrap(), test1_reward),
             ("test2".parse().unwrap(), test2_reward),
-            ("near".parse().unwrap(), protocol_reward),
+            ("unc".parse().unwrap(), protocol_reward),
         ],
     );
     assert_eq!(epoch_info.minted_amount(), inflation);
@@ -875,7 +875,7 @@ fn test_reward_multiple_shards() {
         num_blocks_per_year: 1_000_000,
         epoch_length,
         protocol_reward_rate: Ratio::new(1, 10),
-        protocol_treasury_account: "near".parse().unwrap(),
+        protocol_treasury_account: "unc".parse().unwrap(),
         online_min_threshold: Ratio::new(90, 100),
         online_max_threshold: Ratio::new(99, 100),
         num_seconds_per_year: 1_000_000,
@@ -950,7 +950,7 @@ fn test_reward_multiple_shards() {
         epoch_length * NUM_NS_IN_SECOND,
     );
     let test2_reward = *validator_reward.get(AccountIdRef::new_or_panic("test2")).unwrap();
-    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("near")).unwrap();
+    let protocol_reward = *validator_reward.get(AccountIdRef::new_or_panic("unc")).unwrap();
     let epoch_infos: Vec<_> =
         h.iter().filter_map(|x| epoch_manager.get_epoch_info(&EpochId(*x)).ok()).collect();
     let epoch_info = &epoch_infos[1];
@@ -972,7 +972,7 @@ fn test_reward_multiple_shards() {
     );
     check_reward(
         epoch_info,
-        vec![("test2".parse().unwrap(), test2_reward), ("near".parse().unwrap(), protocol_reward)],
+        vec![("test2".parse().unwrap(), test2_reward), ("unc".parse().unwrap(), protocol_reward)],
     );
     assert_eq!(epoch_info.minted_amount(), inflation);
 }
@@ -1010,7 +1010,7 @@ fn test_unstake_and_then_change_stake() {
         vec![
             ("test1".parse().unwrap(), 0),
             ("test2".parse().unwrap(), 0),
-            ("near".parse().unwrap(), 0),
+            ("unc".parse().unwrap(), 0),
         ],
     );
 }

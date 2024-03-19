@@ -43,7 +43,7 @@ When we receive a part, we should announce this information to our peers - so th
 ### Better networking (a.k.a Tier 3)
 Currently our networking code is picking the peers to connect at random (as most of them are tracking all the shards). With phase2 it will no longer be the case, so we should work on improvements of our peer-selection mechanism.
 
-In general - we should make sure that we have direct connection to at least a few nodes that are tracking the same shards that we're tracking right now (or that we'll want to track in the near future).
+In general - we should make sure that we have direct connection to at least a few nodes that are tracking the same shards that we're tracking right now (or that we'll want to track in the unc future).
 
 ### Dedicated nodes optimized towards state sync responses
 The idea is to create a set of nodes that would specialize in state sync responses (similar to how we have archival nodes today).

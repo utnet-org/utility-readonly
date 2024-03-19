@@ -22,7 +22,7 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //
         // StreamerMessage {
         //     block: BlockView {
-        //         author: "test.near",
+        //         author: "test.unc",
         //         header: BlockHeaderView {
         //             height: 63596,
         //             epoch_id: `Bk7pvZWUTfHRRZtfgTDjnQ6y5cV8yG2h3orCqJvUbiym`,
@@ -88,7 +88,7 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //             shard_id: 0,
         //             chunk: Some(
         //                 IndexerChunkView {
-        //                     author: "test.near",
+        //                     author: "test.unc",
         //                     header: ChunkHeaderView {
         //                         chunk_hash: `2M2oeNFBbUUnHfkU1UuBr8EKBCLMH9xr2vfsGRpyiBmA`,
         //                         prev_block_hash: `2vJNJca72pBiq2eETq2xvuoc6caKDaUkdRgtdefyutbA`,
@@ -112,10 +112,10 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //                     transactions: [
         //                         IndexerTransactionWithOutcome {
         //                             transaction: SignedTransactionView {
-        //                                 signer_id: "test.near",
+        //                                 signer_id: "test.unc",
         //                                 public_key: ed25519:8NA7mh6TAWzy2qz68bHp62QHTEQ6nJLfiYeKDRwEbU3X,
         //                                 nonce: 1,
-        //                                 receiver_id: "some.test.near",
+        //                                 receiver_id: "some.test.unc",
         //                                 actions: [
         //                                     CreateAccount,
         //                                     Transfer {
@@ -144,7 +144,7 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //                                         ],
         //                                         gas_burnt: 424555062500,
         //                                         tokens_burnt: 424555062500000000000,
-        //                                         executor_id: "test.near",
+        //                                         executor_id: "test.unc",
         //                                         status: SuccessReceiptId(CbWu7WYYbYbn3kThs5gcxANrxy7AKLcMcBLxLw8Zq1Fz),
         //                                     },
         //                                 },
@@ -154,11 +154,11 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //                     ],
         //                     receipts: [
         //                         ReceiptView {
-        //                             predecessor_id: "test.near",
-        //                             receiver_id: "some.test.near",
+        //                             predecessor_id: "test.unc",
+        //                             receiver_id: "some.test.unc",
         //                             receipt_id: `CbWu7WYYbYbn3kThs5gcxANrxy7AKLcMcBLxLw8Zq1Fz`,
         //                             receipt: Action {
-        //                                 signer_id: "test.near",
+        //                                 signer_id: "test.unc",
         //                                 signer_public_key: ed25519:8NA7mh6TAWzy2qz68bHp62QHTEQ6nJLfiYeKDRwEbU3X,
         //                                 gas_price: 1030000000,
         //                                 output_data_receivers: [],
@@ -194,16 +194,16 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //                             ],
         //                             gas_burnt: 424555062500,
         //                             tokens_burnt: 424555062500000000000,
-        //                             executor_id: "some.test.near",
+        //                             executor_id: "some.test.unc",
         //                             status: SuccessValue(``),
         //                         },
         //                     },
         //                     receipt: ReceiptView {
-        //                         predecessor_id: "test.near",
-        //                         receiver_id: "some.test.near",
+        //                         predecessor_id: "test.unc",
+        //                         receiver_id: "some.test.unc",
         //                         receipt_id: `CbWu7WYYbYbn3kThs5gcxANrxy7AKLcMcBLxLw8Zq1Fz`,
         //                         receipt: Action {
-        //                             signer_id: "test.near",
+        //                             signer_id: "test.unc",
         //                             signer_public_key: ed25519:8NA7mh6TAWzy2qz68bHp62QHTEQ6nJLfiYeKDRwEbU3X,
         //                             gas_price: 1030000000,
         //                             output_data_receivers: [],
@@ -231,7 +231,7 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //         StateChangeWithCauseView {
         //             cause: ValidatorAccountsUpdate,
         //             value: AccountUpdate {
-        //                 account_id: "test.near",
+        //                 account_id: "test.unc",
         //                 account: AccountView {
         //                     amount: 1000000000000000000000000000000000,
         //                     locked: 50000000000000000000000000000000,
@@ -261,7 +261,7 @@ fn main() -> Result<()> {
     // (sending telemetry and downloading genesis)
     openssl_probe::init_ssl_cert_env_vars();
     let env_filter = unc_o11y::tracing_subscriber::EnvFilter::new(
-        "framework=info,indexer_example=info,tokio_reactor=info,near=info,\
+        "framework=info,indexer_example=info,tokio_reactor=info,unc=info,\
          stats=info,telemetry=info,indexer=info,unc-performance-metrics=info",
     );
     let _subscriber = unc_o11y::default_subscriber(env_filter, &Default::default()).global();

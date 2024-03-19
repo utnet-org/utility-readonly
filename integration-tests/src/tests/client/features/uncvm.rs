@@ -14,7 +14,7 @@ use framework::test_utils::TestEnvNightshadeSetupExt;
 
 #[cfg_attr(all(target_arch = "aarch64", target_vendor = "apple"), ignore)]
 #[test]
-fn test_nearvm_upgrade() {
+fn test_uncvm_upgrade() {
     let mut capture = unc_o11y::testonly::TracingCapture::enable();
 
     let old_protocol_version =

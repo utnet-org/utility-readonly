@@ -428,7 +428,7 @@ pub(crate) fn action_create_account(
             // OK: Valid top-level Account ID
         }
     } else if !account_id.is_sub_account_of(predecessor_id) {
-        // The sub-account can only be created by its root account. E.g. `alice.near` only by `near`
+        // The sub-account can only be created by its root account. E.g. `alice.unc` only by `unc`
         result.result = Err(ActionErrorKind::CreateAccountNotAllowed {
             account_id: account_id.clone(),
             predecessor_id: predecessor_id.clone(),
@@ -497,7 +497,7 @@ pub(crate) fn action_implicit_account_creation_transfer(
         // It holds because in the only calling site, we've checked the permissions before.
         AccountType::EthImplicitAccount => {
             if checked_feature!("stable", EthImplicitAccounts, current_protocol_version) {
-                // We deploy "near[wallet contract hash]" magic bytes as the contract code,
+                // We deploy "unc[wallet contract hash]" magic bytes as the contract code,
                 // to mark that this is a uncd-defined contract. It will not be used on a function call.
                 // Instead, uncd-defined Wallet Contract implementation will be used.
                 let magic_bytes = wallet_contract_magic_bytes();
@@ -1211,7 +1211,7 @@ mod tests {
     #[test]
     fn test_create_account_valid_top_level_long() {
         let account_id = "bob_unc_long_name".parse().unwrap();
-        let predecessor_id = "alice.near".parse().unwrap();
+        let predecessor_id = "alice.unc".parse().unwrap();
         let action_result = test_action_create_account(account_id, predecessor_id, 11);
         assert!(action_result.result.is_ok());
     }
@@ -1226,15 +1226,15 @@ mod tests {
 
     #[test]
     fn test_create_account_valid_sub_account() {
-        let account_id = "alice.near".parse().unwrap();
-        let predecessor_id = "near".parse().unwrap();
+        let account_id = "alice.unc".parse().unwrap();
+        let predecessor_id = "unc".parse().unwrap();
         let action_result = test_action_create_account(account_id, predecessor_id, 11);
         assert!(action_result.result.is_ok());
     }
 
     #[test]
     fn test_create_account_invalid_sub_account() {
-        let account_id = "alice.near".parse::<AccountId>().unwrap();
+        let account_id = "alice.unc".parse::<AccountId>().unwrap();
         let predecessor_id = "bob".parse::<AccountId>().unwrap();
         let action_result =
             test_action_create_account(account_id.clone(), predecessor_id.clone(), 11);
@@ -1253,7 +1253,7 @@ mod tests {
     #[test]
     fn test_create_account_invalid_short_top_level() {
         let account_id = "bob".parse::<AccountId>().unwrap();
-        let predecessor_id = "near".parse::<AccountId>().unwrap();
+        let predecessor_id = "unc".parse::<AccountId>().unwrap();
         let action_result =
             test_action_create_account(account_id.clone(), predecessor_id.clone(), 11);
         assert_eq!(
@@ -1272,7 +1272,7 @@ mod tests {
     #[test]
     fn test_create_account_valid_short_top_level_len_allowed() {
         let account_id = "bob".parse().unwrap();
-        let predecessor_id = "near".parse().unwrap();
+        let predecessor_id = "unc".parse().unwrap();
         let action_result = test_action_create_account(account_id, predecessor_id, 0);
         assert!(action_result.result.is_ok());
     }
@@ -1286,7 +1286,7 @@ mod tests {
         let mut account = Some(Account::new(100, 0,0, *code_hash, storage_usage));
         let mut actor_id = account_id.clone();
         let mut action_result = ActionResult::default();
-        let receipt = Receipt::new_balance_refund(&"alice.near".parse().unwrap(), 0);
+        let receipt = Receipt::new_balance_refund(&"alice.unc".parse().unwrap(), 0);
         let res = action_delete_account(
             state_update,
             &mut account,
@@ -1360,8 +1360,8 @@ mod tests {
     fn create_delegate_action_receipt() -> (ActionReceipt, SignedDelegateAction) {
         let signed_delegate_action = SignedDelegateAction {
             delegate_action: DelegateAction {
-                sender_id: "bob.test.near".parse().unwrap(),
-                receiver_id: "token.test.near".parse().unwrap(),
+                sender_id: "bob.test.unc".parse().unwrap(),
+                receiver_id: "token.test.unc".parse().unwrap(),
                 actions: vec![
                     non_delegate_action(
                         Action::FunctionCall(
@@ -1382,7 +1382,7 @@ mod tests {
         };
 
         let action_receipt = ActionReceipt {
-            signer_id: "alice.test.near".parse().unwrap(),
+            signer_id: "alice.test.unc".parse().unwrap(),
             signer_public_key: PublicKey::empty(unc_crypto::KeyType::ED25519),
             gas_price: 1,
             output_data_receivers: Vec::new(),
@@ -1492,7 +1492,7 @@ mod tests {
         let mut state_update = setup_account(&sender_id, &sender_pub_key, &access_key);
 
         // Corrupt receiver_id. Signature verifycation must fail.
-        signed_delegate_action.delegate_action.receiver_id = "www.test.near".parse().unwrap();
+        signed_delegate_action.delegate_action.receiver_id = "www.test.unc".parse().unwrap();
 
         apply_delegate_action(
             &mut state_update,
@@ -1550,7 +1550,7 @@ mod tests {
             &mut state_update,
             &apply_state,
             &action_receipt,
-            &"www.test.near".parse().unwrap(),
+            &"www.test.unc".parse().unwrap(),
             &signed_delegate_action,
             &mut result,
         )
@@ -1560,7 +1560,7 @@ mod tests {
             result.result,
             Err(ActionErrorKind::DelegateActionSenderDoesNotMatchTxReceiver {
                 sender_id: sender_id.clone(),
-                receiver_id: "www.test.near".parse().unwrap(),
+                receiver_id: "www.test.unc".parse().unwrap(),
             }
             .into())
         );
@@ -1879,7 +1879,7 @@ mod tests {
             nonce: 19000000,
             permission: AccessKeyPermission::FunctionCall(FunctionCallPermission {
                 allowance: None,
-                receiver_id: "another.near".parse().unwrap(),
+                receiver_id: "another.unc".parse().unwrap(),
                 method_names: Vec::new(),
             }),
         };
@@ -1900,7 +1900,7 @@ mod tests {
             Err(ActionErrorKind::DelegateActionAccessKeyError(
                 InvalidAccessKeyError::ReceiverMismatch {
                     tx_receiver: delegate_action.receiver_id,
-                    ak_receiver: "another.near".parse().unwrap(),
+                    ak_receiver: "another.unc".parse().unwrap(),
                 },
             )
             .into())

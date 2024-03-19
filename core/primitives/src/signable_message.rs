@@ -11,7 +11,7 @@ use unc_primitives_core::types::AccountId;
 // specification in the wider ecosystem. Note that NEP-461 should not change the
 // protocol in any way, unless we have to change meta transaction implementation
 // details to adhere to the future standard.
-// [NEP-461](https://github.com/near/NEPs/pull/461)
+// [NEP-461](https://github.com/unc/NEPs/pull/461)
 //
 // TODO: consider making these public once there is an approved standard.
 const MIN_ON_CHAIN_DISCRIMINANT: u32 = 1 << 30;
@@ -235,8 +235,8 @@ mod tests {
     // happy path for NEP-366 signature
     #[test]
     fn nep_366_ok() {
-        let sender_id: AccountId = "alice.near".parse().unwrap();
-        let receiver_id: AccountId = "bob.near".parse().unwrap();
+        let sender_id: AccountId = "alice.unc".parse().unwrap();
+        let receiver_id: AccountId = "bob.unc".parse().unwrap();
         let signer = create_user_test_signer(&sender_id);
 
         let delegate_action = delegate_action(sender_id, receiver_id, signer.public_key());
@@ -249,8 +249,8 @@ mod tests {
     // Try to use a wrong nep number in NEP-366 signature verification.
     #[test]
     fn nep_366_wrong_nep() {
-        let sender_id: AccountId = "alice.near".parse().unwrap();
-        let receiver_id: AccountId = "bob.near".parse().unwrap();
+        let sender_id: AccountId = "alice.unc".parse().unwrap();
+        let receiver_id: AccountId = "bob.unc".parse().unwrap();
         let signer = create_user_test_signer(&sender_id);
 
         let delegate_action = delegate_action(sender_id, receiver_id, signer.public_key());
@@ -267,8 +267,8 @@ mod tests {
     // Try to use a wrong message type in NEP-366 signature verification.
     #[test]
     fn nep_366_wrong_msg_type() {
-        let sender_id: AccountId = "alice.near".parse().unwrap();
-        let receiver_id: AccountId = "bob.near".parse().unwrap();
+        let sender_id: AccountId = "alice.unc".parse().unwrap();
+        let receiver_id: AccountId = "bob.unc".parse().unwrap();
         let signer = create_user_test_signer(&sender_id);
 
         let delegate_action = delegate_action(sender_id, receiver_id, signer.public_key());

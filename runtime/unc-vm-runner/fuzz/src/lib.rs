@@ -60,7 +60,7 @@ pub fn create_context(input: Vec<u8>) -> VMContext {
 pub struct ModuleConfig {}
 
 impl wasm_smith::Config for ModuleConfig {
-    /// Returns a WebAssembly module which imports all near host functions. The
+    /// Returns a WebAssembly module which imports all unc host functions. The
     /// imports are grabbed from a compiled [test contract] which calls every
     /// host function in its method `sanity_check`.
     ///

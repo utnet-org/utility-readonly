@@ -477,9 +477,9 @@ fn test_flat_storage_iter() {
         match shard_id {
             0 => {
                 assert_eq!(2, items.len());
-                // Two entries - one for 'near' system account, the other for the contract.
+                // Two entries - one for 'unc' system account, the other for the contract.
                 assert_eq!(
-                    TrieKey::Account { account_id: "near".parse().unwrap() }.to_vec(),
+                    TrieKey::Account { account_id: "unc".parse().unwrap() }.to_vec(),
                     items[0].as_ref().unwrap().0.to_vec()
                 );
             }

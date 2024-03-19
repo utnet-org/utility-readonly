@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 /// Validate genesis config and records. Returns ValidationError if semantic checks of genesis failed.
 pub fn validate_genesis(genesis: &Genesis) -> Result<(), ValidationError> {
     if let GenesisContents::StateRoots { .. } = &genesis.contents {
-        // TODO(robin-near): We don't have a great way of validating the
+        // TODO: We don't have a great way of validating the
         // genesis records if we're given state roots directly, though we
         // could still validate things that aren't related to records.
         return Ok(());

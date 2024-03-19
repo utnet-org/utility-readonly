@@ -685,7 +685,7 @@ def init_account_generator(parsed_options):
             "V1": {
                 "fixed_shards": [],
                 "boundary_accounts": [
-                    "aurora", "aurora-0", "kkuuue2akv_1630967379.near"
+                    "aurora", "aurora-0", "kkuuue2akv_1630967379.unc"
                 ],
                 "shards_split_map": [[0, 1, 2, 3]],
                 "to_parent_shard_map": [0, 0, 0, 0],

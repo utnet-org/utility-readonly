@@ -39,7 +39,7 @@ use super::test_env_builder::TestEnvBuilder;
 use super::TEST_SEED;
 
 /// An environment for writing integration tests with multiple clients.
-/// This environment can simulate near nodes without network and it can be configured to use different runtimes.
+/// This environment can simulate unc nodes without network and it can be configured to use different runtimes.
 pub struct TestEnv {
     pub chain_genesis: ChainGenesis,
     pub validators: Vec<AccountId>,

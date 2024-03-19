@@ -505,13 +505,13 @@ mod tests {
     #[test]
     fn test_three_contract_sizes() {
         let initial = vec![
-            contract_tuple("caroline.near", 3),
-            contract_tuple("alice.near", 1),
-            contract_tuple("alice.nearx", 2),
+            contract_tuple("caroline.unc", 3),
+            contract_tuple("alice.unc", 1),
+            contract_tuple("alice.uncx", 2),
             // data right before contracts in trie order
-            account_tuple("xeno.near", 1),
+            account_tuple("xeno.unc", 1),
             // data right after contracts in trie order
-            access_key_tuple("alan.near", 1),
+            access_key_tuple("alan.unc", 1),
         ];
         let trie = create_trie(initial);
 
@@ -524,9 +524,9 @@ mod tests {
         let contract1 = contract_accounts[0].as_ref().expect("returned error instead of contract");
         let contract2 = contract_accounts[1].as_ref().expect("returned error instead of contract");
         let contract3 = contract_accounts[2].as_ref().expect("returned error instead of contract");
-        assert_eq!(contract1.account_id.as_str(), "alice.near");
-        assert_eq!(contract2.account_id.as_str(), "alice.nearx");
-        assert_eq!(contract3.account_id.as_str(), "caroline.near");
+        assert_eq!(contract1.account_id.as_str(), "alice.unc");
+        assert_eq!(contract2.account_id.as_str(), "alice.uncx");
+        assert_eq!(contract3.account_id.as_str(), "caroline.unc");
         assert_eq!(contract1.info.code_size, Some(1));
         assert_eq!(contract2.info.code_size, Some(2));
         assert_eq!(contract3.info.code_size, Some(3));
@@ -535,7 +535,7 @@ mod tests {
     /// Check basic summary output and make sure the output looks right.
     #[test]
     fn test_simple_summary() {
-        let trie_data = vec![contract_tuple("alice.near", 100), contract_tuple("bob.near", 200)];
+        let trie_data = vec![contract_tuple("alice.unc", 100), contract_tuple("bob.unc", 200)];
         let (store, trie) = create_store_and_trie([].into_iter(), &[], trie_data);
 
         let filter = full_filter();
@@ -549,8 +549,8 @@ mod tests {
         write!(&mut output, "{summary}").unwrap();
         insta::assert_snapshot!(output, @r###"
         ACCOUNT_ID                                                         SIZE[B]   RCPTS_IN  RCPTS_OUT ACTIONS
-        alice.near                                                             100          0          0 
-        bob.near                                                               200          0          0 
+        alice.unc                                                             100          0          0 
+        bob.unc                                                               200          0          0 
 
         Finished without errors!
         "###);
@@ -563,11 +563,11 @@ mod tests {
         // execution outcome spawns another receipt which has actions in it.
 
         // This is our original receipt, converted from a transaction, calling
-        // bob.near::foo().
+        // bob.unc::foo().
         let fn_call_receipt_id = CryptoHash::hash_borsh(1);
         let fn_call_receipt = create_receipt_with_actions(
-            "alice.near",
-            "bob.near",
+            "alice.unc",
+            "bob.unc",
             vec![Action::FunctionCall(Box::new(FunctionCallAction {
                 method_name: "foo".to_owned(),
                 args: vec![],
@@ -581,8 +581,8 @@ mod tests {
         // executed by Alice but this should not matter for the tests here.)
         let outgoing_receipt_id = CryptoHash::hash_borsh(2);
         let outgoing_receipt = create_receipt_with_actions(
-            "bob.near",
-            "alice.near",
+            "bob.unc",
+            "alice.unc",
             vec![
                 Action::Transfer(TransferAction { deposit: 20 }),
                 Action::CreateAccount(CreateAccountAction {}),
@@ -604,7 +604,7 @@ mod tests {
             store_tripple(DBCol::Receipts, &outgoing_receipt_id, &outgoing_receipt),
         ];
 
-        let trie_data = vec![contract_tuple("alice.near", 100), contract_tuple("bob.near", 200)];
+        let trie_data = vec![contract_tuple("alice.unc", 100), contract_tuple("bob.unc", 200)];
         let (store, trie) =
             create_store_and_trie(store_data.into_iter(), &store_data_rc, trie_data);
 
@@ -619,8 +619,8 @@ mod tests {
         write!(&mut output, "{summary}").unwrap();
         insta::assert_snapshot!(output, @r###"
         ACCOUNT_ID                                                         SIZE[B]   RCPTS_IN  RCPTS_OUT ACTIONS
-        alice.near                                                             100          1          0 
-        bob.near                                                               200          1          1 CreateAccount,DeployContract,Transfer
+        alice.unc                                                             100          1          0 
+        bob.unc                                                               200          1          1 CreateAccount,DeployContract,Transfer
 
         Finished without errors!
         "###);
@@ -684,7 +684,7 @@ mod tests {
                 gas_burnt: 100,
                 compute_usage: Some(200),
                 tokens_burnt: 2000,
-                executor_id: "someone.near".parse().unwrap(),
+                executor_id: "someone.unc".parse().unwrap(),
                 status: ExecutionStatus::SuccessValue(vec![]),
                 metadata: ExecutionMetadata::default(),
             },

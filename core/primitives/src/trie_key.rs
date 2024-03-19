@@ -519,7 +519,7 @@ mod tests {
         "100",
         "0o",
         "com",
-        "near",
+        "unc",
         "bowen",
         "b-o_w_e-n",
         "b.owen",
@@ -529,7 +529,7 @@ mod tests {
         "system",
         "over.9000",
         "google.com",
-        "illia.cheapaccounts.near",
+        "illia.cheapaccounts.unc",
         "0o0ooo00oo00o",
         "alex-skidanov",
         "10-4.8-2",
@@ -537,7 +537,7 @@ mod tests {
         "no_lols",
         "0123456789012345678901234567890123456789012345678901234567890123",
         // Valid, but can't be created
-        "near.a",
+        "unc.a",
     ];
 
     #[test]

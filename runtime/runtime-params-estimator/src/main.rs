@@ -165,8 +165,8 @@ fn run_estimation(cli_args: CliArgs) -> anyhow::Result<Option<CostTable>> {
         framework::init_configs(
             &state_dump_path,
             None,
-            Some("test.near".parse().unwrap()),
-            Some("alice.near"),
+            Some("test.unc".parse().unwrap()),
+            Some("alice.unc"),
             1,
             true,
             None,
@@ -364,7 +364,7 @@ fn main_docker(
         let mut qemu_cmd = qemu_cmd_builder
             .build(&format!("/host/framework/target/{profile}/runtime-params-estimator"))?;
 
-        qemu_cmd.args(&["--home", "/.near"]);
+        qemu_cmd.args(&["--home", "/.unc"]);
         buf.push_str(&format!("{:?}", qemu_cmd));
 
         // Sanitize & forward our arguments to the estimator to be run inside
@@ -401,12 +401,12 @@ fn main_docker(
 
     let framework =
         format!("type=bind,source={},target=/host/framework", project_root.to_str().unwrap());
-    let nearhome = format!("type=bind,source={},target=/.near", state_dump_path.to_str().unwrap());
+    let unchome = format!("type=bind,source={},target=/.unc", state_dump_path.to_str().unwrap());
 
     let mut cmd = Command::new("docker");
     cmd.args(&["run", "--rm", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"])
         .args(&["--mount", &framework])
-        .args(&["--mount", &nearhome])
+        .args(&["--mount", &unchome])
         .args(&["--mount", "source=rust-emu-target-dir,target=/host/framework/target"])
         .args(&["--mount", "source=rust-emu-cargo-dir,target=/usr/local/cargo"])
         .args(&["--env", "RUST_BACKTRACE=full"]);

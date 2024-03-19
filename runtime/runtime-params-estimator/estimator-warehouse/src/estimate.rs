@@ -8,7 +8,7 @@ pub(crate) struct EstimateConfig {
     /// Specify the directory of a different repository, if not estimating the current one.
     #[clap(long)]
     pub external_repo: Option<String>,
-    /// Specify the directory for near state used by the estimator. Will use
+    /// Specify the directory for unc state used by the estimator. Will use
     /// temporary directory if unspecified.
     #[clap(long)]
     pub home: Option<String>,

@@ -15,7 +15,7 @@ benchmarking, loadtesting, and estimating system parameters.
 To start node with 20k accounts first create configs:
 
 ```bash
-cargo run --package uncd --bin uncd -- init --test-seed=alice.near --account-id=test.near --fast
+cargo run --package uncd --bin uncd -- init --test-seed=alice.unc --account-id=test.unc --fast
 ```
 
 Then create state dump with how many accounts you want:

@@ -10,7 +10,7 @@ def upload_directory(directory, bucket, s3_client):
             with open(file_path, 'rb') as data:
                 s3_client.upload_fileobj(data, bucket, s3_key)
 
-def run_neard_command(command):
+def run_uncd_command(command):
     result = subprocess.run(command, capture_output=True, text=True)
     print(result.stdout)
 
@@ -22,7 +22,7 @@ s3 = boto3.client(
     region_name="auto",  # Must be one of: wnam, enam, weur, eeur, apac, auto
 )
 
-#run_neard_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/.unc", "database", "make-snapshot", "--destination=/Users/es/snapshot"])
-#run_neard_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/snapshot", "database", "compact-database"])
+#run_uncd_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/.unc", "database", "make-snapshot", "--destination=/Users/es/snapshot"])
+#run_uncd_command(["/Users/es/utility/target/debug/uncd", "--home=/Users/es/snapshot", "database", "compact-database"])
 
-upload_directory('/Users/es/snapshot', 'near', s3)
+upload_directory('/Users/es/snapshot', 'unc', s3)

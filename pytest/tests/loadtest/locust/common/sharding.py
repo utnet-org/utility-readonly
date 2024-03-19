@@ -351,7 +351,7 @@ class TestRandomAccount(unittest.TestCase):
                 assert account_regex.fullmatch(upper) is not None
 
             for _ in range(10):
-                account_id = random_account_between('foo.near', '_ft', lower,
+                account_id = random_account_between('foo.unc', '_ft', lower,
                                                     upper)
                 assert account_regex.fullmatch(account_id) is not None, (
                     account_id, lower, upper)

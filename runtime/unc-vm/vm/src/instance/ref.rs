@@ -78,7 +78,7 @@ impl Drop for InstanceInner {
 
 // TODO: These implementations have been added to enable instances to contain `Arc`s, however it
 // isn’t exactly clear that the `InstanceInner` contents are `Send` or `Sync`, thus effectively
-// lying to the compiler. Fortunately in actual use this is not a big deal as the near runtime is
+// lying to the compiler. Fortunately in actual use this is not a big deal as the unc runtime is
 // single-threaded anyway (and `Arc` is only necessary to facilitate caching of the loaded
 // modules IIRC; an attempt to remove this cache has been made in the past, but had to be
 // restored.)

@@ -18,7 +18,7 @@ from mainnet
 The first step is to obtain an RPC node home directory for the chain
 you'd like to spoon. So if you want to use mainnet state, you can
 follow the instructions
-[here](https://unc-nodes.io/rpc/run-rpc-node-without-nearup#5-get-data-backup-1)
+[here](https://unc-nodes.io/rpc/run-rpc-node-without-uncup#5-get-data-backup-1)
 to obtain a recent snapshot of a mainnet node's home directory. Once
 you have your node's home directory set up, run the following
 `state-viewer` command to generate a dump of the chain's state:
@@ -44,7 +44,7 @@ chain).
 
 So we need to select a new list of validators to start off our
 chain. Suppose that we want our chain to have two validators,
-`validator0.near` and `validator1.near`. Let's make a new directory
+`validator0.unc` and `validator1.unc`. Let's make a new directory
 where we'll be storing intermediate files during this process:
 
 ```shell
@@ -59,12 +59,12 @@ field in `genesis.json`, maybe in the file
 ```json
 [
   {
-    "account_id": "validator0.near",
+    "account_id": "validator0.unc",
     "public_key": "ed25519:GRAFkrqEkJAbdbWUgc6fDnNpCTE83C3pzdJpjAHkMEhq",
     "amount": "100000000000000000000000000000000"
   },
   {
-    "account_id": "validator1.near",
+    "account_id": "validator1.unc",
     "public_key": "ed25519:5FxQQTC9mk5kLAhTF9ffDMTXiyYrDXyGYskgz46kHMdd",
     "amount": "100000000000000000000000000000000"
   }
@@ -75,8 +75,8 @@ These validator keys should be keys you've already generated. So for
 the rest of this document, we'll assume you've run:
 
 ```shell
-$ uncd --home ~/unc-test-chain/validator0 init --account-id validator0.near
-$ uncd --home ~/unc-test-chain/validator1 init --account-id validator1.near
+$ uncd --home ~/unc-test-chain/validator0 init --account-id validator0.unc
+$ uncd --home ~/unc-test-chain/validator1 init --account-id validator1.unc
 ```
 
 This is also a good time to think about what extra accounts you might
@@ -92,7 +92,7 @@ the following in `~/test-chain-scratch/extra-records.json`:
 [
   {
     "Account": {
-      "account_id": "my-test-account.near",
+      "account_id": "my-test-account.unc",
       "account": {
         "amount": "10000000000000000000000000000000000",
         "locked": "0",
@@ -104,7 +104,7 @@ the following in `~/test-chain-scratch/extra-records.json`:
   },
   {
     "AccessKey": {
-      "account_id": "my-test-account.near",
+      "account_id": "my-test-account.unc",
       "public_key": "ed25519:Eo9W44tRMwcYcoua11yM7Xfr1DjgR4EWQFM3RU27MEX8",
       "access_key": {
         "nonce": 0,
@@ -132,8 +132,8 @@ $ uncd amend-genesis --genesis-file-in $unc_HOME_DIRECTORY/output/genesis.json -
 
 After running the previous steps you should have the files
 `genesis.json` and `records.json` in `~/unc-test-chain/`. Assuming
-you've started it with the two validators `validator0.near` and
-`validator1.near` as described above, you'll want to run at least two
+you've started it with the two validators `validator0.unc` and
+`validator1.unc` as described above, you'll want to run at least two
 nodes, one for each of these validator accounts. If you're working
 with multiple computers or VMs that can connect to each other over the
 internet, you'll be able to run your test network over the internet as

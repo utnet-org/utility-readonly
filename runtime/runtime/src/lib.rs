@@ -1786,12 +1786,12 @@ mod tests {
 
     const GAS_PRICE: Balance = 5000;
 
-    fn to_yocto(near: Balance) -> Balance {
-        near * 10u128.pow(24)
+    fn to_yocto(unc: Balance) -> Balance {
+        unc * 10u128.pow(24)
     }
 
-    fn to_yocto2(near: Power) -> Power {
-        near * 10u128.pow(12)
+    fn to_yocto2(unc: Power) -> Power {
+        unc * 10u128.pow(12)
     }
 
     fn create_receipt_with_actions(

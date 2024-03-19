@@ -267,7 +267,7 @@ pub fn test_upload_contract(node: impl Node) {
     assert_eq!(transaction_result.receipts_outcome.len(), 2);
 
     node_user.view_contract_code(&eve_dot_alice_account()).expect_err(
-        "RpcError { code: -32000, message: \"Server error\", data: Some(String(\"contract code of account eve.alice.near does not exist while viewing\")) }");
+        "RpcError { code: -32000, message: \"Server error\", data: Some(String(\"contract code of account eve.alice.unc does not exist while viewing\")) }");
 
     let new_root = node_user.get_state_root();
     assert_ne!(root, new_root);

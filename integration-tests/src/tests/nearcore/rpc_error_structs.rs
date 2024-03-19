@@ -364,11 +364,11 @@ fn test_tx_invalid_tx_error() {
 
         let genesis_hash = *genesis_block(&genesis).hash();
         let signer =
-            InMemorySigner::from_seed("near.5".parse().unwrap(), KeyType::ED25519, "near.5");
+            InMemorySigner::from_seed("unc.5".parse().unwrap(), KeyType::ED25519, "unc.5");
         let transaction = SignedTransaction::send_money(
             1,
-            "near.5".parse().unwrap(),
-            "near.2".parse().unwrap(),
+            "unc.5".parse().unwrap(),
+            "unc.2".parse().unwrap(),
             &signer,
             10000,
             genesis_hash,
@@ -442,7 +442,7 @@ fn test_query_rpc_account_view_unknown_block_must_return_error() {
                     1,
                 )),
                 request: unc_primitives::views::QueryRequest::ViewAccount {
-                    account_id: "near.0".parse().unwrap(),
+                    account_id: "unc.0".parse().unwrap(),
                 },
             })
             .await;

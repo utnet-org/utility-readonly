@@ -168,7 +168,7 @@ pub struct GenesisConfig {
     /// Max stake percentage of the validators we will kick out.
     pub max_kickout_stake_perc: u8,
     /// The lowest ratio s/s_total any block producer can have.
-    /// See <https://github.com/near/NEPs/pull/167> for details
+    /// See <https://github.com/unc/NEPs/pull/167> for details
     #[serde(default = "default_minimum_stake_ratio")]
     #[default(Rational32::new(160, 1_000_000))]
     pub minimum_stake_ratio: Rational32,
@@ -778,7 +778,7 @@ pub struct ProtocolConfigView {
     /// Max stake percentage of the validators we will kick out.
     pub max_kickout_stake_perc: u8,
     /// The lowest ratio s/s_total any block producer can have.
-    /// See <https://github.com/near/NEPs/pull/167> for details
+    /// See <https://github.com/unc/NEPs/pull/167> for details
     pub minimum_stake_ratio: Rational32,
     /// The minimum number of validators each shard must have
     pub minimum_validators_per_shard: NumSeats,
@@ -884,7 +884,7 @@ mod test {
             "a": [1, 2],
             "records": [{
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -896,7 +896,7 @@ mod test {
             "b": "random",
             "records": [{
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -917,7 +917,7 @@ mod test {
             "records": [
                 {
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -947,7 +947,7 @@ mod test {
             "records": [
                 {
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -973,7 +973,7 @@ mod test {
             "records": [
                 {
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -984,7 +984,7 @@ mod test {
                 },
                 {
                     "Account": {
-                        "account_id": "01.near",
+                        "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
                               "locked": "0",
@@ -1038,7 +1038,7 @@ mod test {
               ],
               "validators": [
                 {
-                  "account_id": "test.near",
+                  "account_id": "test.unc",
                   "public_key": "ed25519:Gc4yTakj3QVm5T9XpsFNooVKBxXcYnhnuQdGMXf5Hjcf",
                   "amount": "50000000000000000000000000000000"
                 }
@@ -1054,7 +1054,7 @@ mod test {
               ],
               "total_supply": "2050000000000000000000000000000000",
               "num_blocks_per_year": 31536000,
-              "protocol_treasury_account": "test.near",
+              "protocol_treasury_account": "test.unc",
               "fishermen_threshold": "10000000000000000000000000",
               "minimum_stake_divisor": 10,
               "shard_layout": {
@@ -1074,7 +1074,7 @@ mod test {
               "records": [
                 {
                   "Account": {
-                    "account_id": "test.near",
+                    "account_id": "test.unc",
                     "account": {
                       "amount": "1000000000000000000000000000000000",
                       "locked": "50000000000000000000000000000000",
@@ -1086,7 +1086,7 @@ mod test {
                 },
                 {
                   "AccessKey": {
-                    "account_id": "test.near",
+                    "account_id": "test.unc",
                     "public_key": "ed25519:Gc4yTakj3QVm5T9XpsFNooVKBxXcYnhnuQdGMXf5Hjcf",
                     "access_key": {
                       "nonce": 0,
@@ -1096,7 +1096,7 @@ mod test {
                 },
                 {
                   "Account": {
-                    "account_id": "near",
+                    "account_id": "unc",
                     "account": {
                       "amount": "1000000000000000000000000000000000",
                       "locked": "0",
@@ -1108,7 +1108,7 @@ mod test {
                 },
                 {
                   "AccessKey": {
-                    "account_id": "near",
+                    "account_id": "unc",
                     "public_key": "ed25519:546XB2oHhj7PzUKHiH9Xve3Ze5q1JiW2WTh6abXFED3c",
                     "access_key": {
                       "nonce": 0,
@@ -1163,7 +1163,7 @@ mod test {
               ],
               "validators": [
                 {
-                  "account_id": "test.near",
+                  "account_id": "test.unc",
                   "public_key": "ed25519:Gc4yTakj3QVm5T9XpsFNooVKBxXcYnhnuQdGMXf5Hjcf",
                   "amount": "50000000000000000000000000000000"
                 }
@@ -1179,7 +1179,7 @@ mod test {
               ],
               "total_supply": "2050000000000000000000000000000000",
               "num_blocks_per_year": 31536000,
-              "protocol_treasury_account": "test.near",
+              "protocol_treasury_account": "test.unc",
               "fishermen_threshold": "10000000000000000000000000",
               "minimum_stake_divisor": 10,
               "shard_layout": {

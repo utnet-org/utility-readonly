@@ -46,7 +46,7 @@ def test_binaries(exclude=None):
     for f in glob.glob(f'{target_debug}/deps/*'):
         fname = os.path.basename(f)
         ext = os.path.splitext(fname)[1]
-        is_unc_binary = filecmp.cmp(f, f'{target_debug}/near') or filecmp.cmp(
+        is_unc_binary = filecmp.cmp(f, f'{target_debug}/unc') or filecmp.cmp(
             f, f'{target_debug}/uncd')
         if os.path.isfile(f) and not is_unc_binary and ext == '':
             if not exclude:

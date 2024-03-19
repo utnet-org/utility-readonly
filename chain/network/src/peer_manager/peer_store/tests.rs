@@ -91,7 +91,7 @@ fn test_unknown_vs_not_connected() {
 
     // Check the status of the in-memory store.
     // Boot node should be marked as not-connected, as we've verified it.
-    // TODO(mm-near) - the boot node should have been added as 'NotConnected' and not Unknown.
+    // TODO: the boot node should have been added as 'NotConnected' and not Unknown.
     assert_eq!(get_in_memory_status(&peer_store), [None, None, Some(Unknown)]);
 
     // Add the remaining peers.
