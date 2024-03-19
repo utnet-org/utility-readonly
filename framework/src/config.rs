@@ -68,7 +68,7 @@ pub const MILLI_UNC: Balance = UNC_BASE / 1000;
 pub const BLOCK_PRODUCTION_TRACKING_DELAY: u64 = 100 * 30;
 
 /// Expected block production time in ms.
-pub const MIN_BLOCK_PRODUCTION_DELAY: u64 = 600 * 30;
+pub const MIN_BLOCK_PRODUCTION_DELAY: u64 = 980 * 30;
 
 /// Mainnet and testnet validators are configured with a different value due to
 /// performance values.
