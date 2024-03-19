@@ -4,7 +4,7 @@
 //! cost-estimation function. Function can be arbitrary. Most, but not all,
 //! costs are estimated using roughly the following algorithm:
 //!
-//!   * Create an instance of near starting with specific fixture with many
+//!   * Create an instance of unc starting with specific fixture with many
 //!     accounts deployed.
 //!   * Create a template transaction, like transfer from a to b.
 //!   * Create a bunch of blocks stuffed with copies of this template

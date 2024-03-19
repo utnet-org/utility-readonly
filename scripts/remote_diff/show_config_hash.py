@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shows md5sum of /home/ubuntu/.near/config.json on provided google cloud machines.
+Shows md5sum of /home/ubuntu/.unc/config.json on provided google cloud machines.
 
 Usage: ./show_config_hash.py project host1 host2 host3 ...
 Example for testnet canaries:
@@ -18,7 +18,7 @@ def install_jq(project, host, user='ubuntu'):
 
 def get_canonical_md5sum(project, host, user='ubuntu'):
     install_jq(project, host, user)
-    return run_on_machine("jq --sort-keys . ~/.near/config.json | md5sum", user,
+    return run_on_machine("jq --sort-keys . ~/.unc/config.json | md5sum", user,
                           host, project)
 
 

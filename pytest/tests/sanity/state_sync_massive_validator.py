@@ -30,13 +30,13 @@ Stop at any point after seeing the message: "Genesis generated"
 2. Save generated data:
 
 ```
-cp -r ~/.near/test0_finished ~/.near/backup_genesis
+cp -r ~/.unc/test0_finished ~/.unc/backup_genesis
 ```
 
 3. Run test passing path to backup_genesis
 
 ```
-python3 tests/sanity/state_sync_massive_validator.py ~/.near/backup_genesis
+python3 tests/sanity/state_sync_massive_validator.py ~/.unc/backup_genesis
 ```
 """
 

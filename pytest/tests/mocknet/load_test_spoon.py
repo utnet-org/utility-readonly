@@ -5,7 +5,7 @@ Runs a loadtest on mocknet.
 The setup requires you to have a few nodes that will be validators and at least one node that will be an RPC node.
 Specify the number of validator nodes using the `--num-nodes` flag.
 
-Use https://github.com/near/unc-ops/tree/master/provisioning/terraform/network/mocknet to bring up a set of VM
+Use https://github.com/unc/unc-ops/tree/master/provisioning/terraform/network/mocknet to bring up a set of VM
 instances for the test. It also takes care of downloading necessary binaries and smart contracts.
 
 Depending on the `--chain-id` flag, the nodes will be initialized with an empty state, or with the most recent state
@@ -29,12 +29,12 @@ Things to look out for when running the test:
 6) Ideally we should check the percentage of generated transactions that succeed, but there is no easy way to do that. Maybe replay some blocks using `uncd view_state apply_range --help`.
 
 Other notes:
-1) This grafana dashboard can help: https://grafana.near.org/d/jHbiNgSnz/mocknet
+1) This grafana dashboard can help: https://grafana.unc.org/d/jHbiNgSnz/mocknet
 2) Logs are in /home/ubuntu/uncd.log and /home/ubuntu/uncd.upgrade.log
 
 For the terraform command to work, please do the following:
 1) Install terraform cli: https://learn.hashicorp.com/tutorials/terraform/install-cli
-2) git clone https://github.com/near/unc-ops
+2) git clone https://github.com/unc/unc-ops
 3) cd provisioning/terraform/network/mocknet
 4) Run `terraform init`
 5) Run `terraform apply` as specified above and check the output.

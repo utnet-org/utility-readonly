@@ -576,7 +576,7 @@ mod test {
             let num_shards = 4;
             let shards = ShardLayout::v1(
                 (0..num_shards - 1)
-                    .map(|f| AccountId::from_str(format!("shard{}.test.near", f).as_str()).unwrap())
+                    .map(|f| AccountId::from_str(format!("shard{}.test.unc", f).as_str()).unwrap())
                     .collect(),
                 None,
                 1,
@@ -614,7 +614,7 @@ mod test {
                 max_inflation_rate: framework::config::MAX_INFLATION_RATE,
                 total_supply: get_initial_supply(&records_in),
                 num_blocks_per_year: framework::config::NUM_BLOCKS_PER_YEAR,
-                protocol_treasury_account: "treasury.near".parse().unwrap(),
+                protocol_treasury_account: "treasury.unc".parse().unwrap(),
                 fishermen_threshold: framework::config::FISHERMEN_THRESHOLD,
                 shard_layout: shards,
                 min_gas_price: framework::config::MIN_GAS_PRICE,
@@ -691,7 +691,7 @@ mod test {
     }
 
     static TEST_CASES: &[TestCase] = &[
-        // first one adds one validator (foo2), bumps up another's balance (foo0), and adds an extra account (extra-account.near)
+        // first one adds one validator (foo2), bumps up another's balance (foo0), and adds an extra account (extra-account.unc)
         TestCase {
             initial_validators: &[
                 TestAccountInfo {
@@ -727,13 +727,13 @@ mod test {
                     public_key: "ed25519:FXXrTXiKWpXj1R6r5fBvMLpstd8gPyrBq3qMByqKVzKF",
                 },
                 TestStateRecord::Account {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     amount: 1_234_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     public_key: "ed25519:5C66RSJgwK17Yb6VtTbgBCFHDRPzGUd6AAhFdXNvmJuo",
                 },
             ],
@@ -762,13 +762,13 @@ mod test {
                     storage_usage: 0,
                 },
                 TestStateRecord::Account {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     amount: 9_000_000,
                     locked: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     public_key: "ed25519:BhnQV3oJa8iSQDKDc8gy36TsenaMFmv7qHvcnutuXj33",
                 },
             ],
@@ -804,23 +804,23 @@ mod test {
                     public_key: "ed25519:Eo9W44tRMwcYcoua11yM7Xfr1DjgR4EWQFM3RU27MEX8",
                 },
                 TestStateRecord::Account {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     amount: 1_234_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     public_key: "ed25519:5C66RSJgwK17Yb6VtTbgBCFHDRPzGUd6AAhFdXNvmJuo",
                 },
                 TestStateRecord::Account {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     amount: 9_000_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     public_key: "ed25519:BhnQV3oJa8iSQDKDc8gy36TsenaMFmv7qHvcnutuXj33",
                 },
             ],
@@ -873,13 +873,13 @@ mod test {
                     public_key: "ed25519:FXXrTXiKWpXj1R6r5fBvMLpstd8gPyrBq3qMByqKVzKF",
                 },
                 TestStateRecord::Account {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     amount: 1_234_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     public_key: "ed25519:5C66RSJgwK17Yb6VtTbgBCFHDRPzGUd6AAhFdXNvmJuo",
                 },
             ],
@@ -905,13 +905,13 @@ mod test {
                     public_key: "ed25519:He7QeRuwizNEhBioYG3u4DZ8jWXyETiyNzFD3MkTjDMf",
                 },
                 TestStateRecord::Account {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     amount: 9_000_000,
                     locked: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     public_key: "ed25519:BhnQV3oJa8iSQDKDc8gy36TsenaMFmv7qHvcnutuXj33",
                 },
             ],
@@ -965,23 +965,23 @@ mod test {
                     public_key: "ed25519:FXXrTXiKWpXj1R6r5fBvMLpstd8gPyrBq3qMByqKVzKF",
                 },
                 TestStateRecord::Account {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     amount: 1_234_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "asdf.near",
+                    account_id: "asdf.unc",
                     public_key: "ed25519:5C66RSJgwK17Yb6VtTbgBCFHDRPzGUd6AAhFdXNvmJuo",
                 },
                 TestStateRecord::Account {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     amount: 9_000_000,
                     locked: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
-                    account_id: "extra-account.near",
+                    account_id: "extra-account.unc",
                     public_key: "ed25519:BhnQV3oJa8iSQDKDc8gy36TsenaMFmv7qHvcnutuXj33",
                 },
             ],

@@ -1,5 +1,5 @@
 use crate::genesis_helpers::genesis_block;
-use crate::nearcore_utils::{add_blocks, setup_configs};
+use crate::unc_utils::{add_blocks, setup_configs};
 use crate::test_helpers::heavy_test;
 use actix::{Actor, System};
 use futures::{future, FutureExt};

@@ -21,7 +21,7 @@ way we'll use this is that we'll generate the forked state from the
 source chain using the usual `dump-state` command, and then run:
 
 ```
-$ mirror prepare --records-file-in "~/.near/output/records.json" --records-file-out "~/.near/output/mapped-records.json"
+$ mirror prepare --records-file-in "~/.unc/output/records.json" --records-file-out "~/.unc/output/mapped-records.json"
 ```
 
 This command will output a records file where the keys have been

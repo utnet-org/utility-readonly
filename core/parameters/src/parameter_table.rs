@@ -562,7 +562,7 @@ storage_num_extra_bytes_record   :   40
 
     static DIFF_0: &str = r#"
 # Comment line
-registrar_account_id: { old: "registrar", new: "near" }
+registrar_account_id: { old: "registrar", new: "unc" }
 min_allowed_top_level_account_length: { old: 32, new: 32_000 }
 wasm_regular_op_cost: { new: 3_856_371 }
 burnt_gas_reward: {
@@ -577,7 +577,7 @@ wasm_storage_read_base: {
 
     static DIFF_1: &str = r#"
 # Comment line
-registrar_account_id: { old: "near", new: "registrar" }
+registrar_account_id: { old: "unc", new: "registrar" }
 storage_num_extra_bytes_record: { old: 40, new: 77 }
 wasm_regular_op_cost: { old: 3_856_371, new: 0 }
 max_memory_pages: { new: 512 }
@@ -641,7 +641,7 @@ burnt_gas_reward: {
             BASE_0,
             &[DIFF_0],
             [
-                (Parameter::RegistrarAccountId, "\"near\""),
+                (Parameter::RegistrarAccountId, "\"unc\""),
                 (Parameter::MinAllowedTopLevelAccountLength, "32000"),
                 (Parameter::StorageAmountPerByte, "\"100000000000000000000\""),
                 (Parameter::StorageNumBytesAccount, "100"),

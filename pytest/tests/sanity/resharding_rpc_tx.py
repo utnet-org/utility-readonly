@@ -77,7 +77,7 @@ class ReshardingRpcTx(unittest.TestCase):
             client_config_changes=client_config_changes)
         self.node = nodes[0]
 
-        # The shard boundaries are at "kkuuue2akv_1630967379.near" and "tge-lockup.sweat" for shard 3 and 4
+        # The shard boundaries are at "kkuuue2akv_1630967379.unc" and "tge-lockup.sweat" for shard 3 and 4
         # We would like to create accounts that are in different shards
         # The first account before and after resharding is in shard 3
         # The second account after resharding is in shard 4

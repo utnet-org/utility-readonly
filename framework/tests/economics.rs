@@ -49,7 +49,7 @@ fn setup_env(genesis: &Genesis) -> TestEnv {
 }
 
 fn calc_total_supply(env: &mut TestEnv) -> u128 {
-    ["near", "test0", "test1"]
+    ["unc", "test0", "test1"]
         .iter()
         .map(|account_id| {
             let account = env.query_account(account_id.parse().unwrap());
@@ -88,7 +88,7 @@ fn test_burn_mint() {
         ),
         ProcessTxResponse::ValidTx
     );
-    let unc_balance = env.query_balance("near".parse().unwrap());
+    let unc_balance = env.query_balance("unc".parse().unwrap());
     assert_eq!(calc_total_supply(&mut env), initial_total_supply);
     for i in 1..6 {
         env.produce_block(0, i);
@@ -123,7 +123,7 @@ fn test_burn_mint() {
     assert_eq!(block4.header().total_supply(), block3.header().total_supply() - half_transfer_cost);
     assert_eq!(block4.chunks()[0].prev_balance_burnt(), half_transfer_cost);
     // Check that Protocol Treasury account got it's 1% as well.
-    assert_eq!(env.query_balance("near".parse().unwrap()), unc_balance + epoch_total_reward / 10);
+    assert_eq!(env.query_balance("unc".parse().unwrap()), unc_balance + epoch_total_reward / 10);
     // Block 5: reward from previous block.
     let block5 = env.clients[0].chain.get_block_by_height(5).unwrap();
     let prev_total_supply = block4.header().total_supply();

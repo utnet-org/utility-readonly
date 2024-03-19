@@ -514,7 +514,7 @@ impl WrappedTrieChanges {
                 // Serialize all kinds of state changes without any filtering.
                 // Without this it's not possible to replay state changes to get an identical state root.
 
-                // This branch will become the default in the near future.
+                // This branch will become the default in the unc future.
 
                 match change_with_trie_key.trie_key.get_account_id() {
                     // If a TrieKey itself doesn't identify the Shard, then we need to add shard id to the row key.
@@ -697,8 +697,6 @@ mod test {
             shard_cache_config: trie_cache_config.clone(),
             view_shard_cache_config: trie_cache_config,
             enable_receipt_prefetching: false,
-            sweat_prefetch_receivers: Vec::new(),
-            sweat_prefetch_senders: Vec::new(),
             load_mem_tries_for_shards: Vec::new(),
             load_mem_tries_for_all_shards: false,
         };

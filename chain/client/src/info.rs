@@ -41,7 +41,7 @@ struct ValidatorInfoHelper {
 /// A helper that prints information about current chain and reports to telemetry.
 pub struct InfoHelper {
     /// Nearcore agent (executable) version
-    nearcore_version: Version,
+    unc_version: Version,
     /// System reference.
     sys: System,
     /// Process id to query resources.
@@ -80,7 +80,7 @@ impl InfoHelper {
         set_open_files_limit(0);
         metrics::export_version(&client_config.version);
         InfoHelper {
-            nearcore_version: client_config.version.clone(),
+            unc_version: client_config.version.clone(),
             sys: System::new(),
             pid: get_current_pid().ok(),
             started: StaticClock::instant(),
@@ -504,8 +504,8 @@ impl InfoHelper {
         let info = TelemetryInfo {
             agent: TelemetryAgentInfo {
                 name: "unc-rs".to_string(),
-                version: self.nearcore_version.version.clone(),
-                build: self.nearcore_version.build.clone(),
+                version: self.unc_version.version.clone(),
+                build: self.unc_version.build.clone(),
             },
             system: TelemetrySystemInfo {
                 bandwidth_download: network_info.received_bytes_per_sec,

@@ -18,7 +18,7 @@ use std::sync::Arc;
 /// if the second block is not requested
 #[test]
 fn test_not_process_height_twice() {
-    let mut env = TestEnv::builder(ChainGenesis::test()).build();
+    let mut env: TestEnv = TestEnv::builder(ChainGenesis::test()).build();
     let block = env.clients[0].produce_block(1).unwrap().unwrap();
     // modify the block and resign it
     let mut duplicate_block = block.clone();
@@ -76,6 +76,7 @@ fn test_bad_shard_id() {
         outgoing_receipts_root,
         chunk.tx_root(),
         chunk.prev_validator_proposals().collect(),
+        vec![],
         &validator_signer,
     );
     modified_chunk.height_included = 2;

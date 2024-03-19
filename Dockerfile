@@ -22,8 +22,8 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 RUN curl https://sh.rustup.rs -sSf | \
     sh -s -- -y --no-modify-path --default-toolchain none
 
-VOLUME [ /near ]
-WORKDIR /near
+VOLUME [ /unc ]
+WORKDIR /unc
 COPY . .
 
 ENV PORTABLE=ON

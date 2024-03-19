@@ -106,7 +106,7 @@
             "block_hash": "4CVvjzoVdnK3WCuaKBRyApuNwmM3ieNrRJ9c4SFqD1jt",
             "id": "ALRJ4gpVhbX36dYbVPLLPVX76Kw9j1dMiNxqR8uCkifh",
             "outcome": {
-                "executor_id": "app.nearcrowd.near",
+                "executor_id": "app.unccrowd.unc",
                 "gas_burnt": 2428325704054,
                 "logs": [],
                 "metadata": {

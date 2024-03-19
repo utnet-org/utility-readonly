@@ -412,7 +412,7 @@ mod tests {
         let simple_nightshade_version = SimpleNightshade.protocol_version();
         let epoch_manager = get_epoch_manager(simple_nightshade_version - 1, 1, true);
         let tracked_accounts =
-            vec!["a.near".parse().unwrap(), "near".parse().unwrap(), "zoo".parse().unwrap()];
+            vec!["a.unc".parse().unwrap(), "unc".parse().unwrap(), "zoo".parse().unwrap()];
         let tracker = ShardTracker::new(
             TrackedConfig::Accounts(tracked_accounts.clone()),
             Arc::new(epoch_manager.clone()),

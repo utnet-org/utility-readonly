@@ -7,9 +7,9 @@ set -euo pipefail
 # Takes one argument -- chain_id (mainnet or testnet)
 # Prerequisites:
 # - systemd uncd service
-# - uncd home is in /home/ubuntu/.near
+# - uncd home is in /home/ubuntu/.unc
 # - uncd binary is in /home/ubuntu/uncd
-# - /home/ubuntu/.near/config.json is initialised
+# - /home/ubuntu/.unc/config.json is initialised
 # - metrics are exported to 3030 port
 # - aws s3 client
 # First, prepares config files using jq.
@@ -20,7 +20,7 @@ set -euo pipefail
 # After that node is running in split storage mode
 # Legacy archival db can be removed
 
-unc_HOME=/home/ubuntu/.near
+unc_HOME=/home/ubuntu/.unc
 chain=$1
 service_name=uncd
 
@@ -29,12 +29,12 @@ if [ "$chain" != "testnet" ] && [ "$chain" != "mainnet" ]; then
   exit 1
 fi
 
-function restart_neard() {
+function restart_uncd() {
   echo "Restarting the systemd service '$service_name'"
   sudo systemctl restart $service_name
 }
 
-function stop_neard() {
+function stop_uncd() {
   echo "Stopping the systemd service '$service_name'"
   sudo systemctl stop $service_name
 }
@@ -43,7 +43,7 @@ function intro() {
   echo "This script is going to migrate this archival node to cold storage"
   echo
   echo "The script makes the following assumptions:"
-  echo " * You have about 10TB of disk space available. Recommended setup is to mount a cheap HDD to '~/.near/cold-data'."
+  echo " * You have about 10TB of disk space available. Recommended setup is to mount a cheap HDD to '~/.unc/cold-data'."
   echo " * The node can be controlled as a systemd service. The script will run 'sudo systemctl restart $service_name' when it needs to restart the node."
   echo " * The machine has commands 'jq' and 'aws' available, or if those commands are not available, they can be installed using 'apt'."
   echo " * It's ok to stop the node for several minutes."
@@ -100,7 +100,7 @@ function prepare_configs {
 function run_with_trie_changes {
   echo "Starting an archival run with TrieChanges"
   cp $unc_HOME/config.json.archival $unc_HOME/config.json
-  restart_neard
+  restart_uncd
 
   echo "Waiting 10 minutes"
   sleep 600
@@ -114,7 +114,7 @@ function init_cold_storage {
   echo "Do not interrupt. Any interruption will undo the migration process."
   cp $unc_HOME/config.json.migration $unc_HOME/config.json
 
-  restart_neard
+  restart_uncd
 
   metrics_url="http://0.0.0.0:3030/metrics"
   # Wait for the migration to complete
@@ -147,7 +147,7 @@ function finish_split_storage_migration {
   # Change hot store type
   while true
   do
-    stop_neard
+    stop_uncd
     echo "Trying to change RPC DB kind to Hot"
     if /home/ubuntu/uncd cold-store prepare-hot --store-relative-path='hot-data'
     then
@@ -157,7 +157,7 @@ function finish_split_storage_migration {
       echo "Failed to change RPC DB king to Hot. Check the error above."
       echo "Assuming the error is cold head being behind rpc tail."
       echo "Restarting the node with legacy archival db and waiting an hour for cold head to increase."
-      restart_neard
+      restart_uncd
       sleep 3600
     fi
   done
@@ -165,7 +165,7 @@ function finish_split_storage_migration {
   # Switch to split storage mode
   echo "Starting split storage run"
   cp $unc_HOME/config.json.split $unc_HOME/config.json
-  restart_neard
+  restart_uncd
 
   echo "Waiting 5 minutes"
   sleep 300

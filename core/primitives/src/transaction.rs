@@ -340,12 +340,12 @@ mod tests {
     }
 
     /// This test is change checker for a reason - we don't expect transaction format to change.
-    /// If it does - you MUST update all of the dependencies: like nearlib and other clients.
+    /// If it does - you MUST update all of the dependencies: like framework and other clients.
     #[test]
     fn test_serialize_transaction() {
         let public_key: PublicKey = "22skMptHjFWNyuEWY22ftn2AbLPSYpmYwGJRGwpNHbTV".parse().unwrap();
         let transaction = Transaction {
-            signer_id: "test.near".parse().unwrap(),
+            signer_id: "test.unc".parse().unwrap(),
             public_key: public_key.clone(),
             nonce: 1,
             receiver_id: "123".parse().unwrap(),

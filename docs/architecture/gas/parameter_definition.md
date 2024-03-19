@@ -38,7 +38,7 @@ the store once per chunk and then passed down to all functions that need it.
 ## How to Add a New Parameter
 
 First and foremost, if you are feeling lost, open a topic in our Zulip chat
-([pagoda/contract-runtime](https://near.zulipchat.com/#narrow/stream/295306-pagoda.2Fcontract-runtime)).
+([pagoda/contract-runtime](https://unc.zulipchat.com/#narrow/stream/295306-pagoda.2Fcontract-runtime)).
 We are here to help.
 
 ### Principles

@@ -54,7 +54,7 @@ def main():
 
         # this will restart the binary one time during this test, and it will return false
         # when it exits on its own, which should happen once it finishes sending all the
-        # transactions in its source chain (~/.near/test1/)
+        # transactions in its source chain (~/.unc/test1/)
         if not mirror.restart_once():
             break
         elapsed = time.time() - mirror.start_time

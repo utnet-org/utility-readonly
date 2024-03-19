@@ -11,7 +11,7 @@ assignees: ''
 Thank you for taking the time to file an issue, we highly appreciate your contribution.
 
 Before you go ahead, please make sure that the issue has not been reported already.
-For support questions, please head over to our [Discord](http://near.chat/) or ask on [StackOverflow](https://stackoverflow.com/search?q=utility).
+For support questions, please head over to our [Discord](http://unc.chat/) or ask on [StackOverflow](https://stackoverflow.com/search?q=utility).
 -->
 
 **Describe the bug**

@@ -434,7 +434,7 @@ mod tests {
     use super::{GasUsageInShard, ShardSplit};
 
     fn account(name: &str) -> AccountId {
-        AccountId::from_str(&format!("{name}.near")).unwrap()
+        AccountId::from_str(&format!("{name}.unc")).unwrap()
     }
 
     // There is no optimal split for a shard with no accounts

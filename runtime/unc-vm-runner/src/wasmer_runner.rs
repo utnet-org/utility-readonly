@@ -89,7 +89,7 @@ impl IntoVMError for wasmer_runtime::error::RuntimeError {
                 // Failed unwinder may happen in the case of deep recursion/stack overflow.
                 // Also can be thrown on unreachable instruction, which is quite unfortunate.
                 //
-                // See https://github.com/near/wasmer/blob/0.17.2/lib/runtime-core/src/fault.rs#L285
+                // See https://github.com/unc/wasmer/blob/0.17.2/lib/runtime-core/src/fault.rs#L285
                 InvokeError::FailedWithNoError => {
                     tracing::error!(target: "vm", "Got FailedWithNoError from wasmer0");
                     // XXX: Initially, we treated this error case as

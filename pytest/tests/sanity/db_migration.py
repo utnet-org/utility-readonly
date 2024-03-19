@@ -55,7 +55,7 @@ def main():
     executables = branches.prepare_ab_test()
     node_root = utils.get_unc_tempdir('db_migration', clean=True)
 
-    logging.info(f"The near root is {executables.stable.root}...")
+    logging.info(f"The unc root is {executables.stable.root}...")
     logging.info(f"The node root is {node_root}...")
 
     # Init local node

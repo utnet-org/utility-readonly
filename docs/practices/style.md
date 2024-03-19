@@ -33,7 +33,7 @@ considered idiomatic Rust, a good start are the
 advice applies literally).
 
 When in doubt, ask question in the [Rust
-🦀](https://near.zulipchat.com/#narrow/stream/300659-Rust-.F0.9F.A6.80) Zulip
+🦀](https://unc.zulipchat.com/#narrow/stream/300659-Rust-.F0.9F.A6.80) Zulip
 stream or during code review.
 
 **Rationale:**

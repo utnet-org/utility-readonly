@@ -6,26 +6,26 @@ use unc_primitives::state_record::StateRecord;
 use unc_primitives::types::{AccountId, Balance};
 
 pub fn alice_account() -> AccountId {
-    "alice.near".parse().unwrap()
+    "alice.unc".parse().unwrap()
 }
 pub fn bob_account() -> AccountId {
-    "bob.near".parse().unwrap()
+    "bob.unc".parse().unwrap()
 }
 pub fn carol_account() -> AccountId {
-    "carol.near".parse().unwrap()
+    "carol.unc".parse().unwrap()
 }
 pub fn eve_dot_alice_account() -> AccountId {
-    "eve.alice.near".parse().unwrap()
+    "eve.alice.unc".parse().unwrap()
 }
 
 pub fn x_dot_y_dot_alice_account() -> AccountId {
-    "x.y.alice.near".parse().unwrap()
+    "x.y.alice.unc".parse().unwrap()
 }
 
 /// Pre-deploy in genesis the standard test contract for a given account.
 ///
 /// This contract contains various functions useful for testing and its code is available in
-/// `/home/jakmeier/near/core-runtime/framework/runtime/unc-test-contracts/test-contract-rs/src/lib.rs`
+/// `/home/jakmeier/unc/core-runtime/framework/runtime/unc-test-contracts/test-contract-rs/src/lib.rs`
 pub fn add_test_contract(genesis: &mut Genesis, account_id: &AccountId) {
     add_contract(genesis, account_id, unc_test_contracts::rs_contract().to_vec())
 }

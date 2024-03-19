@@ -14,7 +14,7 @@ TODO: Fill out documentation for all available commands
 Basic example:
 ```bash
 make uncd
-./target/release/uncd --home ~/.near/ view_state apply_range \
+./target/release/uncd --home ~/.unc/ view_state apply_range \
         --shard-id=0 --start-index=42376889 --end_index=423770101 \
          --verbose-output --csv-file=./apply_range.csv
 ```
@@ -47,12 +47,12 @@ number of rayon threads.
 As of today you need approximately 2TB of disk space for the whole history of `mainnet`, and the most practical way of
 obtaining this whole history is the following:
 
-* Patch <https://github.com/near/unc-ops/pull/591> to define your own GCP instance in project `rpc-prod`.
+* Patch <https://github.com/unc/unc-ops/pull/591> to define your own GCP instance in project `rpc-prod`.
 * Make sure to change `machine-name` and `role` to something unique.
 * Make a Pull Request and ask Mario (@mhalambek) or Sandi (@chefsale) for review.
 * Ask Mario or Sandi to grant you permissions to the GCP project `rpc-prod`.
 * Run `terraform init` and `terraform apply` to start an instance. This instance will have a running `uncd` systemd
-  service, with `/home/ubuntu/.near` as the home directory. Follow the `terraform` CLI
+  service, with `/home/ubuntu/.unc` as the home directory. Follow the `terraform` CLI
   [installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli) if needed.
 * SSH using `gcloud compute ssh <machine_name>" --project=rpc-prod`. Follow the `gcloud` CLI
   [installation guide](https://cloud.google.com/sdk/docs/install) if needed.
@@ -95,7 +95,7 @@ Flags:
 Example:
 
 ```shell
-./target/release/uncd --home ~/.near/mainnet/ view_state dump_state --height 68874690 --account-ids near
+./target/release/uncd --home ~/.unc/mainnet/ view_state dump_state --height 68874690 --account-ids unc
 ```
 
 ### `dump_tx`
@@ -113,7 +113,7 @@ Flags:
 Example:
 
 ```shell
-./target/release/uncd --home ~/.near/mainnet/ view_state dump_tx --start-height 68701890 --end-height 68701890 --account-ids near
+./target/release/uncd --home ~/.unc/mainnet/ view_state dump_tx --start-height 68701890 --end-height 68701890 --account-ids unc
 ```
 
 ### `rocksdb_stats`
@@ -178,7 +178,7 @@ actions on-chain.
 
 ```ignore
 cargo run -p uncd -- view-state contract-accounts \
-  --skip-accounts "aurora,relay.aurora,token.sweat,oracle.sweat,tge-lockup.near,sweat_welcome.near" \
+  --skip-accounts "aurora,relay.aurora,token.sweat,oracle.sweat,tge-lockup.unc,sweat_welcome.unc" \
   --receipts-in \
   --receipts-out \
   --actions \
@@ -188,14 +188,14 @@ cargo run -p uncd -- view-state contract-accounts \
 And the output may look something like thi:
 ```ignore
 ACCOUNT_ID                                                         RCPTS_IN  RCPTS_OUT ACTIONS
-0-0.near                                                                 37         14 Transfer
-0-1.near                                                                797        117 Transfer
-0.app.hipodev.near                                                        8          9 Transfer
-0.app2.hipodev.near                                                       4          5 Transfer
-0.near                                                                   56          9 Transfer
-00.near                                                                  29          5 Transfer
-000.near                                                                190         17 Transfer
-0000.mintbase1.near                                                      49         68 FunctionCall,Transfer
+0-0.unc                                                                 37         14 Transfer
+0-1.unc                                                                797        117 Transfer
+0.app.hipodev.unc                                                        8          9 Transfer
+0.app2.hipodev.unc                                                       4          5 Transfer
+0.unc                                                                   56          9 Transfer
+00.unc                                                                  29          5 Transfer
+000.unc                                                                190         17 Transfer
+0000.mintbase1.unc                                                      49         68 FunctionCall,Transfer
 ...
 And 18858 errors:
 failed loading outgoing receipt DpoPSrAHECYrpntTdYXrp2W2Ad3yEPyMyCav4mXi8kyh

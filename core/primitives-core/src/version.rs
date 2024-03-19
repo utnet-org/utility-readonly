@@ -55,7 +55,7 @@ pub enum ProtocolFeature {
     LimitContractFunctionsNumber,
     BlockHeaderV3,
     /// Changes how we select validators for epoch and how we select validators
-    /// within epoch.  See <https://github.com/near/NEPs/pull/167> for general
+    /// within epoch.  See <https://github.com/unc/NEPs/pull/167> for general
     /// description, note that we would not introduce chunk-only validators with
     /// this feature
     AliasValidatorSelectionAlgorithm,
@@ -86,22 +86,22 @@ pub enum ProtocolFeature {
     MaxKickoutStake,
     /// Validate account id for function call access keys.
     AccountIdInFunctionCallPermission,
-    /// Zero Balance Account NEP 448: https://github.com/near/NEPs/pull/448
+    /// Zero Balance Account NEP 448: https://github.com/unc/NEPs/pull/448
     ZeroBalanceAccount,
     /// Execute a set of actions on behalf of another account.
     ///
-    /// Meta Transaction NEP-366: https://github.com/near/NEPs/blob/master/neps/nep-0366.md
+    /// Meta Transaction NEP-366: https://github.com/unc/NEPs/blob/master/neps/nep-0366.md
     DelegateAction,
     Ed25519Verify,
     /// Decouple compute and gas costs of operations to safely limit the compute time it takes to
     /// process the chunk.
     ///
-    /// Compute Costs NEP-455: https://github.com/near/NEPs/blob/master/neps/nep-0455.md
+    /// Compute Costs NEP-455: https://github.com/unc/NEPs/blob/master/neps/nep-0455.md
     ComputeCosts,
     /// Enable flat storage for reads, reducing number of DB accesses from `2 * key.len()` in
     /// the worst case to 2.
     ///
-    /// Flat Storage NEP-399: https://github.com/near/NEPs/blob/master/neps/nep-0399.md
+    /// Flat Storage NEP-399: https://github.com/unc/NEPs/blob/master/neps/nep-0399.md
     FlatStorageReads,
     /// Enables preparation V2. Note that this setting is not supported in production settings
     /// without NearVmRuntime enabled alongside it, as the VM runner would be too slow.
@@ -127,7 +127,7 @@ pub enum ProtocolFeature {
     /// Increases the number of chunk producers.
     TestnetFewerBlockProducers,
     /// Enables chunk validation which is introduced with stateless validation.
-    /// NEP: https://github.com/near/NEPs/pull/509
+    /// NEP: https://github.com/unc/NEPs/pull/509
     ChunkValidation,
     EthImplicitAccounts,
 }

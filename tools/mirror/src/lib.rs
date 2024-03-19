@@ -119,7 +119,7 @@ fn nonce_col_key(account_id: &AccountId, public_key: &PublicKey) -> Vec<u8> {
 // this serves a similar purpose to `LatestTargetNonce`. The difference is
 // that this one keeps track of what's in memory. So for example if the last
 // height we sent transactions for was 10, and we have a set of transactions
-// queued up for height 12, one of which is an AddKey for ('foo.near', 'ed25519:...'),
+// queued up for height 12, one of which is an AddKey for ('foo.unc', 'ed25519:...'),
 // then we'lll want to remember that for txs of height > 12 that use that
 // signer id and public key, but we don't want to store that on disk. The `LatestTargetNonce`
 // on disk will only record the transactions/receipts updating the nonce that we actually sent

@@ -75,7 +75,7 @@ pub fn check_storage_stake(
     }
 }
 
-/// Zero Balance Account introduced in NEP 448 https://github.com/near/NEPs/pull/448
+/// Zero Balance Account introduced in NEP 448 https://github.com/unc/NEPs/pull/448
 /// An account is a zero balance account if and only if the account uses no more than `ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT` bytes
 fn is_zero_balance_account(account: &Account) -> bool {
     account.storage_usage() <= ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT
@@ -768,7 +768,7 @@ mod tests {
             for num_full_access_key in 0..10 {
                 for num_function_call_access_key in 0..10 {
                     let account_id: AccountId = format!(
-                        "alice{}.near",
+                        "alice{}.unc",
                         num_full_access_key * 1000 + num_function_call_access_key
                     )
                     .parse()
@@ -1851,8 +1851,8 @@ mod tests {
     fn test_delegate_action_must_be_only_one() {
         let signed_delegate_action = SignedDelegateAction {
             delegate_action: DelegateAction {
-                sender_id: "bob.test.near".parse().unwrap(),
-                receiver_id: "token.test.near".parse().unwrap(),
+                sender_id: "bob.test.unc".parse().unwrap(),
+                receiver_id: "token.test.unc".parse().unwrap(),
                 actions: vec![NonDelegateAction::try_from(Action::CreateAccount(
                     CreateAccountAction {},
                 ))

@@ -1,6 +1,6 @@
 //! DelegateAction is a type of action to support meta transactions.
 //!
-//! NEP: https://github.com/near/NEPs/pull/366
+//! NEP: https://github.com/unc/NEPs/pull/366
 //! This is the module containing the types introduced for delegate actions.
 
 pub use self::private_non_delegate_action::NonDelegateAction;
@@ -68,7 +68,7 @@ impl DelegateAction {
     /// Delegate action hash used for NEP-461 signature scheme which tags
     /// different messages before hashing
     ///
-    /// For more details, see: [NEP-461](https://github.com/near/NEPs/pull/461)
+    /// For more details, see: [NEP-461](https://github.com/unc/NEPs/pull/461)
     pub fn get_nep461_hash(&self) -> CryptoHash {
         let signable = SignableMessage::new(&self, SignableMessageType::DelegateAction);
         let bytes = borsh::to_vec(&signable).expect("Failed to deserialize");

@@ -1,6 +1,6 @@
 //! DelegateAction is a type of action to support meta transactions.
 //!
-//! NEP: https://github.com/near/NEPs/pull/366
+//! NEP: https://github.com/unc/NEPs/pull/366
 //! This is the module for its integration tests.
 
 use crate::node::{Node, RuntimeNode};
@@ -51,9 +51,9 @@ fn exec_meta_transaction(
 ) -> FinalExecutionStatus {
     unc_o11y::testonly::init_test_logger();
     let validator: AccountId = "test0".parse().unwrap();
-    let user: AccountId = "alice.near".parse().unwrap();
-    let receiver: AccountId = "bob.near".parse().unwrap();
-    let relayer: AccountId = "relayer.near".parse().unwrap();
+    let user: AccountId = "alice.unc".parse().unwrap();
+    let receiver: AccountId = "bob.unc".parse().unwrap();
+    let relayer: AccountId = "relayer.unc".parse().unwrap();
     let mut genesis =
         Genesis::test(vec![validator, user.clone(), receiver.clone(), relayer.clone()], 1);
     genesis.config.epoch_length = 1000;
@@ -369,7 +369,7 @@ fn meta_tx_fn_call_access_key_insufficient_allowance() {
     let relayer = alice_account();
     let receiver = carol_account();
 
-    // 1 yocto near, that's less than 1 gas unit
+    // 1 yocto unc, that's less than 1 gas unit
     let initial_allowance = 1;
     let signer = create_user_test_signer(&sender);
 
@@ -555,7 +555,7 @@ fn meta_tx_delete_account() {
     assert_eq!(sender_diff, receiver_diff);
     assert_eq!(relayer_diff, balance as i128 - (gas_cost as i128), "unexpected relayer balance");
     let err = node.view_account(&receiver).expect_err("account should have been deleted");
-    assert_eq!(err, "Account ID #eve.alice.near does not exist");
+    assert_eq!(err, "Account ID #eve.alice.unc does not exist");
 }
 
 /// Test the canonical example for meta transactions: A fungible token transfer.
@@ -567,7 +567,7 @@ fn meta_tx_ft_transfer() {
     let relayer = alice_account();
     let sender = bob_account();
     let ft_contract = carol_account();
-    let receiver = "david.near";
+    let receiver = "david.unc";
 
     let mut genesis = Genesis::test(vec![alice_account(), bob_account(), carol_account()], 3);
     add_contract(&mut genesis, &ft_contract, unc_test_contracts::ft_contract().to_vec());
@@ -581,7 +581,7 @@ fn meta_tx_ft_transfer() {
             ft_contract.clone(),
             "new_default_meta",
             // make the relayer (alice) owner, makes initialization easier
-            br#"{"owner_id": "alice.near", "total_supply": "1000000"}"#.to_vec(),
+            br#"{"owner_id": "alice.unc", "total_supply": "1000000"}"#.to_vec(),
             30_000_000_000_000,
             0,
         )

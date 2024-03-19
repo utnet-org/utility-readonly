@@ -31,7 +31,7 @@ def random_u64():
 
 
 # Generates traffic for all possible shards.
-# Assumes that `test0`, `test1`, `near` all belong to different shards.
+# Assumes that `test0`, `test1`, `unc` all belong to different shards.
 def random_workload_until(target, nonce, keys, node0, node1, target_node):
     last_height = -1
     while True:
@@ -53,7 +53,7 @@ def random_workload_until(target, nonce, keys, node0, node1, target_node):
             # The goal is to generate cross-shard receipts.
             key_from = random.choice([node0, node1]).signer_key
             account_to = random.choice([
-                node0.signer_key.account_id, node1.signer_key.account_id, "near"
+                node0.signer_key.account_id, node1.signer_key.account_id, "unc"
             ])
             payment_tx = transaction.sign_payment_tx(key_from, account_to, 1,
                                                      nonce, last_block_hash)

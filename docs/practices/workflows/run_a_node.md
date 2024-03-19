@@ -51,16 +51,16 @@ command to create config files:
 ```console
 $ cargo run --profile dev-release -p uncd -- init
 INFO uncd: version="trunk" build="1.1.0-3091-ga8964d200-modified" latest_protocol=57
-INFO near: Using key ed25519:B41GMfqE2jWHVwrPLbD7YmjZxxeQE9WA9Ua2jffP5dVQ for test.near
-INFO near: Using key ed25519:34d4aFJEmc2A96UXMa9kQCF8g2EfzZG9gCkBAPcsVZaz for node
-INFO near: Generated node key, validator key, genesis file in ~/.near
+INFO unc: Using key ed25519:B41GMfqE2jWHVwrPLbD7YmjZxxeQE9WA9Ua2jffP5dVQ for test.unc
+INFO unc: Using key ed25519:34d4aFJEmc2A96UXMa9kQCF8g2EfzZG9gCkBAPcsVZaz for node
+INFO unc: Generated node key, validator key, genesis file in ~/.unc
 ```
 
-As the log output says, we are just generating _some things_ in `~/.near`.
+As the log output says, we are just generating _some things_ in `~/.unc`.
 Let's take a look:
 
 ```console
-$ ls ~/.near
+$ ls ~/.unc
 config.json
 genesis.json
 node_key.json
@@ -73,11 +73,11 @@ there, which we'll ignore here. The part we'll look at is the `.records`, which
 contains the actual initial data:
 
 ```console
-$ cat ~/.near/genesis.json | jq '.records'
+$ cat ~/.unc/genesis.json | jq '.records'
 [
   {
     "Account": {
-      "account_id": "test.near",
+      "account_id": "test.unc",
       "account": {
         "amount": "1000000000000000000000000000000000",
         "locked": "50000000000000000000000000000000",
@@ -89,7 +89,7 @@ $ cat ~/.near/genesis.json | jq '.records'
   },
   {
     "AccessKey": {
-      "account_id": "test.near",
+      "account_id": "test.unc",
       "public_key": "ed25519:B41GMfqE2jWHVwrPLbD7YmjZxxeQE9WA9Ua2jffP5dVQ",
       "access_key": {
         "nonce": 0,
@@ -99,7 +99,7 @@ $ cat ~/.near/genesis.json | jq '.records'
   },
   {
     "Account": {
-      "account_id": "near",
+      "account_id": "unc",
       "account": {
         "amount": "1000000000000000000000000000000000",
         "locked": "0",
@@ -111,7 +111,7 @@ $ cat ~/.near/genesis.json | jq '.records'
   },
   {
     "AccessKey": {
-      "account_id": "near",
+      "account_id": "unc",
       "public_key": "ed25519:546XB2oHhj7PzUKHiH9Xve3Ze5q1JiW2WTh6abXFED3c",
       "access_key": {
         "nonce": 0,
@@ -129,10 +129,10 @@ not the private ones).
 One of these accounts is a validator:
 
 ```
-$ cat ~/.near/genesis.json | jq '.validators'
+$ cat ~/.unc/genesis.json | jq '.validators'
 [
   {
-    "account_id": "test.near",
+    "account_id": "test.unc",
     "public_key": "ed25519:B41GMfqE2jWHVwrPLbD7YmjZxxeQE9WA9Ua2jffP5dVQ",
     "amount": "50000000000000000000000000000000"
   }
@@ -142,14 +142,14 @@ $ cat ~/.near/genesis.json | jq '.validators'
 Now, if we
 
 ```console
-$ cat ~/.near/validator_key.json
+$ cat ~/.unc/validator_key.json
 ```
 
 we'll see
 
 ```json
 {
-  "account_id": "test.near",
+  "account_id": "test.unc",
   "public_key": "ed25519:B41GMfqE2jWHVwrPLbD7YmjZxxeQE9WA9Ua2jffP5dVQ",
   "secret_key": "ed25519:3x2dUQgBoEqNvKwPjfDE8zDVJgM8ysqb641PYHV28mGPu61WWv332p8keMDKHUEdf7GVBm4f6z4D1XRgBxnGPd7L"
 }
@@ -161,14 +161,14 @@ convenient.
 To recap, `uncd init` without arguments creates a config for a new network
 that starts with a single validator, for which we have the keys.
 
-You might be wondering what `~/.near/node_key.json` is. That's not too
+You might be wondering what `~/.unc/node_key.json` is. That's not too
 important, but, in our network, there's no 1-1 correspondence between machines
 participating in the peer-to-peer network and accounts on the blockchain. So the
 `node_key` specifies the keypair we'll use when signing network packets. These
 packets internally will contain messages signed with the validator's key, and
 these internal messages will drive the evolution of the blockchain state.
 
-Finally, `~/.near/config.json` contains various configs for the node itself.
+Finally, `~/.unc/config.json` contains various configs for the node itself.
 These are configs that don't affect the rules guiding the evolution of the
 blockchain state, but rather things like timeouts, database settings and
 such.
@@ -176,7 +176,7 @@ such.
 The only field we'll look at is `boot_nodes`:
 
 ```console
-$ cat ~/.near/config.json | jq '.network.boot_nodes'
+$ cat ~/.unc/config.json | jq '.network.boot_nodes'
 ""
 ```
 
@@ -195,7 +195,7 @@ Finally,
 ```console
 $ cargo run --profile dev-release -p uncd -- run
 INFO uncd: version="trunk" build="1.1.0-3091-ga8964d200-modified" latest_protocol=57
-INFO near: Creating a new RocksDB database path=/home/matklad/.near/data
+INFO unc: Creating a new RocksDB database path=/home/matklad/.unc/data
 INFO db: Created a new RocksDB instance. num_instances=1
 INFO stats: #       0 4xecSHqTKx2q8JNQNapVEi5jxzewjxAnVFhMd4v5LqNh Validator | 1 validator 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s CPU: 0%, Mem: 50.8 MB
 INFO unc_chain::doomslug: ready to produce block @ 1, has enough approvals for 59.907µs, has enough chunks
@@ -226,11 +226,11 @@ INFO db: All RocksDB instances shut down
 $
 ```
 
-The main change now is that we have a `~/.near/data` directory which holds the
+The main change now is that we have a `~/.unc/data` directory which holds the
 state of the network in various rocksdb tables:
 
 ```console
-$ ls ~/.near/data
+$ ls ~/.unc/data
  000004.log
  CURRENT
  IDENTITY
@@ -250,7 +250,7 @@ $ cargo run --profile dev-release -p uncd -- run
 INFO uncd: version="trunk" build="1.1.0-3091-ga8964d200-modified" latest_protocol=57
 INFO db: Created a new RocksDB instance. num_instances=1
 INFO db: Dropped a RocksDB instance. num_instances=0
-INFO near: Opening an existing RocksDB database path=/home/matklad/.near/data
+INFO unc: Opening an existing RocksDB database path=/home/matklad/.unc/data
 INFO db: Created a new RocksDB instance. num_instances=1
 INFO stats: #       5 Cfba39eH7cyNfKn9GoKTyRg8YrhoY1nQxQs66tLBYwRH Validator | 1 validator 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s CPU: 0%, Mem: 49.4 MB
 INFO unc_chain::doomslug: not ready to produce block @ 43, need to wait 366.58789ms, has enough approvals for 78.776µs
@@ -299,11 +299,11 @@ vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
         "syncing": false
     },
     "uptime_sec": 570,
-    "validator_account_id": "test.near",
+    "validator_account_id": "test.unc",
     "validator_public_key": "ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf",
     "validators": [
         {
-            "account_id": "test.near",
+            "account_id": "test.unc",
             "is_slashed": false
         }
     ],
@@ -323,9 +323,9 @@ Let's query the blockchain state:
 
 ```
 $ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
-     params:='{"request_type": "view_account", "finality": "final", "account_id": "test.near"}'
+     params:='{"request_type": "view_account", "finality": "final", "account_id": "test.unc"}'
 λ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
-           params:='{"request_type": "view_account", "finality": "final", "account_id": "test.near"}'
+           params:='{"request_type": "view_account", "finality": "final", "account_id": "test.unc"}'
 
 HTTP/1.1 200 OK
 access-control-allow-credentials: true
@@ -353,7 +353,7 @@ vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
 Note how we use an HTTP `post` method when we interact with the blockchain RPC.
 The full set of RPC endpoints is documented at
 
-<https://docs.near.org/api/rpc/introduction>
+<https://docs.unc.org/api/rpc/introduction>
 
 ## Sending Transactions
 
@@ -363,29 +363,29 @@ to bytes, then signed, then encoded in base64 for JSON.
 
 So we will use the official [UNC CLI] utility.
 
-[UNC CLI]: https://docs.near.org/tools/unc-cli
+[UNC CLI]: https://docs.unc.org/tools/unc-cli
 
 Install it via `npm`:
 
 ```console
 $ npm install -g unc-cli
-$ near -h
-Usage: near <command> [options]
+$ unc -h
+Usage: unc <command> [options]
 
 Commands:
-  near create-account <accountId>    create a new developer account
+  unc create-account <accountId>    create a new developer account
 ....
 ```
 
-Note that, although you install `unc-cli`, the name of the utility is `near`.
+Note that, although you install `unc-cli`, the name of the utility is `unc`.
 
 As a first step, let's redo the `view_account` call we did with raw `httpie`
 with `unc-cli`:
 
 ```console
-$ unc_ENV=local near state test.near
-Loaded master account test.near key from ~/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
-Account test.near
+$ unc_ENV=local unc state test.unc
+Loaded master account test.unc key from ~/.unc/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
+Account test.unc
 {
   amount: '1000000000000000000000000000000000',
   block_hash: 'ESGN7H1kVLp566CTQ9zkBocooUFWNMhjKwqHg4uCh2Sg',
@@ -404,21 +404,21 @@ Account test.near
 Now, let's create a couple of accounts and send tokes between them:
 
 ```
-$ unc_ENV=local near create-account alice.test.near --masterAccount test.near
+$ unc_ENV=local unc create-account alice.test.unc --masterAccount test.unc
 NOTE: In most cases, when connected to network "local", masterAccount will end in ".node0"
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
-Saving key to 'undefined/local/alice.test.near.json'
-Account alice.test.near for network "local" was created.
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
+Saving key to 'undefined/local/alice.test.unc.json'
+Account alice.test.unc for network "local" was created.
 
-$ unc_ENV=local near create-account bob.test.near --masterAccount test.near
+$ unc_ENV=local unc create-account bob.test.unc --masterAccount test.unc
 NOTE: In most cases, when connected to network "local", masterAccount will end in ".node0"
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
-Saving key to 'undefined/local/bob.test.near.json'
-Account bob.test.near for network "local" was created.
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
+Saving key to 'undefined/local/bob.test.unc.json'
+Account bob.test.unc for network "local" was created.
 
-$ unc_ENV=local near send alice.test.near bob.test.near 10
-Sending 10 UNC to bob.test.near from alice.test.near
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
+$ unc_ENV=local unc send alice.test.unc bob.test.unc 10
+Sending 10 UNC to bob.test.unc from alice.test.unc
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:71QRP9qKcYRUYXTLNnrmRc1NZSdBaBo9nKZ88DK5USNf
 Transaction Id BBPndo6gR4X8pzoDK7UQfoUXp5J8WDxkf8Sq75tK5FFT
 To see the transaction in the transaction explorer, please open this url in your browser
 http://localhost:9001/transactions/BBPndo6gR4X8pzoDK7UQfoUXp5J8WDxkf8Sq75tK5FFT
@@ -434,13 +434,13 @@ $ export unc_ENV=local
 UNC CLI printouts are not always the most useful or accurate, but this seems to
 work.
 
-Note that `near` automatically creates keypairs and stores them at
+Note that `unc` automatically creates keypairs and stores them at
 `.unc-credentials`:
 
 ```console
 $ ls ~/.unc-credentials/local
-  alice.test.near.json
-  bob.test.near.json
+  alice.test.unc.json
+  bob.test.unc.json
 ```
 
 To verify that this did work, and that `unc-cli` didn't cheat us, let's
@@ -448,13 +448,13 @@ query the state of accounts manually:
 
 ```console
 $ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
-    params:='{"request_type": "view_account", "finality": "final", "account_id": "alice.test.near"}' \
+    params:='{"request_type": "view_account", "finality": "final", "account_id": "alice.test.unc"}' \
     | jq '.result.amount'
 "89999955363487500000000000"
 
 14:30:52|~
 λ http post http://localhost:3030/ method=query jsonrpc=2.0 id=1 \
-    params:='{"request_type": "view_account", "finality": "final", "account_id": "bob.test.near"}' \
+    params:='{"request_type": "view_account", "finality": "final", "account_id": "bob.test.unc"}' \
     | jq '.result.amount'
 "110000000000000000000000000"
 ```
@@ -471,7 +471,7 @@ binary we've built from source. The steps are:
 - Run the node with `cargo run --profile dev-release -p uncd -- run`
 - Poke the node with `httpie` or
 - Install `unc-cli` via `npm install -g unc-cli`
-- Submit transactions via `unc_ENV=local near create-account ...`
+- Submit transactions via `unc_ENV=local unc create-account ...`
 
 In the [next chapter](./deploy_a_contract.md), we'll learn how to deploy a simple
 WASM contract.

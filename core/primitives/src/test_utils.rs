@@ -349,7 +349,7 @@ impl ShardChunkHeader {
 /// Builder class for blocks to make testing easier.
 /// # Examples
 ///
-/// // TODO(mm-near): change it to doc-tested code once we have easy way to create a genesis block.
+/// // TODO: change it to doc-tested code once we have easy way to create a genesis block.
 /// let signer = EmptyValidatorSigner::default();
 /// let test_block = test_utils::TestBlockBuilder::new(prev, signer).height(33).build();
 ///

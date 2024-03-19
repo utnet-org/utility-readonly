@@ -51,12 +51,12 @@ pub(super) struct NeardCmd {
 
 impl NeardCmd {
     pub(super) fn parse_and_run() -> anyhow::Result<()> {
-        let neard_cmd: Self = clap::Parser::parse();
+        let uncd_cmd: Self = clap::Parser::parse();
 
         // Enable logging of the current thread.
         let _subscriber_guard = default_subscriber(
-            make_env_filter(neard_cmd.opts.verbose_target())?,
-            &neard_cmd.opts.o11y,
+            make_env_filter(uncd_cmd.opts.verbose_target())?,
+            &uncd_cmd.opts.o11y,
         )
         .local();
 
@@ -80,21 +80,21 @@ impl NeardCmd {
             }
         }
 
-        let home_dir = neard_cmd.opts.home.clone();
-        let genesis_validation = if neard_cmd.opts.unsafe_fast_startup {
+        let home_dir = uncd_cmd.opts.home.clone();
+        let genesis_validation = if uncd_cmd.opts.unsafe_fast_startup {
             GenesisValidationMode::UnsafeFast
         } else {
             GenesisValidationMode::Full
         };
 
-        match neard_cmd.subcmd {
+        match uncd_cmd.subcmd {
             NeardSubCommand::Init(cmd) => cmd.run(&home_dir)?,
             NeardSubCommand::Localnet(cmd) => cmd.run(&home_dir),
             NeardSubCommand::Run(cmd) => cmd.run(
                 &home_dir,
                 genesis_validation,
-                neard_cmd.opts.verbose_target(),
-                &neard_cmd.opts.o11y,
+                uncd_cmd.opts.verbose_target(),
+                &uncd_cmd.opts.o11y,
             ),
 
             NeardSubCommand::StateViewer(cmd) => {
@@ -139,8 +139,8 @@ impl NeardCmd {
                 cmd.run(
                     &home_dir,
                     genesis_validation,
-                    neard_cmd.opts.verbose_target(),
-                    &neard_cmd.opts.o11y,
+                    uncd_cmd.opts.verbose_target(),
+                    &uncd_cmd.opts.o11y,
                 )?;
             }
             NeardSubCommand::StatePartsDumpCheck(cmd) => {
@@ -461,7 +461,7 @@ impl RunCmd {
         check_release_build(&unc_config.client_config.chain_id);
 
         // Set current version in client config.
-        unc_config.client_config.version = crate::neard_version();
+        unc_config.client_config.version = crate::uncd_version();
         // Override some parameters from command line.
         if let Some(produce_empty_blocks) = self.produce_empty_blocks {
             unc_config.client_config.produce_empty_blocks = produce_empty_blocks;
@@ -869,8 +869,8 @@ mod tests {
             "init",
             // * This line currently fails to be parsed (= without a value)
             "--chain-id=",
-            "--test-seed=alice.near",
-            "--account-id=test.near",
+            "--test-seed=alice.unc",
+            "--account-id=test.unc",
             "--fast"
         ])
         .is_err());

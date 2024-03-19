@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # test fast fowarding on epoch boundaries just so we can see that epoch heights
-# are being updated accordingly once we get near the boundary.
+# are being updated accordingly once we get unc the boundary.
 
 import datetime
 import sys

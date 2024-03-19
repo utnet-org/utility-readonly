@@ -9,7 +9,7 @@ chapter. Otherwise, this chapter is for you!
 Rust community actively encourages beginners to ask questions, take advantage of that!
 
 We have a dedicated stream for Rust questions on our Zulip: [Rust
-🦀](https://near.zulipchat.com/#narrow/stream/300659-Rust-.F0.9F.A6.80).
+🦀](https://unc.zulipchat.com/#narrow/stream/300659-Rust-.F0.9F.A6.80).
 
 There's a general Rust forum at <https://users.rust-lang.org>.
 

@@ -3,7 +3,7 @@
 # Two specific cases:
 #  - BPs never showed up to begin with, since genesis
 #  - BPs went offline after some epoch
-# Warn: this test may not clean up ~/.near if fails early
+# Warn: this test may not clean up ~/.unc if fails early
 
 import base58
 import pathlib

@@ -151,7 +151,7 @@ impl LoopCheckCommand {
         let rpc_server_addr = match &self.rpc_server_addr {
             None => {
                 if chain_id == "mainnet" || chain_id == "testnet" {
-                    format!("http://rpc.{}.near.org", chain_id)
+                    format!("http://rpc.{}.unc.org", chain_id)
                 } else {
                     return Err(anyhow!("rpc_server_addr needs to be supplied if chain_id is not mainnet or testnet"));
                 }

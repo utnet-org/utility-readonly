@@ -787,7 +787,7 @@ fn call_promise() {
 #[no_mangle]
 fn attach_unspent_gas_but_burn_all_gas() {
     unsafe {
-        let account_id = "alice.near";
+        let account_id = "alice.unc";
         let promise_idx = promise_batch_create(account_id.len() as u64, account_id.as_ptr() as u64);
 
         let method_name = "f";
@@ -816,7 +816,7 @@ fn attach_unspent_gas_but_burn_all_gas() {
 #[no_mangle]
 fn attach_unspent_gas_but_use_all_gas() {
     unsafe {
-        let account_id = "alice.near";
+        let account_id = "alice.unc";
         let promise_idx = promise_batch_create(account_id.len() as u64, account_id.as_ptr() as u64);
 
         let method_name = "f";

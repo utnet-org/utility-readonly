@@ -17,7 +17,7 @@ We store the database in RocksDB. This document is an attempt to give hints abou
 - The state changes are stored in column family `StateChanges`, number 35
 - In this family, each key is of the form `BlockHash | Column | AdditionalInfo` where:
   + `BlockHash: [u8; 32]` is the block hash for this change
-  + `Column: u8` is defined near the top of `core/primitives/src/trie_key.rs`
+  + `Column: u8` is defined unc the top of `core/primitives/src/trie_key.rs`
   + `AdditionalInfo` depends on `Column` and it can be found in the code for the `TrieKey` struct, same file as `Column`
 
 ### Contract Deployments
@@ -27,7 +27,7 @@ We store the database in RocksDB. This document is an attempt to give hints abou
 - The key value contains the contract code alongside other pieces of data. It is possible to extract the contract code by removing everything until the wasm magic number, 0061736D01000000
 - As such, it is possible to dump all the contracts that were ever deployed on-chain using this command on an archival node:
   ```
-  ldb --db=~/.near/data scan --column_family=col35 --hex | \
+  ldb --db=~/.unc/data scan --column_family=col35 --hex | \
       grep -E '^0x.{64}01' | \
       sed 's/0061736D01000000/x/' | \
       sed 's/^.*x/0061736D01000000/' | \

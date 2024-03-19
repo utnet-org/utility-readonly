@@ -28,8 +28,8 @@ guarantees to operate within the given time constraints. How we tackle this is
 the topic of this chapter.
 
 If you want to learn more about Gas from a user perspective, 
-[Gas basic concepts](https://docs.near.org/concepts/basics/transactions/gas),
-[Gas advanced concepts](https://docs.near.org/concepts/basics/transactions/gas-advanced),
+[Gas basic concepts](https://docs.unc.org/concepts/basics/transactions/gas),
+[Gas advanced concepts](https://docs.unc.org/concepts/basics/transactions/gas-advanced),
 and [the runtime fee specification](https://nomicon.io/RuntimeSpec/Fees/) are
 good places to dig deeper.
 

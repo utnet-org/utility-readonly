@@ -19,7 +19,7 @@ logger = new_logger(level=logging.WARN)
 
 class SocialDbUser(NearUser):
     """
-    Registers itself on near.social in the setup phase, then starts posting,
+    Registers itself on unc.social in the setup phase, then starts posting,
     following, and liking posts.
     """
     wait_time = between(1, 3)  # random pause between transactions

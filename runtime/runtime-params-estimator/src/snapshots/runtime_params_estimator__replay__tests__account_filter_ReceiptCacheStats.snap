@@ -2,7 +2,7 @@
 source: runtime/runtime-params-estimator/src/replay.rs
 expression: output
 ---
-            process_receipt receiver=alice.near receipt_id=id0
+            process_receipt receiver=alice.unc receipt_id=id0
               GET   2 State  
               DB GET                2 requests for a total of       30 B
               DB SET                0 requests for a total of        0 B
@@ -13,7 +13,7 @@ expression: output
               SHARD CACHE         75.00% hit rate
               CHUNK CACHE not accessed
 
-            process_receipt receiver=alice.near receipt_id=id2
+            process_receipt receiver=alice.unc receipt_id=id2
               GET   2 State  
               DB GET                2 requests for a total of       35 B
               DB SET                0 requests for a total of        0 B
@@ -24,7 +24,7 @@ expression: output
               SHARD CACHE         92.59% hit rate
               CHUNK CACHE          4.76% hit rate
 
-            process_receipt receiver=alice.near receipt_id=id3
+            process_receipt receiver=alice.unc receipt_id=id3
               DB GET                0 requests for a total of        0 B
               DB SET                0 requests for a total of        0 B
               STORAGE READ          0 requests for a total of        0 B

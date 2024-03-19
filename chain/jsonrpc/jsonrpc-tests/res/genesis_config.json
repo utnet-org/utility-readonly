@@ -35,7 +35,7 @@
   ],
   "validators": [
     {
-      "account_id": "test.near",
+      "account_id": "test.unc",
       "public_key": "ed25519:9BmAFNRTa5mRRXpSAm6MxSEeqRASDGNh2FuuwZ4gyxTw",
       "amount": "50000000000000000000000000000000"
     }
@@ -51,7 +51,7 @@
   ],
   "total_supply": "2050000000000000000000000000000000",
   "num_blocks_per_year": 31536000,
-  "protocol_treasury_account": "test.near",
+  "protocol_treasury_account": "test.unc",
   "fishermen_threshold": "10000000000000000000000000",
   "minimum_stake_divisor": 10,
   "shard_layout": {

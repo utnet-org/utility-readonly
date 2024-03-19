@@ -25,10 +25,10 @@ The load generator needs access to an account key with plenty of tokens.
 For a local test setup, this works just fine.
 ```sh
 # This assumes you are running against localnet
-KEY=~/.near/localnet/node0/validator_key.json
+KEY=~/.unc/localnet/node0/validator_key.json
 ```
 
-For a quick demo, you can also run a localnet using [nearup](https://github.com/near/nearup).
+For a quick demo, you can also run a localnet using [nearup](https://github.com/unc/nearup).
 ```sh
 nearup run localnet --binary-path ../framework/target/release/ --num-nodes 4 --num-shards 4 --override
 ```

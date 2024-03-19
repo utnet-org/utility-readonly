@@ -110,7 +110,7 @@ def social_db_build_index_obj(key_list_pairs: dict) -> dict:
     ```
     where value_string = 
     ```json
-    "[{\"key\":\"follow\",\"value\":{\"type\":\"follow\",\"accountId\":\"pagodaplatform.near\"}}]"
+    "[{\"key\":\"follow\",\"value\":{\"type\":\"follow\",\"accountId\":\"pagodaplatform.unc\"}}]"
     ```
     So it's really JSON nested inside a JSON string.
     And worse, the nested JSON is always a list of objects with "key" and "value" fields.
@@ -180,22 +180,22 @@ def social_post_args(sender: str, text: str) -> dict:
 class TestSocialDbSetMsg(unittest.TestCase):
 
     def test_follow(self):
-        sender = "alice.near"
-        follow_list = ["bob.near"]
+        sender = "alice.unc"
+        follow_list = ["bob.unc"]
         parsed_msg = social_follow_args(sender, follow_list)
         expected_msg = {
             "data": {
-                "alice.near": {
+                "alice.unc": {
                     "graph": {
                         "follow": {
-                            "bob.near": ""
+                            "bob.unc": ""
                         }
                     },
                     "index": {
                         "graph":
-                            "[{\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"bob.near\"}}]",
+                            "[{\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"bob.unc\"}}]",
                         "notify":
-                            "[{\"key\": \"bob.near\", \"value\": {\"type\": \"follow\"}}]"
+                            "[{\"key\": \"bob.unc\", \"value\": {\"type\": \"follow\"}}]"
                     }
                 }
             }
@@ -204,28 +204,28 @@ class TestSocialDbSetMsg(unittest.TestCase):
         self.assertEqual(parsed_msg, expected_msg)
 
     def test_mass_follow(self):
-        sender = "alice.near"
-        follow_list = ["bob.near", "caroline.near", "david.near"]
+        sender = "alice.unc"
+        follow_list = ["bob.unc", "caroline.unc", "david.unc"]
         parsed_msg = social_follow_args(sender, follow_list)
         expected_msg = {
             "data": {
-                "alice.near": {
+                "alice.unc": {
                     "graph": {
                         "follow": {
-                            "bob.near": "",
-                            "caroline.near": "",
-                            "david.near": "",
+                            "bob.unc": "",
+                            "caroline.unc": "",
+                            "david.unc": "",
                         }
                     },
                     "index": {
                         "graph":
-                            "[{\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"bob.near\"}},"
-                            " {\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"caroline.near\"}},"
-                            " {\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"david.near\"}}]",
+                            "[{\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"bob.unc\"}},"
+                            " {\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"caroline.unc\"}},"
+                            " {\"key\": \"follow\", \"value\": {\"type\": \"follow\", \"accountId\": \"david.unc\"}}]",
                         "notify":
-                            "[{\"key\": \"bob.near\", \"value\": {\"type\": \"follow\"}},"
-                            " {\"key\": \"caroline.near\", \"value\": {\"type\": \"follow\"}},"
-                            " {\"key\": \"david.near\", \"value\": {\"type\": \"follow\"}}]"
+                            "[{\"key\": \"bob.unc\", \"value\": {\"type\": \"follow\"}},"
+                            " {\"key\": \"caroline.unc\", \"value\": {\"type\": \"follow\"}},"
+                            " {\"key\": \"david.unc\", \"value\": {\"type\": \"follow\"}}]"
                     }
                 }
             }
@@ -234,12 +234,12 @@ class TestSocialDbSetMsg(unittest.TestCase):
         self.assertEqual(parsed_msg, expected_msg)
 
     def test_post(self):
-        sender = "alice.near"
+        sender = "alice.unc"
         text = "#Title\n\nbody"
         parsed_msg = social_post_args(sender, text)
         expected_msg = {
             "data": {
-                "alice.near": {
+                "alice.unc": {
                     "post": {
                         "main":
                             "{\"type\": \"md\", \"text\": \"#Title\\n\\nbody\"}"

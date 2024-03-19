@@ -9,7 +9,7 @@ use std::path::Path;
 pub struct KeyFile {
     pub account_id: AccountId,
     pub public_key: PublicKey,
-    // Credential files generated which near cli works with have private_key
+    // Credential files generated which unc cli works with have private_key
     // rather than secret_key field.  To make it possible to read those from
     // uncd add private_key as an alias to this field so either will work.
     #[serde(alias = "private_key")]

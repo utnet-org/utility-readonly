@@ -141,7 +141,7 @@ fn wait_until_genesis(genesis_time: &DateTime<Utc>) {
         if chrono_seconds <= 0 {
             break;
         }
-        info!(target: "near", "Waiting until genesis: {}d {}h {}m {}s", duration.num_days(),
+        info!(target: "unc", "Waiting until genesis: {}d {}h {}m {}s", duration.num_days(),
               (duration.num_hours() % 24),
               (duration.num_minutes() % 60),
               (duration.num_seconds() % 60));

@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn test_basic_prefetch_account() {
-        let accounts = ["alice.near"];
+        let accounts = ["alice.unc"];
         // One account <=> a root value and a value.
         let expected_prefetched = 2;
         check_prefetch_account(&accounts, &accounts, expected_prefetched);
@@ -183,18 +183,18 @@ mod tests {
     #[test]
     fn test_prefetch_multiple_accounts() {
         let accounts = [
-            "000.alice.near",
-            "111.alice.near",
-            "222.alice.near",
-            "333.alice.near",
-            "000.bob.near",
-            "111.bob.near",
-            "222.bob.near",
-            "333.bob.near",
+            "000.alice.unc",
+            "111.alice.unc",
+            "222.alice.unc",
+            "333.alice.unc",
+            "000.bob.unc",
+            "111.bob.unc",
+            "222.bob.unc",
+            "333.bob.unc",
         ];
         // root is an extension with the prefix for accounts
         // that extension leads to a branch with four extensions ("000.","111.","222.","333.")
-        // each extension leads to a branch with two leafs ("alice.near", "bob.near")
+        // each extension leads to a branch with two leafs ("alice.unc", "bob.unc")
         //
         //                           root
         //                           extension
@@ -213,9 +213,9 @@ mod tests {
         //   |          |    |          |   |           |    |          |
         //   |          |    |          |   |           |    |          |
         //   |          |    |          |   |           |    |          |
-        // "lice.near"  |  "lice.near"  |  "lice.near"  | "lice.near"   |
+        // "lice.unc"  |  "lice.unc"  |  "lice.unc"  | "lice.unc"   |
         //              |               |               |               |
-        //          "ob.near"       "ob.near"       "ob.near"       "ob.near"
+        //          "ob.unc"       "ob.unc"       "ob.unc"       "ob.unc"
         //
         //
         // Note: drawing does not show values. Also, upper nibble is always equal
@@ -232,15 +232,15 @@ mod tests {
         check_prefetch_account(&accounts, prefetch_accounts, expected_prefetched);
 
         // prefetching two neighboring nodes results in 2 extensions + 2 branches + 2 leafs + 2 values
-        let prefetch_accounts = &["000.alice.near", "000.bob.near"];
+        let prefetch_accounts = &["000.alice.unc", "000.bob.unc"];
         let expected_prefetched = 8;
         check_prefetch_account(&accounts, prefetch_accounts, expected_prefetched);
     }
 
     #[test]
     fn test_prefetch_non_existing_account() {
-        let existing_accounts = ["alice.near", "bob.near"];
-        let non_existing_account = ["charlotta.near"];
+        let existing_accounts = ["alice.unc", "bob.unc"];
+        let non_existing_account = ["charlotta.unc"];
         // Most importantly, it should not crash.
         // Secondly, it should prefetch the root extension + the first branch.
         let expected_prefetched = 2;

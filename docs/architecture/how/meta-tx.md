@@ -1,6 +1,6 @@
 # Meta Transactions
 
-[NEP-366](https://github.com/near/NEPs/pull/366) introduced the concept of meta
+[NEP-366](https://github.com/unc/NEPs/pull/366) introduced the concept of meta
 transactions to unc Protocol. This feature allows users to execute transactions
 on UNC without owning any gas or tokens. In order to enable this, users
 construct and sign transactions off-chain. A third party (the relayer) is used
@@ -14,7 +14,7 @@ more flexible.
 ## Overview
 
 ![Flow chart of meta
-transactions](https://raw.githubusercontent.com/near/NEPs/003e589e6aba24fc70dd91c9cf7ef0007ca50735/neps/assets/nep-0366/NEP-DelegateAction.png)
+transactions](https://raw.githubusercontent.com/unc/NEPs/003e589e6aba24fc70dd91c9cf7ef0007ca50735/neps/assets/nep-0366/NEP-DelegateAction.png)
 _Credits for the diagram go to the NEP authors Alexander Fadeev and Egor
 Uleyskiy._
 
@@ -104,7 +104,7 @@ deploy a contract code on `Alice` and pay in $FT in one meta transaction. It
 would require two separate meta transactions to do that. Due to timing problems,
 this again requires some level of trust between the relayer and Alice.
 
-A potential solution could involve linear dependencies between the action
+A potential solution could involve liunc dependencies between the action
 receipts spawned from a single meta transaction. Only if the first succeeds,
 will the second start executing, and so on. But this quickly gets too complicated
 for the MVP and is therefore left open for future improvements.

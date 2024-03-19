@@ -110,7 +110,7 @@ fn test_eth_implicit_account_creation() {
         _ => panic!("wrong query response"),
     }
 
-    // Verify that contract code deployed to the ETH-implicit account is near[wallet contract hash].
+    // Verify that contract code deployed to the ETH-implicit account is unc[wallet contract hash].
     let request = QueryRequest::ViewCode { account_id: eth_implicit_account_id };
     match view_request(&env, request).kind {
         QueryResponseKind::ViewCode(view) => {

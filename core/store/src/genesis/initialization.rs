@@ -62,7 +62,7 @@ pub fn initialize_genesis_state(store: Store, genesis: &Genesis, home_dir: Optio
 }
 
 fn genesis_state_from_dump(store: Store, home_dir: &Path) -> Vec<StateRoot> {
-    error!(target: "near", "Loading genesis from a state dump file. Do not use this outside of genesis-tools");
+    error!(target: "unc", "Loading genesis from a state dump file. Do not use this outside of genesis-tools");
     let mut state_file = home_dir.to_path_buf();
     state_file.push(STATE_DUMP_FILE);
     store.load_state_from_file(state_file.as_path()).expect("Failed to read state dump");

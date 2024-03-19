@@ -19,13 +19,13 @@ fn read_contract() -> ContractCode {
     ContractCode::new(code.to_vec(), None)
 }
 
-/// near[wallet contract hash]
+/// unc[wallet contract hash]
 pub fn wallet_contract_magic_bytes() -> Arc<ContractCode> {
     static CONTRACT: OnceLock<Arc<ContractCode>> = OnceLock::new();
     CONTRACT
         .get_or_init(|| {
             let wallet_contract_hash = *wallet_contract().hash();
-            let magic_bytes = format!("near{}", wallet_contract_hash);
+            let magic_bytes = format!("unc{}", wallet_contract_hash);
             Arc::new(ContractCode::new(magic_bytes.into(), None))
         })
         .clone()
@@ -62,7 +62,7 @@ mod tests {
             CryptoHash::from_str(MAGIC_BYTES_HASH).expect("Failed to parse hash from string");
         assert_eq!(*wallet_contract_magic_bytes().hash(), expected_hash);
 
-        let expected_code = format!("near{}", WALLET_CONTRACT_HASH);
+        let expected_code = format!("unc{}", WALLET_CONTRACT_HASH);
         assert_eq!(wallet_contract_magic_bytes().code(), expected_code.as_bytes());
     }
 }

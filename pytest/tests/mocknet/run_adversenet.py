@@ -7,7 +7,7 @@ The setup requires you to have a few nodes that will be validators and at least 
 The script will recognize any node that has "validator" in its name as a validator, of which any node that has a
 "bad" in its name as an adversarial node.
 
-Use https://github.com/near/unc-ops/tree/master/provisioning/terraform/network/adversenet to bring up a set of VM
+Use https://github.com/unc/unc-ops/tree/master/provisioning/terraform/network/adversenet to bring up a set of VM
 instances for the test.
 """
 

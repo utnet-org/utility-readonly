@@ -12,15 +12,15 @@ to understand what's going one here:
 ```console
 $ cargo run --profile dev-release -p uncd -- init
 $ cargo run --profile dev-release -p uncd -- run
-$ unc_ENV=local near create-account alice.test.near --masterAccount test.near
+$ UNC_ENV=local unc create-account alice.test.unc --masterAccount test.unc
 ```
 
-As a sanity check, querying the state of `alice.test.near` account should work:
+As a sanity check, querying the state of `alice.test.unc` account should work:
 
 ```console
-$ unc_ENV=local near state alice.test.near
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:7tU4NtFozPWLotcfhbT9KfBbR3TJHPfKJeCri8Me6jU7
-Account alice.test.near
+$ UNC_ENV=local unc state alice.test.unc
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:7tU4NtFozPWLotcfhbT9KfBbR3TJHPfKJeCri8Me6jU7
+Account alice.test.unc
 {
   amount: '100000000000000000000000000',
   block_hash: 'EEMiLrk4ZiRzjNJXGdhWPJfKXey667YBnSRoJZicFGy9',
@@ -80,7 +80,7 @@ Before we start doing that, some amount of setup code is required.
 Let's start with creating a new crate:
 
 ```console
-$ cargo new hello-near --lib
+$ cargo new hello-unc --lib
 ```
 
 To compile to wasm, we also need to add a relevant rustup toolchain:
@@ -95,7 +95,7 @@ WebAssembly module.
 This requires the following cryptic spell in Cargo.toml:
 
 ```toml
-# hello-near/Cargo.toml
+# hello-unc/Cargo.toml
 
 [lib]
 crate-type = ["cdylib"]
@@ -111,10 +111,10 @@ that we are not going to use the Rust standard library), set `panic=abort`
 as our panic strategy and define a panic handler to abort execution.
 
 ```toml
-# hello-near/Cargo.toml
+# hello-unc/Cargo.toml
 
 [package]
-name = "hello-near"
+name = "hello-unc"
 version = "0.1.0"
 edition = "2021"
 
@@ -126,7 +126,7 @@ panic = "abort"
 ```
 
 ```rust
-// hello-near/src/lib.rs
+// hello-unc/src/lib.rs
 
 #![no_std]
 
@@ -141,10 +141,10 @@ fairly small. Let's do that:
 
 ```console
 $ cargo b -r --target wasm32-unknown-unknown
-   Compiling hello-near v0.1.0 (~/hello-near)
+   Compiling hello-unc v0.1.0 (~/hello-unc)
     Finished release [optimized] target(s) in 0.24s
-$ ls target/wasm32-unknown-unknown/release/hello_near.wasm
-.rwxr-xr-x 106 matklad 15 Nov 15:34 target/wasm32-unknown-unknown/release/hello_near.wasm
+$ ls target/wasm32-unknown-unknown/release/hello_unc.wasm
+.rwxr-xr-x 106 matklad 15 Nov 15:34 target/wasm32-unknown-unknown/release/hello_unc.wasm
 ```
 
 106 bytes is pretty small! Let's see what's inside. For that, we'll use
@@ -152,7 +152,7 @@ the `wasm-tools` suite of CLI utilities.
 
 ```console
 $ cargo install wasm-tools
-λ wasm-tools print target/wasm32-unknown-unknown/release/hello_near.wasm
+λ wasm-tools print target/wasm32-unknown-unknown/release/hello_unc.wasm
 (module
   (memory (;0;) 16)
   (global $__stack_pointer (;0;) (mut i32) i32.const 1048576)
@@ -171,7 +171,7 @@ declare the `value_return` import, and a `#[no_mangle] extern "C"` function to
 declare the `hello` export:
 
 ```rust
-// hello-near/src/lib.rs
+// hello-unc/src/lib.rs
 
 #![no_std]
 
@@ -196,9 +196,9 @@ want:
 
 ```console
 $ cargo b -r --target wasm32-unknown-unknown
-   Compiling hello-near v0.1.0 (/home/matklad/hello-near)
+   Compiling hello-unc v0.1.0 (/home/matklad/hello-unc)
     Finished release [optimized] target(s) in 0.05s
-$ wasm-tools print target/wasm32-unknown-unknown/release/hello_near.wasm
+$ wasm-tools print target/wasm32-unknown-unknown/release/hello_unc.wasm
 (module
   (type (;0;) (func (param i64 i64)))
   (type (;1;) (func))
@@ -227,23 +227,23 @@ $ wasm-tools print target/wasm32-unknown-unknown/release/hello_near.wasm
 Now that we have the WASM, let's deploy it!
 
 ```console
-$ unc_ENV=local near deploy alice.test.near \
-    ./target/wasm32-unknown-unknown/release/hello_near.wasm
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
-Starting deployment. Account id: alice.test.near, node: http://127.0.0.1:3030, helper: http://localhost:3000, file: ./target/wasm32-unknown-unknown/release/hello_near.wasm
+$ unc_ENV=local unc deploy alice.test.unc \
+    ./target/wasm32-unknown-unknown/release/hello_unc.wasm
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
+Starting deployment. Account id: alice.test.unc, node: http://127.0.0.1:3030, helper: http://localhost:3000, file: ./target/wasm32-unknown-unknown/release/hello_unc.wasm
 Transaction Id GDbTLUGeVaddhcdrQScVauYvgGXxSssEPGUSUVAhMWw8
 To see the transaction in the transaction explorer, please open this url in your browser
 http://localhost:9001/transactions/GDbTLUGeVaddhcdrQScVauYvgGXxSssEPGUSUVAhMWw8
-Done deploying to alice.test.near
+Done deploying to alice.test.unc
 ```
 
 And, finally, let's call our contract:
 
 
 ```console
-$ unc_ENV=local $near call alice.test.near hello --accountId alice.test.near
-Scheduling a call: alice.test.near.hello()
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
+$ unc_ENV=local $unc call alice.test.unc hello --accountId alice.test.unc
+Scheduling a call: alice.test.unc.hello()
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
 Doing account.functionCall()
 Transaction Id 9WMwmTf6pnFMtj1KBqjJtkKvdFXS4kt3DHnYRnbFpJ9e
 To see the transaction in the transaction explorer, please open this url in your browser
@@ -251,16 +251,16 @@ http://localhost:9001/transactions/9WMwmTf6pnFMtj1KBqjJtkKvdFXS4kt3DHnYRnbFpJ9e
 'hello world'
 ```
 
-Note that we pass `alice.test.near` twice: the first time to specify which contract
+Note that we pass `alice.test.unc` twice: the first time to specify which contract
 we are calling, the second time to determine who calls the contract. That is,
 the second account is the one that spends tokens. In the following example `bob`
 spends UNC to call the contact deployed to the `alice` account:
 
 
 ```console
-$ unc_ENV=local $near call alice.test.near hello --accountId bob.test.near
-Scheduling a call: alice.test.near.hello()
-Loaded master account test.near key from /home/matklad/.near/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
+$ unc_ENV=local $unc call alice.test.unc hello --accountId bob.test.unc
+Scheduling a call: alice.test.unc.hello()
+Loaded master account test.unc key from /home/matklad/.unc/validator_key.json with public key = ed25519:ChLD1qYic3G9qKyzgFG3PifrJs49CDYeERGsG58yaSoL
 Doing account.functionCall()
 Transaction Id 4vQKtP6zmcR4Xaebw8NLF6L5YS96gt5mCxc5BUqUcC41
 To see the transaction in the transaction explorer, please open this url in your browser

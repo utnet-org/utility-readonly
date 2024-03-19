@@ -39,18 +39,18 @@ use std::time::{Duration, Instant};
 ///
 /// ```console
 /// # Pure catchup from genesis height to the end of the recorded history.
-/// $ mock-node ~/.near/localnet/node0
+/// $ mock-node ~/.unc/localnet/node0
 ///
 /// # Pure block production starting from block height 61.
-/// $ mock-node ~/.near/localnet/node0 --start-height 61
+/// $ mock-node ~/.unc/localnet/node0 --start-height 61
 ///
 /// # Mixed: client starts at genesis and tries to catch up with the network, which starts at height 20.
-/// $ mock-node ~/.near/localnet/node0 --network-height 20
+/// $ mock-node ~/.unc/localnet/node0 --network-height 20
 /// ```
 #[derive(clap::Parser)]
 struct Cli {
     /// Existing home dir for the pre-generated chain history. For example, you can use
-    /// the home dir of a near node.
+    /// the home dir of a unc node.
     chain_history_home_dir: String,
     /// Home dir for the new client that will be started. If not specified, the binary will
     /// generate a temporary directory

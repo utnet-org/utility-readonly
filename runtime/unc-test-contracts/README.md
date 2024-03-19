@@ -3,7 +3,7 @@ A collection of smart-contract used in framework tests.
 Rust contracts are built via `build.rs`, the Assembly Script contract
 is build manually and committed to the git repository.
 `res/unc_evm.wasm` and `res/ZombieOwnership.bin` are taken from
-<https://github.com/near/unc-evm/tree/a651e9be680b59cca9aad86c1f9e9e9b54ad9c06>
+<https://github.com/unc/unc-evm/tree/a651e9be680b59cca9aad86c1f9e9e9b54ad9c06>
 and it's for reproduce a performance issue encountered in EVM
 contracts.
 

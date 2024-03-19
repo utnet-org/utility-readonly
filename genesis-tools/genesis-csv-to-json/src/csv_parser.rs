@@ -298,7 +298,7 @@ mod tests {
         writer
             .serialize(Row {
                 genesis_time: Some(Utc::now()),
-                account_id: "alice_near".parse().unwrap(),
+                account_id: "alice_unc".parse().unwrap(),
                 regular_pks: vec![
                     PublicKey::empty(KeyType::ED25519),
                     PublicKey::empty(KeyType::ED25519),
@@ -325,7 +325,7 @@ mod tests {
         writer
             .serialize(Row {
                 genesis_time: None,
-                account_id: "bob_near".parse().unwrap(),
+                account_id: "bob_unc".parse().unwrap(),
                 regular_pks: vec![],
                 privileged_pks: vec![PublicKey::empty(KeyType::ED25519)],
                 foundation_pks: vec![PublicKey::empty(KeyType::ED25519)],

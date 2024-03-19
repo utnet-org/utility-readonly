@@ -739,7 +739,7 @@ pub mod validator_power_and_frozen {
         /// mandates might become computationally too expensive. This might trigger an increase in
         /// the required power per mandate, bringing down the number of mandates per validator.
         ///
-        /// [recommended lower bound]: https://near.zulipchat.com/#narrow/stream/407237-pagoda.2Fcore.2Fstateless-validation/topic/validator.20seat.20assignment/near/393792901
+        /// [recommended lower bound]: https://unc.zulipchat.com/#narrow/stream/407237-pagoda.2Fcore.2Fstateless-validation/topic/validator.20seat.20assignment/unc/393792901
         ///
         /// # Panics
         ///

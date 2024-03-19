@@ -6,7 +6,7 @@ The intended audience of the information presented here is developers working
 on the implementation of the UNC protocol.
 
 Are you a security researcher? Please report security vulnerabilities to
-[security@near.org](mailto:security@near.org).
+[security@unc.org](mailto:security@unc.org).
 
 </blockquote>
 
@@ -30,7 +30,7 @@ Before creating an issue under framework-private, ask the following questions yo
 * Does it need special attention beyond what's provided from public repository due to its sensitivity?
 * Does confidentiality of the issue overrule our principle of public transparency?
 
-Unless an answer to one of these questions is 'YES', the issue may better reside within public repository. If you are unsure, consult private repo auditors (e.g. @akhi3030, @mm-near) to get their thoughts.
+Unless an answer to one of these questions is 'YES', the issue may better reside within public repository. If you are unsure, consult private repo auditors (e.g. @akhi3030, @mm-unc) to get their thoughts.
 
 ## Extra
 To learn more about the process for creating an issue/PR on framework-private, please visit [link](https://github.com/utnet-org/utility/blob/c308df157bf64a528033b618b4f444d3b9c73f94/docs/practices/security_vulnerabilities.md).

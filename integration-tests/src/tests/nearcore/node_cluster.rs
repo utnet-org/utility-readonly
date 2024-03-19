@@ -23,7 +23,7 @@ fn start_nodes(
     init_integration_logger();
 
     let num_tracking_nodes = num_nodes - num_lightclient;
-    let seeds = (0..num_nodes).map(|i| format!("near.{}", i)).collect::<Vec<_>>();
+    let seeds = (0..num_nodes).map(|i| format!("unc.{}", i)).collect::<Vec<_>>();
     let mut genesis = Genesis::test_sharded_new_version(
         seeds.iter().map(|s| s.parse().unwrap()).collect(),
         num_validator_seats,
@@ -32,7 +32,7 @@ fn start_nodes(
     genesis.config.epoch_length = epoch_length;
     genesis.config.genesis_height = genesis_height;
 
-    let validators = (0..num_validator_seats).map(|i| format!("near.{}", i)).collect::<Vec<_>>();
+    let validators = (0..num_validator_seats).map(|i| format!("unc.{}", i)).collect::<Vec<_>>();
     let mut unc_configs = vec![];
     let first_node = tcp::ListenerAddr::reserve_for_test();
     let mut rpc_addrs = vec![];
@@ -46,7 +46,7 @@ fn start_nodes(
         unc_config.client_config.min_num_peers = (num_nodes as usize) - 1;
         if i > 0 {
             unc_config.network_config.peer_store.boot_nodes =
-                convert_boot_nodes(vec![("near.0", *first_node)]);
+                convert_boot_nodes(vec![("unc.0", *first_node)]);
         }
         // if non validator, track all shards
         if i >= num_validator_seats && i < num_tracking_nodes {

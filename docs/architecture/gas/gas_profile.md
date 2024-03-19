@@ -13,23 +13,23 @@ details of how they are computed can change without a protocol version bump.
 ## Example Transaction Gas Profile
 
 You can query the gas profile of a transaction with
-[UNC CLI](https://docs.near.org/tools/unc-cli).
+[UNC CLI](https://docs.unc.org/tools/unc-cli).
 
 ```bash
-unc_ENV=mainnet near tx-status 8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw  \
-  --accountId app.nearcrowd.near  \
-  --nodeUrl https://archival-rpc.mainnet.near.org  # Allows to retrieve older transactions.
+unc_ENV=mainnet unc tx-status 8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw  \
+  --accountId app.unccrowd.unc  \
+  --nodeUrl https://archival-rpc.mainnet.unc.org  # Allows to retrieve older transactions.
 ```
 
 ```
-Transaction app.nearcrowd.near:8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw
+Transaction app.unccrowd.unc:8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw
 {
   receipts_outcome: [
     {
       block_hash: '2UVQKpxH6PhEqiKr6zMggqux4hwMrqqjpsbKrJG3vFXW',
       id: '14bwmJF21PXY9YWGYN1jpjF3BRuyCKzgVWfhXhZBKH4u',
       outcome: {
-        executor_id: 'app.nearcrowd.near',
+        executor_id: 'app.unccrowd.unc',
         gas_burnt: 5302170867180,
         logs: [],
         metadata: {
@@ -84,7 +84,7 @@ Transaction app.nearcrowd.near:8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw
     block_hash: '7MgTTVi3aMG9LiGV8ezrNvoorUwQ7TwkJ4Wkbk3Fq5Uq',
     id: '8vYxsqYp5Kkfe8j9LsTqZRsEupNkAs1WvgcGcUE4MUUw',
     outcome: {
-      executor_id: 'evgeniya.near',
+      executor_id: 'evgeniya.unc',
       gas_burnt: 2428068571644,
       ...
       tokens_burnt: '242806857164400000000'

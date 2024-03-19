@@ -12,7 +12,7 @@ protocol and is separate from the version of some specific client (such as frame
 since the protocol version defines the protocol rather than some specific
 implementation of the protocol. More concretely, for each epoch, there is a
 corresponding protocol version that is agreed upon by validators through
-[a voting mechanism](https://github.com/near/NEPs/blob/master/specs/ChainSpec/Upgradability.md).
+[a voting mechanism](https://github.com/unc/NEPs/blob/master/specs/ChainSpec/Upgradability.md).
 Our upgrade scheme dictates that protocol version X is backward compatible with
 protocol version X-1 so that nodes in the network can seamlessly upgrade to
 the new protocol. However, there is **no guarantee** that protocol version X is
@@ -163,7 +163,7 @@ release), and change the `protocol_version` implementation to map the
 stabilized features to the new protocol version.
 
 A feature stabilization request must be approved by at least **two**
-[framework code owners](https://github.com/orgs/near/teams/framework-codeowners).
+[framework code owners](https://github.com/orgs/unc/teams/framework-codeowners).
 Unless it is a security-related fix, a protocol feature cannot be included in
 any release until at least **one** week after its stabilization. This is to ensure
 that feature implementation and stabilization are not rushed.

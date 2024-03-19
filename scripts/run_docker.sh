@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-unc_HOME=${unc_HOME:-/srv/near}
+unc_HOME=${unc_HOME:-/srv/unc}
 export unc_HOME
 
 if [ -n "$INIT" ]; then

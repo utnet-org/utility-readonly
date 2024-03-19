@@ -1,6 +1,6 @@
 A temporary (placeholder) implementation of the `Wallet Contract`.
 
-See https://github.com/near/NEPs/issues/518.
+See https://github.com/unc/NEPs/issues/518.
 
 Must not use in production!
 

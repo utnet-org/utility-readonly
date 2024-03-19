@@ -548,7 +548,7 @@ class RosettaTestCase(unittest.TestCase):
             },
             'operations': [{
                 'account': {
-                    'address': 'near'
+                    'address': 'unc'
                 },
                 'amount': {
                     'currency': {

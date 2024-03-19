@@ -157,7 +157,7 @@ class DockerNode(cluster.LocalNode):
 
         cid = docker_run(detach=True,
                          network=True,
-                         volume=(self.node_dir, '/srv/near'),
+                         volume=(self.node_dir, '/srv/unc'),
                          env=env)
         self._container_id = cid
         logger.info(f'Node started in Docker container {cid}')
@@ -190,11 +190,11 @@ def main():
     logger.info("Build the container")
     run(('make', 'DOCKER_TAG=' + _DOCKER_IMAGE_TAG, 'docker-framework'))
     try:
-        dot_near = pathlib.Path.home() / '.near'
+        dot_near = pathlib.Path.home() / '.unc'
 
         logger.info("Initialise local network nodes config.")
-        cmd = f'uncd --home /home/near localnet --v {NUM_NODES} --prefix test'
-        docker_run(cmd, volume=(dot_near, '/home/near'), network=True)
+        cmd = f'uncd --home /home/unc localnet --v {NUM_NODES} --prefix test'
+        docker_run(cmd, volume=(dot_near, '/home/unc'), network=True)
 
         # Start all the nodes
         for ordinal in range(NUM_NODES):
