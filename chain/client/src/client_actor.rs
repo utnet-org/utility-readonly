@@ -1130,7 +1130,7 @@ impl ClientActor {
 
         self.try_process_unfinished_blocks();
 
-        let mut delay = Duration::from_secs(1);
+        let mut delay = Duration::from_secs(30);
         let now = Utc::now();
 
         let timer = metrics::CHECK_TRIGGERS_TIME.start_timer();
