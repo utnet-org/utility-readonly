@@ -61,30 +61,30 @@ pub const TESTING_INIT_POWER: Power = 5;
 /// One UNC, divisible by 10^24.
 pub const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
 
-/// Milliunc, 1/1000 of UNC.
-pub const MILLI_NEAR: Balance = UNC_BASE / 1000;
+/// MilliUNC, 1/1000 of UNC.
+pub const MILLI_UNC: Balance = UNC_BASE / 1000;
 
 /// Block production tracking delay.
-pub const BLOCK_PRODUCTION_TRACKING_DELAY: u64 = 100;
+pub const BLOCK_PRODUCTION_TRACKING_DELAY: u64 = 100 * 30;
 
 /// Expected block production time in ms.
-pub const MIN_BLOCK_PRODUCTION_DELAY: u64 = 600;
+pub const MIN_BLOCK_PRODUCTION_DELAY: u64 = 600 * 30;
 
 /// Mainnet and testnet validators are configured with a different value due to
 /// performance values.
-pub const MAINNET_MIN_BLOCK_PRODUCTION_DELAY: u64 = 1_300;
-pub const TESTNET_MIN_BLOCK_PRODUCTION_DELAY: u64 = 1_000;
+pub const MAINNET_MIN_BLOCK_PRODUCTION_DELAY: u64 = 1_300 * 30;
+pub const TESTNET_MIN_BLOCK_PRODUCTION_DELAY: u64 = 1_000 * 30;
 
 /// Maximum time to delay block production without approvals is ms.
-pub const MAX_BLOCK_PRODUCTION_DELAY: u64 = 2_000;
+pub const MAX_BLOCK_PRODUCTION_DELAY: u64 = 2_000 * 30;
 
 /// Mainnet and testnet validators are configured with a different value due to
 /// performance values.
-pub const MAINNET_MAX_BLOCK_PRODUCTION_DELAY: u64 = 3_000;
-pub const TESTNET_MAX_BLOCK_PRODUCTION_DELAY: u64 = 2_500;
+pub const MAINNET_MAX_BLOCK_PRODUCTION_DELAY: u64 = 3_000 * 30;
+pub const TESTNET_MAX_BLOCK_PRODUCTION_DELAY: u64 = 2_500 * 30;
 
 /// Maximum time until skipping the previous block is ms.
-pub const MAX_BLOCK_WAIT_DELAY: u64 = 6_000;
+pub const MAX_BLOCK_WAIT_DELAY: u64 = 6_000 * 30;
 
 /// Horizon at which instead of fetching block, fetch full state.
 const BLOCK_FETCH_HORIZON: BlockHeightDelta = 50;
@@ -93,13 +93,13 @@ const BLOCK_FETCH_HORIZON: BlockHeightDelta = 50;
 const BLOCK_HEADER_FETCH_HORIZON: BlockHeightDelta = 50;
 
 /// Time between check to perform catchup.
-const CATCHUP_STEP_PERIOD: u64 = 100;
+const CATCHUP_STEP_PERIOD: u64 = 100 * 30;
 
 /// Time between checking to re-request chunks.
-const CHUNK_REQUEST_RETRY_PERIOD: u64 = 400;
+const CHUNK_REQUEST_RETRY_PERIOD: u64 = 400 * 30;
 
 /// Expected epoch length.
-pub const EXPECTED_EPOCH_LENGTH: BlockHeightDelta = (5 * 60 * 1000) / MIN_BLOCK_PRODUCTION_DELAY;
+pub const EXPECTED_EPOCH_LENGTH: BlockHeightDelta = (6 * 60 * 1000) / MIN_BLOCK_PRODUCTION_DELAY;
 
 /// Criterion for kicking out block producers.
 pub const BLOCK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
@@ -108,12 +108,12 @@ pub const BLOCK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
 pub const CHUNK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
 
 /// Fast mode constants for testing/developing.
-pub const FAST_MIN_BLOCK_PRODUCTION_DELAY: u64 = 120;
-pub const FAST_MAX_BLOCK_PRODUCTION_DELAY: u64 = 500;
+pub const FAST_MIN_BLOCK_PRODUCTION_DELAY: u64 = 120 * 30;
+pub const FAST_MAX_BLOCK_PRODUCTION_DELAY: u64 = 500 * 30;
 pub const FAST_EPOCH_LENGTH: BlockHeightDelta = 60;
 
 /// Expected number of blocks per year
-pub const NUM_BLOCKS_PER_YEAR: u64 = 365 * 24 * 60 * 60;
+pub const NUM_BLOCKS_PER_YEAR: u64 = 365 * 24 * 60 * 60 / 30;
 
 /// Initial gas limit.
 pub const INITIAL_GAS_LIMIT: Gas = 1_000_000_000_000_000;
@@ -128,10 +128,10 @@ pub const PROTOCOL_TREASURY_ACCOUNT: &str = "unc";
 pub const FISHERMEN_THRESHOLD: Balance = 10 * UNC_BASE;
 
 /// Number of blocks for which a given transaction is valid
-pub const TRANSACTION_VALIDITY_PERIOD: NumBlocks = 100;
+pub const TRANSACTION_VALIDITY_PERIOD: NumBlocks = 10;
 
 /// Number of seats for block producers
-pub const NUM_BLOCK_PRODUCER_SEATS: NumSeats = 50;
+pub const NUM_BLOCK_PRODUCER_SEATS: NumSeats = 100;
 
 /// The minimum stake required for staking is last seat price divided by this number.
 pub const MINIMUM_STAKE_DIVISOR: u64 = 10;
@@ -158,7 +158,7 @@ pub const MAX_INFLATION_RATE: Rational32 = Rational32::new_raw(1, 20);
 pub const PROTOCOL_UPGRADE_STAKE_THRESHOLD: Rational32 = Rational32::new_raw(4, 5);
 
 fn default_doomslug_step_period() -> Duration {
-    Duration::from_millis(100)
+    Duration::from_millis(100 * 30)
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]

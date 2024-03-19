@@ -242,7 +242,7 @@ pub fn default_sync_check_period() -> Duration {
 }
 
 pub fn default_sync_step_period() -> Duration {
-    Duration::from_millis(10)
+    Duration::from_millis(10 * 30)
 }
 
 pub fn default_sync_height_threshold() -> u64 {
