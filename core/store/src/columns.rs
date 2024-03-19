@@ -285,10 +285,6 @@ pub enum DBCol {
     /// - *Column type*: `EpochSyncInfo
     #[cfg(feature = "new_epoch_sync")]
     EpochSyncInfo,
-    /// Bad Validators AccountIds that not produce block in time.
-    /// - *Rows*: block height (int)
-    /// - *Column type*: Vec<AccountId>
-    BadValidator,
 }
 
 /// Defines different logical parts of a db key.
@@ -455,8 +451,6 @@ impl DBCol {
             DBCol::ProcessedBlockHeights => false,
             // HeaderHashesByHeight is only needed for GC.
             DBCol::HeaderHashesByHeight => false,
-            //
-            DBCol::BadValidator => false,
 
             // Columns that are not GC-ed need not be copied to the cold storage.
             DBCol::BlockHeader
@@ -557,7 +551,6 @@ impl DBCol {
             DBCol::FlatStorageStatus => &[DBKeyType::ShardUId],
             #[cfg(feature = "new_epoch_sync")]
             DBCol::EpochSyncInfo => &[DBKeyType::EpochId],
-            DBCol::BadValidator => &[DBKeyType::BlockHeight],
         }
     }
 }
