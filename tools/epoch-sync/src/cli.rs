@@ -1,7 +1,7 @@
 use anyhow::Context;
 use clap;
 use unc_chain::{ChainStore, ChainStoreAccess, ChainUpdate, DoomslugThresholdMode};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::EpochManager;
 use unc_primitives::block::BlockHeader;
 use unc_primitives::borsh::BorshDeserialize;
@@ -107,7 +107,6 @@ impl ValidateEpochSyncInfoCmd {
         let epoch_manager =
             EpochManager::new_arc_handle(storage.get_hot_store(), &config.genesis.config);
         let shard_tracker = ShardTracker::new(
-            TrackedConfig::from_config(&config.client_config),
             epoch_manager.clone(),
         );
         let runtime = NightshadeRuntime::from_config(

@@ -684,7 +684,7 @@ impl JsonRpcHandler {
     > {
         self.send_tx(RpcSendTransactionRequest {
             signed_transaction: request_data.signed_transaction,
-            wait_until: TxExecutionStatus::Final,
+            wait_until: TxExecutionStatus::None,
         })
         .await
     }

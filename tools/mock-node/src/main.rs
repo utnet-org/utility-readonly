@@ -111,8 +111,6 @@ fn main() -> anyhow::Result<()> {
     unc_config.client_config.min_num_peers = 1;
     let signer = InMemorySigner::from_random("mock_node".parse().unwrap(), KeyType::ED25519);
     unc_config.network_config.node_key = signer.secret_key;
-    unc_config.client_config.tracked_shards =
-        unc_config.genesis.config.shard_layout.shard_ids().collect();
     if unc_config.rpc_config.is_none() {
         unc_config.rpc_config = Some(unc_jsonrpc::RpcConfig::default());
     }

@@ -28,7 +28,7 @@ use unc_chunks::shards_manager_actor::start_shards_manager;
 use unc_chunks::test_utils::SynchronousShardsManagerAdapter;
 use unc_chunks::ShardsManager;
 use unc_crypto::{KeyType, PublicKey};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::{ShardTracker};
 use unc_epoch_manager::EpochManagerAdapter;
 use unc_network::shards_manager::ShardsManagerRequestFromNetwork;
 use unc_network::types::{BlockInfo, PeerChainInfo};
@@ -86,7 +86,7 @@ pub fn setup(
     let store = create_test_store();
     let num_validator_seats = vs.all_block_producers().count() as NumSeats;
     let epoch_manager = MockEpochManager::new_with_validators(store.clone(), vs, epoch_length);
-    let shard_tracker = ShardTracker::new(TrackedConfig::AllShards, epoch_manager.clone());
+    let shard_tracker = ShardTracker::new(epoch_manager.clone());
     let runtime = KeyValueRuntime::new_with_no_gc(store.clone(), epoch_manager.as_ref(), archive);
     let chain_genesis = ChainGenesis {
         time: genesis_time,

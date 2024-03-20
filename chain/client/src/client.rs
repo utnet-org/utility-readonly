@@ -2622,14 +2622,8 @@ impl Client {
     /// check_And_update_doomslug_tip, but that would require a bigger refactor.
     pub(crate) fn send_network_chain_info(&mut self) -> Result<(), Error> {
         let tip = self.chain.head()?;
-        // convert config tracked shards
-        // runtime will track all shards if config tracked shards is not empty
-        // https://github.com/utnet-org/utility/issues/4930
-        let tracked_shards = if self.config.tracked_shards.is_empty() {
-            vec![]
-        } else {
-            self.epoch_manager.shard_ids(&tip.epoch_id)?
-        };
+        // convert tracked shards, runtime will track all shards
+        let tracked_shards = self.epoch_manager.shard_ids(&tip.epoch_id)?;
         let tier1_accounts = self.get_tier1_accounts(&tip)?;
         let block = self.chain.get_block(&tip.last_block_hash)?;
         self.network_adapter.send(SetChainInfo(ChainInfo {

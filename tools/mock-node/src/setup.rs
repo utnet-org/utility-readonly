@@ -6,7 +6,7 @@ use unc_chain::types::RuntimeAdapter;
 use unc_chain::ChainStoreUpdate;
 use unc_chain::{Chain, ChainGenesis, ChainStore, ChainStoreAccess, DoomslugThresholdMode};
 use unc_crypto::{KeyType, SecretKey};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
 use unc_jsonrpc_client::JsonRpcClient;
 use unc_network::tcp;
@@ -38,7 +38,7 @@ fn setup_runtime(
     };
     let epoch_manager = EpochManager::new_arc_handle(store.clone(), &config.genesis.config);
     let shard_tracker =
-        ShardTracker::new(TrackedConfig::from_config(&config.client_config), epoch_manager.clone());
+        ShardTracker::new(epoch_manager.clone());
     let runtime = NightshadeRuntime::from_config(home_dir, store, config, epoch_manager.clone());
     (epoch_manager, shard_tracker, runtime)
 }

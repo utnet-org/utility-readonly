@@ -2,7 +2,7 @@ use clap::{Arg, Command};
 use unc_chain::store_validator::StoreValidator;
 use unc_chain_configs::GenesisValidationMode;
 use unc_epoch_manager::{
-    shard_tracker::{ShardTracker, TrackedConfig},
+    shard_tracker::ShardTracker,
     EpochManager,
 };
 use unc_o11y::testonly::init_integration_logger;
@@ -41,7 +41,6 @@ fn main() {
     .get_hot_store();
     let epoch_manager = EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
     let shard_tracker = ShardTracker::new(
-        TrackedConfig::from_config(&unc_config.client_config),
         epoch_manager.clone(),
     );
     let runtime = framework::NightshadeRuntime::from_config(
