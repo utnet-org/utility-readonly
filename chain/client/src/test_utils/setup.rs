@@ -76,7 +76,6 @@ pub fn setup(
     max_block_prod_time: u64,
     enable_doomslug: bool,
     archive: bool,
-    epoch_sync_enabled: bool,
     state_sync_enabled: bool,
     network_adapter: PeerManagerAdapter,
     transaction_validity_period: NumBlocks,
@@ -133,7 +132,6 @@ pub fn setup(
         num_validator_seats,
         archive,
         true,
-        epoch_sync_enabled,
         state_sync_enabled,
     );
 
@@ -204,7 +202,6 @@ pub fn setup_only_view(
     max_block_prod_time: u64,
     enable_doomslug: bool,
     archive: bool,
-    epoch_sync_enabled: bool,
     state_sync_enabled: bool,
     network_adapter: PeerManagerAdapter,
     transaction_validity_period: NumBlocks,
@@ -260,7 +257,6 @@ pub fn setup_only_view(
         num_validator_seats,
         archive,
         true,
-        epoch_sync_enabled,
         state_sync_enabled,
     );
 
@@ -331,7 +327,6 @@ pub fn setup_mock_with_validity_period_and_no_epoch_sync(
             enable_doomslug,
             false,
             false,
-            true,
             network_adapter.clone().into(),
             transaction_validity_period,
             StaticClock::utc(),
@@ -433,7 +428,6 @@ pub fn setup_mock_all_validators(
     epoch_length: BlockHeightDelta,
     enable_doomslug: bool,
     archive: Vec<bool>,
-    epoch_sync_enabled: Vec<bool>,
     check_block_stats: bool,
     peer_manager_mock: Box<
         dyn FnMut(
@@ -484,7 +478,6 @@ pub fn setup_mock_all_validators(
         let largest_skipped_height1 = largest_skipped_height.clone();
         let hash_to_height1 = hash_to_height.clone();
         let archive1 = archive.clone();
-        let epoch_sync_enabled1 = epoch_sync_enabled.clone();
         let client_addr = ClientActor::create(|ctx| {
             let client_addr = ctx.address();
             let _account_id = account_id.clone();
@@ -854,7 +847,6 @@ pub fn setup_mock_all_validators(
                 block_prod_time * 3,
                 enable_doomslug,
                 archive1[index],
-                epoch_sync_enabled1[index],
                 false,
                 Arc::new(pm).into(),
                 10000,
@@ -941,7 +933,6 @@ pub fn setup_client_with_runtime(
         num_validator_seats,
         archive,
         save_trie_changes,
-        true,
         true,
     );
     config.epoch_length = chain_genesis.epoch_length;

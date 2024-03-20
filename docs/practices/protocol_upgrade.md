@@ -12,7 +12,7 @@ protocol and is separate from the version of some specific client (such as frame
 since the protocol version defines the protocol rather than some specific
 implementation of the protocol. More concretely, for each epoch, there is a
 corresponding protocol version that is agreed upon by validators through
-[a voting mechanism](https://github.com/unc/NEPs/blob/master/specs/ChainSpec/Upgradability.md).
+[a voting mechanism](https://github.com/Utility/UEPs/blob/master/specs/ChainSpec/Upgradability.md).
 Our upgrade scheme dictates that protocol version X is backward compatible with
 protocol version X-1 so that nodes in the network can seamlessly upgrade to
 the new protocol. However, there is **no guarantee** that protocol version X is

@@ -11,7 +11,7 @@ use unc_primitives_core::types::AccountId;
 // specification in the wider ecosystem. Note that NEP-461 should not change the
 // protocol in any way, unless we have to change meta transaction implementation
 // details to adhere to the future standard.
-// [NEP-461](https://github.com/unc/NEPs/pull/461)
+// [NEP-461](https://github.com/Utility/UEPs/pull/461)
 //
 // TODO: consider making these public once there is an approved standard.
 const MIN_ON_CHAIN_DISCRIMINANT: u32 = 1 << 30;
@@ -19,7 +19,7 @@ const MAX_ON_CHAIN_DISCRIMINANT: u32 = (1 << 31) - 1;
 const MIN_OFF_CHAIN_DISCRIMINANT: u32 = 1 << 31;
 const MAX_OFF_CHAIN_DISCRIMINANT: u32 = u32::MAX;
 
-// NEPs currently included in the scheme
+// UEPs currently included in the scheme
 const NEP_366_META_TRANSACTIONS: u32 = 366;
 
 /// Used to distinguish message types that are sign by account keys, to avoid an

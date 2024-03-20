@@ -250,7 +250,7 @@ impl AllEpochConfig {
 }
 
 /// Additional configuration parameters for the new validator selection
-/// algorithm.  See <https://github.com/unc/NEPs/pull/167> for details.
+/// algorithm.  See <https://github.com/Utility/UEPs/pull/167> for details.
 #[derive(Debug, Clone, SmartDefault, PartialEq, Eq)]
 pub struct ValidatorSelectionConfig {
     #[default(300)]

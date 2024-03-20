@@ -4,7 +4,7 @@ Feel free to link other pull requests or issues here.
 
 # Context
 
-- NEP (if exists): https://github.com/unc/NEPs/blob/master/ueps/uep-XXXX.md
+- NEP (if exists): https://github.com/Utility/UEPs/blob/master/ueps/uep-XXXX.md
 - Implementation: https://github.com/utnet-org/utility/pull/XXXX
 
 # Testing and QA

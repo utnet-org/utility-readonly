@@ -646,7 +646,7 @@ impl EpochManager {
         let mut validator_kickout = HashMap::new();
 
         // Next protocol version calculation.
-        // Implements https://github.com/utility/NEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
+        // Implements https://github.com/utility/UEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
         let mut versions = HashMap::new();
         for (validator_id, version) in version_tracker {
             let stake = epoch_info.validator_frozen(validator_id);

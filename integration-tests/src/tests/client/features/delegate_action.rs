@@ -1,6 +1,6 @@
 //! DelegateAction is a type of action to support meta transactions.
 //!
-//! NEP: https://github.com/unc/NEPs/pull/366
+//! NEP: https://github.com/Utility/UEPs/pull/366
 //! This is the module for its integration tests.
 
 use crate::node::{Node, RuntimeNode};

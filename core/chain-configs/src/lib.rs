@@ -6,7 +6,7 @@ mod metrics;
 mod updateable_config;
 
 pub use client_config::{
-    default_enable_multiline_logging, default_epoch_sync_enabled,
+    default_enable_multiline_logging,
     default_header_sync_expected_height_per_second, default_header_sync_initial_timeout,
     default_header_sync_progress_timeout, default_header_sync_stall_ban_timeout,
     default_log_summary_period, default_produce_chunk_add_transactions_time_limit,

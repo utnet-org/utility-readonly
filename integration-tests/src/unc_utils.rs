@@ -114,13 +114,11 @@ pub fn setup_configs_with_epoch_length(
     let mut unc1 = load_test_config("test1", port1, genesis.clone());
     unc1.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test2", *port2)]);
     unc1.client_config.min_num_peers = 1;
-    unc1.client_config.epoch_sync_enabled = false;
     unc1.client_config.state_sync_enabled = true;
 
     let mut unc2 = load_test_config("test2", port2, genesis.clone());
     unc2.network_config.peer_store.boot_nodes = convert_boot_nodes(vec![("test1", *port1)]);
     unc2.client_config.min_num_peers = 1;
-    unc2.client_config.epoch_sync_enabled = false;
     unc2.client_config.state_sync_enabled = true;
 
     (genesis, genesis_block, unc1, unc2)

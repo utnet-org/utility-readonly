@@ -1,7 +1,7 @@
 # Tracking issues
 
 `framework` uses so-called "tracking issues" to coordinate larger pieces of work
-(e.g. implementation of new NEPs).  Such issues are tagged with the
+(e.g. implementation of new UEPs).  Such issues are tagged with the
 [`C-tracking-issue`
 label](https://github.com/utnet-org/utility/issues?q=is%3Aopen+is%3Aissue+label%3AC-tracking-issue).
 

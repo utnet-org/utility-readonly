@@ -52,7 +52,6 @@ fn start_nodes(
         if i >= num_validator_seats && i < num_tracking_nodes {
             unc_config.client_config.tracked_shards = vec![0];
         }
-        unc_config.client_config.epoch_sync_enabled = false;
         unc_configs.push(unc_config);
     }
 
