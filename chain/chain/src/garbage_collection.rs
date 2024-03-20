@@ -984,7 +984,6 @@ impl<'a> ChainStoreUpdate<'a> {
             | DBCol::PeerComponent
             | DBCol::LastComponentNonce
             | DBCol::ComponentEdges
-            // https://github.com/utnet-org/utility/pull/2952
             | DBCol::EpochInfo
             | DBCol::EpochStart
             | DBCol::EpochValidatorInfo

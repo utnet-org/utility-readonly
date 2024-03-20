@@ -454,7 +454,6 @@ impl ViewClientActor {
     ) -> Result<TxStatusView, TxStatusError> {
         {
             // TODO: take into account `fetch_receipt()`
-            // https://github.com/utnet-org/utility/issues/9545
             let mut request_manager = self.request_manager.write().expect(POISONED_LOCK_ERR);
             if let Some(res) = request_manager.tx_status_response.pop(&tx_hash) {
                 request_manager.tx_status_requests.pop(&tx_hash);
