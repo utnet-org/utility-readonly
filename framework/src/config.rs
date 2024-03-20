@@ -96,7 +96,7 @@ const BLOCK_HEADER_FETCH_HORIZON: BlockHeightDelta = 50;
 const CATCHUP_STEP_PERIOD: u64 = 100 * 30;
 
 /// Time between checking to re-request chunks.
-const CHUNK_REQUEST_RETRY_PERIOD: u64 = 400 * 30;
+const CHUNK_REQUEST_RETRY_PERIOD: u64 = 400;
 
 /// Expected epoch length.
 pub const EXPECTED_EPOCH_LENGTH: BlockHeightDelta = (6 * 60 * 1000) / MIN_BLOCK_PRODUCTION_DELAY;
@@ -251,10 +251,7 @@ pub struct Config {
     pub telemetry: TelemetryConfig,
     pub network: unc_network::config_json::Config,
     pub consensus: Consensus,
-    pub tracked_accounts: Vec<AccountId>,
     pub tracked_shards: Vec<ShardId>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tracked_shard_schedule: Option<Vec<Vec<ShardId>>>,
     #[serde(skip_serializing_if = "is_false")]
     pub archive: bool,
     /// If save_trie_changes is not set it will get inferred from the `archive` field as follows:
@@ -331,9 +328,7 @@ impl Default for Config {
             telemetry: TelemetryConfig::default(),
             network: Default::default(),
             consensus: Consensus::default(),
-            tracked_accounts: vec![],
-            tracked_shards: vec![],
-            tracked_shard_schedule: None,
+            tracked_shards: vec![0],
             archive: false,
             save_trie_changes: None,
             log_summary_style: LogSummaryStyle::Colored,
@@ -633,9 +628,6 @@ impl UncConfig {
                 catchup_step_period: config.consensus.catchup_step_period,
                 chunk_request_retry_period: config.consensus.chunk_request_retry_period,
                 doosmslug_step_period: config.consensus.doomslug_step_period,
-                tracked_accounts: config.tracked_accounts,
-                tracked_shards: config.tracked_shards,
-                tracked_shard_schedule: config.tracked_shard_schedule.unwrap_or(vec![]),
                 archive: config.archive,
                 save_trie_changes: config.save_trie_changes.unwrap_or(!config.archive),
                 log_summary_style: config.log_summary_style,
@@ -956,8 +948,7 @@ pub fn init_configs(
     }
 
     let mut config = Config::default();
-    // Make sure node tracks all shards, see
-    // https://github.com/utnet-org/utility/issues/7388
+    // Make sure node tracks all shards
     config.tracked_shards = vec![0];
     // If a config gets generated, block production times may need to be updated.
     set_block_production_delay(&chain_id, fast, &mut config);
@@ -1414,8 +1405,7 @@ pub fn load_config(
                 )
                 && config.tracked_shards.is_empty()
             {
-                // Make sure validators tracks all shards, see
-                // https://github.com/utnet-org/utility/issues/7388
+                // Make sure validators tracks all shards
                 let error_message = "The `chain_id` field specified in genesis is among mainnet/betanet/testnet, so validator must track all shards. Please change `tracked_shards` field in config.json to be any non-empty vector";
                 validation_errors.push_cross_file_semantics_error(error_message.to_string());
             }

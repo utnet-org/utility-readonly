@@ -1,110 +1,24 @@
 use std::sync::Arc;
 
 use crate::EpochManagerAdapter;
-use unc_cache::SyncLruCache;
-use unc_chain_configs::ClientConfig;
-use unc_primitives::errors::EpochError;
 use unc_primitives::hash::CryptoHash;
-use unc_primitives::shard_layout::account_id_to_shard_id;
-use unc_primitives::types::{AccountId, EpochId, ShardId};
+use unc_primitives::types::{AccountId, ShardId};
 
-#[derive(Clone)]
-pub enum TrackedConfig {
-    Accounts(Vec<AccountId>),
-    AllShards,
-    // Rotates between sets of shards to track.
-    Schedule(Vec<Vec<ShardId>>),
-}
-
-impl TrackedConfig {
-    pub fn new_empty() -> Self {
-        TrackedConfig::Accounts(vec![])
-    }
-
-    pub fn from_config(config: &ClientConfig) -> Self {
-        if !config.tracked_shards.is_empty() {
-            TrackedConfig::AllShards
-        } else if !config.tracked_shard_schedule.is_empty() {
-            TrackedConfig::Schedule(config.tracked_shard_schedule.clone())
-        } else {
-            TrackedConfig::Accounts(config.tracked_accounts.clone())
-        }
-    }
-}
-
-// bit mask for which shard to track
-type BitMask = Vec<bool>;
-
-/// Tracker that tracks shard ids and accounts. Right now, it only supports two modes
-/// TrackedConfig::Accounts(accounts): track the shards where `accounts` belong to
 /// TrackedConfig::AllShards: track all shards
 #[derive(Clone)]
 pub struct ShardTracker {
-    tracked_config: TrackedConfig,
-    /// Stores shard tracking information by epoch, only useful if TrackedState == Accounts
-    tracking_shards_cache: Arc<SyncLruCache<EpochId, BitMask>>,
     epoch_manager: Arc<dyn EpochManagerAdapter>,
 }
 
 impl ShardTracker {
-    pub fn new(tracked_config: TrackedConfig, epoch_manager: Arc<dyn EpochManagerAdapter>) -> Self {
+    pub fn new(epoch_manager: Arc<dyn EpochManagerAdapter>) -> Self {
         ShardTracker {
-            tracked_config,
-            // 1024 epochs on mainnet is about 512 days which is more than enough,
-            // and this is a cache anyway. The data size is pretty small as well,
-            // only one bit per shard per epoch.
-            tracking_shards_cache: Arc::new(SyncLruCache::new(1024)),
             epoch_manager,
         }
     }
 
     pub fn new_empty(epoch_manager: Arc<dyn EpochManagerAdapter>) -> Self {
-        Self::new(TrackedConfig::new_empty(), epoch_manager)
-    }
-
-    fn tracks_shard_at_epoch(
-        &self,
-        shard_id: ShardId,
-        epoch_id: &EpochId,
-    ) -> Result<bool, EpochError> {
-        match &self.tracked_config {
-            TrackedConfig::Accounts(tracked_accounts) => {
-                let shard_layout = self.epoch_manager.get_shard_layout(epoch_id)?;
-                let tracking_mask = self.tracking_shards_cache.get_or_put(epoch_id.clone(), |_| {
-                    let mut tracking_mask: Vec<_> =
-                        shard_layout.shard_ids().map(|_| false).collect();
-                    for account_id in tracked_accounts {
-                        let shard_id = account_id_to_shard_id(account_id, &shard_layout);
-                        tracking_mask[shard_id as usize] = true;
-                    }
-                    tracking_mask
-                });
-                Ok(tracking_mask.get(shard_id as usize).copied().unwrap_or(false))
-            }
-            TrackedConfig::AllShards => Ok(true),
-            TrackedConfig::Schedule(schedule) => {
-                assert_ne!(schedule.len(), 0);
-                let epoch_info = self.epoch_manager.get_epoch_info(epoch_id)?;
-                let epoch_height = epoch_info.epoch_height();
-                let index = epoch_height % schedule.len() as u64;
-                let subset = &schedule[index as usize];
-                Ok(subset.contains(&shard_id))
-            }
-        }
-    }
-
-    fn tracks_shard(&self, shard_id: ShardId, prev_hash: &CryptoHash) -> Result<bool, EpochError> {
-        let epoch_id = self.epoch_manager.get_epoch_id_from_prev_block(prev_hash)?;
-        self.tracks_shard_at_epoch(shard_id, &epoch_id)
-    }
-
-    fn tracks_shard_next_epoch_from_prev_block(
-        &self,
-        shard_id: ShardId,
-        prev_hash: &CryptoHash,
-    ) -> Result<bool, EpochError> {
-        let epoch_id = self.epoch_manager.get_next_epoch_id_from_prev_block(prev_hash)?;
-        self.tracks_shard_at_epoch(shard_id, &epoch_id)
+        Self::new(epoch_manager)
     }
 
     /// Whether the client cares about some shard right now.
@@ -139,13 +53,7 @@ impl ShardTracker {
                 // We have access to the node config. Use the config to find a definite answer.
             }
         }
-        match self.tracked_config {
-            TrackedConfig::AllShards => {
-                // Avoid looking up EpochId as a performance optimization.
-                true
-            }
-            _ => self.tracks_shard(shard_id, parent_hash).unwrap_or(false),
-        }
+        true
     }
 
     /// Whether the client cares about some shard in the next epoch.
@@ -182,23 +90,15 @@ impl ShardTracker {
                 // We have access to the node config. Use the config to find a definite answer.
             }
         }
-        match self.tracked_config {
-            TrackedConfig::AllShards => {
-                // Avoid looking up EpochId as a performance optimization.
-                true
-            }
-            _ => {
-                self.tracks_shard_next_epoch_from_prev_block(shard_id, parent_hash).unwrap_or(false)
-            }
-        }
+
+        true
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{account_id_to_shard_id, ShardTracker};
-    use crate::shard_tracker::TrackedConfig;
-    use crate::test_utils::{frozen, hash_range};
+    use super::ShardTracker;
+    use crate::test_utils::hash_range;
     use crate::{EpochManager, EpochManagerAdapter, EpochManagerHandle, RewardCalculator};
     use unc_crypto::{KeyType, PublicKey};
     use unc_primitives::epoch_manager::block_info::BlockInfo;

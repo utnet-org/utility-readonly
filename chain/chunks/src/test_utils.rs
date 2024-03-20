@@ -1,7 +1,7 @@
 use unc_async::messaging::CanSend;
 use unc_chain::types::{EpochManagerAdapter, Tip};
 use unc_chain::{Chain, ChainStore};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::{ShardTracker};
 use unc_epoch_manager::test_utils::setup_epoch_manager_with_block_and_chunk_producers;
 use unc_epoch_manager::EpochManagerHandle;
 use unc_network::shards_manager::ShardsManagerRequestFromNetwork;
@@ -49,7 +49,7 @@ pub struct ChunkTestFixture {
 
 impl Default for ChunkTestFixture {
     fn default() -> Self {
-        Self::new(false, 3, 6, 6, true)
+        Self::new(false, 3, 6, 6)
     }
 }
 
@@ -59,7 +59,6 @@ impl ChunkTestFixture {
         num_shards: u64,
         num_block_producers: usize,
         num_chunk_only_producers: usize,
-        track_all_shards: bool,
     ) -> Self {
         if num_shards > num_block_producers as u64 {
             panic!("Invalid setup: there must be at least as many block producers as shards");
@@ -76,7 +75,6 @@ impl ChunkTestFixture {
         );
         let epoch_manager = epoch_manager.into_handle();
         let shard_tracker = ShardTracker::new(
-            if track_all_shards { TrackedConfig::AllShards } else { TrackedConfig::new_empty() },
             Arc::new(epoch_manager.clone()),
         );
         let mock_network = Arc::new(MockPeerManagerAdapter::default());

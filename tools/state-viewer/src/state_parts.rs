@@ -6,7 +6,7 @@ use unc_client::sync::external::{
     external_storage_location_directory, get_num_parts_from_filename, ExternalConnection,
 };
 use unc_client::sync::state::StateSync;
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::EpochManager;
 use unc_primitives::challenge::PartialState;
 use unc_primitives::epoch_manager::epoch_info::EpochInfo;
@@ -99,7 +99,6 @@ impl StatePartsSubCommand {
         let epoch_manager =
             EpochManager::new_arc_handle(store.clone(), &unc_config.genesis.config);
         let shard_tracker = ShardTracker::new(
-            TrackedConfig::from_config(&unc_config.client_config),
             epoch_manager.clone(),
         );
         let runtime = NightshadeRuntime::from_config(

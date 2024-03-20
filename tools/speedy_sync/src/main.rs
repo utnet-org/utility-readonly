@@ -2,7 +2,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use unc_chain::types::{ChainConfig, Tip};
 use unc_chain::{Chain, ChainGenesis, DoomslugThresholdMode};
 use unc_chain_configs::{GenesisValidationMode, MutableConfigValue, ReshardingConfig};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::types::EpochInfoAggregator;
 use unc_epoch_manager::EpochManager;
 use unc_primitives::block::Block;
@@ -230,7 +230,7 @@ fn load_snapshot(load_cmd: LoadCmd) {
     let chain_genesis = ChainGenesis::new(&config.genesis);
     let epoch_manager = EpochManager::new_arc_handle(store.clone(), &config.genesis.config);
     let shard_tracker =
-        ShardTracker::new(TrackedConfig::from_config(&config.client_config), epoch_manager.clone());
+        ShardTracker::new(epoch_manager.clone());
     let runtime =
         NightshadeRuntime::from_config(home_dir, store.clone(), &config, epoch_manager.clone());
     // This will initialize the database (add genesis block etc)

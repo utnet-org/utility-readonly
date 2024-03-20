@@ -62,36 +62,13 @@ The above code will download the official genesis config and generate necessary 
 
 Replace `config.json` in your `--home-dir` (e.g. `~/.unc/testnet/config.json`) with downloaded one.
 
-Configs for the specified network are in the `--home-dir` provided folder. We need to ensure that UNC Indexer follows all the necessary shards, so `"tracked_shards"` parameters in `~/.unc/testnet/config.json` needs to be configured properly. For example, with a single shared network, you just add the shard #0 to the list:
-
-```text
-...
-"tracked_shards": [0],
-...
-```
-
-Hint: See the Tweaks section below to learn more about further configuration options.
-
 After that we can run UNC Indexer.
-
 
 ```bash
 $ cargo run --release -- --home-dir ~/.unc/testnet run
 ```
 
 After the network is synced, you should see logs of every block produced in Testnet. Get back to the code to implement any custom handling of the data flowing into the indexer.
-
-## Tweaks
-
-By default, framework is configured to do as little work as possible while still operating on an up-to-date state. Indexers may have different requirements, so there is no solution that would work for everyone, and thus we are going to provide you with the set of knobs you can tune for your requirements.
-
-As already has been mentioned above, the most common tweak you need to apply is listing all the shards you want to index data from; to do that, you should ensure that `"tracked_shards"` in the `config.json` lists all the shard IDs, e.g. for the current betanet and testnet, which have a single shard:
-
-```json
-...
-"tracked_shards": [0],
-...
-```
 
 
 You can choose Indexer Framework sync mode by setting what to stream:

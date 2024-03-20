@@ -22,7 +22,7 @@ use unc_chain_configs::SyncConfig;
 use unc_chunks::shards_manager_actor::start_shards_manager;
 use unc_client::sync::adapter::SyncAdapter;
 use unc_client::{start_client, start_view_client, ClientActor, ConfigUpdater, ViewClientActor};
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::EpochManager;
 use unc_network::PeerManagerActor;
 use unc_primitives::block::GenesisId;
@@ -254,7 +254,7 @@ pub fn start_with_config_and_synchronization(
     let epoch_manager =
         EpochManager::new_arc_handle(storage.get_hot_store(), &config.genesis.config);
     let shard_tracker =
-        ShardTracker::new(TrackedConfig::from_config(&config.client_config), epoch_manager.clone());
+        ShardTracker::new(epoch_manager.clone());
     let runtime = NightshadeRuntime::from_config(
         home_dir,
         storage.get_hot_store(),
@@ -270,7 +270,6 @@ pub fn start_with_config_and_synchronization(
             let view_epoch_manager =
                 EpochManager::new_arc_handle(split_store.clone(), &config.genesis.config);
             let view_shard_tracker = ShardTracker::new(
-                TrackedConfig::from_config(&config.client_config),
                 epoch_manager.clone(),
             );
             let view_runtime = NightshadeRuntime::from_config(

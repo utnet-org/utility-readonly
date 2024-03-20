@@ -10,7 +10,7 @@ use unc_chain::types::RuntimeAdapter;
 use unc_chain::ChainGenesis;
 use unc_chain_configs::GenesisConfig;
 use unc_chunks::test_utils::MockClientAdapterForShardsManager;
-use unc_epoch_manager::shard_tracker::{ShardTracker, TrackedConfig};
+use unc_epoch_manager::shard_tracker::ShardTracker;
 use unc_epoch_manager::{EpochManager, EpochManagerAdapter, EpochManagerHandle};
 use unc_network::test_utils::MockPeerManagerAdapter;
 use unc_parameters::RuntimeConfigStore;
@@ -347,7 +347,7 @@ impl TestEnvBuilder {
             .unwrap()
             .iter()
             .map(|epoch_manager| {
-                ShardTracker::new(TrackedConfig::AllShards, epoch_manager.clone().into_adapter())
+                ShardTracker::new(epoch_manager.clone().into_adapter())
             })
             .collect();
         ret.shard_trackers(shard_trackers)
@@ -365,7 +365,7 @@ impl TestEnvBuilder {
             .unwrap()
             .iter()
             .map(|epoch_manager| {
-                ShardTracker::new(TrackedConfig::new_empty(), epoch_manager.clone().into_adapter())
+                ShardTracker::new(epoch_manager.clone().into_adapter())
             })
             .collect();
         ret.shard_trackers(shard_trackers)

@@ -1,9 +1,7 @@
 //! Chain Client Configuration
 use crate::ExternalStorageLocation::GCS;
 use crate::MutableConfigValue;
-use unc_primitives::types::{
-    AccountId, BlockHeight, BlockHeightDelta, Gas, NumBlocks, NumSeats, ShardId,
-};
+use unc_primitives::types::{BlockHeight, BlockHeightDelta, Gas, NumBlocks, NumSeats, ShardId,};
 use unc_primitives::version::Version;
 use std::cmp::{max, min};
 use std::path::PathBuf;
@@ -238,7 +236,7 @@ pub fn default_header_sync_expected_height_per_second() -> u64 {
 }
 
 pub fn default_sync_check_period() -> Duration {
-    Duration::from_secs(10)
+    Duration::from_secs(10 * 30)
 }
 
 pub fn default_sync_step_period() -> Duration {
@@ -298,7 +296,7 @@ pub fn default_enable_multiline_logging() -> Option<bool> {
 }
 
 pub fn default_produce_chunk_add_transactions_time_limit() -> Option<Duration> {
-    Some(Duration::from_millis(200))
+    Some(Duration::from_millis(200 * 30))
 }
 
 /// ClientConfig where some fields can be updated at runtime.
@@ -364,14 +362,6 @@ pub struct ClientConfig {
     pub block_header_fetch_horizon: BlockHeightDelta,
     /// Garbage collection configuration.
     pub gc: GCConfig,
-    /// Accounts that this client tracks.
-    pub tracked_accounts: Vec<AccountId>,
-    /// Shards that this client tracks.
-    pub tracked_shards: Vec<ShardId>,
-    /// Rotate between these sets of tracked shards.
-    /// Used to simulate the behavior of chunk only producers without staking tokens.
-    /// This field is only used if `tracked_shards` is empty.
-    pub tracked_shard_schedule: Vec<Vec<ShardId>>,
     /// Not clear old data, set `true` for archive nodes.
     pub archive: bool,
     /// save_trie_changes should be set to true iff
@@ -474,9 +464,6 @@ impl ClientConfig {
             doosmslug_step_period: Duration::from_millis(100),
             block_header_fetch_horizon: 50,
             gc: GCConfig { gc_blocks_limit: 100, ..GCConfig::default() },
-            tracked_accounts: vec![],
-            tracked_shards: vec![],
-            tracked_shard_schedule: vec![],
             archive,
             save_trie_changes,
             log_summary_style: LogSummaryStyle::Colored,

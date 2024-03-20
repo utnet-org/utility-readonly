@@ -108,14 +108,6 @@ impl Indexer {
         let unc_config =
             framework::config::load_config(&indexer_config.home_dir, genesis_validation_mode)
                 .unwrap_or_else(|e| panic!("Error loading config: {:#}", e));
-
-        assert!(
-            !&unc_config.client_config.tracked_shards.is_empty(),
-            "Indexer should track at least one shard. \n\
-            Tip: You may want to update {} with `\"tracked_shards\": [0]`
-            ",
-            indexer_config.home_dir.join("config.json").display()
-        );
         let framework::NearNode { client, view_client, .. } =
             framework::start_with_config(&indexer_config.home_dir, unc_config.clone())
                 .with_context(|| "start_with_config")?;

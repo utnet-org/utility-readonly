@@ -7,7 +7,7 @@ use unc_async::{
 };
 use unc_chain::{types::Tip, Chain};
 use unc_epoch_manager::{
-    shard_tracker::{ShardTracker, TrackedConfig},
+    shard_tracker::{ShardTracker},
     test_utils::{record_block, setup_epoch_manager_with_block_and_chunk_producers},
     EpochManagerAdapter, EpochManagerHandle,
 };
@@ -186,12 +186,7 @@ impl MockChainForShardsManager {
             )
             .into_handle(),
         );
-        let tracking = if config.track_all_shards {
-            TrackedConfig::AllShards
-        } else {
-            TrackedConfig::new_empty()
-        };
-        let shard_tracker = ShardTracker::new(tracking, epoch_manager.clone());
+        let shard_tracker = ShardTracker::new(epoch_manager.clone());
         Self {
             account_id: config.account_id,
             epoch_manager,
