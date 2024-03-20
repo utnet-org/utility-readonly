@@ -4,7 +4,7 @@ This chapter describes framework's approach to documentation. There are three
 primary types of documentation to keep in mind:
 
 * [**The UNC Protocol Specification**](https://nomicon.io)
-  ([source code](https://github.com/unc/NEPs)) is the formal description of
+  ([source code](https://github.com/Utility/UEPs)) is the formal description of
   the UNC protocol. The reference framework implementation and any other UNC
   client implementations must follow this specification.
 * [**User docs**](https://docs.unc.org) ([source code](https://github.com/unc/docs))

@@ -138,7 +138,6 @@ fn test_catchup_receipts_sync_common(wait_till: u64, send: u64, sync_hold: bool)
 
         let (vs, key_pairs) = get_validators_and_key_pairs();
         let archive = vec![true; vs.all_block_producers().count()];
-        let epoch_sync_enabled = vec![false; vs.all_block_producers().count()];
 
         let phase = Arc::new(RwLock::new(ReceiptsSyncPhases::WaitingForFirstBlock));
         let seen_heights_with_receipts = Arc::new(RwLock::new(HashSet::<BlockHeight>::new()));
@@ -159,7 +158,6 @@ fn test_catchup_receipts_sync_common(wait_till: u64, send: u64, sync_hold: bool)
             5,
             false,
             archive,
-            epoch_sync_enabled,
             false,
             Box::new(move |_, _account_id: _, msg: &PeerManagerMessageRequest| {
                 let msg = msg.as_network_requests_ref();
@@ -628,7 +626,6 @@ fn test_catchup_sanity_blocks_produced() {
         let (vs, key_pairs) = get_validators_and_key_pairs();
         let vs = vs.validator_groups(2);
         let archive = vec![false; vs.all_block_producers().count()];
-        let epoch_sync_enabled = vec![true; vs.all_block_producers().count()];
 
         let (_, conn, _) = setup_mock_all_validators(
             vs,
@@ -640,7 +637,6 @@ fn test_catchup_sanity_blocks_produced() {
             5,
             true,
             archive,
-            epoch_sync_enabled,
             false,
             Box::new(move |_, _account_id: _, msg: &PeerManagerMessageRequest| {
                 let msg = msg.as_network_requests_ref();
@@ -701,7 +697,6 @@ fn test_all_chunks_accepted_common(
 
         let (vs, key_pairs) = get_validators_and_key_pairs();
         let archive = vec![false; vs.all_block_producers().count()];
-        let epoch_sync_enabled = vec![true; vs.all_block_producers().count()];
 
         let verbose = false;
 
@@ -719,7 +714,6 @@ fn test_all_chunks_accepted_common(
             epoch_length,
             true,
             archive,
-            epoch_sync_enabled,
             false,
             Box::new(move |_, sender_account_id: AccountId, msg: &PeerManagerMessageRequest| {
                 let msg = msg.as_network_requests_ref();

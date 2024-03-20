@@ -247,10 +247,6 @@ pub fn default_sync_height_threshold() -> u64 {
     1
 }
 
-pub fn default_epoch_sync_enabled() -> bool {
-    false
-}
-
 pub fn default_state_sync() -> Option<StateSyncConfig> {
     Some(StateSyncConfig {
         dump: None,
@@ -371,8 +367,6 @@ pub struct ClientConfig {
     pub save_trie_changes: bool,
     /// Number of threads for ViewClientActor pool.
     pub view_client_threads: usize,
-    /// Run Epoch Sync on the start.
-    pub epoch_sync_enabled: bool,
     /// Number of seconds between state requests for view client.
     pub view_client_throttle_period: Duration,
     /// Upper bound of the byte size of contract state that is still viewable. None is no limit
@@ -419,7 +413,6 @@ impl ClientConfig {
         num_block_producer_seats: NumSeats,
         archive: bool,
         save_trie_changes: bool,
-        epoch_sync_enabled: bool,
         state_sync_enabled: bool,
     ) -> Self {
         assert!(
@@ -468,7 +461,6 @@ impl ClientConfig {
             save_trie_changes,
             log_summary_style: LogSummaryStyle::Colored,
             view_client_threads: 1,
-            epoch_sync_enabled,
             view_client_throttle_period: Duration::from_secs(1),
             trie_viewer_state_size_limit: None,
             max_gas_burnt_view: None,

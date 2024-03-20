@@ -9,9 +9,9 @@ number of shards.
 
 ## Specification
 
-The resharding is described in more detail in the following NEPs:
-* [NEP-0040](https://github.com/unc/NEPs/blob/master/specs/Proposals/0040-split-states.md)
-* [NEP-0508](https://github.com/unc/NEPs/pull/508) - TODO - once merged use the master link
+The resharding is described in more detail in the following UEPs:
+* [NEP-0040](https://github.com/Utility/UEPs/blob/master/specs/Proposals/0040-split-states.md)
+* [NEP-0508](https://github.com/Utility/UEPs/pull/508) - TODO - once merged use the master link
 
 ## Shard layout
 

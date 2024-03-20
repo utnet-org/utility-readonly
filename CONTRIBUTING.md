@@ -56,7 +56,7 @@ help on our zulip channel.
 
 If you have an idea for an enhancement to the protocol itself, please make a
 proposal by following the [UNC Enhancement
-Proposal](https://github.com/unc/NEPs/blob/master/neps/nep-0001.md) process.
+Proposal](https://github.com/Utility/UEPs/blob/master/neps/nep-0001.md) process.
 
 ## Pull Requests
 

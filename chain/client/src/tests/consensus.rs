@@ -53,7 +53,6 @@ fn test_consensus_with_epoch_switches() {
             ValidatorSchedule::new().num_shards(8).block_producers_per_epoch(validators.clone());
         let key_pairs = (0..24).map(|_| PeerInfo::random()).collect::<Vec<_>>();
         let archive = vec![true; vs.all_block_producers().count()];
-        let epoch_sync_enabled = vec![false; vs.all_block_producers().count()];
 
         let block_to_prev_block = Arc::new(RwLock::new(HashMap::new()));
         let block_to_height = Arc::new(RwLock::new(HashMap::new()));
@@ -77,7 +76,6 @@ fn test_consensus_with_epoch_switches() {
             4,
             true,
             archive,
-            epoch_sync_enabled,
             false,
             Box::new(move |_, from_whom: AccountId, msg: &PeerManagerMessageRequest| {
                 let mut all_blocks: RwLockWriteGuard<BTreeMap<BlockHeight, Block>> =

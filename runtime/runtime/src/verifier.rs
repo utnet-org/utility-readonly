@@ -75,7 +75,7 @@ pub fn check_storage_stake(
     }
 }
 
-/// Zero Balance Account introduced in NEP 448 https://github.com/unc/NEPs/pull/448
+/// Zero Balance Account introduced in NEP 448 https://github.com/Utility/UEPs/pull/448
 /// An account is a zero balance account if and only if the account uses no more than `ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT` bytes
 fn is_zero_balance_account(account: &Account) -> bool {
     account.storage_usage() <= ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT
