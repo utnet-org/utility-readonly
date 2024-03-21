@@ -27,4 +27,6 @@ unc stake 79d96a47f387ae8f8e92a7f5b42e75d86c31c680581ad77cef1115a5b76b6e3b ed255
 sleep 2
 unc stake e2678f53a51a46a8c76639cf37ed6c6070b995ed759d6fff0fad1c25ee87057d ed25519:GEnjFuPBKc5LxX5YPVoYyRBZ5tyCfU2Vz9Sf1PvABwhN 10000000 --keyPath /Users/jameswalstonn/.unc/Unc4/validator_key.json
 
+#unc stake miner ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv 20000000 --keyPath /Users/jameswalstonn/.unc/Unc1/validator_key.json
+
 
