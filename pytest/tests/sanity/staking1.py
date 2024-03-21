@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Spins up with two validators, and one non-validator
-# Stakes for the non-validators, ensures it becomes a validator
+# Pledges for the non-validators, ensures it becomes a validator
 # Unpledges for them, makes sure they stop being a validator
 
 import sys, time, base58, random, datetime

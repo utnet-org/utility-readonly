@@ -158,7 +158,7 @@ def print_staking_key(home_dir):
     if not key_file['account_id']:
         print("Node is not staking. Re-run init to specify staking account.")
         return
-    print("Stake for user '%s' with '%s'" %
+    print("Pledge for user '%s' with '%s'" %
           (key_file['account_id'], key_file['public_key']))
 
 

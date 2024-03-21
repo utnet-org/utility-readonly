@@ -1466,7 +1466,7 @@ def pledge_available_amount(node_account, last_staking):
                     )
                     node_account.send_pledge_tx(pledge_amount)
                 logger.info(
-                    f'Staked {pledge_amount} for {node_account.key.account_id}')
+                    f'Pledged {pledge_amount} for {node_account.key.account_id}')
                 return time.time()
             except Exception as e:
                 logger.info('Failed to pledge')

@@ -9,7 +9,7 @@ use crate::{Doomslug, DoomslugThresholdMode};
 use unc_crypto::{KeyType, SecretKey};
 use unc_primitives::block::Approval;
 use unc_primitives::hash::{hash, CryptoHash};
-use unc_primitives::types::{ApprovalStake, BlockHeight};
+use unc_primitives::types::{ApprovalPledge, BlockHeight};
 
 fn block_hash(height: BlockHeight, ord: usize) -> CryptoHash {
     hash(([height.to_le_bytes(), ord.to_le_bytes()].concat()).as_ref())
@@ -38,7 +38,7 @@ fn one_iter(
     let account_ids = ["test1", "test2", "test3", "test4", "test5", "test6", "test7", "test8"];
     let pledges = account_ids
         .iter()
-        .map(|account_id| ApprovalStake {
+        .map(|account_id| ApprovalPledge {
             account_id: account_id.parse().unwrap(),
             pledge_this_epoch: 1,
             pledge_next_epoch: 1,

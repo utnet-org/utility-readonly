@@ -5,7 +5,7 @@ use unc_chain::{Chain, ChainGenesis};
 use unc_epoch_manager::types::BlockHeaderInfo;
 use unc_epoch_manager::EpochManager;
 use unc_primitives::test_utils::create_test_signer;
-use unc_primitives::types::validator_pledge::{ValidatorPledge, ValidatorStakeIter};
+use unc_primitives::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
 use unc_store::flat::{FlatStateChanges, FlatStateDelta, FlatStateDeltaMetadata};
 use unc_store::genesis::initialize_genesis_state;
 use num_rational::Ratio;
@@ -16,7 +16,7 @@ use unc_crypto::{InMemorySigner, KeyType, Signer};
 use unc_o11y::testonly::init_test_logger;
 use unc_primitives::block::Tip;
 use unc_primitives::challenge::{ChallengesResult, SlashedValidator};
-use unc_primitives::transaction::{Action, DeleteAccountAction, StakeAction, TransferAction};
+use unc_primitives::transaction::{Action, DeleteAccountAction, PledgeAction, TransferAction};
 use unc_primitives::types::{
     BlockHeightDelta, Nonce, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason,
 };
@@ -44,7 +44,7 @@ fn pledge(
         sender.validator_id().clone(),
         sender.validator_id().clone(),
         &*signer,
-        vec![Action::Stake(Box::new(StakeAction { pledge, public_key: sender.public_key() }))],
+        vec![Action::Pledge(Box::new(PledgeAction { pledge, public_key: sender.public_key() }))],
         // runtime does not validate block history
         CryptoHash::default(),
     )
@@ -61,7 +61,7 @@ impl NightshadeRuntime {
         block_hash: &CryptoHash,
         receipts: &[Receipt],
         transactions: &[SignedTransaction],
-        last_validator_proposals: ValidatorStakeIter,
+        last_validator_proposals: ValidatorPledgeIter,
         gas_price: Balance,
         gas_limit: Gas,
         challenges_result: &ChallengesResult,
@@ -272,7 +272,7 @@ impl TestEnv {
                 &new_hash,
                 self.last_receipts.get(&shard_id).map_or(&[], |v| v.as_slice()),
                 &transactions[shard_id as usize],
-                ValidatorStakeIter::new(
+                ValidatorPledgeIter::new(
                     self.last_shard_proposals.get(&shard_id).unwrap_or(&vec![]),
                 ),
                 self.runtime.genesis_config.min_gas_price,
@@ -443,7 +443,7 @@ fn test_validator_rotation() {
     );
 
     let test1_acc = env.view_account(&"test1".parse().unwrap());
-    // Staked 2 * X, sent 3 * X to test3.
+    // Pledged 2 * X, sent 3 * X to test3.
     assert_eq!(
         (test1_acc.amount, test1_acc.pledging),
         (TESTING_INIT_BALANCE - 5 * TESTING_INIT_PLEDGE, 2 * TESTING_INIT_PLEDGE)

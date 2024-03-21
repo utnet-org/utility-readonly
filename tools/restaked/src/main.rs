@@ -53,7 +53,7 @@ fn main() {
             Arg::new("pledge-amount")
                 .long("pledge-amount")
                 .default_value("0")
-                .help("Stake amount in UNC, if 0 is used it repledges last seen pledging amount")
+                .help("Pledge amount in UNC, if 0 is used it repledges last seen pledging amount")
                 .action(clap::ArgAction::Set),
         )
         .get_matches();
@@ -66,7 +66,7 @@ fn main() {
     let rpc_url = matches.get_one::<String>("rpc-url").unwrap();
     let pledge_amount = matches
         .get_one::<String>("pledge-amount")
-        .map(|s| s.parse().expect("Stake amount must be a number"))
+        .map(|s| s.parse().expect("Pledge amount must be a number"))
         .unwrap();
 
     let config = Config::from_file(&home_dir.join(CONFIG_FILENAME)).expect("can't load config");

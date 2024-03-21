@@ -185,9 +185,9 @@ export interface EpochInfoView {
 export interface EpochValidatorInfo {
     current_validators: CurrentEpochValidatorInfo[];
     next_validators: NextEpochValidatorInfo[];
-    current_fishermen: ValidatorStakeView[];
-    next_fishermen: ValidatorStakeView[];
-    current_proposals: ValidatorStakeView[];
+    current_fishermen: ValidatorPledgeView[];
+    next_fishermen: ValidatorPledgeView[];
+    current_proposals: ValidatorPledgeView[];
     prev_epoch_kickout: ValidatorKickoutView[];
     epoch_start_height: number;
     epoch_height: number;
@@ -212,7 +212,7 @@ export interface NextEpochValidatorInfo {
     shards: number[];
 }
 
-export interface ValidatorStakeView {
+export interface ValidatorPledgeView {
     account_id: string;
     public_key: string;
     pledge: string;
@@ -229,7 +229,7 @@ export type ValidatorKickoutReason =
     | { NotEnoughBlocks: { produced: number; expected: number } }
     | { NotEnoughChunks: { produced: number; expected: number } }
     | 'Unpledged'
-    | { NotEnoughStake: { pledge: string; threshold: string } }
+    | { NotEnoughPledge: { pledge: string; threshold: string } }
     | 'DidNotGetASeat';
 
 export interface PeerStoreView {

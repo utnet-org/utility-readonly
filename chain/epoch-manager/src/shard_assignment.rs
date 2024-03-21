@@ -18,7 +18,7 @@ use unc_primitives::utils::min_heap::{MinHeap, PeekMut};
 ///
 /// Panics if chunk_producers vector is not sorted in descending order by
 /// producer’s pledge.
-pub fn assign_shards<T: HasStake<Balance> + Eq + Clone + PartialOrd>(
+pub fn assign_shards<T: HasPledge<Balance> + Eq + Clone + PartialOrd>(
     chunk_producers: Vec<T>,
     num_shards: NumShards,
     min_validators_per_shard: usize,
@@ -78,7 +78,7 @@ pub fn assign_shards<T: HasStake<Balance> + Eq + Clone + PartialOrd>(
     Ok(result)
 }
 
-fn assign_with_possible_repeats<T: HasStake<Balance> + Eq, I: Iterator<Item = (usize, T)>>(
+fn assign_with_possible_repeats<T: HasPledge<Balance> + Eq, I: Iterator<Item = (usize, T)>>(
     shard_index: &mut MinHeap<(usize, Balance, ShardId)>,
     result: &mut Vec<Vec<T>>,
     cp_iter: &mut I,
@@ -143,23 +143,23 @@ fn assign_with_possible_repeats<T: HasStake<Balance> + Eq, I: Iterator<Item = (u
 #[derive(Debug)]
 pub struct NotEnoughValidators;
 
-pub trait HasStake<T> {
+pub trait HasPledge<T> {
     fn get_value(&self) -> T;
 }
 
-impl HasStake<Power> for ValidatorPower {
+impl HasPledge<Power> for ValidatorPower {
     fn get_value(&self) -> Power {
         self.power()
     }
 }
 
-impl HasStake<Balance> for ValidatorPledge {
+impl HasPledge<Balance> for ValidatorPledge {
     fn get_value(&self) -> Balance {
         self.pledge()
     }
 }
 
-impl HasStake<Balance> for ValidatorPowerAndPledge {
+impl HasPledge<Balance> for ValidatorPowerAndPledge {
     fn get_value(&self) -> Balance {
         self.pledge()
     }
@@ -302,7 +302,7 @@ mod tests {
                 shard_id, cps.0, validators_per_shard
             );
 
-            // Stake distribution should be even
+            // Pledge distribution should be even
             let diff = (cps.1 as i128) - (average_pledge_per_shard as i128);
             assert!(
                 diff.abs() < diff_tolerance,
@@ -315,7 +315,7 @@ mod tests {
         }
     }
 
-    impl super::HasStake for (usize, Balance) {
+    impl super::HasPledge for (usize, Balance) {
         fn get_pledge(&self) -> Balance {
             self.1
         }

@@ -27,7 +27,7 @@ use crate::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
     DeployContractAction, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithIdAndProof,
     ExecutionStatus, FunctionCallAction, PartialExecutionOutcome, PartialExecutionStatus,
-    SignedTransaction, StakeAction, TransferAction,
+    SignedTransaction, PledgeAction, TransferAction,
 };
 use crate::types::{
     AccountId, AccountWithPublicKey, Balance, BlockHeight, EpochHeight, EpochId, FunctionArgs, Gas,
@@ -1298,7 +1298,7 @@ pub enum ActionView {
         #[serde(with = "dec_format")]
         deposit: Balance,
     },
-    Stake {
+    Pledge {
         #[serde(with = "dec_format")]
         pledge: Balance,
         public_key: PublicKey,
@@ -1346,8 +1346,8 @@ impl From<Action> for ActionView {
                 deposit: action.deposit,
             },
             Action::Transfer(action) => ActionView::Transfer { deposit: action.deposit },
-            Action::Stake(action) => {
-                ActionView::Stake { pledge: action.pledge, public_key: action.public_key }
+            Action::Pledge(action) => {
+                ActionView::Pledge { pledge: action.pledge, public_key: action.public_key }
             }
             Action::AddKey(action) => ActionView::AddKey {
                 public_key: action.public_key,
@@ -1393,8 +1393,8 @@ impl TryFrom<ActionView> for Action {
                 }))
             }
             ActionView::Transfer { deposit } => Action::Transfer(TransferAction { deposit }),
-            ActionView::Stake { pledge, public_key } => {
-                Action::Stake(Box::new(StakeAction { pledge, public_key }))
+            ActionView::Pledge { pledge, public_key } => {
+                Action::Pledge(Box::new(PledgeAction { pledge, public_key }))
             }
             ActionView::AddKey { public_key, access_key } => {
                 Action::AddKey(Box::new(AddKeyAction { public_key, access_key: access_key.into() }))

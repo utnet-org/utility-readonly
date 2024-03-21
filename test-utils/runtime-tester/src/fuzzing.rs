@@ -121,7 +121,7 @@ impl TransactionConfig {
         });
 
         /* This actually can create new block producers, and currently we only support one.
-        // Stake
+        // Pledge
         options.push(|u, scope| {
             let signer_account = scope.random_account(u)?;
             let amount = u.int_in_range::<u128>(0..=signer_account.balance)?;
@@ -137,7 +137,7 @@ impl TransactionConfig {
                 signer_id: signer_account.id.clone(),
                 receiver_id: signer_account.id,
                 signer,
-                actions: vec![Action::Stake(StakeAction { pledge: amount, public_key })],
+                actions: vec![Action::Pledge(PledgeAction { pledge: amount, public_key })],
             })
         });
          */
@@ -390,7 +390,7 @@ pub enum Function {
     CurrentAccountId,
     AccountBalance,
     AttachedDeposit,
-    ValidatorTotalStake,
+    ValidatorTotalPledge,
     ExtSha256,
     UsedGas,
     WriteKeyValue,
@@ -437,7 +437,7 @@ impl Scope {
                     Function::CurrentAccountId,
                     Function::AccountBalance,
                     Function::AttachedDeposit,
-                    Function::ValidatorTotalStake,
+                    Function::ValidatorTotalPledge,
                     Function::ExtSha256,
                     Function::UsedGas,
                     Function::WriteKeyValue,
@@ -718,7 +718,7 @@ impl Function {
             Function::AttachedDeposit => {
                 method_name = "ext_attached_deposit";
             }
-            Function::ValidatorTotalStake => {
+            Function::ValidatorTotalPledge => {
                 method_name = "ext_validators_total_pledge";
             }
             Function::ExtSha256 => {

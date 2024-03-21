@@ -1463,7 +1463,7 @@ mod tests {
         }
     }
 
-    fn create_prev_epoch_info<T: IntoValidatorStake + Copy>(
+    fn create_prev_epoch_info<T: IntoValidatorPledge + Copy>(
         epoch_height: u64,
         prev_validators: &[T],
         prev_fishermen: &[T],
@@ -1486,25 +1486,25 @@ mod tests {
 
     fn create_proposals<I, T>(ps: I) -> Vec<ValidatorPowerAndPledge>
         where
-            T: IntoValidatorStake,
+            T: IntoValidatorPledge,
             I: IntoIterator<Item = T>,
     {
-        ps.into_iter().map(IntoValidatorStake::into_validator_pledge).collect()
+        ps.into_iter().map(IntoValidatorPledge::into_validator_pledge).collect()
     }
     fn create_power_proposals<I, T>(ps: I) -> Vec<ValidatorPower>
     where
-        T: IntoValidatorStake,
+        T: IntoValidatorPledge,
         I: IntoIterator<Item = T>,
     {
-        ps.into_iter().map(IntoValidatorStake::into_validator_pledge).collect()
+        ps.into_iter().map(IntoValidatorPledge::into_validator_pledge).collect()
     }
 
     fn create_pledge_proposals<I, T>(ps: I) -> Vec<ValidatorPledge>
         where
-            T: IntoValidatorStake,
+            T: IntoValidatorPledge,
             I: IntoIterator<Item = T>,
     {
-        ps.into_iter().map(IntoValidatorStake::into_validator_pledge).collect()
+        ps.into_iter().map(IntoValidatorPledge::into_validator_pledge).collect()
     }
 
     #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -1513,41 +1513,41 @@ mod tests {
         ChunkOnlyProducer,
     }
 
-    trait IntoValidatorStake {
+    trait IntoValidatorPledge {
         fn into_validator_pledge(self) -> ValidatorPledge;
     }
 
-    impl IntoValidatorStake for &str {
+    impl IntoValidatorPledge for &str {
         fn into_validator_pledge(self) -> ValidatorPledge {
             ValidatorPledge::new(self.parse().unwrap(), PublicKey::empty(KeyType::ED25519), 100)
         }
     }
 
-    impl IntoValidatorStake for (&str, Balance) {
+    impl IntoValidatorPledge for (&str, Balance) {
         fn into_validator_pledge(self) -> ValidatorPledge {
             ValidatorPledge::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
-    impl IntoValidatorStake for (String, Balance) {
+    impl IntoValidatorPledge for (String, Balance) {
         fn into_validator_pledge(self) -> ValidatorPledge {
             ValidatorPledge::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
-    impl IntoValidatorStake for (&str, Balance, Proposal) {
+    impl IntoValidatorPledge for (&str, Balance, Proposal) {
         fn into_validator_pledge(self) -> ValidatorPledge {
             ValidatorPledge::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
-    impl IntoValidatorStake for (String, Balance, Proposal) {
+    impl IntoValidatorPledge for (String, Balance, Proposal) {
         fn into_validator_pledge(self) -> ValidatorPledge {
             ValidatorPledge::new(self.0.parse().unwrap(), PublicKey::empty(KeyType::ED25519), self.1)
         }
     }
 
-    impl<T: IntoValidatorStake + Copy> IntoValidatorStake for &T {
+    impl<T: IntoValidatorPledge + Copy> IntoValidatorPledge for &T {
         fn into_validator_pledge(self) -> ValidatorPledge {
             (*self).into_validator_pledge()
         }

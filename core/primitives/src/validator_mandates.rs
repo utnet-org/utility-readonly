@@ -214,7 +214,7 @@ pub type ValidatorMandatesAssignment = Vec<HashMap<ValidatorId, AssignmentWeight
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub struct AssignmentWeight {
     pub num_mandates: u16,
-    /// Stake assigned to this partial mandate.
+    /// Pledge assigned to this partial mandate.
     pub partial_weight: Balance,
 }
 
@@ -300,7 +300,7 @@ mod tests {
         )
     }
 
-    /// Constructs some `ValidatorStakes` for usage in tests.
+    /// Constructs some `ValidatorPledges` for usage in tests.
     ///
     /// # Properties of the corresponding `ValidatorMandates`
     ///

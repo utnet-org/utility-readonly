@@ -95,7 +95,7 @@ initial_balances = balances
 
 logger.info("stage 3 done")
 
-# 4. Stake for the second node to bring it back up as a validator and wait until it actually
+# 4. Pledge for the second node to bring it back up as a validator and wait until it actually
 #    becomes one
 
 

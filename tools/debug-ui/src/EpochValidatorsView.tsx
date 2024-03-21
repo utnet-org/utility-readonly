@@ -27,7 +27,7 @@ interface ValidatorInfo {
     accountId: string;
     current: CurrentValidatorInfo | null;
     next: NextValidatorInfo | null;
-    proposalStake: number | null;
+    proposalPledge: number | null;
     kickoutReason: ValidatorKickoutReason | null;
     roles: ValidatorRole[];
 }
@@ -49,7 +49,7 @@ class Validators {
             accountId,
             current: null,
             next: null,
-            proposalStake: null,
+            proposalPledge: null,
             kickoutReason: null,
             roles,
         });
@@ -70,8 +70,8 @@ class Validators {
             if (info.next !== null) {
                 return [1, -info.next.pledge];
             }
-            if (info.proposalStake !== null) {
-                return [2, -info.proposalStake];
+            if (info.proposalPledge !== null) {
+                return [2, -info.proposalPledge];
             }
             return [3, 0];
         }
@@ -104,8 +104,8 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
     if (epochError) {
         return <div className="error">{(epochError as Error).stack}</div>;
     }
-    let maxStake = 0,
-        totalStake = 0,
+    let maxPledge = 0,
+        totalPledge = 0,
         maxExpectedBlocks = 0,
         maxExpectedChunks = 0;
     const epochs = epochData!.status_response.EpochInfo;
@@ -126,8 +126,8 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
                 expected: validatorInfo.num_expected_chunks,
             },
         };
-        maxStake = Math.max(maxStake, pledge);
-        totalStake += pledge;
+        maxPledge = Math.max(maxPledge, pledge);
+        totalPledge += pledge;
         maxExpectedBlocks = Math.max(maxExpectedBlocks, validatorInfo.num_expected_blocks);
         maxExpectedChunks = Math.max(maxExpectedChunks, validatorInfo.num_expected_chunks);
     }
@@ -140,7 +140,7 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
     }
     for (const proposal of currentValidatorInfo.current_proposals) {
         const validator = validators.validator(proposal.account_id);
-        validator.proposalStake = parseFloat(proposal.pledge);
+        validator.proposalPledge = parseFloat(proposal.pledge);
     }
     for (const kickout of currentValidatorInfo.prev_epoch_kickout) {
         const validator = validators.validator(kickout.account_id);
@@ -169,12 +169,12 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
 
                     <th className="small-text">Role</th>
                     <th className="small-text">Shards</th>
-                    <th>Stake</th>
+                    <th>Pledge</th>
                     <th>Proposal</th>
 
                     <th className="small-text">Role</th>
                     <th className="small-text">Shards</th>
-                    <th>Stake</th>
+                    <th>Pledge</th>
                     <th>Blocks</th>
                     <th>Chunks</th>
 
@@ -196,17 +196,17 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
                             <td>{renderRole(validator.roles[0])}</td>
                             <td>{validator.next?.shards?.join(',') ?? ''}</td>
                             <td>
-                                {drawStakeBar(validator.next?.pledge ?? null, maxStake, totalStake)}
+                                {drawPledgeBar(validator.next?.pledge ?? null, maxPledge, totalPledge)}
                             </td>
-                            <td>{drawStakeBar(validator.proposalStake, maxStake, totalStake)}</td>
+                            <td>{drawPledgeBar(validator.proposalPledge, maxPledge, totalPledge)}</td>
 
                             <td>{renderRole(validator.roles[1])}</td>
                             <td>{validator.current?.shards?.join(',') ?? ''}</td>
                             <td>
-                                {drawStakeBar(
+                                {drawPledgeBar(
                                     validator.current?.pledge ?? null,
-                                    maxStake,
-                                    totalStake
+                                    maxPledge,
+                                    totalPledge
                                 )}
                             </td>
                             <td>
@@ -274,13 +274,13 @@ function drawProducedAndExpectedBar(
     );
 }
 
-function drawStakeBar(pledge: number | null, maxStake: number, totalStake: number): JSX.Element {
+function drawPledgeBar(pledge: number | null, maxPledge: number, totalPledge: number): JSX.Element {
     if (pledge === null) {
         return <></>;
     }
-    const width = (pledge / maxStake) * 100 + 5;
+    const width = (pledge / maxPledge) * 100 + 5;
     const pledgeText = Math.floor(pledge / 1e24).toLocaleString('en-US');
-    const pledgePercentage = ((100 * pledge) / totalStake).toFixed(2) + '%';
+    const pledgePercentage = ((100 * pledge) / totalPledge).toFixed(2) + '%';
     return (
         <div className="pledge-bar">
             <div className="bar" style={{ width }}></div>
@@ -324,9 +324,9 @@ const KickoutReason = ({ reason }: { reason: ValidatorKickoutReason | null }) =>
     } else if ('NotEnoughChunks' in reason) {
         kickoutSummary = '#Chunks';
         kickoutReason = `Validator did not produce enough chunks: expected ${reason.NotEnoughChunks.expected}, actually produced ${reason.NotEnoughChunks.produced}`;
-    } else if ('NotEnoughStake' in reason) {
-        kickoutSummary = 'LowStake';
-        kickoutReason = `Validator did not have enough pledge: minimum pledge required was ${reason.NotEnoughStake.threshold}, but validator only had ${reason.NotEnoughStake.pledge}`;
+    } else if ('NotEnoughPledge' in reason) {
+        kickoutSummary = 'LowPledge';
+        kickoutReason = `Validator did not have enough pledge: minimum pledge required was ${reason.NotEnoughPledge.threshold}, but validator only had ${reason.NotEnoughPledge.pledge}`;
     } else {
         kickoutSummary = 'Other';
         kickoutReason = JSON.stringify(reason);

@@ -686,7 +686,7 @@ fn create_transfer_action() -> Action {
 }
 
 fn pledge_action() -> Action {
-    Action::Stake(Box::new(unc_primitives::transaction::StakeAction {
+    Action::Pledge(Box::new(unc_primitives::transaction::PledgeAction {
         pledge: 5u128.pow(28), // some arbitrary positive number
         public_key: PublicKey::from_seed(KeyType::ED25519, "seed"),
     }))

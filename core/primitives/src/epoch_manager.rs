@@ -44,7 +44,7 @@ pub struct BlockConfig {
     pub online_min_threshold: Rational32,
     /// Online maximum threshold above which validator gets full reward.
     pub online_max_threshold: Rational32,
-    /// Stake threshold for becoming a fisherman.
+    /// Pledge threshold for becoming a fisherman.
     pub fishermen_threshold: Balance,
     /// The minimum pledge required for staking is last seat price divided by this number.
     pub minimum_pledge_divisor: u64,
@@ -77,7 +77,7 @@ pub struct EpochConfig {
     pub online_min_threshold: Rational32,
     /// Online maximum threshold above which validator gets full reward.
     pub online_max_threshold: Rational32,
-    /// Stake threshold for becoming a fisherman.
+    /// Pledge threshold for becoming a fisherman.
     pub fishermen_threshold: Balance,
     /// The minimum pledge required for staking is last seat price divided by this number.
     pub minimum_pledge_divisor: u64,
@@ -226,7 +226,7 @@ impl AllEpochConfig {
     }
 
     fn config_max_kickout_pledge(config: &mut EpochConfig, protocol_version: u32) {
-        if checked_feature!("stable", MaxKickoutStake, protocol_version) {
+        if checked_feature!("stable", MaxKickoutPledge, protocol_version) {
             config.validator_max_kickout_pledge_perc = 30;
         }
     }

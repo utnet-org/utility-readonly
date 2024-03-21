@@ -16,7 +16,7 @@ use std::hash::{Hash, Hasher};
 
 pub use crate::action::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
-    DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
+    DeployContractAction, FunctionCallAction, PledgeAction, TransferAction,
     RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 
@@ -360,7 +360,7 @@ mod tests {
                     deposit: 1_000_000,
                 })),
                 Action::Transfer(TransferAction { deposit: 123 }),
-                Action::Stake(Box::new(StakeAction {
+                Action::Pledge(Box::new(PledgeAction {
                     public_key: public_key.clone(),
                     pledge: 1_000_000,
                 })),

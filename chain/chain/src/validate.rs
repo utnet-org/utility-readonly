@@ -352,7 +352,7 @@ fn validate_chunk_state_challenge(
     //         block_header.hash(),
     //         chunk_state.prev_chunk.receipts(),
     //         chunk_state.prev_chunk.transactions(),
-    //         ValidatorStakeIter::empty(),
+    //         ValidatorPledgeIter::empty(),
     //         prev_block_header.gas_price(),
     //         prev_chunk_header.gas_limit(),
     //         &ChallengesResult::default(),

@@ -457,7 +457,7 @@ impl EpochManager {
         // Later when we perform the check to kick out validators, we don't kick out validators in
         // exempted_validators.
         let mut exempted_validators = HashSet::new();
-        if checked_feature!("stable", MaxKickoutStake, epoch_info.protocol_version()) {
+        if checked_feature!("stable", MaxKickoutPledge, epoch_info.protocol_version()) {
             let min_keep_pledge = total_pledge * (exempt_perc as u128) / 100;
             let mut sorted_validators = validator_block_chunk_stats
                 .iter()

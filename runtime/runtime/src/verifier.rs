@@ -13,7 +13,7 @@ use unc_primitives::errors::{
 use unc_primitives::receipt::{ActionReceipt, DataReceipt, Receipt, ReceiptEnum};
 use unc_primitives::transaction::DeleteAccountAction;
 use unc_primitives::transaction::{
-    Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction, StakeAction,
+    Action, AddKeyAction, DeployContractAction, FunctionCallAction, SignedTransaction, PledgeAction,
     RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 use unc_primitives::types::{AccountId, Balance};
@@ -398,7 +398,7 @@ pub fn validate_action(
         Action::DeployContract(a) => validate_deploy_contract_action(limit_config, a),
         Action::FunctionCall(a) => validate_function_call_action(limit_config, a),
         Action::Transfer(_) => Ok(()),
-        Action::Stake(a) => validate_pledge_action(a),
+        Action::Pledge(a) => validate_pledge_action(a),
         Action::AddKey(a) => validate_add_key_action(limit_config, a),
         Action::DeleteKey(_) => Ok(()),
         Action::DeleteAccount(a) => validate_delete_action(a),
@@ -460,8 +460,8 @@ fn validate_function_call_action(
     Ok(())
 }
 
-/// Validates `StakeAction`. Checks that the `public_key` is a valid staking key.
-fn validate_pledge_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
+/// Validates `PledgeAction`. Checks that the `public_key` is a valid staking key.
+fn validate_pledge_action(action: &PledgeAction) -> Result<(), ActionsValidationError> {
     if !is_valid_staking_key(&action.public_key) {
         return Err(ActionsValidationError::UnsuitableStakingKey {
             public_key: Box::new(action.public_key.clone()),
@@ -565,7 +565,7 @@ mod tests {
     use unc_primitives::hash::{hash, CryptoHash};
     use unc_primitives::test_utils::account_new;
     use unc_primitives::transaction::{
-        CreateAccountAction, DeleteAccountAction, DeleteKeyAction, StakeAction, TransferAction,
+        CreateAccountAction, DeleteAccountAction, DeleteKeyAction, PledgeAction, TransferAction,
     };
     use unc_primitives::types::{AccountId, Balance, MerkleHash, StateChangeCause};
     use unc_primitives::version::PROTOCOL_VERSION;
@@ -1765,7 +1765,7 @@ mod tests {
     fn test_validate_action_valid_pledge() {
         validate_action(
             &test_limit_config(),
-            &Action::Stake(Box::new(StakeAction {
+            &Action::Pledge(Box::new(PledgeAction {
                 pledge: 100,
                 public_key: "ed25519:KuTCtARNzxZQ3YvXDeLjx83FDqxv2SdQTSbiq876zR7".parse().unwrap(),
             })),
@@ -1779,7 +1779,7 @@ mod tests {
         assert_eq!(
             validate_action(
                 &test_limit_config(),
-                &Action::Stake(Box::new(StakeAction {
+                &Action::Pledge(Box::new(PledgeAction {
                     pledge: 100,
                     public_key: PublicKey::empty(KeyType::ED25519),
                 })),

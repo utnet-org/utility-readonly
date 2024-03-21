@@ -601,7 +601,7 @@ fn out_of_gas_pledge() {
         let idx = promise_batch_create(logic, account_id)?;
         let attached_balance = logic.internal_mem_write(&1u128.to_be_bytes());
         let pk = write_test_pk(logic);
-        logic.promise_batch_action_stake(idx, attached_balance.ptr, pk.len, pk.ptr)?;
+        logic.promise_batch_action_pledge(idx, attached_balance.ptr, pk.len, pk.ptr)?;
         Ok(())
     }
 }

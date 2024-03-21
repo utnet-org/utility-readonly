@@ -137,7 +137,7 @@ pub struct Doomslug {
     /// Information to track the timer (see `start_timer` routine in the paper)
     timer: DoomslugTimer,
     signer: Option<Arc<dyn ValidatorSigner>>,
-    /// How many approvals to have before producing a block. In production should be always `HalfStake`,
+    /// How many approvals to have before producing a block. In production should be always `HalfPledge`,
     ///    but for many tests we use `NoApprovals` to invoke more forkfulness
     threshold_mode: DoomslugThresholdMode,
 
@@ -537,7 +537,7 @@ impl Doomslug {
     }
 
     /// Determines whether a block has enough approvals to be produced.
-    /// In production (with `mode == HalfStake`) we require the total pledge of all the approvals to
+    /// In production (with `mode == HalfPledge`) we require the total pledge of all the approvals to
     /// be strictly more than half of the total pledge. For many non-doomslug specific tests
     /// (with `mode == NoApprovals`) no approvals are needed.
     ///
@@ -779,7 +779,7 @@ mod tests {
     use unc_primitives::hash::hash;
     use unc_primitives::static_clock::StaticClock;
     use unc_primitives::test_utils::create_test_signer;
-    use unc_primitives::types::ApprovalStake;
+    use unc_primitives::types::ApprovalPledge;
 
     use crate::doomslug::{
         DoomslugApprovalsTrackersAtHeight, DoomslugBlockProductionReadiness, DoomslugThresholdMode,
@@ -920,7 +920,7 @@ mod tests {
             vec![("test1", 2, 0), ("test2", 1, 0), ("test3", 3, 0), ("test4", 1, 0)];
         let pledges = accounts
             .iter()
-            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalStake {
+            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalPledge {
                 account_id: account_id.parse().unwrap(),
                 pledge_this_epoch: *pledge_this_epoch,
                 pledge_next_epoch: *pledge_next_epoch,
@@ -1052,7 +1052,7 @@ mod tests {
             .collect::<Vec<_>>();
         let pledges = accounts
             .into_iter()
-            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalStake {
+            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalPledge {
                 account_id: account_id.parse().unwrap(),
                 pledge_this_epoch,
                 pledge_next_epoch,

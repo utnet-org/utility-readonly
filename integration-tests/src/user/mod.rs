@@ -11,7 +11,7 @@ use unc_primitives::receipt::Receipt;
 use unc_primitives::test_utils::create_user_test_signer;
 use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
-    DeployContractAction, ExecutionOutcome, FunctionCallAction, SignedTransaction, StakeAction,
+    DeployContractAction, ExecutionOutcome, FunctionCallAction, SignedTransaction, PledgeAction,
     TransferAction,
 };
 use unc_primitives::types::{AccountId, Balance, BlockHeight, Gas, MerkleHash, ShardId};
@@ -249,7 +249,7 @@ pub trait User {
         self.sign_and_commit_actions(
             signer_id.clone(),
             signer_id,
-            vec![Action::Stake(Box::new(StakeAction { pledge, public_key }))],
+            vec![Action::Pledge(Box::new(PledgeAction { pledge, public_key }))],
         )
     }
 

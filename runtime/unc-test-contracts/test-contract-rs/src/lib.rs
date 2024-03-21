@@ -95,7 +95,7 @@ extern "C" {
         gas_weight: u64,
     );
     fn promise_batch_action_transfer(promise_index: u64, amount_ptr: u64);
-    fn promise_batch_action_stake(
+    fn promise_batch_action_pledge(
         promise_index: u64,
         amount_ptr: u64,
         public_key_len: u64,
@@ -710,11 +710,11 @@ fn call_promise() {
                     &amount as *const u128 as *const u64 as u64,
                 );
                 promise_index
-            } else if let Some(action) = arg.get("action_stake") {
+            } else if let Some(action) = arg.get("action_pledge") {
                 let promise_index = action["promise_index"].as_i64().unwrap() as u64;
                 let amount = action["amount"].as_str().unwrap().parse::<u128>().unwrap();
                 let public_key = from_base64(action["public_key"].as_str().unwrap());
-                promise_batch_action_stake(
+                promise_batch_action_pledge(
                     promise_index,
                     &amount as *const u128 as *const u64 as u64,
                     public_key.len() as u64,
@@ -1075,7 +1075,7 @@ pub unsafe fn sanity_check() {
         account_id.as_ptr() as u64,
     );
 
-    // Create a new account as `DeleteAccountAction` fails after `StakeAction`.
+    // Create a new account as `DeleteAccountAction` fails after `PledgeAction`.
     let new_account_id = insert_account_id_prefix("bar.", account_id.clone()).unwrap();
     let batch_promise_idx = 9;
     let amount_pledge = 30_000_000_000_000_000_000_000u128;
@@ -1088,7 +1088,7 @@ pub unsafe fn sanity_check() {
         batch_promise_idx,
         &amount_non_zero as *const u128 as *const u64 as u64,
     );
-    promise_batch_action_stake(
+    promise_batch_action_pledge(
         batch_promise_idx,
         &amount_pledge as *const u128 as *const u64 as u64,
         account_public_key.len() as u64,

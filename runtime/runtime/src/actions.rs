@@ -17,7 +17,7 @@ use unc_primitives::hash::CryptoHash;
 use unc_primitives::receipt::{ActionReceipt, Receipt, ReceiptEnum};
 use unc_primitives::transaction::{
     Action, AddKeyAction, DeleteAccountAction, DeleteKeyAction, DeployContractAction,
-    FunctionCallAction, StakeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
+    FunctionCallAction, PledgeAction, TransferAction, RegisterRsa2048KeysAction, CreateRsa2048ChallengeAction,
 };
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::{AccountId, BlockHeight, EpochInfoProvider, Gas, TrieCacheMode};
@@ -313,11 +313,11 @@ pub(crate) fn action_function_call(
     Ok(())
 }
 
-pub(crate) fn action_stake(
+pub(crate) fn action_pledge(
     account: &mut Account,
     result: &mut ActionResult,
     account_id: &AccountId,
-    pledge: &StakeAction,
+    pledge: &PledgeAction,
     last_block_hash: &CryptoHash,
     epoch_info_provider: &dyn EpochInfoProvider,
 ) -> Result<(), RuntimeError> {
@@ -334,7 +334,7 @@ pub(crate) fn action_stake(
         if pledge.pledge > 0 {
             let minimum_pledge = epoch_info_provider.minimum_pledge(last_block_hash)?;
             if pledge.pledge < minimum_pledge {
-                result.result = Err(ActionErrorKind::InsufficientStake {
+                result.result = Err(ActionErrorKind::InsufficientPledge {
                     account_id: account_id.clone(),
                     pledge: pledge.pledge,
                     minimum_pledge,
@@ -355,7 +355,7 @@ pub(crate) fn action_stake(
             account.set_pledging(pledge.pledge);
         }
     } else {
-        result.result = Err(ActionErrorKind::TriesToStake {
+        result.result = Err(ActionErrorKind::TriesToPledge {
             account_id: account_id.clone(),
             pledge: pledge.pledge,
             pledging: account.pledging(),
@@ -1034,7 +1034,7 @@ pub(crate) fn check_actor_permissions(
     account_id: &AccountId,
 ) -> Result<(), ActionError> {
     match action {
-        Action::DeployContract(_) | Action::Stake(_) | Action::AddKey(_) | Action::DeleteKey(_) => {
+        Action::DeployContract(_) | Action::Pledge(_) | Action::AddKey(_) | Action::DeleteKey(_) => {
             if actor_id != account_id {
                 return Err(ActionErrorKind::ActorNoPermission {
                     account_id: account_id.clone(),
@@ -1137,7 +1137,7 @@ pub(crate) fn check_account_existence(
         }
         Action::DeployContract(_)
         | Action::FunctionCall(_)
-        | Action::Stake(_)
+        | Action::Pledge(_)
         | Action::AddKey(_)
         | Action::DeleteKey(_)
         | Action::DeleteAccount(_)

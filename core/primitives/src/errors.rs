@@ -446,7 +446,7 @@ pub enum ActionErrorKind {
 
     /// A newly created account must be under a namespace of the creator account
     CreateAccountNotAllowed { account_id: AccountId, predecessor_id: AccountId },
-    /// Administrative actions like `DeployContract`, `Stake`, `AddKey`, `DeleteKey`. can be proceed only if sender=receiver
+    /// Administrative actions like `DeployContract`, `Pledge`, `AddKey`, `DeleteKey`. can be proceed only if sender=receiver
     /// or the first TX action is a `CreateAccount` action
     ActorNoPermission { account_id: AccountId, actor_id: AccountId },
     /// Account tries to remove an access key that doesn't exist
@@ -466,7 +466,7 @@ pub enum ActionErrorKind {
     /// Account is not yet pledging, but tries to unpledge
     TriesToUnpledge { account_id: AccountId },
     /// The account doesn't have enough balance to increase the pledge.
-    TriesToStake {
+    TriesToPledge {
         account_id: AccountId,
         #[serde(with = "dec_format")]
         pledge: Balance,
@@ -475,7 +475,7 @@ pub enum ActionErrorKind {
         #[serde(with = "dec_format")]
         balance: Balance,
     },
-    InsufficientStake {
+    InsufficientPledge {
         account_id: AccountId,
         #[serde(with = "dec_format")]
         pledge: Balance,
@@ -794,7 +794,7 @@ impl Display for ActionErrorKind {
             ActionErrorKind::TriesToUnpledge { account_id } => {
                 write!(f, "Account {:?} is not yet pledging, but tries to unpledge", account_id)
             }
-            ActionErrorKind::TriesToStake { account_id, pledge, pledging, balance } => write!(
+            ActionErrorKind::TriesToPledge { account_id, pledge, pledging, balance } => write!(
                 f,
                 "Account {:?} tries to pledge {}, but has pledging {} and only has {}",
                 account_id, pledge, pledging, balance
@@ -826,7 +826,7 @@ impl Display for ActionErrorKind {
             ActionErrorKind::NewReceiptValidationError(e) => {
                 write!(f, "An new action receipt created during a FunctionCall is not valid: {}", e)
             }
-            ActionErrorKind::InsufficientStake { account_id, pledge, minimum_pledge } => write!(f, "Account {} tries to pledge {} but minimum required pledge is {}", account_id, pledge, minimum_pledge),
+            ActionErrorKind::InsufficientPledge { account_id, pledge, minimum_pledge } => write!(f, "Account {} tries to pledge {} but minimum required pledge is {}", account_id, pledge, minimum_pledge),
             ActionErrorKind::OnlyImplicitAccountCreationAllowed { account_id } => write!(f, "CreateAccount action is called on hex-characters account of length 64 {}", account_id),
             ActionErrorKind::DeleteAccountWithLargeState { account_id } => write!(f, "The state of account {} is too large and therefore cannot be deleted", account_id),
             ActionErrorKind::DelegateActionInvalidSignature => write!(f, "DelegateAction is not signed with the given public key"),

@@ -7,7 +7,7 @@ ActionDeployContractPerByte                        13_625_998
 ActionFunctionCallBase                      4_639_723_000_000
 ActionFunctionCallPerByte                           4_471_868
 ActionTransfer                                230_246_125_000
-ActionStake                                   204_435_250_000
+ActionPledge                                   204_435_250_000
 ActionAddFullAccessKey                        203_530_250_000
 ActionAddFunctionAccessKeyBase                204_435_250_000
 ActionAddFunctionAccessKeyPerByte                   3_850_662

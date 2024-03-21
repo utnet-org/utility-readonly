@@ -362,7 +362,7 @@ fn test_promise_batch_action_transfer() {
 }
 
 #[test]
-fn test_promise_batch_action_stake() {
+fn test_promise_batch_action_pledge() {
     let mut logic_builder = VMLogicBuilder::default();
     let mut logic = logic_builder.build();
     let index = promise_create(&mut logic, b"rick.test", 0, 0).expect("should create a promise");
@@ -376,16 +376,16 @@ fn test_promise_batch_action_stake() {
     let num_110u128 = logic.internal_mem_write(&110u128.to_le_bytes());
 
     logic
-        .promise_batch_action_stake(123, num_110u128.ptr, key.len, key.ptr)
+        .promise_batch_action_pledge(123, num_110u128.ptr, key.len, key.ptr)
         .expect_err("shouldn't accept not existent promise index");
     let non_receipt =
         logic.promise_and(index_ptr, 1u64).expect("should create a non-receipt promise");
     logic
-        .promise_batch_action_stake(non_receipt, num_110u128.ptr, key.len, key.ptr)
+        .promise_batch_action_pledge(non_receipt, num_110u128.ptr, key.len, key.ptr)
         .expect_err("shouldn't accept non-receipt promise index");
 
     logic
-        .promise_batch_action_stake(index, num_110u128.ptr, key.len, key.ptr)
+        .promise_batch_action_pledge(index, num_110u128.ptr, key.len, key.ptr)
         .expect("should add an action to pledge");
     assert_eq!(logic.used_gas().unwrap(), 5138414976215);
     expect_test::expect![[r#"
@@ -427,7 +427,7 @@ fn test_promise_batch_action_stake() {
             }
           },
           {
-            "Stake": {
+            "Pledge": {
               "receipt_index": 0,
               "pledge": 110,
               "public_key": "ed25519:5do5nkAEVhL8iteDvXNgxi4pWK78Y7DDadX11ArFNyrf"

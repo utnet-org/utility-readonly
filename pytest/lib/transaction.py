@@ -129,7 +129,7 @@ def create_payment_action(amount):
 
 
 def create_staking_action(amount, pk):
-    pledge = Stake()
+    pledge = Pledge()
     pledge.pledge = amount
     pledge.publicKey = PublicKey()
     pledge.publicKey.keyType = 0

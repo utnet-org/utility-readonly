@@ -1820,7 +1820,7 @@ impl<'a> VMLogic<'a> {
         Ok(())
     }
 
-    /// Appends `Stake` action to the batch of actions for the given promise pointed by
+    /// Appends `Pledge` action to the batch of actions for the given promise pointed by
     /// `promise_idx`.
     ///
     /// # Errors
@@ -1837,7 +1837,7 @@ impl<'a> VMLogic<'a> {
     ///
     /// `burnt_gas := base + dispatch action base fee + dispatch action per byte fee * num bytes + cost of reading public key from memory `
     /// `used_gas := burnt_gas + exec action base fee + exec action per byte fee * num bytes`
-    pub fn promise_batch_action_stake(
+    pub fn promise_batch_action_pledge(
         &mut self,
         promise_idx: u64,
         amount_ptr: u64,
@@ -1847,7 +1847,7 @@ impl<'a> VMLogic<'a> {
         self.gas_counter.pay_base(base)?;
         if self.context.is_view() {
             return Err(HostError::ProhibitedInView {
-                method_name: "promise_batch_action_stake".to_string(),
+                method_name: "promise_batch_action_pledge".to_string(),
             }
             .into());
         }
@@ -1855,7 +1855,7 @@ impl<'a> VMLogic<'a> {
         let public_key = self.get_public_key(public_key_ptr, public_key_len)?;
         let (receipt_idx, sir) = self.promise_idx_to_receipt_idx_with_sir(promise_idx)?;
         self.pay_action_base(ActionCosts::pledge, sir)?;
-        self.ext.append_action_stake(receipt_idx, amount, public_key.decode()?);
+        self.ext.append_action_pledge(receipt_idx, amount, public_key.decode()?);
         Ok(())
     }
 

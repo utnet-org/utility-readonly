@@ -162,7 +162,7 @@ pub(crate) static VALIDATORS_BLOCKS_EXPECTED_IN_EPOCH: Lazy<IntGaugeVec> = Lazy:
 pub(crate) static BLOCK_PRODUCER_STAKE: Lazy<IntGaugeVec> = Lazy::new(|| {
     try_create_int_gauge_vec(
         "unc_block_producer_pledge",
-        "Stake of each block producer in the network",
+        "Pledge of each block producer in the network",
         &["account_id", "epoch_height"],
     )
     .unwrap()

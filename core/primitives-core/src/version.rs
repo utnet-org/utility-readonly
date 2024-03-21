@@ -83,7 +83,7 @@ pub enum ProtocolFeature {
     AltBn128,
     ChunkOnlyProducers,
     /// Ensure the total pledge of validators that are kicked out does not exceed a percentage of total pledges
-    MaxKickoutStake,
+    MaxKickoutPledge,
     /// Validate account id for function call access keys.
     AccountIdInFunctionCallPermission,
     /// Zero Balance Account NEP 448: https://github.com/Utility/UEPs/pull/448
@@ -165,7 +165,7 @@ impl ProtocolFeature {
             | ProtocolFeature::ChunkNodesCache
             | ProtocolFeature::LowerStorageKeyLimit => 53,
             ProtocolFeature::AltBn128 => 55,
-            ProtocolFeature::ChunkOnlyProducers | ProtocolFeature::MaxKickoutStake => 56,
+            ProtocolFeature::ChunkOnlyProducers | ProtocolFeature::MaxKickoutPledge => 56,
             ProtocolFeature::AccountIdInFunctionCallPermission => 57,
             ProtocolFeature::Ed25519Verify
             | ProtocolFeature::ZeroBalanceAccount

@@ -420,8 +420,8 @@ impl Runtime {
                     );
                 }
             }
-            Action::Stake(pledge) => {
-                action_stake(
+            Action::Pledge(pledge) => {
+                action_pledge(
                     account.as_mut().expect(EXPECT_ACCOUNT_EXISTS),
                     &mut result,
                     account_id,

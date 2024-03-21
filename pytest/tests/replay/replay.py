@@ -76,7 +76,7 @@ def convert_transaction_type_string_to_class(name):
         "DeployContract": DeployContract,
         "FunctionCall": FunctionCall,
         "Transfer": Transfer,
-        "Stake": Stake,
+        "Pledge": Pledge,
         "AddKey": AddKey,
         "DeleteKey": DeleteKey,
     }
@@ -112,7 +112,7 @@ def fix_json_fields_by_tx_type(py_tx, tx_type):
         py_tx.deposit = int(py_tx.deposit)
     elif tx_type == "Transfer":
         py_tx.deposit = int(py_tx.deposit)
-    elif tx_type == "Stake":
+    elif tx_type == "Pledge":
         py_tx.pledge = int(py_tx.pledge)
         py_tx.publicKey = convert_json_public_key_to_py_public_key(
             py_tx.publicKey)

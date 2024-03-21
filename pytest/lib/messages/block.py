@@ -225,11 +225,11 @@ class ValidatorPledge:
     pass
 
 
-class ValidatorStakeV1:
+class ValidatorPledgeV1:
     pass
 
 
-class ValidatorStakeV2:
+class ValidatorPledgeV2:
     pass
 
 
@@ -393,7 +393,7 @@ block_schema = [
                 ['chunks_included', 'u64'],
                 ['challenges_root', [32]],
                 ['random_value', [32]],
-                ['validator_proposals', [ValidatorStakeV1]],
+                ['validator_proposals', [ValidatorPledgeV1]],
                 ['chunk_mask', ['u8']],
                 ['gas_price', 'u128'],
                 ['total_supply', 'u128'],
@@ -419,7 +419,7 @@ block_schema = [
                 ['chunk_tx_root', [32]],
                 ['challenges_root', [32]],
                 ['random_value', [32]],
-                ['validator_proposals', [ValidatorStakeV1]],
+                ['validator_proposals', [ValidatorPledgeV1]],
                 ['chunk_mask', ['u8']],
                 ['gas_price', 'u128'],
                 ['total_supply', 'u128'],
@@ -569,7 +569,7 @@ block_schema = [
                 ['balance_burnt', 'u128'],
                 ['outgoing_receipt_root', [32]],
                 ['tx_root', [32]],
-                ['validator_proposals', [ValidatorStakeV1]],
+                ['validator_proposals', [ValidatorPledgeV1]],
             ]
         }
     ],
@@ -705,11 +705,11 @@ block_schema = [
         ValidatorPledge, {
             'kind': 'enum',
             'field': 'enum',
-            'values': [['V1', ValidatorStakeV1], ['V2', ValidatorStakeV2]]
+            'values': [['V1', ValidatorPledgeV1], ['V2', ValidatorPledgeV2]]
         }
     ],
     [
-        ValidatorStakeV1, {
+        ValidatorPledgeV1, {
             'kind':
                 'struct',
             'fields': [

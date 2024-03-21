@@ -267,13 +267,13 @@ impl<'a> External for RuntimeExt<'a> {
         self.receipt_manager.append_action_transfer(receipt_index, deposit)
     }
 
-    fn append_action_stake(
+    fn append_action_pledge(
         &mut self,
         receipt_index: ReceiptIndex,
         pledge: Balance,
         public_key: unc_crypto::PublicKey,
     ) {
-        self.receipt_manager.append_action_stake(receipt_index, pledge, public_key)
+        self.receipt_manager.append_action_pledge(receipt_index, pledge, public_key)
     }
 
     fn append_action_add_key_with_full_access(

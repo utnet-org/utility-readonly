@@ -346,7 +346,7 @@ pub trait External {
         deposit: Balance,
     ) -> Result<(), VMLogicError>;
 
-    /// Attach the [`StakeAction`] action to an existing receipt.
+    /// Attach the [`PledgeAction`] action to an existing receipt.
     ///
     /// # Arguments
     ///
@@ -357,7 +357,7 @@ pub trait External {
     /// # Panics
     ///
     /// Panics if the `receipt_index` does not refer to a known receipt.
-    fn append_action_stake(
+    fn append_action_pledge(
         &mut self,
         receipt_index: ReceiptIndex,
         pledge: Balance,

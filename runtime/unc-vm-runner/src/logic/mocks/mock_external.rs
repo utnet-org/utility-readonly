@@ -36,7 +36,7 @@ pub enum MockAction {
         receipt_index: ReceiptIndex,
         deposit: u128,
     },
-    Stake {
+    Pledge {
         receipt_index: ReceiptIndex,
         pledge: u128,
         public_key: unc_crypto::PublicKey,
@@ -225,13 +225,13 @@ impl External for MockedExternal {
         Ok(())
     }
 
-    fn append_action_stake(
+    fn append_action_pledge(
         &mut self,
         receipt_index: ReceiptIndex,
         pledge: Balance,
         public_key: unc_crypto::PublicKey,
     ) {
-        self.action_log.push(MockAction::Stake { receipt_index, pledge, public_key });
+        self.action_log.push(MockAction::Pledge { receipt_index, pledge, public_key });
     }
 
     fn append_action_add_key_with_full_access(

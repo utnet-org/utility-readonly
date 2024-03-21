@@ -129,7 +129,7 @@ impl fmt::Debug for FunctionCallAction {
     serde::Serialize,
     serde::Deserialize,
 )]
-pub struct StakeAction {
+pub struct PledgeAction {
     /// Amount of tokens to pledge.
     #[serde(with = "dec_format")]
     pub pledge: Balance,
@@ -230,7 +230,7 @@ pub enum Action {
     DeployContract(DeployContractAction),
     FunctionCall(Box<FunctionCallAction>),
     Transfer(TransferAction),
-    Stake(Box<StakeAction>),
+    Pledge(Box<PledgeAction>),
     AddKey(Box<AddKeyAction>),
     DeleteKey(Box<DeleteKeyAction>),
     DeleteAccount(DeleteAccountAction),
@@ -287,9 +287,9 @@ impl From<TransferAction> for Action {
     }
 }
 
-impl From<StakeAction> for Action {
-    fn from(pledge_action: StakeAction) -> Self {
-        Self::Stake(Box::new(pledge_action))
+impl From<PledgeAction> for Action {
+    fn from(pledge_action: PledgeAction) -> Self {
+        Self::Pledge(Box::new(pledge_action))
     }
 }
 

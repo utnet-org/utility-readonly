@@ -118,7 +118,7 @@ const block = {
     },
 };
 
-const validatorStake = {
+const validatorPledge = {
     titleKey: 'account_id',
 };
 
@@ -127,7 +127,7 @@ const epochInfo = {
         V3: {
             struct: {
                 validators: {
-                    array: validatorStake,
+                    array: validatorPledge,
                 },
             },
         },

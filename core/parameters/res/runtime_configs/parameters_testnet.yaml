@@ -71,7 +71,7 @@ action_transfer: {
   send_not_sir: 115_123_062_500,
   execution: 115_123_062_500,
 }
-action_stake: {
+action_pledge: {
   send_sir: 141_715_687_500,
   send_not_sir: 141_715_687_500,
   execution: 102_217_625_000,

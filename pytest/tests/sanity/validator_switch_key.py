@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Starts two validating nodes and one non-validating node
 # Set a new validator key that has the same account id as one of
-# the validating nodes. Stake that account with the new key
+# the validating nodes. Pledge that account with the new key
 # and make sure that the network doesn't stall even after
 # the non-validating node becomes a validator.
 

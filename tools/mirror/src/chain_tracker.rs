@@ -843,7 +843,7 @@ impl TxTracker {
                 // resulted from one of our txs (not an external/manual pledge action by the test operator),
                 // so we want to reverse it.
                 for a in actions {
-                    if let ActionView::Stake { public_key, pledge } = a {
+                    if let ActionView::Pledge { public_key, pledge } = a {
                         if pledge > 0 {
                             pledged_accounts.insert(
                                 (outcome.receipt.receiver_id.clone(), public_key),

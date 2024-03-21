@@ -103,7 +103,7 @@ use unc_parameters::{ExtCosts, RuntimeConfigStore, RuntimeFeesConfig};
 use unc_primitives::account::{AccessKey, AccessKeyPermission, FunctionCallPermission};
 use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
-    DeployContractAction, SignedTransaction, StakeAction, TransferAction,
+    DeployContractAction, SignedTransaction, PledgeAction, TransferAction,
 };
 use unc_primitives::types::AccountId;
 use unc_primitives::version::PROTOCOL_VERSION;
@@ -168,10 +168,10 @@ static ALL_COSTS: &[(Cost, fn(&mut EstimatorContext) -> GasCost)] = &[
     (Cost::ActionDeleteKeySendSir, action_costs::delete_key_send_sir),
     (Cost::ActionDeleteKeySendNotSir, action_costs::delete_key_send_not_sir),
     (Cost::ActionDeleteKeyExec, action_costs::delete_key_exec),
-    (Cost::ActionStake, action_stake),
-    (Cost::ActionStakeSendNotSir, action_costs::pledge_send_not_sir),
-    (Cost::ActionStakeSendSir, action_costs::pledge_send_sir),
-    (Cost::ActionStakeExec, action_costs::pledge_exec),
+    (Cost::ActionPledge, action_pledge),
+    (Cost::ActionPledgeSendNotSir, action_costs::pledge_send_not_sir),
+    (Cost::ActionPledgeSendSir, action_costs::pledge_send_sir),
+    (Cost::ActionPledgeExec, action_costs::pledge_exec),
     (Cost::ActionDeployContractBase, action_deploy_contract_base),
     (Cost::ActionDeployContractBaseSendNotSir, action_costs::deploy_contract_base_send_not_sir),
     (Cost::ActionDeployContractBaseSendSir, action_costs::deploy_contract_base_send_sir),
@@ -542,13 +542,13 @@ fn action_delete_key(ctx: &mut EstimatorContext) -> GasCost {
     total_cost.saturating_sub(&base_cost, &NonNegativeTolerance::PER_MILLE)
 }
 
-fn action_stake(ctx: &mut EstimatorContext) -> GasCost {
+fn action_pledge(ctx: &mut EstimatorContext) -> GasCost {
     let total_cost = {
         let mut make_transaction = |tb: &mut TransactionBuilder| -> SignedTransaction {
             let sender = tb.random_unused_account();
             let receiver = sender.clone();
 
-            let actions = vec![Action::Stake(Box::new(StakeAction {
+            let actions = vec![Action::Pledge(Box::new(PledgeAction {
                 pledge: 1,
                 public_key: "22skMptHjFWNyuEWY22ftn2AbLPSYpmYwGJRGwpNHbTV".parse().unwrap(),
             }))];

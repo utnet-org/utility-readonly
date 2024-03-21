@@ -16,7 +16,7 @@ use unc_o11y::WithSpanContextExt;
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::receipt::{Receipt, ReceiptEnum};
 use unc_primitives::transaction::{
-    Action, AddKeyAction, CreateAccountAction, DeleteKeyAction, SignedTransaction, StakeAction,
+    Action, AddKeyAction, CreateAccountAction, DeleteKeyAction, SignedTransaction, PledgeAction,
     Transaction,
 };
 use unc_primitives::types::{
@@ -1017,7 +1017,7 @@ impl<T: ChainAccess> TxMirror<T> {
                     actions.push(action.clone());
                 }
                 // We don't want to mess with the set of validators in the target chain
-                Action::Stake(_) => {}
+                Action::Pledge(_) => {}
                 Action::DeployContract(_) => {
                     // if we're getting transactions from a ViewClient instead of directly from the DB,
                     // DeployContract actions are silently mangled, so we can't recover the original contract code here
@@ -1219,7 +1219,7 @@ impl<T: ChainAccess> TxMirror<T> {
                         target_actions.push(a.clone())
                     }
                 }
-                Action::Stake(_) => {
+                Action::Pledge(_) => {
                     if provenance.is_unpledge() {
                         target_actions.push(a.clone());
                     }
@@ -1646,7 +1646,7 @@ impl<T: ChainAccess> TxMirror<T> {
                 &mut txs,
                 predecessor_id,
                 receiver_id.clone(),
-                &[Action::Stake(Box::new(StakeAction { public_key, pledge: 0 }))],
+                &[Action::Pledge(Box::new(PledgeAction { public_key, pledge: 0 }))],
                 target_hash,
                 MappedTxProvenance::Unpledge(*target_hash),
                 None,

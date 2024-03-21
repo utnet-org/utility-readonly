@@ -16,7 +16,7 @@ use crate::num_rational::Ratio;
 use crate::sharding::{ShardChunkHeader, ShardChunkHeaderV3};
 use crate::transaction::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
-    DeployContractAction, FunctionCallAction, SignedTransaction, StakeAction, Transaction,
+    DeployContractAction, FunctionCallAction, SignedTransaction, PledgeAction, Transaction,
     TransferAction,
 };
 use crate::types::{AccountId, Balance, EpochId, EpochInfoProvider, Gas, Nonce};
@@ -76,7 +76,7 @@ impl Transaction {
     }
 
     pub fn pledge(mut self, pledge: Balance, public_key: PublicKey) -> Self {
-        self.actions.push(Action::Stake(Box::new(StakeAction { pledge, public_key })));
+        self.actions.push(Action::Pledge(Box::new(PledgeAction { pledge, public_key })));
         self
     }
     pub fn add_key(mut self, public_key: PublicKey, access_key: AccessKey) -> Self {
@@ -146,7 +146,7 @@ impl SignedTransaction {
             signer_id.clone(),
             signer_id,
             signer,
-            vec![Action::Stake(Box::new(StakeAction { pledge, public_key }))],
+            vec![Action::Pledge(Box::new(PledgeAction { pledge, public_key }))],
             block_hash,
         )
     }

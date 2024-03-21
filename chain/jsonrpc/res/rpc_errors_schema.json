@@ -35,8 +35,8 @@
         "DeleteAccountStaking",
         "LackBalanceForState",
         "TriesToUnpledge",
-        "TriesToStake",
-        "InsufficientStake",
+        "TriesToPledge",
+        "InsufficientPledge",
         "FunctionCallError",
         "NewReceiptValidationError",
         "OnlyImplicitAccountCreationAllowed",
@@ -419,8 +419,8 @@
       "subtypes": [],
       "props": {}
     },
-    "InsufficientStake": {
-      "name": "InsufficientStake",
+    "InsufficientPledge": {
+      "name": "InsufficientPledge",
       "subtypes": [],
       "props": {
         "account_id": "",
@@ -817,8 +817,8 @@
         "size": ""
       }
     },
-    "TriesToStake": {
-      "name": "TriesToStake",
+    "TriesToPledge": {
+      "name": "TriesToPledge",
       "subtypes": [],
       "props": {
         "account_id": "",

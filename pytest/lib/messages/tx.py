@@ -29,7 +29,7 @@ class Transfer:
     pass
 
 
-class Stake:
+class Pledge:
     pass
 
 
@@ -100,7 +100,7 @@ tx_schema = [
                 ['deployContract', DeployContract],
                 ['functionCall', FunctionCall],
                 ['transfer', Transfer],
-                ['pledge', Stake],
+                ['pledge', Pledge],
                 ['addKey', AddKey],
                 ['deleteKey', DeleteKey],
                 ['deleteAccount', DeleteAccount],
@@ -146,7 +146,7 @@ tx_schema = [
         'fields': [['deposit', 'u128']]
     }],
     [
-        Stake, {
+        Pledge, {
             'kind': 'struct',
             'fields': [['pledge', 'u128'], ['publicKey', PublicKey]]
         }

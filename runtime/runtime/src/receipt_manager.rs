@@ -1,7 +1,7 @@
 use unc_crypto::PublicKey;
 use unc_primitives::action::{
     Action, AddKeyAction, CreateAccountAction, DeleteAccountAction, DeleteKeyAction,
-    DeployContractAction, FunctionCallAction, StakeAction, TransferAction,
+    DeployContractAction, FunctionCallAction, PledgeAction, TransferAction,
 };
 use unc_primitives::errors::RuntimeError;
 use unc_primitives::receipt::DataReceiver;
@@ -209,7 +209,7 @@ impl ReceiptManager {
         Ok(())
     }
 
-    /// Attach the [`StakeAction`] action to an existing receipt.
+    /// Attach the [`PledgeAction`] action to an existing receipt.
     ///
     /// # Arguments
     ///
@@ -220,7 +220,7 @@ impl ReceiptManager {
     /// # Panics
     ///
     /// Panics if the `receipt_index` does not refer to a known receipt.
-    pub(super) fn append_action_stake(
+    pub(super) fn append_action_pledge(
         &mut self,
         receipt_index: ReceiptIndex,
         pledge: Balance,
@@ -228,7 +228,7 @@ impl ReceiptManager {
     ) {
         self.append_action(
             receipt_index,
-            Action::Stake(Box::new(StakeAction { pledge, public_key })),
+            Action::Pledge(Box::new(PledgeAction { pledge, public_key })),
         );
     }
 

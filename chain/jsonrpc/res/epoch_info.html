@@ -43,7 +43,7 @@
             return bytes.toFixed(dp) + ' ' + units[u];
         }
 
-        function humanStake(pledge) {
+        function humanPledge(pledge) {
             let pledge_in_unc = parseInt(pledge / 10**24);
             return pledge_in_unc.toLocaleString('en-US')
         }
@@ -62,11 +62,11 @@
             validator_info.current_validators.forEach(validator => {
                 total_pledge += parseInt(validator.pledge);
             })
-            $('.js-tbody-curepoch').append("Total pledge " + humanStake(total_pledge))
+            $('.js-tbody-curepoch').append("Total pledge " + humanPledge(total_pledge))
             validator_info.current_validators.forEach(validator => {
                 let row = $('<tr>');
                 row.append($('<td>').append(validator.account_id));
-                row.append($('<td>').append(humanStake(validator.pledge) + "/" + (100 * validator.pledge / total_pledge).toFixed(2) + "%"));
+                row.append($('<td>').append(humanPledge(validator.pledge) + "/" + (100 * validator.pledge / total_pledge).toFixed(2) + "%"));
                 row.append($('<td>').append(validator.shards.join(",")));
                 row.append($('<td>').append(validator.num_expected_blocks - validator.num_produced_blocks));
                 row.append($('<td>').append(validator.num_expected_blocks));
@@ -93,7 +93,7 @@
             validator_info.next_validators.forEach(validator => {
                 let row = $('<tr>');
                 row.append($('<td>').append(validator.account_id));
-                row.append($('<td>').append(humanStake(validator.pledge) + "/" + (100 * validator.pledge / total_pledge).toFixed(2) + "%"));
+                row.append($('<td>').append(humanPledge(validator.pledge) + "/" + (100 * validator.pledge / total_pledge).toFixed(2) + "%"));
                 row.append($('<td>').append(validator.shards.join(",")));
                 $('.js-tbody-curepoch-nextvalidators').append(row)
             })
@@ -101,7 +101,7 @@
             validator_info.current_proposals.forEach(proposal=> {
                 let row = $('<tr>');
                 row.append($('<td>').append(proposal.account_id));
-                row.append($('<td>').append(humanStake(proposal.pledge) + "/" + (100*proposal.pledge/total_pledge).toFixed(2) + "%"));
+                row.append($('<td>').append(humanPledge(proposal.pledge) + "/" + (100*proposal.pledge/total_pledge).toFixed(2) + "%"));
                 $('.js-tbody-curepoch-proposals').append(row);
             })
 
@@ -275,7 +275,7 @@
         <thead onclick="toggle_tbody('js-tbody-curepoch-curvalidators')">
         <tr>
             <th>Account id</th>
-            <th>Stake / Stake %</th>
+            <th>Pledge / Pledge %</th>
             <th>Shards</th>
             <th># Missed blocks</th>
             <th># Expected blocks</th>
@@ -294,7 +294,7 @@
         <thead onclick="toggle_tbody('js-tbody-curepoch-nextvalidators')">
         <tr>
             <th>AccountId</th>
-            <th>Stake/Stake Percentage</th>
+            <th>Pledge/Pledge Percentage</th>
             <th>Shards</th>
         </tr>
         </thead>
@@ -307,7 +307,7 @@
         <thead onclick="toggle_tbody('js-tbody-curepoch-proposals')">
         <tr>
             <th>AccountId</th>
-            <th>Stake/Stake Percentage</th>
+            <th>Pledge/Pledge Percentage</th>
         </tr>
         </thead>
         <tbody class = "js-tbody-curepoch-proposals">

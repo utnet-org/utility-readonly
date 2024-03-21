@@ -133,16 +133,16 @@ pub enum Cost {
     ActionTransferSendSir,
     ActionTransferExec,
     /// Estimates `action_creation_config.pledge_cost` which is charged for every
-    /// `Action::Stake`, a slightly higher value for sending than executing.
+    /// `Action::Pledge`, a slightly higher value for sending than executing.
     ///
     /// Estimation: Measure a transaction with only a staking action and
     /// subtract the base cost of creating a sir-receipt.
     ///
     /// Note: The exec cost is probably a copy-paste mipledge. (#8185)
-    ActionStake,
-    ActionStakeSendNotSir,
-    ActionStakeSendSir,
-    ActionStakeExec,
+    ActionPledge,
+    ActionPledgeSendNotSir,
+    ActionPledgeSendSir,
+    ActionPledgeExec,
     /// Estimates `action_creation_config.add_key_cost.full_access_cost` which
     /// is charged for every `Action::AddKey` where the key is a full access
     /// key. The same value is charged for sending and executing.
@@ -592,14 +592,14 @@ pub enum Cost {
     /// available from the local EpochManager.
     ///
     /// Estimation: Currently not estimated
-    ValidatorStakeBase,
+    ValidatorPledgeBase,
     /// Estimates `validator_total_pledge_base` which is charged for each call to
     /// `validator_total_pledge`, covering the cost for looking up the total
     /// pledging tokens for the current epoch. This information is
     /// available from the local EpochManager.
     ///
     /// Estimation: Currently not estimated
-    ValidatorTotalStakeBase,
+    ValidatorTotalPledgeBase,
 
     AltBn128G1MultiexpBase,
     AltBn128G1MultiexpElement,

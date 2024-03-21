@@ -539,7 +539,7 @@ pub struct ApprovalPledge {
     pub public_key: PublicKey,
     /// Pledge / weight of the validator.
     pub pledge_this_epoch: Balance,
-    /// Stake of the validator.
+    /// Pledge of the validator.
     pub pledge_next_epoch: Balance,
 }
 
