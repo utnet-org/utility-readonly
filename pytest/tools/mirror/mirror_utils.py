@@ -384,12 +384,12 @@ def call_create_account(node, signer_key, account_id, public_key, nonce,
     )
 
 
-def call_stake(node, signer_key, amount, public_key, nonce, block_hash):
+def call_pledge(node, signer_key, amount, public_key, nonce, block_hash):
     args = json.dumps({'amount': amount, 'public_key': public_key})
     args = bytearray(args, encoding='utf-8')
 
     actions = [
-        transaction.create_function_call_action('stake', args, 10**13, 0),
+        transaction.create_function_call_action('pledge', args, 10**13, 0),
     ]
     tx = transaction.sign_and_serialize_transaction(signer_key.account_id,
                                                     nonce, actions, block_hash,
@@ -398,7 +398,7 @@ def call_stake(node, signer_key, amount, public_key, nonce, block_hash):
                                                     signer_key.decoded_sk())
     res = node.send_tx(tx)
     logger.info(
-        f'called stake contract for {signer_key.account_id} {amount} {public_key}: {res}'
+        f'called pledge contract for {signer_key.account_id} {amount} {public_key}: {res}'
     )
 
 
@@ -708,7 +708,7 @@ def send_traffic(unc_root, source_nodes, traffic_data, callback):
     implicit_deleted = None
     implicit_account2 = ImplicitAccount()
     subaccount_contract_deployed = False
-    subaccount_staked = False
+    subaccount_pledged = False
 
     # here we are gonna send a tiny amount (1 yoctoUNC) to the implicit account and
     # then wait a bit before properly initializing it. This hits a corner case where the
@@ -811,14 +811,14 @@ def send_traffic(unc_root, source_nodes, traffic_data, callback):
                                        CONTRACT_PATH, subaccount_key.nonce,
                                        block_hash_bytes)
                 subaccount_contract_deployed = True
-            elif not subaccount_staked:
+            elif not subaccount_pledged:
                 if contract_deployed(source_nodes[0],
                                      subaccount_key.account_id()):
                     subaccount_key.nonce += 1
-                    call_stake(source_nodes[0], subaccount_key.key, 10**28,
+                    call_pledge(source_nodes[0], subaccount_key.key, 10**28,
                                subaccount_key.key.pk, subaccount_key.nonce,
                                block_hash_bytes)
-                    subaccount_staked = True
+                    subaccount_pledged = True
 
         if height - start_source_height >= 100:
             break

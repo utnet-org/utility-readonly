@@ -25,7 +25,7 @@ genesis_change = [
     ["chunk_producer_kickout_threshold", 60],
     ["validators", 0, "amount", "110000000000000000000000000000000"],
     [
-        "records", 0, "Account", "account", "locked",
+        "records", 0, "Account", "account", "pledging",
         "110000000000000000000000000000000"
     ], ["total_supply", "4060000000000000000000000000000000"]
 ]
@@ -36,12 +36,12 @@ nightly_genesis_change = [
     ["chunk_producer_kickout_threshold", 60],
     ["validators", 0, "amount", "110000000000000000000000000000000"],
     [
-        "records", 0, "Account", "account", "locked",
+        "records", 0, "Account", "account", "pledging",
         "110000000000000000000000000000000"
     ], ["total_supply", "4060000000000000000000000000000000"]
 ]
 
-# give more stake to the bootnode so that it can produce the blocks alone
+# give more pledge to the bootnode so that it can produce the blocks alone
 nodes = start_cluster(2, 1, 8, None,
                       nightly_genesis_change if nightly else genesis_change, {
                           0: {

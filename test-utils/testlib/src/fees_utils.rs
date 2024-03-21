@@ -130,11 +130,11 @@ impl FeeHelper {
         self.gas_to_balance(self.transfer_fee())
     }
 
-    pub fn stake_cost(&self) -> Balance {
+    pub fn pledge_cost(&self) -> Balance {
         let exec_gas = self.cfg().fee(ActionCosts::new_action_receipt).exec_fee()
-            + self.cfg().fee(ActionCosts::stake).exec_fee();
+            + self.cfg().fee(ActionCosts::pledge).exec_fee();
         let send_gas = self.cfg().fee(ActionCosts::new_action_receipt).send_fee(true)
-            + self.cfg().fee(ActionCosts::stake).send_fee(true);
+            + self.cfg().fee(ActionCosts::pledge).send_fee(true);
         self.gas_to_balance(exec_gas + send_gas)
     }
 

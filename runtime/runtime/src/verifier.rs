@@ -29,19 +29,19 @@ pub const ZERO_BALANCE_ACCOUNT_STORAGE_LIMIT: StorageUsage = 770;
 
 /// Possible errors when checking whether an account has enough tokens for storage staking
 /// Read details of state staking
-/// <https://nomicon.io/Economics/README.html#state-stake>.
+/// <https://nomicon.io/Economics/README.html#state-pledge>.
 pub enum StorageStakingError {
     /// An account does not have enough and the additional amount needed for storage staking
     LackBalanceForStorageStaking(Balance),
-    /// Storage consistency error: an account has invalid storage usage or amount or locked amount
+    /// Storage consistency error: an account has invalid storage usage or amount or pledging amount
     StorageError(String),
 }
 
-/// Checks if given account has enough balance for storage stake, and returns:
+/// Checks if given account has enough balance for storage pledge, and returns:
 ///  - Ok(()) if account has enough balance or is a zero-balance account
 ///  - Err(StorageStakingError::LackBalanceForStorageStaking(amount)) if account doesn't have enough and how much need to be added,
-///  - Err(StorageStakingError::StorageError(err)) if account has invalid storage usage or amount/locked.
-pub fn check_storage_stake(
+///  - Err(StorageStakingError::StorageError(err)) if account has invalid storage usage or amount/pledging.
+pub fn check_storage_pledge(
     account: &Account,
     runtime_config: &RuntimeConfig,
     current_protocol_version: ProtocolVersion,
@@ -54,12 +54,12 @@ pub fn check_storage_stake(
         .map_err(StorageStakingError::StorageError)?;
     let available_amount = account
         .amount()
-        .checked_add(account.locked())
+        .checked_add(account.pledging())
         .ok_or_else(|| {
             format!(
-                "Account's amount {} and locked {} overflow addition",
+                "Account's amount {} and pledging {} overflow addition",
                 account.amount(),
-                account.locked()
+                account.pledging()
             )
         })
         .map_err(StorageStakingError::StorageError)?;
@@ -211,7 +211,7 @@ pub fn verify_and_charge_transaction(
         }
     }
 
-    match check_storage_stake(&signer, config, current_protocol_version) {
+    match check_storage_pledge(&signer, config, current_protocol_version) {
         Ok(()) => {}
         Err(StorageStakingError::LackBalanceForStorageStaking(amount)) => {
             return Err(InvalidTxError::LackBalanceForState {
@@ -398,7 +398,7 @@ pub fn validate_action(
         Action::DeployContract(a) => validate_deploy_contract_action(limit_config, a),
         Action::FunctionCall(a) => validate_function_call_action(limit_config, a),
         Action::Transfer(_) => Ok(()),
-        Action::Stake(a) => validate_stake_action(a),
+        Action::Stake(a) => validate_pledge_action(a),
         Action::AddKey(a) => validate_add_key_action(limit_config, a),
         Action::DeleteKey(_) => Ok(()),
         Action::DeleteAccount(a) => validate_delete_action(a),
@@ -461,7 +461,7 @@ fn validate_function_call_action(
 }
 
 /// Validates `StakeAction`. Checks that the `public_key` is a valid staking key.
-fn validate_stake_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
+fn validate_pledge_action(action: &StakeAction) -> Result<(), ActionsValidationError> {
     if !is_valid_staking_key(&action.public_key) {
         return Err(ActionsValidationError::UnsuitableStakingKey {
             public_key: Box::new(action.public_key.clone()),
@@ -626,7 +626,7 @@ mod tests {
             accounts
         {
             let mut initial_account = account_new(initial_balance, CryptoHash::default());
-            initial_account.set_locked(initial_locked);
+            initial_account.set_pledging(initial_locked);
             let mut key_count = 0;
             for access_key in access_keys {
                 let public_key = if key_count == 0 {
@@ -1762,11 +1762,11 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_action_valid_stake() {
+    fn test_validate_action_valid_pledge() {
         validate_action(
             &test_limit_config(),
             &Action::Stake(Box::new(StakeAction {
-                stake: 100,
+                pledge: 100,
                 public_key: "ed25519:KuTCtARNzxZQ3YvXDeLjx83FDqxv2SdQTSbiq876zR7".parse().unwrap(),
             })),
             PROTOCOL_VERSION,
@@ -1780,7 +1780,7 @@ mod tests {
             validate_action(
                 &test_limit_config(),
                 &Action::Stake(Box::new(StakeAction {
-                    stake: 100,
+                    pledge: 100,
                     public_key: PublicKey::empty(KeyType::ED25519),
                 })),
                 PROTOCOL_VERSION,

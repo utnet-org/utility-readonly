@@ -41,8 +41,8 @@ pub static BLOCK_ORDINAL_HEAD: Lazy<IntGauge> = Lazy::new(|| {
 });
 pub static VALIDATOR_AMOUNT_STAKED: Lazy<IntGauge> = Lazy::new(|| {
     try_create_int_gauge(
-        "unc_validators_stake_total",
-        "The total stake of all active validators during the last block",
+        "unc_validators_pledge_total",
+        "The total pledge of all active validators during the last block",
     )
     .unwrap()
 });

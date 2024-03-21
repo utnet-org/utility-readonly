@@ -32,7 +32,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
 use tracing::warn;
-use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 const MAX_GAS_PRICE: Balance = 10_000_000_000_000_000_000_000;
 
@@ -44,11 +44,11 @@ fn default_online_max_threshold() -> Rational32 {
     Rational32::new(99, 100)
 }
 
-fn default_minimum_stake_divisor() -> u64 {
+fn default_minimum_pledge_divisor() -> u64 {
     10
 }
 
-fn default_protocol_upgrade_stake_threshold() -> Rational32 {
+fn default_protocol_upgrade_pledge_threshold() -> Rational32 {
     Rational32::new(8, 10)
 }
 
@@ -56,7 +56,7 @@ fn default_shard_layout() -> ShardLayout {
     ShardLayout::v0_single_shard()
 }
 
-fn default_minimum_stake_ratio() -> Rational32 {
+fn default_minimum_pledge_ratio() -> Rational32 {
     Rational32::new(160, 1_000_000)
 }
 
@@ -72,7 +72,7 @@ fn default_use_production_config() -> bool {
     false
 }
 
-fn default_max_kickout_stake_threshold() -> u8 {
+fn default_max_kickout_pledge_threshold() -> u8 {
     100
 }
 
@@ -98,10 +98,10 @@ pub struct GenesisConfig {
     pub avg_hidden_validator_seats_per_shard: Vec<NumSeats>,
     /// Enable dynamic re-sharding.
     pub dynamic_resharding: bool,
-    /// Threshold of stake that needs to indicate that they ready for upgrade.
-    #[serde(default = "default_protocol_upgrade_stake_threshold")]
+    /// Threshold of pledge that needs to indicate that they ready for upgrade.
+    #[serde(default = "default_protocol_upgrade_pledge_threshold")]
     #[default(Rational32::new(8, 10))]
-    pub protocol_upgrade_stake_threshold: Rational32,
+    pub protocol_upgrade_pledge_threshold: Rational32,
     /// Epoch length counted in block heights.
     pub epoch_length: BlockHeightDelta,
     /// Initial gas limit.
@@ -145,13 +145,13 @@ pub struct GenesisConfig {
     /// Protocol treasury account
     #[default("unc".parse().unwrap())]
     pub protocol_treasury_account: AccountId,
-    /// Fishermen stake threshold.
+    /// Fishermen pledge threshold.
     #[serde(with = "dec_format")]
     pub fishermen_threshold: Balance,
-    /// The minimum stake required for staking is last seat price divided by this number.
-    #[serde(default = "default_minimum_stake_divisor")]
+    /// The minimum pledge required for staking is last seat price divided by this number.
+    #[serde(default = "default_minimum_pledge_divisor")]
     #[default(10)]
-    pub minimum_stake_divisor: u64,
+    pub minimum_pledge_divisor: u64,
     /// Layout information regarding how to split accounts to shards
     #[serde(default = "default_shard_layout")]
     #[default(ShardLayout::v0_single_shard())]
@@ -163,15 +163,15 @@ pub struct GenesisConfig {
     #[serde(default = "default_minimum_validators_per_shard")]
     #[default(1)]
     pub minimum_validators_per_shard: NumSeats,
-    #[serde(default = "default_max_kickout_stake_threshold")]
+    #[serde(default = "default_max_kickout_pledge_threshold")]
     #[default(100)]
-    /// Max stake percentage of the validators we will kick out.
-    pub max_kickout_stake_perc: u8,
+    /// Max pledge percentage of the validators we will kick out.
+    pub max_kickout_pledge_perc: u8,
     /// The lowest ratio s/s_total any block producer can have.
     /// See <https://github.com/Utility/UEPs/pull/167> for details
-    #[serde(default = "default_minimum_stake_ratio")]
+    #[serde(default = "default_minimum_pledge_ratio")]
     #[default(Rational32::new(160, 1_000_000))]
-    pub minimum_stake_ratio: Rational32,
+    pub minimum_pledge_ratio: Rational32,
     #[serde(default = "default_use_production_config")]
     #[default(false)]
     /// This is only for test purposes. We hard code some configs for mainnet and testnet
@@ -202,15 +202,15 @@ impl From<&GenesisConfig> for EpochConfig {
             fishermen_threshold: config.fishermen_threshold,
             online_min_threshold: config.online_min_threshold,
             online_max_threshold: config.online_max_threshold,
-            protocol_upgrade_stake_threshold: config.protocol_upgrade_stake_threshold,
-            minimum_stake_divisor: config.minimum_stake_divisor,
+            protocol_upgrade_pledge_threshold: config.protocol_upgrade_pledge_threshold,
+            minimum_pledge_divisor: config.minimum_pledge_divisor,
             shard_layout: config.shard_layout.clone(),
             validator_selection_config: unc_primitives::epoch_manager::ValidatorSelectionConfig {
                 num_chunk_only_producer_seats: config.num_chunk_only_producer_seats,
                 minimum_validators_per_shard: config.minimum_validators_per_shard,
-                minimum_stake_ratio: config.minimum_stake_ratio,
+                minimum_pledge_ratio: config.minimum_pledge_ratio,
             },
-            validator_max_kickout_stake_perc: config.max_kickout_stake_perc,
+            validator_max_kickout_pledge_perc: config.max_kickout_pledge_perc,
         }
     }
 }
@@ -327,15 +327,15 @@ impl GenesisConfig {
     }
 
     /// Get validators from genesis config
-    pub fn validators(&self) -> Vec<ValidatorPowerAndFrozen> {
+    pub fn validators(&self) -> Vec<ValidatorPowerAndPledge> {
         self.validators
             .iter()
             .map(|account_info| {
-                ValidatorPowerAndFrozen::new(
+                ValidatorPowerAndPledge::new(
                     account_info.account_id.clone(),
                     account_info.public_key.clone(),
                     account_info.power,
-                    account_info.locked,
+                    account_info.pledging,
                 )
             })
             .collect()
@@ -736,8 +736,8 @@ pub struct ProtocolConfigView {
     pub avg_hidden_validator_seats_per_shard: Vec<NumSeats>,
     /// Enable dynamic re-sharding.
     pub dynamic_resharding: bool,
-    /// Threshold of stake that needs to indicate that they ready for upgrade.
-    pub protocol_upgrade_stake_threshold: Rational32,
+    /// Threshold of pledge that needs to indicate that they ready for upgrade.
+    pub protocol_upgrade_pledge_threshold: Rational32,
     /// Epoch length counted in block heights.
     pub epoch_length: BlockHeightDelta,
     /// Initial gas limit.
@@ -770,16 +770,16 @@ pub struct ProtocolConfigView {
     pub num_blocks_per_year: NumBlocks,
     /// Protocol treasury account
     pub protocol_treasury_account: AccountId,
-    /// Fishermen stake threshold.
+    /// Fishermen pledge threshold.
     #[serde(with = "dec_format")]
     pub fishermen_threshold: Balance,
-    /// The minimum stake required for staking is last seat price divided by this number.
-    pub minimum_stake_divisor: u64,
-    /// Max stake percentage of the validators we will kick out.
-    pub max_kickout_stake_perc: u8,
+    /// The minimum pledge required for staking is last seat price divided by this number.
+    pub minimum_pledge_divisor: u64,
+    /// Max pledge percentage of the validators we will kick out.
+    pub max_kickout_pledge_perc: u8,
     /// The lowest ratio s/s_total any block producer can have.
     /// See <https://github.com/Utility/UEPs/pull/167> for details
-    pub minimum_stake_ratio: Rational32,
+    pub minimum_pledge_ratio: Rational32,
     /// The minimum number of validators each shard must have
     pub minimum_validators_per_shard: NumSeats,
     /// Number of validator seats for chunk only producers.
@@ -807,7 +807,7 @@ impl From<ProtocolConfig> for ProtocolConfigView {
             avg_hidden_validator_seats_per_shard: genesis_config
                 .avg_hidden_validator_seats_per_shard,
             dynamic_resharding: genesis_config.dynamic_resharding,
-            protocol_upgrade_stake_threshold: genesis_config.protocol_upgrade_stake_threshold,
+            protocol_upgrade_pledge_threshold: genesis_config.protocol_upgrade_pledge_threshold,
             epoch_length: genesis_config.epoch_length,
             gas_limit: genesis_config.gas_limit,
             min_gas_price: genesis_config.min_gas_price,
@@ -824,9 +824,9 @@ impl From<ProtocolConfig> for ProtocolConfigView {
             num_blocks_per_year: genesis_config.num_blocks_per_year,
             protocol_treasury_account: genesis_config.protocol_treasury_account,
             fishermen_threshold: genesis_config.fishermen_threshold,
-            minimum_stake_divisor: genesis_config.minimum_stake_divisor,
-            max_kickout_stake_perc: genesis_config.max_kickout_stake_perc,
-            minimum_stake_ratio: genesis_config.minimum_stake_ratio,
+            minimum_pledge_divisor: genesis_config.minimum_pledge_divisor,
+            max_kickout_pledge_perc: genesis_config.max_kickout_pledge_perc,
+            minimum_pledge_ratio: genesis_config.minimum_pledge_ratio,
             minimum_validators_per_shard: genesis_config.minimum_validators_per_shard,
             num_chunk_only_producer_seats: genesis_config.num_chunk_only_producer_seats,
             shard_layout: genesis_config.shard_layout,
@@ -838,7 +838,7 @@ pub fn get_initial_supply(records: &[StateRecord]) -> Balance {
     let mut total_supply = 0;
     for record in records {
         if let StateRecord::Account { account, .. } = record {
-            total_supply += account.amount() + account.locked();
+            total_supply += account.amount() + account.pledging();
         }
     }
     total_supply
@@ -887,7 +887,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -899,7 +899,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -920,7 +920,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -950,7 +950,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -976,7 +976,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -987,7 +987,7 @@ mod test {
                         "account_id": "01.unc",
                         "account": {
                               "amount": "49999999958035075000000000",
-                              "locked": "0",
+                              "pledging": "0",
                               "code_hash": "11111111111111111111111111111111",
                               "storage_usage": 264
                         }
@@ -1013,7 +1013,7 @@ mod test {
                 0
               ],
               "dynamic_resharding": false,
-              "protocol_upgrade_stake_threshold": [
+              "protocol_upgrade_pledge_threshold": [
                 4,
                 5
               ],
@@ -1056,7 +1056,7 @@ mod test {
               "num_blocks_per_year": 31536000,
               "protocol_treasury_account": "test.unc",
               "fishermen_threshold": "10000000000000000000000000",
-              "minimum_stake_divisor": 10,
+              "minimum_pledge_divisor": 10,
               "shard_layout": {
                 "V0": {
                   "num_shards": 1,
@@ -1065,8 +1065,8 @@ mod test {
               },
               "num_chunk_only_producer_seats": 300,
               "minimum_validators_per_shard": 1,
-              "max_kickout_stake_perc": 100,
-              "minimum_stake_ratio": [
+              "max_kickout_pledge_perc": 100,
+              "minimum_pledge_ratio": [
                 1,
                 6250
               ],
@@ -1077,7 +1077,7 @@ mod test {
                     "account_id": "test.unc",
                     "account": {
                       "amount": "1000000000000000000000000000000000",
-                      "locked": "50000000000000000000000000000000",
+                      "pledging": "50000000000000000000000000000000",
                       "code_hash": "11111111111111111111111111111111",
                       "storage_usage": 0,
                       "version": "V1"
@@ -1099,7 +1099,7 @@ mod test {
                     "account_id": "unc",
                     "account": {
                       "amount": "1000000000000000000000000000000000",
-                      "locked": "0",
+                      "pledging": "0",
                       "code_hash": "11111111111111111111111111111111",
                       "storage_usage": 0,
                       "version": "V1"
@@ -1138,7 +1138,7 @@ mod test {
                 0
               ],
               "dynamic_resharding": false,
-              "protocol_upgrade_stake_threshold": [
+              "protocol_upgrade_pledge_threshold": [
                 4,
                 5
               ],
@@ -1181,7 +1181,7 @@ mod test {
               "num_blocks_per_year": 31536000,
               "protocol_treasury_account": "test.unc",
               "fishermen_threshold": "10000000000000000000000000",
-              "minimum_stake_divisor": 10,
+              "minimum_pledge_divisor": 10,
               "shard_layout": {
                 "V0": {
                   "num_shards": 1,
@@ -1190,8 +1190,8 @@ mod test {
               },
               "num_chunk_only_producer_seats": 300,
               "minimum_validators_per_shard": 1,
-              "max_kickout_stake_perc": 100,
-              "minimum_stake_ratio": [
+              "max_kickout_pledge_perc": 100,
+              "minimum_pledge_ratio": [
                 1,
                 6250
               ],

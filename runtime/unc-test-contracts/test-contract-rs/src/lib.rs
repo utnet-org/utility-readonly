@@ -154,8 +154,8 @@ extern "C" {
     // #################
     // # Validator API #
     // #################
-    fn validator_stake(account_id_len: u64, account_id_ptr: u64, stake_ptr: u64);
-    fn validator_total_stake(stake_ptr: u64);
+    fn validator_pledge(account_id_len: u64, account_id_ptr: u64, pledge_ptr: u64);
+    fn validator_total_pledge(pledge_ptr: u64);
     // ###################
     // # Math Extensions #
     // ###################
@@ -220,7 +220,7 @@ ext_test!(ext_account_id, current_account_id);
 ext_test_u128!(ext_account_balance, account_balance);
 ext_test_u128!(ext_attached_deposit, attached_deposit);
 
-ext_test_u128!(ext_validator_total_stake, validator_total_stake);
+ext_test_u128!(ext_validator_total_pledge, validator_total_pledge);
 
 #[no_mangle]
 pub unsafe fn ext_sha256() {
@@ -250,12 +250,12 @@ pub unsafe fn ext_used_gas() {
 }
 
 #[no_mangle]
-pub unsafe fn ext_validator_stake() {
+pub unsafe fn ext_validator_pledge() {
     input(0);
     let account_id = vec![0; register_len(0) as usize];
     read_register(0, account_id.as_ptr() as *const u64 as u64);
     let result = [0u8; size_of::<u128>()];
-    validator_stake(
+    validator_pledge(
         account_id.len() as u64,
         account_id.as_ptr() as *const u64 as u64,
         result.as_ptr() as *const u64 as u64,
@@ -1078,7 +1078,7 @@ pub unsafe fn sanity_check() {
     // Create a new account as `DeleteAccountAction` fails after `StakeAction`.
     let new_account_id = insert_account_id_prefix("bar.", account_id.clone()).unwrap();
     let batch_promise_idx = 9;
-    let amount_stake = 30_000_000_000_000_000_000_000u128;
+    let amount_pledge = 30_000_000_000_000_000_000_000u128;
     assert_eq!(
         promise_batch_create(new_account_id.len() as u64, new_account_id.as_ptr() as u64),
         batch_promise_idx,
@@ -1090,7 +1090,7 @@ pub unsafe fn sanity_check() {
     );
     promise_batch_action_stake(
         batch_promise_idx,
-        &amount_stake as *const u128 as *const u64 as u64,
+        &amount_pledge as *const u128 as *const u64 as u64,
         account_public_key.len() as u64,
         account_public_key.as_ptr() as u64,
     );
@@ -1174,10 +1174,10 @@ pub unsafe fn sanity_check() {
     // #################
     // # Validator API #
     // #################
-    let stake = [0u8; size_of::<u128>()];
+    let pledge = [0u8; size_of::<u128>()];
     let validator_id = input_args["validator_id"].as_str().unwrap().as_bytes();
-    validator_stake(validator_id.len() as u64, validator_id.as_ptr() as u64, stake.as_ptr() as u64);
-    validator_total_stake(stake.as_ptr() as u64);
+    validator_pledge(validator_id.len() as u64, validator_id.as_ptr() as u64, pledge.as_ptr() as u64);
+    validator_total_pledge(pledge.as_ptr() as u64);
 
     // ###################
     // # Math Extensions #

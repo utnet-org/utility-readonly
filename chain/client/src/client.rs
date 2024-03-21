@@ -71,7 +71,7 @@ use unc_primitives::sharding::{
 };
 use unc_primitives::static_clock::StaticClock;
 use unc_primitives::transaction::SignedTransaction;
-use unc_primitives::types::{ApprovalFrozen, Gas};
+use unc_primitives::types::{ApprovalPledge, Gas};
 use unc_primitives::types::StateRoot;
 use unc_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ShardId};
 use unc_primitives::unwrap_or_return;
@@ -617,13 +617,13 @@ impl Client {
             debug!(target: "client", "Should reschedule block");
             return Ok(None);
         }
-        let (validator_stake, _) = self.epoch_manager.get_validator_by_account_id(
+        let (validator_pledge, _) = self.epoch_manager.get_validator_by_account_id(
             &epoch_id,
             &prev_hash,
             &next_block_proposer,
         )?;
 
-        let validator_pk = validator_stake.take_public_key();
+        let validator_pk = validator_pledge.take_public_key();
         if validator_pk != validator_signer.public_key() {
             debug!(target: "client",
                 local_validator_key = ?validator_signer.public_key(),
@@ -675,7 +675,7 @@ impl Client {
             .epoch_manager
             .get_epoch_block_approvers_ordered(&prev_hash)?
             .into_iter()
-            .map(|(ApprovalFrozen { account_id, .. }, is_slashed)| {
+            .map(|(ApprovalPledge { account_id, .. }, is_slashed)| {
                 if is_slashed {
                     None
                 } else {
@@ -889,7 +889,7 @@ impl Client {
             chunk_extra.gas_limit(),
             chunk_extra.balance_burnt(),
             chunk_extra.validator_power_proposals().collect(),
-            chunk_extra.validator_frozen_proposals().collect(),
+            chunk_extra.validator_pledge_proposals().collect(),
             transactions,
             &outgoing_receipts,
             outgoing_receipts_root,
@@ -1866,8 +1866,8 @@ impl Client {
                     .epoch_manager
                     .get_validator_by_account_id(epoch_id, block_hash, account_id)
                 {
-                    Ok((validator_stake, is_slashed)) => {
-                        !is_slashed && validator_stake.take_public_key() == signer.public_key()
+                    Ok((validator_pledge, is_slashed)) => {
+                        !is_slashed && validator_pledge.take_public_key() == signer.public_key()
                     }
                     Err(_) => false,
                 }
@@ -2029,15 +2029,15 @@ impl Client {
             };
         }
 
-        let block_producer_stakes =
+        let block_producer_pledges =
             match self.epoch_manager.get_epoch_block_approvers_ordered(&parent_hash) {
-                Ok(block_producer_stakes) => block_producer_stakes,
+                Ok(block_producer_pledges) => block_producer_pledges,
                 Err(err) => {
                     error!(target: "client", ?err, "Block approval error");
                     return;
                 }
             };
-        self.doomslug.on_approval_message(StaticClock::instant(), approval, &block_producer_stakes);
+        self.doomslug.on_approval_message(StaticClock::instant(), approval, &block_producer_pledges);
     }
 
     /// Forwards given transaction to upcoming validators.

@@ -288,7 +288,7 @@ impl NightshadeRuntime {
         let ApplyChunkShardContext {
             shard_id,
             last_validator_power_proposals,
-            last_validator_frozen_proposals,
+            last_validator_pledge_proposals,
             gas_limit,
             is_new_chunk,
             is_first_block_with_chunk_of_version,
@@ -316,7 +316,7 @@ impl NightshadeRuntime {
         //         .collect();
         //
         //     if epoch_manager.is_next_block_epoch_start(prev_block_hash)? {
-        //         let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
+        //         let (power_info, pledge_info, validator_reward, double_sign_slashing_info) =
         //             epoch_manager.compute_power_return_info(prev_block_hash)?;
         //         let power_info = power_info
         //             .into_iter()
@@ -324,7 +324,7 @@ impl NightshadeRuntime {
         //                 account_id_to_shard_id(account_id, &shard_layout) == shard_id
         //             })
         //             .collect();
-        //         let frozen_info = frozen_info
+        //         let pledge_info = pledge_info
         //             .into_iter()
         //             .filter(|(account_id, _)| {
         //                 account_id_to_shard_id(account_id, &shard_layout) == shard_id
@@ -339,15 +339,15 @@ impl NightshadeRuntime {
         //         let last_power_proposals = last_validator_power_proposals
         //             .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
         //             .fold(HashMap::new(), |mut acc, v| {
-        //                 let (account_id, stake) = v.account_and_power();
-        //                 acc.insert(account_id, stake);
+        //                 let (account_id, pledge) = v.account_and_power();
+        //                 acc.insert(account_id, pledge);
         //                 acc
         //             });
-        //         let last_frozen_proposals = last_validator_frozen_proposals
+        //         let last_pledge_proposals = last_validator_pledge_proposals
         //             .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
         //             .fold(HashMap::new(), |mut acc, v| {
-        //                 let (account_id, stake) = v.account_and_frozen();
-        //                 acc.insert(account_id, stake);
+        //                 let (account_id, pledge) = v.account_and_pledge();
+        //                 acc.insert(account_id, pledge);
         //                 acc
         //             });
         //         let double_sign_slashing_info: HashMap<_, _> = double_sign_slashing_info
@@ -355,15 +355,15 @@ impl NightshadeRuntime {
         //             .filter(|(account_id, _)| {
         //                 account_id_to_shard_id(account_id, &shard_layout) == shard_id
         //             })
-        //             .map(|(account_id, stake)| (account_id, Some(stake)))
+        //             .map(|(account_id, pledge)| (account_id, Some(pledge)))
         //             .collect();
         //         slashing_info.extend(double_sign_slashing_info);
         //         Some(ValidatorAccountsUpdate {
         //             power_info,
-        //             frozen_info,
+        //             pledge_info,
         //             validator_rewards,
         //             last_power_proposals,
-        //             last_frozen_proposals,
+        //             last_pledge_proposals,
         //             protocol_treasury_account_id: Some(
         //                 self.genesis_config.protocol_treasury_account.clone(),
         //             )
@@ -375,10 +375,10 @@ impl NightshadeRuntime {
         //     } else if !challenges_result.is_empty() {
         //         Some(ValidatorAccountsUpdate {
         //             power_info: Default::default(),
-        //             frozen_info: Default::default(),
+        //             pledge_info: Default::default(),
         //             validator_rewards: Default::default(),
         //             last_power_proposals: Default::default(),
-        //             last_frozen_proposals: Default::default(),
+        //             last_pledge_proposals: Default::default(),
         //             protocol_treasury_account_id: None,
         //             slashing_info,
         //         })
@@ -411,15 +411,15 @@ impl NightshadeRuntime {
             if !challenges_result.is_empty() {
                 Some(ValidatorAccountsUpdate {
                     power_info: Default::default(),
-                    frozen_info: Default::default(),
+                    pledge_info: Default::default(),
                     validator_rewards: Default::default(),
                     last_power_proposals: Default::default(),
-                    last_frozen_proposals: Default::default(),
+                    last_pledge_proposals: Default::default(),
                     protocol_treasury_account_id: None,
                     slashing_info,
                 })
             } else {
-                let (power_info, frozen_info, validator_reward, double_sign_slashing_info) =
+                let (power_info, pledge_info, validator_reward, double_sign_slashing_info) =
                     epoch_manager.compute_power_return_info_for_block(prev_block_hash)?;
                 let power_info = power_info
                     .into_iter()
@@ -427,7 +427,7 @@ impl NightshadeRuntime {
                         account_id_to_shard_id(account_id, &shard_layout) == shard_id
                     })
                     .collect();
-                let frozen_info = frozen_info
+                let pledge_info = pledge_info
                     .into_iter()
                     .filter(|(account_id, _)| {
                         account_id_to_shard_id(account_id, &shard_layout) == shard_id
@@ -442,15 +442,15 @@ impl NightshadeRuntime {
                 let last_power_proposals = last_validator_power_proposals
                     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
                     .fold(HashMap::new(), |mut acc, v| {
-                        let (account_id, stake) = v.account_and_power();
-                        acc.insert(account_id, stake);
+                        let (account_id, pledge) = v.account_and_power();
+                        acc.insert(account_id, pledge);
                         acc
                     });
-                let last_frozen_proposals = last_validator_frozen_proposals
+                let last_pledge_proposals = last_validator_pledge_proposals
                     .filter(|v| account_id_to_shard_id(v.account_id(), &shard_layout) == shard_id)
                     .fold(HashMap::new(), |mut acc, v| {
-                        let (account_id, stake) = v.account_and_frozen();
-                        acc.insert(account_id, stake);
+                        let (account_id, pledge) = v.account_and_pledge();
+                        acc.insert(account_id, pledge);
                         acc
                     });
                 let double_sign_slashing_info: HashMap<_, _> = double_sign_slashing_info
@@ -458,15 +458,15 @@ impl NightshadeRuntime {
                     .filter(|(account_id, _)| {
                         account_id_to_shard_id(account_id, &shard_layout) == shard_id
                     })
-                    .map(|(account_id, stake)| (account_id, Some(stake)))
+                    .map(|(account_id, pledge)| (account_id, Some(pledge)))
                     .collect();
                 slashing_info.extend(double_sign_slashing_info);
                 Some(ValidatorAccountsUpdate {
                     power_info,
-                    frozen_info,
+                    pledge_info,
                     validator_rewards,
                     last_power_proposals,
-                    last_frozen_proposals,
+                    last_pledge_proposals,
                     protocol_treasury_account_id: Some(
                         self.genesis_config.protocol_treasury_account.clone(),
                     )
@@ -575,7 +575,7 @@ impl NightshadeRuntime {
             outcomes: apply_result.outcomes,
             outgoing_receipts: apply_result.outgoing_receipts,
             validator_power_proposals: apply_result.validator_power_proposals,
-            validator_frozen_proposals: apply_result.validator_frozen_proposals,
+            validator_pledge_proposals: apply_result.validator_pledge_proposals,
             total_gas_burnt,
             total_balance_burnt,
             proof: apply_result.proof,
@@ -1329,20 +1329,20 @@ impl RuntimeAdapter for NightshadeRuntime {
             epoch_config.block_producer_kickout_threshold;
         genesis_config.chunk_producer_kickout_threshold =
             epoch_config.chunk_producer_kickout_threshold;
-        genesis_config.max_kickout_stake_perc = epoch_config.validator_max_kickout_stake_perc;
+        genesis_config.max_kickout_pledge_perc = epoch_config.validator_max_kickout_pledge_perc;
         genesis_config.online_min_threshold = epoch_config.online_min_threshold;
         genesis_config.online_max_threshold = epoch_config.online_max_threshold;
         genesis_config.fishermen_threshold = epoch_config.fishermen_threshold;
-        genesis_config.minimum_stake_divisor = epoch_config.minimum_stake_divisor;
-        genesis_config.protocol_upgrade_stake_threshold =
-            epoch_config.protocol_upgrade_stake_threshold;
+        genesis_config.minimum_pledge_divisor = epoch_config.minimum_pledge_divisor;
+        genesis_config.protocol_upgrade_pledge_threshold =
+            epoch_config.protocol_upgrade_pledge_threshold;
         genesis_config.shard_layout = epoch_config.shard_layout;
         genesis_config.num_chunk_only_producer_seats =
             epoch_config.validator_selection_config.num_chunk_only_producer_seats;
         genesis_config.minimum_validators_per_shard =
             epoch_config.validator_selection_config.minimum_validators_per_shard;
-        genesis_config.minimum_stake_ratio =
-            epoch_config.validator_selection_config.minimum_stake_ratio;
+        genesis_config.minimum_pledge_ratio =
+            epoch_config.validator_selection_config.minimum_pledge_ratio;
 
         let runtime_config =
             self.runtime_config_store.get_config(protocol_version).as_ref().clone();

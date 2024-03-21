@@ -36,14 +36,14 @@ consensus_config1 = {
         }
     }
 }
-# give more stake to the bootnode so that it can produce the blocks alone
+# give more pledge to the bootnode so that it can produce the blocks alone
 nodes = start_cluster(
     2, 0, 4, None,
     [["epoch_length", 100], ["num_block_producer_seats", 100],
      ["num_block_producer_seats_per_shard", [25, 25, 25, 25]],
      ["validators", 0, "amount", "110000000000000000000000000000000"],
      [
-         "records", 0, "Account", "account", "locked",
+         "records", 0, "Account", "account", "pledging",
          "110000000000000000000000000000000"
      ], ["total_supply", "3060000000000000000000000000000000"]], {
          0: consensus_config0,

@@ -144,7 +144,7 @@ fn test_query_by_path_account() {
         };
         assert_eq!(account_info.amount, 0);
         assert_eq!(account_info.code_hash.as_ref(), &[0; 32]);
-        assert_eq!(account_info.locked, 0);
+        assert_eq!(account_info.pledging, 0);
         assert_eq!(account_info.storage_paid_at, 0);
         assert_eq!(account_info.storage_usage, 0);
     });
@@ -189,7 +189,7 @@ fn test_query_account() {
             };
             assert_eq!(account_info.amount, 0);
             assert_eq!(account_info.code_hash.as_ref(), &[0; 32]);
-            assert_eq!(account_info.locked, 0);
+            assert_eq!(account_info.pledging, 0);
             assert_eq!(account_info.storage_paid_at, 0);
             assert_eq!(account_info.storage_usage, 0);
         }

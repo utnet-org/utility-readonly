@@ -175,9 +175,9 @@ fn put_target_nonce(
 // we store a value (empty HashSet if it affects no access keys) in the database for any tx we send,
 // as well as all generated descendant receipts. Once we see it on chain, we update any access keys
 // that might be updated by it, and we insert any generated receipts in the DB. When we see an
-// execution outcome that adds stake actions, the presence/absence of that receipt's ID in the DB
+// execution outcome that adds pledge actions, the presence/absence of that receipt's ID in the DB
 // will tell us whether it resulted from one of our txs that we mirrored from the source so that
-// we can send a stake tx to reverse it
+// we can send a pledge tx to reverse it
 
 fn read_pending_outcome(
     db: &DB,
@@ -506,7 +506,7 @@ enum MappedTxProvenance {
     ReceiptAddKey(BlockHeight, ShardId, usize),
     TxCreateAccount(BlockHeight, ShardId, usize),
     ReceiptCreateAccount(BlockHeight, ShardId, usize),
-    Unstake(CryptoHash),
+    Unpledge(CryptoHash),
 }
 
 impl MappedTxProvenance {
@@ -525,8 +525,8 @@ impl MappedTxProvenance {
         )
     }
 
-    fn is_unstake(&self) -> bool {
-        matches!(self, MappedTxProvenance::Unstake(_))
+    fn is_unpledge(&self) -> bool {
+        matches!(self, MappedTxProvenance::Unpledge(_))
     }
 }
 
@@ -554,8 +554,8 @@ impl std::fmt::Display for MappedTxProvenance {
                     height, shard_id, idx
                 )
             }
-            Self::Unstake(hash) => {
-                write!(f, "unstake after stake receipt in target block {}", hash,)
+            Self::Unpledge(hash) => {
+                write!(f, "unpledge after pledge receipt in target block {}", hash,)
             }
         }
     }
@@ -1220,7 +1220,7 @@ impl<T: ChainAccess> TxMirror<T> {
                     }
                 }
                 Action::Stake(_) => {
-                    if provenance.is_unstake() {
+                    if provenance.is_unpledge() {
                         target_actions.push(a.clone());
                     }
                 }
@@ -1518,7 +1518,7 @@ impl<T: ChainAccess> TxMirror<T> {
             for (idx, source_tx) in ch.transactions.into_iter().enumerate() {
                 let (actions, nonce_updates) = self.map_actions(&source_tx).await?;
                 if actions.is_empty() {
-                    // If this is a tx containing only stake actions, skip it.
+                    // If this is a tx containing only pledge actions, skip it.
                     continue;
                 }
                 let target_private_key =
@@ -1625,30 +1625,30 @@ impl<T: ChainAccess> TxMirror<T> {
         Ok(())
     }
 
-    // send stake txs for zero stake for each of the stake actions we just saw in
+    // send pledge txs for zero pledge for each of the pledge actions we just saw in
     // the last block's processed receipts. These would have come from function calls
-    // rather than normal stake txs, since we skip sending those.
+    // rather than normal pledge txs, since we skip sending those.
     // TODO: here we're just sending it and forgetting about it, but would be good to
     // retry later if the tx got lost for some reason
-    async fn unstake(
+    async fn unpledge(
         &mut self,
         tracker: &mut crate::chain_tracker::TxTracker,
-        stakes: HashMap<(AccountId, PublicKey), AccountId>,
+        pledges: HashMap<(AccountId, PublicKey), AccountId>,
         source_hash: &CryptoHash,
         target_hash: &CryptoHash,
         target_height: BlockHeight,
     ) -> anyhow::Result<()> {
         let mut txs = Vec::new();
-        for ((receiver_id, public_key), predecessor_id) in stakes {
+        for ((receiver_id, public_key), predecessor_id) in pledges {
             self.push_extra_tx(
                 tracker,
                 *source_hash,
                 &mut txs,
                 predecessor_id,
                 receiver_id.clone(),
-                &[Action::Stake(Box::new(StakeAction { public_key, stake: 0 }))],
+                &[Action::Stake(Box::new(StakeAction { public_key, pledge: 0 }))],
                 target_hash,
-                MappedTxProvenance::Unstake(*target_hash),
+                MappedTxProvenance::Unpledge(*target_hash),
                 None,
             )
             .await?;
@@ -1691,8 +1691,8 @@ impl<T: ChainAccess> TxMirror<T> {
                     let msg = msg.unwrap();
                     target_head = msg.block.header.hash;
                     target_height = msg.block.header.height;
-                    let staked_accounts = tracker.on_target_block(&self.target_view_client, &self.db, msg).await?;
-                    self.unstake(&mut tracker, staked_accounts, &source_hash, &target_head, target_height).await?;
+                    let pledged_accounts = tracker.on_target_block(&self.target_view_client, &self.db, msg).await?;
+                    self.unpledge(&mut tracker, pledged_accounts, &source_hash, &target_head, target_height).await?;
                 }
                 // If we don't have any upcoming sets of transactions to send already built, we probably fell behind in the source
                 // chain and can't fetch the transactions. Check if we have them now here.

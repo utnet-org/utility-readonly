@@ -82,7 +82,7 @@ pub enum ProtocolFeature {
     // alt_bn128_g1_multiexp, alt_bn128_g1_sum, alt_bn128_pairing_check host functions
     AltBn128,
     ChunkOnlyProducers,
-    /// Ensure the total stake of validators that are kicked out does not exceed a percentage of total stakes
+    /// Ensure the total pledge of validators that are kicked out does not exceed a percentage of total pledges
     MaxKickoutStake,
     /// Validate account id for function call access keys.
     AccountIdInFunctionCallPermission,
@@ -114,8 +114,8 @@ pub enum ProtocolFeature {
     /// layout for the production networks.
     SimpleNightshadeV2,
     /// In case not all validator seats are occupied our algorithm provide incorrect minimal seat
-    /// price - it reports as alpha * sum_stake instead of alpha * sum_stake / (1 - alpha), where
-    /// alpha is min stake ratio
+    /// price - it reports as alpha * sum_pledge instead of alpha * sum_pledge / (1 - alpha), where
+    /// alpha is min pledge ratio
     #[cfg(feature = "protocol_feature_fix_staking_threshold")]
     FixStakingThreshold,
     /// Charge for contract loading before it happens.

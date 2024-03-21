@@ -393,7 +393,7 @@ impl Testbed<'_> {
         let mut state_update = TrieUpdate::new(self.trie());
         let mut outgoing_receipts = vec![];
         let mut validator_power_proposals = vec![];
-        let mut validator_frozen_proposals = vec![];
+        let mut validator_pledge_proposals = vec![];
         let mut stats = node_runtime::ApplyStats::default();
         // TODO: mock is not accurate, potential DB requests are skipped in the mock!
         let epoch_info_provider = MockEpochInfoProvider::new([].into_iter());
@@ -404,7 +404,7 @@ impl Testbed<'_> {
             receipt,
             &mut outgoing_receipts,
             &mut validator_power_proposals,
-            &mut validator_frozen_proposals,
+            &mut validator_pledge_proposals,
             &mut stats,
             &epoch_info_provider,
         )

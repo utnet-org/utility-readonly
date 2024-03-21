@@ -35,7 +35,7 @@ nodes = start_cluster(
            ["block_producer_kickout_threshold", 50],
            ["chunk_producer_kickout_threshold", 50],
            [
-               "records", 0, "Account", "account", "locked",
+               "records", 0, "Account", "account", "pledging",
                "60000000000000000000000000000000"
            ], ["total_supply", "5010000000000000000000000000000000"]],
     {x: node_config for x in range(4)})

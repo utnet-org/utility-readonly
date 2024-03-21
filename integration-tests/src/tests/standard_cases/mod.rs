@@ -21,7 +21,7 @@ use unc_primitives::views::{
     AccessKeyView, AccountView, ExecutionMetadataView, FinalExecutionOutcomeView,
     FinalExecutionStatus,
 };
-use framework::config::{UNC_BASE, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::config::{UNC_BASE, TESTING_INIT_BALANCE, TESTING_INIT_PLEDGE};
 
 use crate::node::Node;
 use crate::user::User;
@@ -315,18 +315,18 @@ pub fn test_send_money(node: impl Node) {
     assert_ne!(root, new_root);
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 1);
 
-    let AccountView { amount, locked, .. } = node_user.view_account(account_id).unwrap();
+    let AccountView { amount, pledging, .. } = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (amount, locked),
+        (amount, pledging),
         (
-            TESTING_INIT_BALANCE - money_used - TESTING_INIT_STAKE - transfer_cost,
-            TESTING_INIT_STAKE
+            TESTING_INIT_BALANCE - money_used - TESTING_INIT_PLEDGE - transfer_cost,
+            TESTING_INIT_PLEDGE
         )
     );
-    let AccountView { amount, locked, .. } = node_user.view_account(&bob_account()).unwrap();
+    let AccountView { amount, pledging, .. } = node_user.view_account(&bob_account()).unwrap();
     assert_eq!(
-        (amount, locked),
-        (TESTING_INIT_BALANCE + money_used - TESTING_INIT_STAKE, TESTING_INIT_STAKE,)
+        (amount, pledging),
+        (TESTING_INIT_BALANCE + money_used - TESTING_INIT_PLEDGE, TESTING_INIT_PLEDGE,)
     );
 }
 
@@ -357,17 +357,17 @@ pub fn transfer_tokens_to_implicit_account(node: impl Node, public_key: PublicKe
     assert_ne!(root, new_root);
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 1);
 
-    let AccountView { amount, locked, .. } = node_user.view_account(account_id).unwrap();
+    let AccountView { amount, pledging, .. } = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (amount, locked),
+        (amount, pledging),
         (
-            TESTING_INIT_BALANCE - tokens_used - TESTING_INIT_STAKE - transfer_cost,
-            TESTING_INIT_STAKE
+            TESTING_INIT_BALANCE - tokens_used - TESTING_INIT_PLEDGE - transfer_cost,
+            TESTING_INIT_PLEDGE
         )
     );
 
-    let AccountView { amount, locked, .. } = node_user.view_account(&receiver_id).unwrap();
-    assert_eq!((amount, locked), (tokens_used, 0));
+    let AccountView { amount, pledging, .. } = node_user.view_account(&receiver_id).unwrap();
+    assert_eq!((amount, pledging), (tokens_used, 0));
 
     let view_access_key = node_user.get_access_key(&receiver_id, &public_key);
     match receiver_id.get_account_type() {
@@ -390,17 +390,17 @@ pub fn transfer_tokens_to_implicit_account(node: impl Node, public_key: PublicKe
     assert_ne!(root, new_root);
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 2);
 
-    let AccountView { amount, locked, .. } = node_user.view_account(account_id).unwrap();
+    let AccountView { amount, pledging, .. } = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (amount, locked),
+        (amount, pledging),
         (
-            TESTING_INIT_BALANCE - 2 * tokens_used - TESTING_INIT_STAKE - 2 * transfer_cost,
-            TESTING_INIT_STAKE
+            TESTING_INIT_BALANCE - 2 * tokens_used - TESTING_INIT_PLEDGE - 2 * transfer_cost,
+            TESTING_INIT_PLEDGE
         )
     );
 
-    let AccountView { amount, locked, .. } = node_user.view_account(&receiver_id).unwrap();
-    assert_eq!((amount, locked), (tokens_used * 2, 0));
+    let AccountView { amount, pledging, .. } = node_user.view_account(&receiver_id).unwrap();
+    assert_eq!((amount, pledging), (tokens_used * 2, 0));
 }
 
 pub fn trying_to_create_implicit_account(node: impl Node, public_key: PublicKey) {
@@ -456,8 +456,8 @@ pub fn trying_to_create_implicit_account(node: impl Node, public_key: PublicKey)
 
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE - cost, TESTING_INIT_STAKE)
+        (result1.amount, result1.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE - cost, TESTING_INIT_PLEDGE)
     );
 
     let result2 = node_user.view_account(&receiver_id);
@@ -468,7 +468,7 @@ pub fn test_smart_contract_reward(node: impl Node) {
     let node_user = node.user();
     let root = node_user.get_state_root();
     let bob = node_user.view_account(&bob_account()).unwrap();
-    assert_eq!(bob.amount, TESTING_INIT_BALANCE - TESTING_INIT_STAKE);
+    assert_eq!(bob.amount, TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE);
     let transaction_result = node_user
         .function_call(alice_account(), bob_account(), "run_test", vec![], 10u64.pow(14), 0)
         .unwrap();
@@ -485,7 +485,7 @@ pub fn test_smart_contract_reward(node: impl Node) {
     let gas_burnt_for_function_call = transaction_result.receipts_outcome[0].outcome.gas_burnt
         - fee_helper.function_call_exec_gas(b"run_test".len() as u64);
     let reward = fee_helper.gas_burnt_to_reward(gas_burnt_for_function_call);
-    assert_eq!(bob.amount, TESTING_INIT_BALANCE - TESTING_INIT_STAKE + reward);
+    assert_eq!(bob.amount, TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE + reward);
 }
 
 pub fn test_send_money_over_balance(node: impl Node) {
@@ -498,15 +498,15 @@ pub fn test_send_money_over_balance(node: impl Node) {
     assert_eq!(root, new_root);
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE, TESTING_INIT_STAKE)
+        (result1.amount, result1.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE, TESTING_INIT_PLEDGE)
     );
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 0);
 
     let result2 = node_user.view_account(&bob_account()).unwrap();
     assert_eq!(
-        (result2.amount, result2.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE, TESTING_INIT_STAKE)
+        (result2.amount, result2.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE, TESTING_INIT_PLEDGE)
     );
 }
 
@@ -535,8 +535,8 @@ pub fn test_refund_on_send_money_to_non_existent_account(node: impl Node) {
     assert_ne!(root, new_root);
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE - transfer_cost, TESTING_INIT_STAKE)
+        (result1.amount, result1.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE - transfer_cost, TESTING_INIT_PLEDGE)
     );
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 1);
     let result2 = node_user.view_account(&eve_dot_alice_account());
@@ -568,15 +568,15 @@ pub fn test_create_account(node: impl Node) {
 
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
+        (result1.amount, result1.pledging),
         (
-            TESTING_INIT_BALANCE - money_used - TESTING_INIT_STAKE - create_account_cost,
-            TESTING_INIT_STAKE
+            TESTING_INIT_BALANCE - money_used - TESTING_INIT_PLEDGE - create_account_cost,
+            TESTING_INIT_PLEDGE
         )
     );
 
     let result2 = node_user.view_account(&eve_dot_alice_account()).unwrap();
-    assert_eq!((result2.amount, result2.locked), (money_used, 0));
+    assert_eq!((result2.amount, result2.pledging), (money_used, 0));
 }
 
 pub fn test_create_account_again(node: impl Node) {
@@ -600,12 +600,12 @@ pub fn test_create_account_again(node: impl Node) {
 
     let result1 = node_user.view_account(account_id).unwrap();
     let new_expected_balance =
-        TESTING_INIT_BALANCE - money_used - TESTING_INIT_STAKE - create_account_cost;
-    assert_eq!((result1.amount, result1.locked), (new_expected_balance, TESTING_INIT_STAKE));
+        TESTING_INIT_BALANCE - money_used - TESTING_INIT_PLEDGE - create_account_cost;
+    assert_eq!((result1.amount, result1.pledging), (new_expected_balance, TESTING_INIT_PLEDGE));
     assert_eq!(node_user.get_access_key_nonce_for_signer(account_id).unwrap(), 1);
 
     let result2 = node_user.view_account(&eve_dot_alice_account()).unwrap();
-    assert_eq!((result2.amount, result2.locked), (money_used, 0));
+    assert_eq!((result2.amount, result2.pledging), (money_used, 0));
 
     let transaction_result = node_user
         .create_account(
@@ -637,8 +637,8 @@ pub fn test_create_account_again(node: impl Node) {
 
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
-        (new_expected_balance - additional_cost, TESTING_INIT_STAKE)
+        (result1.amount, result1.pledging),
+        (new_expected_balance - additional_cost, TESTING_INIT_PLEDGE)
     );
 }
 
@@ -680,14 +680,14 @@ pub fn test_create_account_failure_already_exists(node: impl Node) {
 
     let result1 = node_user.view_account(account_id).unwrap();
     assert_eq!(
-        (result1.amount, result1.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE - create_account_cost, TESTING_INIT_STAKE)
+        (result1.amount, result1.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE - create_account_cost, TESTING_INIT_PLEDGE)
     );
 
     let result2 = node_user.view_account(&bob_account()).unwrap();
     assert_eq!(
-        (result2.amount, result2.locked),
-        (TESTING_INIT_BALANCE - TESTING_INIT_STAKE, TESTING_INIT_STAKE)
+        (result2.amount, result2.pledging),
+        (TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE, TESTING_INIT_PLEDGE)
     );
 }
 
@@ -1124,15 +1124,15 @@ pub fn test_access_key_reject_non_function_call(node: impl Node) {
     );
 }
 
-pub fn test_increase_stake(node: impl Node) {
+pub fn test_increase_pledge(node: impl Node) {
     let node_user = node.user();
     let root = node_user.get_state_root();
     let account_id = &node.account_id().unwrap();
-    let amount_staked = TESTING_INIT_STAKE + 1;
+    let amount_pledged = TESTING_INIT_PLEDGE + 1;
     let fee_helper = fee_helper(&node);
-    let stake_cost = fee_helper.stake_cost();
+    let pledge_cost = fee_helper.pledge_cost();
     let transaction_result = node_user
-        .stake(account_id.clone(), node.block_signer().public_key(), amount_staked)
+        .pledge(account_id.clone(), node.block_signer().public_key(), amount_pledged)
         .unwrap();
     assert_eq!(transaction_result.status, FinalExecutionStatus::SuccessValue(Vec::new()));
     assert_eq!(transaction_result.receipts_outcome.len(), 1);
@@ -1141,31 +1141,31 @@ pub fn test_increase_stake(node: impl Node) {
     assert_ne!(root, new_root);
 
     let account = node_user.view_account(account_id).unwrap();
-    assert_eq!(account.amount, TESTING_INIT_BALANCE - TESTING_INIT_STAKE - 1 - stake_cost);
-    assert_eq!(account.locked, amount_staked)
+    assert_eq!(account.amount, TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE - 1 - pledge_cost);
+    assert_eq!(account.pledging, amount_pledged)
 }
 
-pub fn test_decrease_stake(node: impl Node) {
+pub fn test_decrease_pledge(node: impl Node) {
     let node_user = node.user();
     let root = node_user.get_state_root();
-    let amount_staked = 10;
+    let amount_pledged = 10;
     let account_id = &node.account_id().unwrap();
     let transaction_result = node_user
-        .stake(account_id.clone(), node.block_signer().public_key(), amount_staked)
+        .pledge(account_id.clone(), node.block_signer().public_key(), amount_pledged)
         .unwrap();
     let fee_helper = fee_helper(&node);
-    let stake_cost = fee_helper.stake_cost();
+    let pledge_cost = fee_helper.pledge_cost();
     assert_eq!(transaction_result.status, FinalExecutionStatus::SuccessValue(Vec::new()));
     assert_eq!(transaction_result.receipts_outcome.len(), 1);
     let new_root = node_user.get_state_root();
     assert_ne!(root, new_root);
 
     let account = node_user.view_account(account_id).unwrap();
-    assert_eq!(account.amount, TESTING_INIT_BALANCE - TESTING_INIT_STAKE - stake_cost);
-    assert_eq!(account.locked, TESTING_INIT_STAKE);
+    assert_eq!(account.amount, TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE - pledge_cost);
+    assert_eq!(account.pledging, TESTING_INIT_PLEDGE);
 }
 
-pub fn test_unstake_while_not_staked(node: impl Node) {
+pub fn test_unpledge_while_not_pledged(node: impl Node) {
     let node_user = node.user();
     let transaction_result = node_user
         .create_account(
@@ -1178,13 +1178,13 @@ pub fn test_unstake_while_not_staked(node: impl Node) {
     assert_eq!(transaction_result.status, FinalExecutionStatus::SuccessValue(Vec::new()));
     assert_eq!(transaction_result.receipts_outcome.len(), 2);
     let transaction_result =
-        node_user.stake(eve_dot_alice_account(), node.block_signer().public_key(), 0).unwrap();
+        node_user.pledge(eve_dot_alice_account(), node.block_signer().public_key(), 0).unwrap();
     assert_eq!(
         transaction_result.status,
         FinalExecutionStatus::Failure(
             ActionError {
                 index: Some(0),
-                kind: ActionErrorKind::TriesToUnstake { account_id: eve_dot_alice_account() }
+                kind: ActionErrorKind::TriesToUnpledge { account_id: eve_dot_alice_account() }
             }
             .into()
         )
@@ -1309,13 +1309,13 @@ pub fn test_delete_account_while_staking(node: impl Node) {
         money_used,
     );
     let fee_helper = fee_helper(&node);
-    let stake_fee = fee_helper.stake_cost();
+    let pledge_fee = fee_helper.pledge_cost();
     let delete_account_fee = fee_helper.prepaid_delete_account_cost();
     let transaction_result = node_user
-        .stake(
+        .pledge(
             eve_dot_alice_account(),
             node.block_signer().public_key(),
-            money_used - stake_fee - delete_account_fee,
+            money_used - pledge_fee - delete_account_fee,
         )
         .unwrap();
     assert_eq!(transaction_result.status, FinalExecutionStatus::SuccessValue(Vec::new()));

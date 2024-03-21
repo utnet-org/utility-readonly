@@ -27,7 +27,7 @@ pub fn validate_genesis(genesis: &Genesis) -> Result<(), ValidationError> {
 struct GenesisValidator<'a> {
     genesis_config: &'a GenesisConfig,
     total_supply: u128,
-    staked_accounts: HashMap<AccountId, u128>,
+    pledged_accounts: HashMap<AccountId, u128>,
     account_ids: HashSet<AccountId>,
     access_key_account_ids: HashSet<AccountId>,
     contract_account_ids: HashSet<AccountId>,
@@ -42,7 +42,7 @@ impl<'a> GenesisValidator<'a> {
         Self {
             genesis_config,
             total_supply: 0,
-            staked_accounts: HashMap::new(),
+            pledged_accounts: HashMap::new(),
             account_ids: HashSet::new(),
             access_key_account_ids: HashSet::new(),
             contract_account_ids: HashSet::new(),
@@ -58,10 +58,10 @@ impl<'a> GenesisValidator<'a> {
                         format!("Duplicate account id {} in genesis records", account_id);
                     self.validation_errors.push_genesis_semantics_error(error_message)
                 }
-                self.total_supply += account.locked() + account.amount();
+                self.total_supply += account.pledging() + account.amount();
                 self.account_ids.insert(account_id.clone());
-                if account.locked() > 0 {
-                    self.staked_accounts.insert(account_id.clone(), account.locked());
+                if account.pledging() > 0 {
+                    self.pledged_accounts.insert(account_id.clone(), account.pledging());
                 }
             }
             StateRecord::AccessKey { account_id, .. } => {
@@ -90,7 +90,7 @@ impl<'a> GenesisValidator<'a> {
                     let error_message = format!("validator staking key is not valid");
                     self.validation_errors.push_genesis_semantics_error(error_message);
                 }
-                (account_info.account_id, account_info.amount)
+                (account_info.account_id, account_info.pledging)
             })
             .collect::<HashMap<_, _>>();
 
@@ -105,12 +105,12 @@ impl<'a> GenesisValidator<'a> {
         }
 
         if self.total_supply != self.genesis_config.total_supply {
-            let error_message = format!("wrong total supply. account.locked() + account.amount() = {} is not equal to the total supply = {} specified in genesis config.", self.total_supply, self.genesis_config.total_supply);
+            let error_message = format!("wrong total supply. account.pledging() + account.amount() = {} is not equal to the total supply = {} specified in genesis config.", self.total_supply, self.genesis_config.total_supply);
             self.validation_errors.push_genesis_semantics_error(error_message)
         }
 
-        if validators != self.staked_accounts {
-            let error_message = format!("Validator accounts do not match staked accounts.");
+        if validators != self.pledged_accounts {
+            let error_message = format!("Validator accounts: {:?} do not match pledging accounts: {:?}.", validators, self.pledged_accounts);
             self.validation_errors.push_genesis_semantics_error(error_message)
         }
 
@@ -216,7 +216,7 @@ mod test {
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
             power: 10,
-            locked: 5,
+            pledging: 10,
         }];
         let records = GenesisRecords(vec![StateRecord::Account {
             account_id: "test".parse().unwrap(),
@@ -235,6 +235,7 @@ mod test {
             public_key: PublicKey::empty(KeyType::ED25519),
             amount: 10,
             power: 10,
+            pledging: 10,
         }];
         let records = GenesisRecords(vec![StateRecord::Account {
             account_id: "test".parse().unwrap(),
@@ -245,7 +246,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Validator accounts do not match staked accounts")]
+    #[should_panic(expected = "Validator accounts do not match pledging accounts")]
     fn test_validator_not_match() {
         let mut config = GenesisConfig::default();
         config.validators = vec![AccountInfo {
@@ -253,6 +254,7 @@ mod test {
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 100,
             power: 100,
+            pledging: 100,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![StateRecord::Account {
@@ -284,6 +286,7 @@ mod test {
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
             power: 10,
+            pledging: 10,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![
@@ -307,6 +310,7 @@ mod test {
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
             amount: 10,
             power: 10,
+            pledging: 10,
         }];
         config.total_supply = 110;
         let records = GenesisRecords(vec![

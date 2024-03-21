@@ -53,9 +53,9 @@ use std::ops::Range;
 use std::sync::Arc;
 use strum::IntoEnumIterator;
 use validator_power_view::ValidatorPowerView;
-use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
-use crate::views::validator_frozen_view::ValidatorFrozenView;
-use crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
+use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
+use crate::views::validator_pledge_view::ValidatorPledgeView;
+use crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView;
 
 /// A view of the account
 #[derive(serde::Serialize, serde::Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -63,7 +63,7 @@ pub struct AccountView {
     #[serde(with = "dec_format")]
     pub amount: Balance,
     #[serde(with = "dec_format")]
-    pub locked: Balance,
+    pub pledging: Balance,
     #[serde(with = "dec_format")]
     pub power: Power,
     pub code_hash: CryptoHash,
@@ -108,7 +108,7 @@ impl From<&Account> for AccountView {
     fn from(account: &Account) -> Self {
         AccountView {
             amount: account.amount(),
-            locked: account.locked(),
+            pledging: account.pledging(),
             power: account.power(),
             code_hash: account.code_hash(),
             storage_usage: account.storage_usage(),
@@ -125,7 +125,7 @@ impl From<Account> for AccountView {
 
 impl From<&AccountView> for Account {
     fn from(view: &AccountView) -> Self {
-        Account::new(view.amount, view.locked, view.power,  view.code_hash, view.storage_usage)
+        Account::new(view.amount, view.pledging, view.power,  view.code_hash, view.storage_usage)
     }
 }
 
@@ -798,7 +798,7 @@ pub struct BlockHeaderView {
     pub timestamp_nanosec: u64,
     pub random_value: CryptoHash,
     pub validator_power_proposals: Vec<ValidatorPowerView>,
-    pub validator_frozen_proposals: Vec<ValidatorFrozenView>,
+    pub validator_pledge_proposals: Vec<ValidatorPledgeView>,
     pub chunk_mask: Vec<bool>,
     #[serde(with = "dec_format")]
     pub gas_price: Balance,
@@ -843,7 +843,7 @@ impl From<BlockHeader> for BlockHeaderView {
             timestamp_nanosec: header.raw_timestamp(),
             random_value: *header.random_value(),
             validator_power_proposals: header.prev_validator_power_proposals().map(Into::into).collect(),
-            validator_frozen_proposals: header.prev_validator_frozen_proposals().map(Into::into).collect(),
+            validator_pledge_proposals: header.prev_validator_pledge_proposals().map(Into::into).collect(),
             chunk_mask: header.chunk_mask().to_vec(),
             block_ordinal: if header.block_ordinal() != 0 {
                 Some(header.block_ordinal())
@@ -887,10 +887,10 @@ impl From<BlockHeaderView> for BlockHeader {
                 .into_iter()
                 .map(|v| v.into_validator_power().into_v1())
                 .collect();
-            let validator_frozen_proposals = view
-                .validator_frozen_proposals
+            let validator_pledge_proposals = view
+                .validator_pledge_proposals
                 .into_iter()
-                .map(|v| v.into_validator_frozen().into_v1())
+                .map(|v| v.into_validator_pledge().into_v1())
                 .collect();
             let mut header = BlockHeaderV1 {
                 prev_hash: view.prev_hash,
@@ -903,7 +903,7 @@ impl From<BlockHeaderView> for BlockHeader {
                     challenges_root: view.challenges_root,
                     random_value: view.random_value,
                     prev_validator_power_proposals: validator_power_proposals,
-                    prev_validator_frozen_proposals: validator_frozen_proposals,
+                    prev_validator_pledge_proposals: validator_pledge_proposals,
                     chunk_mask: view.chunk_mask,
                     next_gas_price: view.gas_price,
                     total_supply: view.total_supply,
@@ -924,10 +924,10 @@ impl From<BlockHeaderView> for BlockHeader {
                 .into_iter()
                 .map(|v| v.into_validator_power().into_v1())
                 .collect();
-            let validator_frozen_proposals = view
-                .validator_frozen_proposals
+            let validator_pledge_proposals = view
+                .validator_pledge_proposals
                 .into_iter()
-                .map(|v| v.into_validator_frozen().into_v1())
+                .map(|v| v.into_validator_pledge().into_v1())
                 .collect();
             let mut header = BlockHeaderV2 {
                 prev_hash: view.prev_hash,
@@ -939,7 +939,7 @@ impl From<BlockHeaderView> for BlockHeader {
                     challenges_root: view.challenges_root,
                     random_value: view.random_value,
                     prev_validator_power_proposals: validator_power_proposals,
-                    prev_validator_frozen_proposals: validator_frozen_proposals,
+                    prev_validator_pledge_proposals: validator_pledge_proposals,
                     chunk_mask: view.chunk_mask,
                     next_gas_price: view.gas_price,
                     total_supply: view.total_supply,
@@ -969,8 +969,8 @@ impl From<BlockHeaderView> for BlockHeader {
                         .into_iter()
                         .map(Into::into)
                         .collect(),
-                    prev_validator_frozen_proposals: view
-                        .validator_frozen_proposals
+                    prev_validator_pledge_proposals: view
+                        .validator_pledge_proposals
                         .into_iter()
                         .map(Into::into)
                         .collect(),
@@ -1007,8 +1007,8 @@ impl From<BlockHeaderView> for BlockHeader {
                         .into_iter()
                         .map(Into::into)
                         .collect(),
-                    prev_validator_frozen_proposals: view
-                        .validator_frozen_proposals
+                    prev_validator_pledge_proposals: view
+                        .validator_pledge_proposals
                         .into_iter()
                         .map(Into::into)
                         .collect(),
@@ -1118,7 +1118,7 @@ pub struct ChunkHeaderView {
     pub outgoing_receipts_root: CryptoHash,
     pub tx_root: CryptoHash,
     pub validator_power_proposals: Vec<ValidatorPowerView>,
-    pub validator_frozen_proposals: Vec<ValidatorFrozenView>,
+    pub validator_pledge_proposals: Vec<ValidatorPledgeView>,
     pub signature: Signature,
 }
 
@@ -1146,7 +1146,7 @@ impl From<ShardChunkHeader> for ChunkHeaderView {
             outgoing_receipts_root: *inner.prev_outgoing_receipts_root(),
             tx_root: *inner.tx_root(),
             validator_power_proposals: inner.prev_validator_power_proposals().map(Into::into).collect(),
-            validator_frozen_proposals: inner.prev_validator_frozen_proposals().map(Into::into).collect(),
+            validator_pledge_proposals: inner.prev_validator_pledge_proposals().map(Into::into).collect(),
             signature,
         }
     }
@@ -1173,8 +1173,8 @@ impl From<ChunkHeaderView> for ShardChunkHeader {
                     .into_iter()
                     .map(Into::into)
                     .collect(),
-                prev_validator_frozen_proposals: view
-                    .validator_frozen_proposals
+                prev_validator_pledge_proposals: view
+                    .validator_pledge_proposals
                     .into_iter()
                     .map(Into::into)
                     .collect(),
@@ -1194,18 +1194,18 @@ pub struct AllMinersView {
     pub miners: Vec<ValidatorPowerView>,
 }
 
-impl From<ValidatorPowerAndFrozenIter<'_>> for AllMinersView {
-    fn from(iter: ValidatorPowerAndFrozenIter) -> Self {
+impl From<ValidatorPowerAndPledgeIter<'_>> for AllMinersView {
+    fn from(iter: ValidatorPowerAndPledgeIter) -> Self {
         let mut total_power = 0; // Initialize total power
         let mut miners = Vec::new(); // Initialize the vector to store ValidatorPowerView instances
 
-        // Iterate over each ValidatorPowerAndFrozen
+        // Iterate over each ValidatorPowerAndPledge
         for validator in iter {
             match validator {
                 // Assuming we only deal with V1 here, similar logic could apply for other versions
-                ValidatorPowerAndFrozen::V1(v) => {
+                ValidatorPowerAndPledge::V1(v) => {
                     total_power += v.power; // Accumulate the total power
-                    // Convert ValidatorPowerAndFrozen to ValidatorPowerView
+                    // Convert ValidatorPowerAndPledge to ValidatorPowerView
                     let miner = ValidatorPowerView::V1(ValidatorPowerViewV1 {
                         account_id: v.account_id,
                         public_key: v.public_key,
@@ -1300,7 +1300,7 @@ pub enum ActionView {
     },
     Stake {
         #[serde(with = "dec_format")]
-        stake: Balance,
+        pledge: Balance,
         public_key: PublicKey,
     },
     AddKey {
@@ -1347,7 +1347,7 @@ impl From<Action> for ActionView {
             },
             Action::Transfer(action) => ActionView::Transfer { deposit: action.deposit },
             Action::Stake(action) => {
-                ActionView::Stake { stake: action.stake, public_key: action.public_key }
+                ActionView::Stake { pledge: action.pledge, public_key: action.public_key }
             }
             Action::AddKey(action) => ActionView::AddKey {
                 public_key: action.public_key,
@@ -1393,8 +1393,8 @@ impl TryFrom<ActionView> for Action {
                 }))
             }
             ActionView::Transfer { deposit } => Action::Transfer(TransferAction { deposit }),
-            ActionView::Stake { stake, public_key } => {
-                Action::Stake(Box::new(StakeAction { stake, public_key }))
+            ActionView::Stake { pledge, public_key } => {
+                Action::Stake(Box::new(StakeAction { pledge, public_key }))
             }
             ActionView::AddKey { public_key, access_key } => {
                 Action::AddKey(Box::new(AddKeyAction { public_key, access_key: access_key.into() }))
@@ -1931,23 +1931,23 @@ pub struct FinalExecutionOutcomeWithReceiptView {
     pub receipts: Vec<ReceiptView>,
 }
 
-pub mod validator_frozen_view {
+pub mod validator_pledge_view {
     pub use super::ValidatorPowerViewV1;
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
-    use crate::types::validator_frozen::ValidatorFrozen;
+    use crate::types::validator_pledge::ValidatorPledge;
 
     #[derive(
     BorshSerialize, BorshDeserialize, serde::Serialize, Deserialize, Debug, Clone, Eq, PartialEq,
     )]
-    #[serde(tag = "validator_frozen_struct_version")]
-    pub enum ValidatorFrozenView {
-        V1(crate::views::ValidatorFrozenViewV1),
+    #[serde(tag = "validator_pledge_struct_version")]
+    pub enum ValidatorPledgeView {
+        V1(crate::views::ValidatorPledgeViewV1),
     }
 
-    impl crate::views::validator_frozen_view::ValidatorFrozenView {
-        pub fn into_validator_frozen(self) -> ValidatorFrozen {
+    impl crate::views::validator_pledge_view::ValidatorPledgeView {
+        pub fn into_validator_pledge(self) -> ValidatorPledge {
             self.into()
         }
 
@@ -1966,22 +1966,22 @@ pub mod validator_frozen_view {
         }
     }
 
-    impl From<ValidatorFrozen> for crate::views::validator_frozen_view::ValidatorFrozenView {
-        fn from(frozen: ValidatorFrozen) -> Self {
-            match frozen {
-                ValidatorFrozen::V1(v1) => Self::V1(crate::views::ValidatorFrozenViewV1 {
+    impl From<ValidatorPledge> for crate::views::validator_pledge_view::ValidatorPledgeView {
+        fn from(pledge: ValidatorPledge) -> Self {
+            match pledge {
+                ValidatorPledge::V1(v1) => Self::V1(crate::views::ValidatorPledgeViewV1 {
                     account_id: v1.account_id,
                     public_key: v1.public_key,
-                    frozen: v1.frozen,
+                    pledge: v1.pledge,
                 }),
             }
         }
     }
 
-    impl From<crate::views::validator_frozen_view::ValidatorFrozenView> for ValidatorFrozen {
-        fn from(view: crate::views::validator_frozen_view::ValidatorFrozenView) -> Self {
+    impl From<crate::views::validator_pledge_view::ValidatorPledgeView> for ValidatorPledge {
+        fn from(view: crate::views::validator_pledge_view::ValidatorPledgeView) -> Self {
             match view {
-                crate::views::validator_frozen_view::ValidatorFrozenView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.frozen),
+                crate::views::validator_pledge_view::ValidatorPledgeView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.pledge),
             }
         }
     }
@@ -1997,11 +1997,11 @@ PartialEq,
 serde::Serialize,
 serde::Deserialize,
 )]
-pub struct ValidatorFrozenViewV1 {
+pub struct ValidatorPledgeViewV1 {
     pub account_id: AccountId,
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
-    pub frozen: Balance,
+    pub pledge: Balance,
 }
 pub mod validator_power_view {
     pub use super::ValidatorPowerViewV1;
@@ -2076,23 +2076,23 @@ pub struct ValidatorPowerViewV1 {
     pub power: Power,
 }
 
-pub mod validator_power_and_frozen_view {
+pub mod validator_power_and_pledge_view {
     pub use super::ValidatorPowerViewV1;
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
-    use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+    use crate::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
     #[derive(
     BorshSerialize, BorshDeserialize, serde::Serialize, Deserialize, Debug, Clone, Eq, PartialEq,
     )]
-    #[serde(tag = "validator_power_and_frozen_struct_version")]
-    pub enum ValidatorPowerAndFrozenView {
-        V1(crate::views::ValidatorPowerAndFrozenViewV1),
+    #[serde(tag = "validator_power_and_pledge_struct_version")]
+    pub enum ValidatorPowerAndPledgeView {
+        V1(crate::views::ValidatorPowerAndPledgeViewV1),
     }
 
-    impl crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView {
-        pub fn into_validator_power_and_frozen(self) -> ValidatorPowerAndFrozen {
+    impl crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView {
+        pub fn into_validator_power_and_pledge(self) -> ValidatorPowerAndPledge {
             self.into()
         }
 
@@ -2111,23 +2111,23 @@ pub mod validator_power_and_frozen_view {
         }
     }
 
-    impl From<ValidatorPowerAndFrozen> for crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView {
-        fn from(power_frozen: ValidatorPowerAndFrozen) -> Self {
-            match power_frozen {
-                ValidatorPowerAndFrozen::V1(v1) => Self::V1(crate::views::ValidatorPowerAndFrozenViewV1 {
+    impl From<ValidatorPowerAndPledge> for crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView {
+        fn from(power_pledge: ValidatorPowerAndPledge) -> Self {
+            match power_pledge {
+                ValidatorPowerAndPledge::V1(v1) => Self::V1(crate::views::ValidatorPowerAndPledgeViewV1 {
                     account_id: v1.account_id,
                     public_key: v1.public_key,
                     power: v1.power,
-                    frozen: v1.frozen,
+                    pledge: v1.pledge,
                 }),
             }
         }
     }
 
-    impl From<crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView> for ValidatorPowerAndFrozen {
-        fn from(view: crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView) -> Self {
+    impl From<crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView> for ValidatorPowerAndPledge {
+        fn from(view: crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView) -> Self {
             match view {
-                crate::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power, v1.frozen,),
+                crate::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView::V1(v1) => Self::new_v1(v1.account_id, v1.public_key, v1.power, v1.pledge,),
             }
         }
     }
@@ -2143,12 +2143,12 @@ PartialEq,
 serde::Serialize,
 serde::Deserialize,
 )]
-pub struct ValidatorPowerAndFrozenViewV1 {
+pub struct ValidatorPowerAndPledgeViewV1 {
     pub account_id: AccountId,
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
     pub power: Power,
-    pub frozen: Balance,
+    pub pledge: Balance,
 }
 
 #[derive(
@@ -2295,13 +2295,13 @@ pub struct EpochValidatorInfo {
     /// Validators for the next epoch
     pub next_validators: Vec<NextEpochValidatorInfo>,
     /// Fishermen for the current epoch
-    pub current_fishermen: Vec<ValidatorPowerAndFrozenView>,
+    pub current_fishermen: Vec<ValidatorPowerAndPledgeView>,
     /// Fishermen for the next epoch
-    pub next_fishermen: Vec<ValidatorPowerAndFrozenView>,
+    pub next_fishermen: Vec<ValidatorPowerAndPledgeView>,
     /// Power proposals in the current epoch
     pub current_power_proposals: Vec<ValidatorPowerView>,
-    /// Frozen proposals in the current epoch
-    pub current_frozen_proposals: Vec<ValidatorFrozenView>,
+    /// Pledge proposals in the current epoch
+    pub current_pledge_proposals: Vec<ValidatorPledgeView>,
     /// Kickout in the previous epoch
     pub prev_epoch_kickout: Vec<ValidatorKickoutView>,
     /// Epoch start block height
@@ -2333,7 +2333,7 @@ pub struct CurrentEpochValidatorInfo {
     #[serde(with = "dec_format")]
     pub power: Power,
     #[serde(with = "dec_format")]
-    pub frozen: Balance,
+    pub pledge: Balance,
     pub shards: Vec<ShardId>,
     pub num_produced_blocks: NumBlocks,
     pub num_expected_blocks: NumBlocks,
@@ -2364,7 +2364,7 @@ pub struct NextEpochValidatorInfo {
     #[serde(with = "dec_format")]
     pub power: Power,
     #[serde(with = "dec_format")]
-    pub frozen: Balance,
+    pub pledge: Balance,
     pub shards: Vec<ShardId>,
 }
 
@@ -2383,7 +2383,7 @@ pub struct LightClientBlockView {
     pub next_block_inner_hash: CryptoHash,
     pub inner_lite: BlockHeaderInnerLiteView,
     pub inner_rest_hash: CryptoHash,
-    pub next_bps: Option<Vec<ValidatorPowerAndFrozenView>>,
+    pub next_bps: Option<Vec<ValidatorPowerAndPledgeView>>,
     pub approvals_after_next: Vec<Option<Box<Signature>>>,
 }
 

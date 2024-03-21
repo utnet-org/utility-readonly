@@ -18,7 +18,7 @@ Configure the desirable generated load with the `--max-tps` flag, or disable loa
 
 Example from the recent loadtest run:
 1) terraform apply -var="chain_id=mainnet" -var="size=big" -var="override_chain_id=rc3-22" -var="neard_binary_url=https://s3.us-west-1.amazonaws.com/build.utility.com/framework/Linux/1.23.0/1eaa01d6abc76757b2ef50a1a127f98576b750c4/uncd" -var="upgrade_neard_binary_url=https://unc-protocol-public.s3.ca-central-1.amazonaws.com/mocknet/uncd.rc3-22"
-2) python3 tests/mocknet/load_test_spoon.py --chain-id=mainnet-spoon --pattern=rc3-22 --epoch-length=1000 --num-nodes=120 --max-tps=100 --script=add_and_delete --increasing-stakes=1 --progressive-upgrade --num-seats=100
+2) python3 tests/mocknet/load_test_spoon.py --chain-id=mainnet-spoon --pattern=rc3-22 --epoch-length=1000 --num-nodes=120 --max-tps=100 --script=add_and_delete --increasing-pledges=1 --progressive-upgrade --num-seats=100
 
 Things to look out for when running the test:
 1) Test init phase completes before any binary upgrades start.
@@ -157,7 +157,7 @@ class LoadTestSpoon:
         parser.add_argument('--epoch-length', type=int, required=True)
         parser.add_argument('--num-nodes', type=int, required=True)
         parser.add_argument('--max-tps', type=float, required=True)
-        parser.add_argument('--increasing-stakes', type=float, default=0.0)
+        parser.add_argument('--increasing-pledges', type=float, default=0.0)
         parser.add_argument('--progressive-upgrade', action='store_true')
 
         parser.add_argument('--skip-load', action='store_true')
@@ -190,7 +190,7 @@ class LoadTestSpoon:
         self.num_nodes = args.num_nodes
         self.max_tps = args.max_tps
 
-        self.increasing_stakes = args.increasing_stakes
+        self.increasing_pledges = args.increasing_pledges
         self.progressive_upgrade = args.progressive_upgrade
         self.num_seats = args.num_seats
 
@@ -234,7 +234,7 @@ class LoadTestSpoon:
             self.rpc_nodes,
             self.validator_nodes,
             self.progressive_upgrade,
-            self.increasing_stakes,
+            self.increasing_pledges,
             self.num_seats,
         )
         logger.info(f'Preparing upgrade schedule -- done.')
@@ -268,7 +268,7 @@ class LoadTestSpoon:
             rpc_nodes=self.rpc_nodes,
             epoch_length=self.epoch_length,
             node_pks=validator_node_pks,
-            increasing_stakes=self.increasing_stakes,
+            increasing_pledges=self.increasing_pledges,
             num_seats=self.num_seats,
             single_shard=self.no_sharding,
             all_node_pks=all_node_pks,

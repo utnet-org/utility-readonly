@@ -154,7 +154,7 @@ pub struct ValidatorStatus {
     pub shards: u64,
     // Current height.
     pub head_height: u64,
-    // Current validators with their stake (stake is in UNC - not yoctounc).
+    // Current validators with their pledge (pledge is in UNC - not yoctounc).
     pub validators: Option<Vec<(AccountId, u64)>>,
     // All approvals that we've sent.
     pub approval_history: Vec<ApprovalHistoryEntry>,

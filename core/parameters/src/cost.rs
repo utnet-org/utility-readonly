@@ -122,8 +122,8 @@ impl ExtCostsConfig {
             ExtCosts::promise_and_base => SAFETY_MULTIPLIER * 488337800,
             ExtCosts::promise_and_per_promise => SAFETY_MULTIPLIER * 1817392,
             ExtCosts::promise_return => SAFETY_MULTIPLIER * 186717462,
-            ExtCosts::validator_frozen_base => SAFETY_MULTIPLIER * 303944908800,
-            ExtCosts::validator_total_frozen_base => SAFETY_MULTIPLIER * 303944908800,
+            ExtCosts::validator_pledge_base => SAFETY_MULTIPLIER * 303944908800,
+            ExtCosts::validator_total_pledge_base => SAFETY_MULTIPLIER * 303944908800,
             ExtCosts::alt_bn128_g1_multiexp_base => 713_000_000_000,
             ExtCosts::alt_bn128_g1_multiexp_element => 320_000_000_000,
             ExtCosts::alt_bn128_pairing_check_base => 9_686_000_000_000,
@@ -213,8 +213,8 @@ pub enum ExtCosts {
     promise_and_base = 48,
     promise_and_per_promise = 49,
     promise_return = 50,
-    validator_frozen_base = 51,
-    validator_total_frozen_base = 52,
+    validator_pledge_base = 51,
+    validator_total_pledge_base = 52,
     alt_bn128_g1_multiexp_base = 53,
     alt_bn128_g1_multiexp_element = 54,
     alt_bn128_pairing_check_base = 55,
@@ -250,7 +250,7 @@ pub enum ActionCosts {
     function_call_base = 4,
     function_call_byte = 5,
     transfer = 6,
-    stake = 7,
+    pledge = 7,
     add_full_access_key = 8,
     add_function_call_key_base = 9,
     add_function_call_key_byte = 10,
@@ -327,16 +327,16 @@ impl ExtCosts {
             ExtCosts::promise_and_base => Parameter::WasmPromiseAndBase,
             ExtCosts::promise_and_per_promise => Parameter::WasmPromiseAndPerPromise,
             ExtCosts::promise_return => Parameter::WasmPromiseReturn,
-            ExtCosts::validator_frozen_base => Parameter::WasmValidatorPowerBase,
-            ExtCosts::validator_total_frozen_base => Parameter::WasmValidatorTotalPowerBase,
+            ExtCosts::validator_pledge_base => Parameter::WasmValidatorPowerBase,
+            ExtCosts::validator_total_pledge_base => Parameter::WasmValidatorTotalPowerBase,
             ExtCosts::alt_bn128_g1_multiexp_base => Parameter::WasmAltBn128G1MultiexpBase,
             ExtCosts::alt_bn128_g1_multiexp_element => Parameter::WasmAltBn128G1MultiexpElement,
             ExtCosts::alt_bn128_pairing_check_base => Parameter::WasmAltBn128PairingCheckBase,
             ExtCosts::alt_bn128_pairing_check_element => Parameter::WasmAltBn128PairingCheckElement,
             ExtCosts::alt_bn128_g1_sum_base => Parameter::WasmAltBn128G1SumBase,
             ExtCosts::alt_bn128_g1_sum_element => Parameter::WasmAltBn128G1SumElement,
-            ExtCosts::validator_power_base => Parameter::WasmValidatorFrozenBase,
-            ExtCosts::validator_total_power_base => Parameter::WasmValidatorTotalFrozenBase,
+            ExtCosts::validator_power_base => Parameter::WasmValidatorPledgeBase,
+            ExtCosts::validator_total_power_base => Parameter::WasmValidatorTotalPledgeBase,
         }
     }
 }
@@ -360,7 +360,7 @@ pub struct RuntimeFeesConfig {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct StorageUsageConfig {
     /// Amount of yN per byte required to have on the account. See
-    /// <https://nomicon.io/Economics/README.html#state-stake> for details.
+    /// <https://nomicon.io/Economics/README.html#state-pledge> for details.
     pub storage_amount_per_byte: Balance,
     /// Number of bytes for an account record, including rounding up for account id.
     pub num_bytes_account: u64,
@@ -415,7 +415,7 @@ impl RuntimeFeesConfig {
                     send_not_sir: 115123062500,
                     execution: 115123062500,
                 },
-                ActionCosts::stake => Fee {
+                ActionCosts::pledge => Fee {
                     send_sir: 141715687500,
                     send_not_sir: 141715687500,
                     execution: 102217625000,

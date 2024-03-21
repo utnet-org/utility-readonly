@@ -165,7 +165,7 @@ pub fn create_chunk(
             header.prev_balance_burnt(),
             tx_root,
             header.prev_validator_power_proposals().collect(),
-            header.prev_validator_frozen_proposals().collect(),
+            header.prev_validator_pledge_proposals().collect(),
             transactions,
             decoded_chunk.prev_outgoing_receipts(),
             header.prev_outgoing_receipts_root(),

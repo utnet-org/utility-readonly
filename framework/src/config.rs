@@ -52,11 +52,11 @@ use tracing::{info, warn};
 /// Initial balance used in tests.
 pub const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * UNC_BASE;
 
-/// Validator's stake used in tests.
-pub const TESTING_INIT_STAKE: Balance = 50_000_000 * UNC_BASE;
+/// Validator's pledge used in tests.
+pub const TESTING_INIT_PLEDGE: Balance = 50_000_000 * UNC_BASE;
 
 ///
-pub const TESTING_INIT_POWER: Power = 5;
+pub const TESTING_INIT_POWER: Power = 5_000_000_000_000;
 
 /// One UNC, divisible by 10^24.
 pub const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
@@ -124,7 +124,7 @@ pub const MIN_GAS_PRICE: Balance = 100_000_000;
 /// Protocol treasury account
 pub const PROTOCOL_TREASURY_ACCOUNT: &str = "unc";
 
-/// Fishermen stake threshold.
+/// Fishermen pledge threshold.
 pub const FISHERMEN_THRESHOLD: Balance = 10 * UNC_BASE;
 
 /// Number of blocks for which a given transaction is valid
@@ -133,7 +133,7 @@ pub const TRANSACTION_VALIDITY_PERIOD: NumBlocks = 10;
 /// Number of seats for block producers
 pub const NUM_BLOCK_PRODUCER_SEATS: NumSeats = 100;
 
-/// The minimum stake required for staking is last seat price divided by this number.
+/// The minimum pledge required for staking is last seat price divided by this number.
 pub const MINIMUM_STAKE_DIVISOR: u64 = 10;
 
 pub const CONFIG_FILENAME: &str = "config.json";
@@ -154,7 +154,7 @@ pub const PROTOCOL_REWARD_RATE: Rational32 = Rational32::new_raw(1, 10);
 /// Maximum inflation rate per year
 pub const MAX_INFLATION_RATE: Rational32 = Rational32::new_raw(1, 20);
 
-/// Protocol upgrade stake threshold.
+/// Protocol upgrade pledge threshold.
 pub const PROTOCOL_UPGRADE_STAKE_THRESHOLD: Rational32 = Rational32::new_raw(4, 5);
 
 fn default_doomslug_step_period() -> Duration {
@@ -487,17 +487,16 @@ impl Genesis {
                 validators.push(AccountInfo {
                     account_id: account.clone(),
                     public_key: signer.public_key.clone(),
-                    amount: TESTING_INIT_STAKE,
-                    power: 0,
-                    locked: 0,
+                    pledging: TESTING_INIT_PLEDGE,
+                    power: TESTING_INIT_POWER,
                 });
             }
             add_account_with_key(
                 &mut records,
                 account,
                 &signer.public_key.clone(),
-                TESTING_INIT_BALANCE - if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
-                if i < num_validator_seats { TESTING_INIT_STAKE } else { 0 },
+                TESTING_INIT_BALANCE - if i < num_validator_seats { TESTING_INIT_PLEDGE } else { 0 },
+                if i < num_validator_seats { TESTING_INIT_PLEDGE } else { 0 },
                 TESTING_INIT_POWER,
                 CryptoHash::default(),
             );
@@ -511,7 +510,7 @@ impl Genesis {
             num_block_producer_seats_per_shard: num_validator_seats_per_shard.clone(),
             avg_hidden_validator_seats_per_shard: vec![0; num_validator_seats_per_shard.len()],
             dynamic_resharding: false,
-            protocol_upgrade_stake_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
+            protocol_upgrade_pledge_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
             epoch_length: FAST_EPOCH_LENGTH,
             gas_limit: INITIAL_GAS_LIMIT,
             gas_price_adjustment_rate: GAS_PRICE_ADJUSTMENT_RATE,
@@ -727,13 +726,13 @@ fn add_account_with_key(
     account_id: AccountId,
     public_key: &PublicKey,
     amount: u128,
-    staked: u128,
+    pledging: u128,
     power:  u64,
     code_hash: CryptoHash,
 ) {
     records.push(StateRecord::Account {
         account_id: account_id.clone(),
-        account: Account::new(amount, staked, power, code_hash, 0),
+        account: Account::new(amount, pledging, power, code_hash, 0),
     });
     records.push(StateRecord::AccessKey {
         account_id,
@@ -1059,7 +1058,7 @@ pub fn init_configs(
                 signer.account_id.clone(),
                 &signer.public_key(),
                 TESTING_INIT_BALANCE,
-                TESTING_INIT_STAKE,
+                TESTING_INIT_PLEDGE,
                 TESTING_INIT_POWER,
                 CryptoHash::default(),
             );
@@ -1090,7 +1089,7 @@ pub fn init_configs(
                 ),
                 avg_hidden_validator_seats_per_shard: (0..num_shards).map(|_| 0).collect(),
                 dynamic_resharding: false,
-                protocol_upgrade_stake_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
+                protocol_upgrade_pledge_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
                 epoch_length: if fast { FAST_EPOCH_LENGTH } else { EXPECTED_EPOCH_LENGTH },
                 gas_limit: INITIAL_GAS_LIMIT,
                 gas_price_adjustment_rate: GAS_PRICE_ADJUSTMENT_RATE,
@@ -1101,9 +1100,8 @@ pub fn init_configs(
                 validators: vec![AccountInfo {
                     account_id: signer.account_id.clone(),
                     public_key: signer.public_key(),
-                    amount: TESTING_INIT_STAKE,
-                    power: 0,
-                    locked: 0,
+                    pledging: TESTING_INIT_PLEDGE,
+                    power: TESTING_INIT_POWER,
                 }],
                 transaction_validity_period: TRANSACTION_VALIDITY_PERIOD,
                 protocol_reward_rate: PROTOCOL_REWARD_RATE,

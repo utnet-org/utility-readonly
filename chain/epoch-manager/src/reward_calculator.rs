@@ -42,7 +42,7 @@ impl RewardCalculator {
     pub fn calculate_reward(
         &self,
         validator_block_chunk_stats: HashMap<AccountId, BlockChunkValidatorStats>,
-        validator_stake: &HashMap<AccountId, Balance>,
+        validator_pledge: &HashMap<AccountId, Balance>,
         total_supply: Balance,
         protocol_version: ProtocolVersion,
         genesis_protocol_version: ProtocolVersion,
@@ -86,7 +86,7 @@ impl RewardCalculator {
         }
         let epoch_validator_reward = epoch_total_reward - epoch_protocol_treasury;
         let mut epoch_actual_reward = epoch_protocol_treasury;
-        let total_stake: Balance = validator_stake.values().sum();
+        let total_pledge: Balance = validator_pledge.values().sum();
         for (account_id, stats) in validator_block_chunk_stats {
             // Uptime is an average of block produced / expected and chunk produced / expected.
             let (average_produced_numer, average_produced_denom) =
@@ -123,7 +123,7 @@ impl RewardCalculator {
             {
                 0
             } else {
-                let stake = *validator_stake
+                let pledge = *validator_pledge
                     .get(&account_id)
                     .unwrap_or_else(|| panic!("{} is not a validator", account_id));
                 // Online reward multiplier is min(1., (uptime - online_threshold_min) / (online_threshold_max - online_threshold_min).
@@ -138,9 +138,9 @@ impl RewardCalculator {
                 // Apply min between 1. and computed uptime.
                 uptime_numer =
                     if uptime_numer > uptime_denum { uptime_denum } else { uptime_numer };
-                (U256::from(epoch_validator_reward) * uptime_numer * U256::from(stake)
+                (U256::from(epoch_validator_reward) * uptime_numer * U256::from(pledge)
                     / uptime_denum
-                    / U256::from(total_stake))
+                    / U256::from(total_pledge))
                 .as_u128()
             };
             res.insert(account_id, reward);
@@ -187,12 +187,12 @@ mod tests {
                 },
             ),
         ]);
-        let validator_stake =
+        let validator_pledge =
             HashMap::from([("test1".parse().unwrap(), 100), ("test2".parse().unwrap(), 100)]);
         let total_supply = 1_000_000_000_000;
         let result = reward_calculator.calculate_reward(
             validator_block_chunk_stats,
-            &validator_stake,
+            &validator_pledge,
             total_supply,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,
@@ -245,7 +245,7 @@ mod tests {
                 },
             ),
         ]);
-        let validator_stake = HashMap::from([
+        let validator_pledge = HashMap::from([
             ("test1".parse().unwrap(), 500_000),
             ("test2".parse().unwrap(), 500_000),
             ("test3".parse().unwrap(), 500_000),
@@ -253,13 +253,13 @@ mod tests {
         let total_supply = 1_000_000_000;
         let result = reward_calculator.calculate_reward(
             validator_block_chunk_stats,
-            &validator_stake,
+            &validator_pledge,
             total_supply,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,
             epoch_length * NUM_NS_IN_SECOND,
         );
-        // Total reward is 10_000_000. Divided by 3 equal stake validators - each gets 3_333_333.
+        // Total reward is 10_000_000. Divided by 3 equal pledge validators - each gets 3_333_333.
         // test1 with 94.5% online gets 50% because of liunc between (0.99-0.9) online.
         assert_eq!(
             result.0,
@@ -312,7 +312,7 @@ mod tests {
                 },
             ),
             // a validator that expected blocks and chunks are both 0 (this could occur with very
-            // small probability for validators with little stakes)
+            // small probability for validators with little pledges)
             (
                 "test4".parse().unwrap(),
                 BlockChunkValidatorStats {
@@ -321,7 +321,7 @@ mod tests {
                 },
             ),
         ]);
-        let validator_stake = HashMap::from([
+        let validator_pledge = HashMap::from([
             ("test1".parse().unwrap(), 500_000),
             ("test2".parse().unwrap(), 500_000),
             ("test3".parse().unwrap(), 500_000),
@@ -330,13 +330,13 @@ mod tests {
         let total_supply = 1_000_000_000;
         let result = reward_calculator.calculate_reward(
             validator_block_chunk_stats,
-            &validator_stake,
+            &validator_pledge,
             total_supply,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,
             epoch_length * NUM_NS_IN_SECOND,
         );
-        // Total reward is 10_000_000. Divided by 4 equal stake validators - each gets 2_500_000.
+        // Total reward is 10_000_000. Divided by 4 equal pledge validators - each gets 2_500_000.
         // test1 with 94.5% online gets 50% because of linear between (0.99-0.9) online.
         {
             assert_eq!(
@@ -376,12 +376,12 @@ mod tests {
                 chunk_stats: ValidatorStats { produced: 345600, expected: 345600 },
             },
         )]);
-        let validator_stake = HashMap::from([("test".parse().unwrap(), 500_000 * 10_u128.pow(24))]);
+        let validator_pledge = HashMap::from([("test".parse().unwrap(), 500_000 * 10_u128.pow(24))]);
         // some hypothetical large total supply (100b)
         let total_supply = 100_000_000_000 * 10_u128.pow(24);
         reward_calculator.calculate_reward(
             validator_block_chunk_stats,
-            &validator_stake,
+            &validator_pledge,
             total_supply,
             PROTOCOL_VERSION,
             PROTOCOL_VERSION,

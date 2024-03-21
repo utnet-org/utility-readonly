@@ -371,7 +371,7 @@ pub struct DumpStateCmd {
     account_ids: Option<Vec<AccountId>>,
     /// List of validators to remain validators.
     /// All other validators will be kicked, but still dumped.
-    /// Their stake will be returned to balance.
+    /// Their pledge will be returned to balance.
     #[clap(long)]
     include_validators: Option<Vec<AccountId>>,
 }

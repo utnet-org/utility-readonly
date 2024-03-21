@@ -245,7 +245,7 @@ impl Block {
     ) -> Self {
         // Collect aggregate of validators and gas usage/limits from chunks.
         let mut prev_validator_power_proposals = vec![];
-        let mut prev_validator_frozen_proposals = vec![];
+        let mut prev_validator_pledge_proposals = vec![];
         let mut gas_used = 0;
         // This computation of chunk_mask relies on the fact that chunks are ordered by shard_id.
         let mut chunk_mask = vec![];
@@ -254,7 +254,7 @@ impl Block {
         for chunk in chunks.iter() {
             if chunk.height_included() == height {
                 prev_validator_power_proposals.extend(chunk.prev_validator_power_proposals());
-                prev_validator_frozen_proposals.extend(chunk.prev_validator_frozen_proposals());
+                prev_validator_pledge_proposals.extend(chunk.prev_validator_pledge_proposals());
                 gas_used += chunk.prev_gas_used();
                 gas_limit += chunk.gas_limit();
                 balance_burnt += chunk.prev_balance_burnt();
@@ -316,7 +316,7 @@ impl Block {
             Block::compute_challenges_root(&body.challenges),
             random_value,
             prev_validator_power_proposals,
-            prev_validator_frozen_proposals,
+            prev_validator_pledge_proposals,
             chunk_mask,
             block_ordinal,
             epoch_id,

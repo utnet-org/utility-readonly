@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Spins up two nodes; Let's them build the chain for several epochs;
-# Spins up two more nodes, and makes the two new nodes to stake, and the old two to unstake;
+# Spins up two more nodes, and makes the two new nodes to pledge, and the old two to unpledge;
 # Makes the two new nodes to build for couple more epochs;
 # Spins up one more node. Makes sure it can sync.
 # For the last node to be able to sync, it needs to learn to download chunks from the other
@@ -142,12 +142,12 @@ if __name__ == '__main__':
             ["validators", 0, "amount", "110000000000000000000000000000000"],
             ["validators", 1, "amount", "110000000000000000000000000000000"],
             [
-                "records", 0, "Account", "account", "locked",
+                "records", 0, "Account", "account", "pledging",
                 "110000000000000000000000000000000"
             ],
             # each validator account is two records, thus the index of a record for the second is 2, not 1
             [
-                "records", 2, "Account", "account", "locked",
+                "records", 2, "Account", "account", "pledging",
                 "110000000000000000000000000000000"
             ],
             ["total_supply", "6120000000000000000000000000000000"]
@@ -217,14 +217,14 @@ if __name__ == '__main__':
             break
         time.sleep(1)
 
-    for stake, nodes, expected_vals in [
+    for pledge, nodes, expected_vals in [
         (100000000000000000000000000000000, [node2, node3],
          ["test0", "test1", "test2", "test3"]),
         (0, [boot_node, node1], ["test2", "test3"]),
     ]:
         logging.info("Rotating validators")
         for ord_, node in enumerate(reversed(nodes)):
-            tx = sign_staking_tx(node.signer_key, node.validator_key, stake, 10,
+            tx = sign_staking_tx(node.signer_key, node.validator_key, pledge, 10,
                                  hash_)
             boot_node.send_tx(tx)
 

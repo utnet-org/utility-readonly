@@ -26,8 +26,8 @@ use unc_store::test_utils::create_test_store;
 
 use unc_primitives::shard_layout::ShardLayout;
 use {crate::reward_calculator::NUM_NS_IN_SECOND, crate::NUM_SECONDS_IN_A_YEAR};
-use unc_primitives::types::validator_frozen::ValidatorFrozen;
-use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 pub const DEFAULT_GAS_PRICE: u128 = 100;
 pub const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
@@ -53,7 +53,7 @@ pub fn epoch_info(
     hidden_validators_settlement: Vec<ValidatorWeight>,
     fishermen: Vec<(AccountId, Power, Balance)>,
     power_change: BTreeMap<AccountId, Power>,
-    frozen_change: BTreeMap<AccountId, Balance>,
+    pledge_change: BTreeMap<AccountId, Balance>,
     validator_kickout: Vec<(AccountId, ValidatorKickoutReason)>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -67,7 +67,7 @@ pub fn epoch_info(
         hidden_validators_settlement,
         fishermen,
         power_change,
-        frozen_change,
+        pledge_change,
         validator_kickout,
         validator_reward,
         minted_amount,
@@ -83,7 +83,7 @@ pub fn epoch_info_with_num_seats(
     hidden_validators_settlement: Vec<ValidatorWeight>,
     fishermen: Vec<(AccountId, Power, Balance)>,
     power_change: BTreeMap<AccountId, Power>,
-    frozen_change: BTreeMap<AccountId, Balance>,
+    pledge_change: BTreeMap<AccountId, Balance>,
     validator_kickout: Vec<(AccountId, ValidatorKickoutReason)>,
     validator_reward: HashMap<AccountId, Balance>,
     minted_amount: Balance,
@@ -98,22 +98,22 @@ pub fn epoch_info_with_num_seats(
     });
     let fishermen_to_index =
         fishermen.iter().enumerate().map(|(i, (s,_ , _))| (s.clone(), i as ValidatorId)).collect();
-    let account_to_validators = |accounts: Vec<(AccountId, Power, Balance)>| -> Vec<ValidatorPowerAndFrozen> {
+    let account_to_validators = |accounts: Vec<(AccountId, Power, Balance)>| -> Vec<ValidatorPowerAndPledge> {
         accounts
             .into_iter()
-            .map(|(account_id, power,locked)| {
-                ValidatorPowerAndFrozen::new(
+            .map(|(account_id, power,pledging)| {
+                ValidatorPowerAndPledge::new(
                     account_id.clone(),
                     SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key(),
                     power,
-                    locked,
+                    pledging,
                 )
             })
             .collect()
     };
     let all_validators = account_to_validators(accounts);
     let validator_mandates = {
-        // TODO(#10014) determine required stake per mandate instead of reusing seat price.
+        // TODO(#10014) determine required pledge per mandate instead of reusing seat price.
         // TODO(#10014) determine `min_mandates_per_shard`
         let num_shards = chunk_producers_settlement.len();
         let min_mandates_per_shard = 0;
@@ -130,7 +130,7 @@ pub fn epoch_info_with_num_seats(
         account_to_validators(fishermen),
         fishermen_to_index,
         power_change,
-        frozen_change,
+        pledge_change,
         validator_reward,
         validator_kickout.into_iter().collect(),
         minted_amount,
@@ -166,11 +166,11 @@ pub fn epoch_config_with_production_config(
         fishermen_threshold,
         online_min_threshold: Ratio::new(90, 100),
         online_max_threshold: Ratio::new(99, 100),
-        protocol_upgrade_stake_threshold: Ratio::new(80, 100),
-        minimum_stake_divisor: 1,
+        protocol_upgrade_pledge_threshold: Ratio::new(80, 100),
+        minimum_pledge_divisor: 1,
         validator_selection_config: Default::default(),
         shard_layout: ShardLayout::v0(num_shards, 0),
-        validator_max_kickout_stake_perc: 100,
+        validator_max_kickout_pledge_perc: 100,
     };
     AllEpochConfig::new(use_production_config, epoch_config, "test-chain")
 }
@@ -201,9 +201,9 @@ pub fn do_power(account_id: AccountId, power: Power) -> ValidatorPower {
     ValidatorPower::new(account_id, public_key, power)
 }
 
-pub fn frozen(account_id: AccountId, frozen: Balance) -> ValidatorFrozen {
+pub fn pledge(account_id: AccountId, pledge: Balance) -> ValidatorPledge {
     let public_key = SecretKey::from_seed(KeyType::ED25519, account_id.as_ref()).public_key();
-    ValidatorFrozen::new(account_id, public_key, frozen)
+    ValidatorPledge::new(account_id, public_key, pledge)
 }
 
 /// No-op reward calculator. Will produce no reward
@@ -226,7 +226,7 @@ pub fn reward(info: Vec<(AccountId, Balance)>) -> HashMap<AccountId, Balance> {
 
 pub fn setup_epoch_manager(
     power_validators: Vec<(AccountId, Power)>,
-    frozen_validators: Vec<(AccountId, Balance)>,
+    pledge_validators: Vec<(AccountId, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -255,9 +255,9 @@ pub fn setup_epoch_manager(
             .iter()
             .map(|(account_id, power)| do_power(account_id.clone(), *power,))
             .collect(),
-        frozen_validators
+        pledge_validators
             .iter()
-            .map(|(account_id, balance)| frozen(account_id.clone(), *balance))
+            .map(|(account_id, balance)| pledge(account_id.clone(), *balance))
             .collect(),
     )
     .unwrap()
@@ -265,7 +265,7 @@ pub fn setup_epoch_manager(
 
 pub fn setup_default_epoch_manager(
     power_validators: Vec<(AccountId, Power)>,
-    frozen_validators: Vec<(AccountId, Balance)>,
+    pledge_validators: Vec<(AccountId, Balance)>,
     epoch_length: BlockHeightDelta,
     num_shards: NumShards,
     num_block_producer_seats: NumSeats,
@@ -275,7 +275,7 @@ pub fn setup_default_epoch_manager(
 ) -> EpochManager {
     setup_epoch_manager(
         power_validators,
-        frozen_validators,
+        pledge_validators,
         epoch_length,
         num_shards,
         num_block_producer_seats,
@@ -288,7 +288,7 @@ pub fn setup_default_epoch_manager(
 }
 
 /// Makes an EpochManager with the given block and chunk producers,
-/// automatically coming up with stakes for them to ensure the desired
+/// automatically coming up with pledges for them to ensure the desired
 /// election outcome.
 pub fn setup_epoch_manager_with_block_and_chunk_producers(
     store: Store,
@@ -299,23 +299,23 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
 ) -> EpochManager {
     let num_block_producers = block_producers.len() as u64;
     let block_producer_power = 1_000_000 as u64;
-    let block_producer_frozen = 1_000_000 as u128;
-    let mut total_frozen = 0;
+    let block_producer_pledge = 1_000_000 as u128;
+    let mut total_pledge = 0;
     let mut total_power = 0;
     let mut power_validators = vec![];
-    let mut frozen_validators = vec![];
+    let mut pledge_validators = vec![];
     for block_producer in &block_producers {
         power_validators.push((block_producer.clone(), block_producer_power));
-        frozen_validators.push((block_producer.clone(), block_producer_frozen));
-        total_frozen += block_producer_frozen;
+        pledge_validators.push((block_producer.clone(), block_producer_pledge));
+        total_pledge += block_producer_pledge;
         total_power += block_producer_power;
     }
     for chunk_only_producer in &chunk_only_producers {
-        let minimum_frozen_to_ensure_election =
-            total_frozen * 160 / 1_000_000 / num_shards as u128 + 1;
-        let frozen = block_producer_frozen - 1;
+        let minimum_pledge_to_ensure_election =
+            total_pledge * 160 / 1_000_000 / num_shards as u128 + 1;
+        let pledge = block_producer_pledge - 1;
         assert!(
-            frozen >= minimum_frozen_to_ensure_election,
+            pledge >= minimum_pledge_to_ensure_election,
             "Could not honor the specified list of producers"
         );
         let minimum_power_to_ensure_election =
@@ -326,8 +326,8 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
             "Could not honor the specified list of producers"
         );
         power_validators.push((chunk_only_producer.clone(), power));
-        frozen_validators.push((chunk_only_producer.clone(), frozen));
-        total_frozen += frozen;
+        pledge_validators.push((chunk_only_producer.clone(), pledge));
+        total_pledge += pledge;
         total_power += power;
     }
     let config = epoch_config(epoch_length, num_shards, num_block_producers, 0, 0, 0, 0);
@@ -340,9 +340,9 @@ pub fn setup_epoch_manager_with_block_and_chunk_producers(
             .iter()
             .map(|(account_id, power)| do_power(account_id.clone(), *power))
             .collect(),
-        frozen_validators
+        pledge_validators
             .iter()
-            .map(|(account_id, balance)| frozen(account_id.clone(), *balance))
+            .map(|(account_id, balance)| pledge(account_id.clone(), *balance))
             .collect(),
     )
     .unwrap();
@@ -364,7 +364,7 @@ pub fn record_block_with_final_block_hash(
     last_final_block_hash: CryptoHash,
     height: BlockHeight,
     power_proposals: Vec<ValidatorPower>,
-    frozen_proposals: Vec<ValidatorFrozen>,
+    pledge_proposals: Vec<ValidatorPledge>,
 ) {
     epoch_manager
         .record_block_info(
@@ -375,7 +375,7 @@ pub fn record_block_with_final_block_hash(
                 last_final_block_hash,
                 prev_h,
                 power_proposals.clone(),
-                frozen_proposals.clone(),
+                pledge_proposals.clone(),
                 vec![],
                 vec![],
                 DEFAULT_TOTAL_SUPPLY,
@@ -394,7 +394,7 @@ pub fn record_block_with_final_block_hash(
                 0,
                 0,
                 power_proposals,
-                frozen_proposals,
+                pledge_proposals,
                 HashMap::default(),
                 ValidatorMandates::default(),
             ),
@@ -411,7 +411,7 @@ pub fn record_block_with_slashes(
     cur_h: CryptoHash,
     height: BlockHeight,
     power_proposals: Vec<ValidatorPower>,
-    frozen_proposals: Vec<ValidatorFrozen>,
+    pledge_proposals: Vec<ValidatorPledge>,
     slashed: Vec<SlashedValidator>,
 ) {
     epoch_manager
@@ -423,7 +423,7 @@ pub fn record_block_with_slashes(
                 prev_h,
                 prev_h,
                 power_proposals.clone(),
-                frozen_proposals.clone(),
+                pledge_proposals.clone(),
                 vec![],
                 slashed,
                 DEFAULT_TOTAL_SUPPLY,
@@ -442,7 +442,7 @@ pub fn record_block_with_slashes(
                 0,
                 0,
                 power_proposals,
-                frozen_proposals,
+                pledge_proposals,
                 HashMap::default(),
                 ValidatorMandates::default(),
             ),
@@ -459,9 +459,9 @@ pub fn record_block(
     cur_h: CryptoHash,
     height: BlockHeight,
     power_proposals: Vec<ValidatorPower>,
-    frozen_proposals: Vec<ValidatorFrozen>
+    pledge_proposals: Vec<ValidatorPledge>
 ) {
-    record_block_with_slashes(epoch_manager, prev_h, cur_h, height, power_proposals, frozen_proposals, vec![]);
+    record_block_with_slashes(epoch_manager, prev_h, cur_h, height, power_proposals, pledge_proposals, vec![]);
 }
 
 pub fn block_info(
@@ -474,19 +474,19 @@ pub fn block_info(
     chunk_mask: Vec<bool>,
     total_supply: Balance,
     random_value: CryptoHash,
-    validators: Vec<ValidatorPowerAndFrozen>,
+    validators: Vec<ValidatorPowerAndPledge>,
     validator_to_index: HashMap<AccountId,ValidatorId>,
     block_producers_settlement: Vec<ValidatorId>,
     chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-    fishermen: Vec<ValidatorPowerAndFrozen>,
+    fishermen: Vec<ValidatorPowerAndPledge>,
     fishermen_to_index: HashMap<AccountId, ValidatorId>,
     power_change: BTreeMap<AccountId, Power>,
-    frozen_change: BTreeMap<AccountId, Balance>,
+    pledge_change: BTreeMap<AccountId, Balance>,
     validator_reward: HashMap<AccountId, Balance>,
     seat_price: Balance,
     minted_amount: Balance,
     all_power_proposals: Vec<ValidatorPower>,
-    all_frozen_proposals: Vec<ValidatorFrozen>,
+    all_pledge_proposals: Vec<ValidatorPledge>,
     validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     validator_mandates: ValidatorMandates,
 ) -> BlockInfo {
@@ -499,7 +499,7 @@ pub fn block_info(
         epoch_first_block,
         epoch_id: Default::default(),
         power_proposals: vec![],
-        frozen_proposals: vec![],
+        pledge_proposals: vec![],
         chunk_mask,
         latest_protocol_version: PROTOCOL_VERSION,
         slashed: Default::default(),
@@ -513,12 +513,12 @@ pub fn block_info(
         fishermen,
         fishermen_to_index,
         power_change,
-        frozen_change,
+        pledge_change,
         validator_reward,
         seat_price,
         minted_amount,
         all_power_proposals,
-        all_frozen_proposals,
+        all_pledge_proposals,
         validator_kickout,
         validator_mandates,
     })

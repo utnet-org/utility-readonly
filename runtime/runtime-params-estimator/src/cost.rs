@@ -132,13 +132,13 @@ pub enum Cost {
     ActionTransferSendNotSir,
     ActionTransferSendSir,
     ActionTransferExec,
-    /// Estimates `action_creation_config.stake_cost` which is charged for every
+    /// Estimates `action_creation_config.pledge_cost` which is charged for every
     /// `Action::Stake`, a slightly higher value for sending than executing.
     ///
     /// Estimation: Measure a transaction with only a staking action and
     /// subtract the base cost of creating a sir-receipt.
     ///
-    /// Note: The exec cost is probably a copy-paste mistake. (#8185)
+    /// Note: The exec cost is probably a copy-paste mipledge. (#8185)
     ActionStake,
     ActionStakeSendNotSir,
     ActionStakeSendSir,
@@ -252,7 +252,7 @@ pub enum Cost {
     //  - Reading from a register: The data from the register is copied into
     //    WASM memory.
     //  - Host function calls such as `account_balance()` and
-    //    `validator_stake()` that return a value by writing it to a pointer.
+    //    `validator_pledge()` that return a value by writing it to a pointer.
     //
     /// Estimates `ext_costs.read_memory_base` which is charged once every time
     /// data is copied from WASM memory to the hosting runtime as a result of
@@ -586,16 +586,16 @@ pub enum Cost {
     ///
     /// Estimation: Currently not estimated
     PromiseReturn,
-    /// Estimates `validator_stake_base` which is charged for each call to
-    /// `validator_stake`, covering the cost for looking up if an account is a
-    /// validator and if so, how much it has staked. This information is
+    /// Estimates `validator_pledge_base` which is charged for each call to
+    /// `validator_pledge`, covering the cost for looking up if an account is a
+    /// validator and if so, how much it has pledging. This information is
     /// available from the local EpochManager.
     ///
     /// Estimation: Currently not estimated
     ValidatorStakeBase,
-    /// Estimates `validator_total_stake_base` which is charged for each call to
-    /// `validator_total_stake`, covering the cost for looking up the total
-    /// staked tokens for the current epoch. This information is
+    /// Estimates `validator_total_pledge_base` which is charged for each call to
+    /// `validator_total_pledge`, covering the cost for looking up the total
+    /// pledging tokens for the current epoch. This information is
     /// available from the local EpochManager.
     ///
     /// Estimation: Currently not estimated

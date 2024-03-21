@@ -53,7 +53,7 @@ fn calc_total_supply(env: &mut TestEnv) -> u128 {
         .iter()
         .map(|account_id| {
             let account = env.query_account(account_id.parse().unwrap());
-            account.amount + account.locked
+            account.amount + account.pledging
         })
         .sum()
 }

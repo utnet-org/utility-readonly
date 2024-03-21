@@ -113,7 +113,7 @@ def fix_json_fields_by_tx_type(py_tx, tx_type):
     elif tx_type == "Transfer":
         py_tx.deposit = int(py_tx.deposit)
     elif tx_type == "Stake":
-        py_tx.stake = int(py_tx.stake)
+        py_tx.pledge = int(py_tx.pledge)
         py_tx.publicKey = convert_json_public_key_to_py_public_key(
             py_tx.publicKey)
     else:

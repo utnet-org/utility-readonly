@@ -51,7 +51,7 @@ res = nodes[0].json_rpc(
                 "account_id": "01.unc",
                 "account": {
                     "amount": "49999999958035075000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 264
                 }
@@ -61,7 +61,7 @@ res = nodes[0].json_rpc(
                 "account_id": "alex.unc",
                 "account": {
                     "amount": "9999000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -71,7 +71,7 @@ res = nodes[0].json_rpc(
                 "account_id": "bo.unc",
                 "account": {
                     "amount": "50000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -81,7 +81,7 @@ res = nodes[0].json_rpc(
                 "account_id": "bot.pulse.unc",
                 "account": {
                     "amount": "791373397694044304600000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -91,7 +91,7 @@ res = nodes[0].json_rpc(
                 "account_id": "bowen.unc",
                 "account": {
                     "amount": "49999999506363398300200000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -101,7 +101,7 @@ res = nodes[0].json_rpc(
                 "account_id": "contributors.unc",
                 "account": {
                     "amount": "418000000000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -111,7 +111,7 @@ res = nodes[0].json_rpc(
                 "account_id": "erik.unc",
                 "account": {
                     "amount": "10000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -121,7 +121,7 @@ res = nodes[0].json_rpc(
                 "account_id": "foundation.unc",
                 "account": {
                     "amount": "581779979999999955363487500000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -131,7 +131,7 @@ res = nodes[0].json_rpc(
                 "account_id": "illia.unc",
                 "account": {
                     "amount": "9909124991408763970627200000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 321
                 }
@@ -141,7 +141,7 @@ res = nodes[0].json_rpc(
                 "account_id": "kendall.unc",
                 "account": {
                     "amount": "49998999710140992484400000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 462
                 }
@@ -151,7 +151,7 @@ res = nodes[0].json_rpc(
                 "account_id": "ledger.vlad.unc",
                 "account": {
                     "amount": "999999957937258742200000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 327
                 }
@@ -161,7 +161,7 @@ res = nodes[0].json_rpc(
                 "account_id": "mike.unc",
                 "account": {
                     "amount": "30999999915088987500000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -171,7 +171,7 @@ res = nodes[0].json_rpc(
                 "account_id": "mikemikemikemikemikemikemikemike",
                 "account": {
                     "amount": "19000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -181,7 +181,7 @@ res = nodes[0].json_rpc(
                 "account_id": "unc",
                 "account": {
                     "amount": "8700003991476791004803600000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "23tqXYRdbJVuvpLB14Pe9Su9bQBwfn3njKN6EBbKTQwh",
                     "storage_usage": 197868
                 }
@@ -191,7 +191,7 @@ res = nodes[0].json_rpc(
                 "account_id": "nfvalidator1.unc",
                 "account": {
                     "amount": "0",
-                    "locked": "50000000000000000000000000000",
+                    "pledging": "50000000000000000000000000000",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -201,7 +201,7 @@ res = nodes[0].json_rpc(
                 "account_id": "nfvalidator2.unc",
                 "account": {
                     "amount": "0",
-                    "locked": "50000000000000000000000000000",
+                    "pledging": "50000000000000000000000000000",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -211,7 +211,7 @@ res = nodes[0].json_rpc(
                 "account_id": "nfvalidator3.unc",
                 "account": {
                     "amount": "0",
-                    "locked": "50000000000000000000000000000",
+                    "pledging": "50000000000000000000000000000",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -221,7 +221,7 @@ res = nodes[0].json_rpc(
                 "account_id": "nfvalidator4.unc",
                 "account": {
                     "amount": "0",
-                    "locked": "50000000000000000000000000000",
+                    "pledging": "50000000000000000000000000000",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -231,7 +231,7 @@ res = nodes[0].json_rpc(
                 "account_id": "patrick.unc",
                 "account": {
                     "amount": "9998999875468925000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 263
                 }
@@ -241,7 +241,7 @@ res = nodes[0].json_rpc(
                 "account_id": "peter.unc",
                 "account": {
                     "amount": "1000874999955363487500000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -251,7 +251,7 @@ res = nodes[0].json_rpc(
                 "account_id": "pulse.unc",
                 "account": {
                     "amount": "48001118054588063403800000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "2pMwiHggCBQAv3eFEPtJozDpbHpD8KkL3o3qRv6qs6DT",
                     "storage_usage": 26061
                 }
@@ -261,7 +261,7 @@ res = nodes[0].json_rpc(
                 "account_id": "registrar",
                 "account": {
                     "amount": "10000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -271,7 +271,7 @@ res = nodes[0].json_rpc(
                 "account_id": "treasury.unc",
                 "account": {
                     "amount": "10000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }
@@ -281,7 +281,7 @@ res = nodes[0].json_rpc(
                 "account_id": "vlad.unc",
                 "account": {
                     "amount": "8998999831159137500000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 346
                 }
@@ -291,7 +291,7 @@ res = nodes[0].json_rpc(
                 "account_id": "wallet.pulse.unc",
                 "account": {
                     "amount": "999899913398562500000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 264
                 }
@@ -301,7 +301,7 @@ res = nodes[0].json_rpc(
                 "account_id": "yifang.unc",
                 "account": {
                     "amount": "50000000000000000000000000",
-                    "locked": "0",
+                    "pledging": "0",
                     "code_hash": "11111111111111111111111111111111",
                     "storage_usage": 182
                 }

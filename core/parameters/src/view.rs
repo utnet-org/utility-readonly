@@ -8,7 +8,7 @@ use num_rational::Rational32;
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct RuntimeConfigView {
     /// Amount of yN per byte required to have on the account.  See
-    /// <https://nomicon.io/Economics/Economic#state-stake> for details.
+    /// <https://nomicon.io/Economics/Economic#state-pledge> for details.
     #[serde(with = "dec_format")]
     pub storage_amount_per_byte: Balance,
     /// Costs of different actions that need to be performed when sending and
@@ -89,7 +89,7 @@ pub struct ActionCreationConfigView {
     pub transfer_cost: Fee,
 
     /// Base cost of staking.
-    pub stake_cost: Fee,
+    pub pledge_cost: Fee,
 
     /// Base cost of adding a key.
     pub add_key_cost: AccessKeyCreationConfigView,
@@ -155,7 +155,7 @@ impl From<crate::RuntimeConfig> for RuntimeConfigView {
                         .fee(ActionCosts::function_call_byte)
                         .clone(),
                     transfer_cost: config.fees.fee(ActionCosts::transfer).clone(),
-                    stake_cost: config.fees.fee(ActionCosts::stake).clone(),
+                    pledge_cost: config.fees.fee(ActionCosts::pledge).clone(),
                     add_key_cost: AccessKeyCreationConfigView {
                         full_access_cost: config.fees.fee(ActionCosts::add_full_access_key).clone(),
                         function_call_cost: config
@@ -414,11 +414,11 @@ pub struct ExtCostsConfigView {
     // ###############
     // # Validator API #
     // ###############
-    /// Cost of calling `validator_stake`.
-    pub validator_frozen_base: Gas,
+    /// Cost of calling `validator_pledge`.
+    pub validator_pledge_base: Gas,
     pub validator_power_base: Gas,
-    /// Cost of calling `validator_total_stake`.
-    pub validator_total_frozen_base: Gas,
+    /// Cost of calling `validator_total_pledge`.
+    pub validator_total_pledge_base: Gas,
     pub validator_total_power_base: Gas,
 
     // Removed parameters, only here for keeping the output backward-compatible.
@@ -501,8 +501,8 @@ impl From<crate::ExtCostsConfig> for ExtCostsConfigView {
             promise_and_base: config.gas_cost(ExtCosts::promise_and_base),
             promise_and_per_promise: config.gas_cost(ExtCosts::promise_and_per_promise),
             promise_return: config.gas_cost(ExtCosts::promise_return),
-            validator_frozen_base: config.gas_cost(ExtCosts::validator_frozen_base),
-            validator_total_frozen_base: config.gas_cost(ExtCosts::validator_total_frozen_base),
+            validator_pledge_base: config.gas_cost(ExtCosts::validator_pledge_base),
+            validator_total_pledge_base: config.gas_cost(ExtCosts::validator_total_pledge_base),
             validator_power_base: config.gas_cost(ExtCosts::validator_power_base),
             validator_total_power_base: config.gas_cost(ExtCosts::validator_total_power_base),
             alt_bn128_g1_multiexp_base: config.gas_cost(ExtCosts::alt_bn128_g1_multiexp_base),
@@ -575,8 +575,8 @@ impl From<ExtCostsConfigView> for crate::ExtCostsConfig {
                 ExtCosts::promise_and_base => view.promise_and_base,
                 ExtCosts::promise_and_per_promise => view.promise_and_per_promise,
                 ExtCosts::promise_return => view.promise_return,
-                ExtCosts::validator_frozen_base => view.validator_frozen_base,
-                ExtCosts::validator_total_frozen_base => view.validator_total_frozen_base,
+                ExtCosts::validator_pledge_base => view.validator_pledge_base,
+                ExtCosts::validator_total_pledge_base => view.validator_total_pledge_base,
                 ExtCosts::validator_power_base => view.validator_power_base,
                 ExtCosts::validator_total_power_base => view.validator_total_power_base,
                 ExtCosts::alt_bn128_g1_multiexp_base => view.alt_bn128_g1_multiexp_base,

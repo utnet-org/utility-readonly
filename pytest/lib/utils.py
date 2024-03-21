@@ -35,7 +35,7 @@ class TxContext:
     def get_balance(self, whose):
         r = self.nodes[self.act_to_val[whose]].get_account("test%s" % whose)
         assert 'result' in r, r
-        return int(r['result']['amount']) + int(r['result']['locked'])
+        return int(r['result']['amount']) + int(r['result']['pledging'])
 
     def get_balances(self):
         return [self.get_balance(i) for i in range(self.num_nodes)]

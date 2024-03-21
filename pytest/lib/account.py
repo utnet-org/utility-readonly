@@ -127,9 +127,9 @@ class Account:
             base_block_hash or self.base_block_hash)
         return self.send_tx(tx)
 
-    def send_stake_tx(self, stake_amount, base_block_hash=None):
+    def send_pledge_tx(self, pledge_amount, base_block_hash=None):
         self.prep_tx()
-        tx = sign_staking_tx(self.key, self.key, stake_amount, self.nonce,
+        tx = sign_staking_tx(self.key, self.key, pledge_amount, self.nonce,
                              base_block_hash or self.base_block_hash)
         return self.send_tx(tx)
 

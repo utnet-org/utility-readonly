@@ -58,7 +58,8 @@ pub fn get_runtime_and_trie_from_genesis(genesis: &Genesis) -> (Runtime, ShardTr
                 (
                     account_info.account_id.clone(),
                     account_info.public_key.clone(),
-                    account_info.amount,
+                    account_info.pledging,
+                    account_info.power,
                 )
             })
             .collect::<Vec<_>>(),

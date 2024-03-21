@@ -220,16 +220,16 @@ impl<'a> ChainUpdate<'a> {
                         .push(validator_power_proposal);
                 }
 
-                let mut validator_frozen_proposals_by_shard: HashMap<_, Vec<_>> = HashMap::new();
-                for validator_frozen_proposal in chunk_extra.validator_frozen_proposals() {
+                let mut validator_pledge_proposals_by_shard: HashMap<_, Vec<_>> = HashMap::new();
+                for validator_pledge_proposal in chunk_extra.validator_pledge_proposals() {
                     let shard_uid = account_id_to_shard_uid(
-                        validator_frozen_proposal.account_id(),
+                        validator_pledge_proposal.account_id(),
                         &next_epoch_shard_layout,
                     );
-                    validator_frozen_proposals_by_shard
+                    validator_pledge_proposals_by_shard
                         .entry(shard_uid)
                         .or_default()
-                        .push(validator_frozen_proposal);
+                        .push(validator_pledge_proposal);
                 }
 
                 let num_split_shards = next_epoch_shard_layout
@@ -283,7 +283,7 @@ impl<'a> ChainUpdate<'a> {
                         &result.new_root,
                         outcome_root,
                         validator_power_proposals_by_shard.remove(&result.shard_uid).unwrap_or_default(),
-                        validator_frozen_proposals_by_shard.remove(&result.shard_uid).unwrap_or_default(),
+                        validator_pledge_proposals_by_shard.remove(&result.shard_uid).unwrap_or_default(),
                         gas_burnt,
                         gas_limit,
                         balance_burnt,
@@ -354,7 +354,7 @@ impl<'a> ChainUpdate<'a> {
                         &apply_result.new_root,
                         outcome_root,
                         apply_result.validator_power_proposals,
-                        apply_result.validator_frozen_proposals,
+                        apply_result.validator_pledge_proposals,
                         apply_result.total_gas_burnt,
                         gas_limit,
                         apply_result.total_balance_burnt,
@@ -571,11 +571,11 @@ impl<'a> ChainUpdate<'a> {
         let approvals = header.approvals();
         self.epoch_manager.verify_approvals_and_threshold_orphan(
             epoch_id,
-            &|approvals, stakes| {
+            &|approvals, pledges| {
                 Doomslug::can_approved_block_be_produced(
                     self.doomslug_threshold_mode,
                     approvals,
-                    stakes,
+                    pledges,
                 )
             },
             prev_hash,
@@ -752,7 +752,7 @@ impl<'a> ChainUpdate<'a> {
                 shard_id,
                 gas_limit,
                 last_validator_power_proposals: chunk_header.prev_validator_power_proposals(),
-                last_validator_frozen_proposals: chunk_header.prev_validator_frozen_proposals(),
+                last_validator_pledge_proposals: chunk_header.prev_validator_pledge_proposals(),
                 is_first_block_with_chunk_of_version,
                 is_new_chunk: true,
             },
@@ -790,7 +790,7 @@ impl<'a> ChainUpdate<'a> {
             &apply_result.new_root,
             outcome_root,
             apply_result.validator_power_proposals,
-            apply_result.validator_frozen_proposals,
+            apply_result.validator_pledge_proposals,
             apply_result.total_gas_burnt,
             gas_limit,
             apply_result.total_balance_burnt,
@@ -850,7 +850,7 @@ impl<'a> ChainUpdate<'a> {
             ApplyChunkShardContext {
                 shard_id,
                 last_validator_power_proposals: chunk_extra.validator_power_proposals(),
-                last_validator_frozen_proposals: chunk_extra.validator_frozen_proposals(),
+                last_validator_pledge_proposals: chunk_extra.validator_pledge_proposals(),
                 gas_limit: chunk_extra.gas_limit(),
                 is_new_chunk: false,
                 is_first_block_with_chunk_of_version: false,

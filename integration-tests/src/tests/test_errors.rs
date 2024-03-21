@@ -13,7 +13,7 @@ use unc_primitives::transaction::{
     Action, AddKeyAction, CreateAccountAction, SignedTransaction, TransferAction,
 };
 use unc_primitives::version::PROTOCOL_VERSION;
-use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_PLEDGE};
 use framework::load_test_config;
 use testlib::runtime_utils::{alice_account, bob_account};
 
@@ -96,7 +96,7 @@ fn test_deliver_tx_error_log() {
         tx_result,
         InvalidTxError::NotEnoughBalance {
             signer_id: alice_account(),
-            balance: TESTING_INIT_BALANCE - TESTING_INIT_STAKE,
+            balance: TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE,
             cost: TESTING_INIT_BALANCE + 1 + cost
         }
         .rpc_into()

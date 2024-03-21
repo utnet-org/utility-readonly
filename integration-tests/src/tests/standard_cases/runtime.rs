@@ -277,21 +277,21 @@ fn test_access_key_reject_non_function_call_runtime() {
 }
 
 #[test]
-fn test_increase_stake_runtime() {
+fn test_increase_pledge_runtime() {
     let node = create_runtime_node();
-    test_increase_stake(node);
+    test_increase_pledge(node);
 }
 
 #[test]
-fn test_decrease_stake_runtime() {
+fn test_decrease_pledge_runtime() {
     let node = create_runtime_node();
-    test_decrease_stake(node);
+    test_decrease_pledge(node);
 }
 
 #[test]
-fn test_unstake_while_not_staked_runtime() {
+fn test_unpledge_while_not_pledged_runtime() {
     let node = create_runtime_node();
-    test_unstake_while_not_staked(node);
+    test_unpledge_while_not_pledged(node);
 }
 
 #[test]

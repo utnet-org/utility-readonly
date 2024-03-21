@@ -86,9 +86,9 @@ def get_validators():
     return set([x['account_id'] for x in nodes[0].get_status()['validators']])
 
 
-def get_stakes():
+def get_pledges():
     return [
-        int(nodes[2].get_account("test%s" % i)['result']['locked'])
+        int(nodes[2].get_account("test%s" % i)['result']['pledging'])
         for i in range(3)
     ]
 

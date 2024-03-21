@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 pub type RpcValidatorsOrderedResponse =
-    Vec<unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView>;
+    Vec<unc_primitives::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView>;
 
 #[derive(thiserror::Error, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "name", content = "info", rename_all = "SCREAMING_SNAKE_CASE")]

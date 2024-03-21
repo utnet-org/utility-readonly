@@ -32,11 +32,11 @@ nodes = start_cluster(
     [["epoch_length", EPOCH_LENGTH],
      ["validators", 0, "amount", "12500000000000000000000000000000"],
      [
-         "records", 0, "Account", "account", "locked",
+         "records", 0, "Account", "account", "pledging",
          "12500000000000000000000000000000"
      ], ["validators", 1, "amount", "12500000000000000000000000000000"],
      [
-         "records", 2, "Account", "account", "locked",
+         "records", 2, "Account", "account", "pledging",
          "12500000000000000000000000000000"
      ], ['total_supply', "4925000000000000000000000000000000"],
      ["block_producer_kickout_threshold", 40],

@@ -12,14 +12,14 @@ interface ProducedAndExpected {
 type ValidatorRole = 'BlockProducer' | 'ChunkOnlyProducer' | 'None';
 
 interface CurrentValidatorInfo {
-    stake: number;
+    pledge: number;
     shards: number[];
     blocks: ProducedAndExpected;
     chunks: ProducedAndExpected;
 }
 
 interface NextValidatorInfo {
-    stake: number;
+    pledge: number;
     shards: number[];
 }
 
@@ -65,10 +65,10 @@ class Validators {
         const validators = [...this.validators.values()];
         function sortingKey(info: ValidatorInfo) {
             if (info.current !== null) {
-                return [0, -info.current.stake];
+                return [0, -info.current.pledge];
             }
             if (info.next !== null) {
-                return [1, -info.next.stake];
+                return [1, -info.next.pledge];
             }
             if (info.proposalStake !== null) {
                 return [2, -info.proposalStake];
@@ -113,9 +113,9 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
     const currentValidatorInfo = epochData!.status_response.EpochInfo[1].validator_info;
     for (const validatorInfo of currentValidatorInfo.current_validators) {
         const validator = validators.validator(validatorInfo.account_id);
-        const stake = parseFloat(validatorInfo.stake);
+        const pledge = parseFloat(validatorInfo.pledge);
         validator.current = {
-            stake,
+            pledge,
             shards: validatorInfo.shards,
             blocks: {
                 produced: validatorInfo.num_produced_blocks,
@@ -126,21 +126,21 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
                 expected: validatorInfo.num_expected_chunks,
             },
         };
-        maxStake = Math.max(maxStake, stake);
-        totalStake += stake;
+        maxStake = Math.max(maxStake, pledge);
+        totalStake += pledge;
         maxExpectedBlocks = Math.max(maxExpectedBlocks, validatorInfo.num_expected_blocks);
         maxExpectedChunks = Math.max(maxExpectedChunks, validatorInfo.num_expected_chunks);
     }
     for (const validatorInfo of currentValidatorInfo.next_validators) {
         const validator = validators.validator(validatorInfo.account_id);
         validator.next = {
-            stake: parseFloat(validatorInfo.stake),
+            pledge: parseFloat(validatorInfo.pledge),
             shards: validatorInfo.shards,
         };
     }
     for (const proposal of currentValidatorInfo.current_proposals) {
         const validator = validators.validator(proposal.account_id);
-        validator.proposalStake = parseFloat(proposal.stake);
+        validator.proposalStake = parseFloat(proposal.pledge);
     }
     for (const kickout of currentValidatorInfo.prev_epoch_kickout) {
         const validator = validators.validator(kickout.account_id);
@@ -196,7 +196,7 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
                             <td>{renderRole(validator.roles[0])}</td>
                             <td>{validator.next?.shards?.join(',') ?? ''}</td>
                             <td>
-                                {drawStakeBar(validator.next?.stake ?? null, maxStake, totalStake)}
+                                {drawStakeBar(validator.next?.pledge ?? null, maxStake, totalStake)}
                             </td>
                             <td>{drawStakeBar(validator.proposalStake, maxStake, totalStake)}</td>
 
@@ -204,7 +204,7 @@ export const EpochValidatorsView = ({ addr }: EpochValidatorViewProps) => {
                             <td>{validator.current?.shards?.join(',') ?? ''}</td>
                             <td>
                                 {drawStakeBar(
-                                    validator.current?.stake ?? null,
+                                    validator.current?.pledge ?? null,
                                     maxStake,
                                     totalStake
                                 )}
@@ -274,18 +274,18 @@ function drawProducedAndExpectedBar(
     );
 }
 
-function drawStakeBar(stake: number | null, maxStake: number, totalStake: number): JSX.Element {
-    if (stake === null) {
+function drawStakeBar(pledge: number | null, maxStake: number, totalStake: number): JSX.Element {
+    if (pledge === null) {
         return <></>;
     }
-    const width = (stake / maxStake) * 100 + 5;
-    const stakeText = Math.floor(stake / 1e24).toLocaleString('en-US');
-    const stakePercentage = ((100 * stake) / totalStake).toFixed(2) + '%';
+    const width = (pledge / maxStake) * 100 + 5;
+    const pledgeText = Math.floor(pledge / 1e24).toLocaleString('en-US');
+    const pledgePercentage = ((100 * pledge) / totalStake).toFixed(2) + '%';
     return (
-        <div className="stake-bar">
+        <div className="pledge-bar">
             <div className="bar" style={{ width }}></div>
             <div className="text">
-                {stakeText} ({stakePercentage})
+                {pledgeText} ({pledgePercentage})
             </div>
         </div>
     );
@@ -312,9 +312,9 @@ const KickoutReason = ({ reason }: { reason: ValidatorKickoutReason | null }) =>
     if (reason == 'Slashed') {
         kickoutSummary = 'Slashed';
         kickoutReason = 'Validator was slashed';
-    } else if (reason == 'Unstaked') {
-        kickoutSummary = 'Unstaked';
-        kickoutReason = 'Validator unstaked';
+    } else if (reason == 'Unpledged') {
+        kickoutSummary = 'Unpledged';
+        kickoutReason = 'Validator unpledged';
     } else if (reason == 'DidNotGetASeat') {
         kickoutSummary = 'Seat';
         kickoutReason = 'Validator did not get a seat';
@@ -326,7 +326,7 @@ const KickoutReason = ({ reason }: { reason: ValidatorKickoutReason | null }) =>
         kickoutReason = `Validator did not produce enough chunks: expected ${reason.NotEnoughChunks.expected}, actually produced ${reason.NotEnoughChunks.produced}`;
     } else if ('NotEnoughStake' in reason) {
         kickoutSummary = 'LowStake';
-        kickoutReason = `Validator did not have enough stake: minimum stake required was ${reason.NotEnoughStake.threshold}, but validator only had ${reason.NotEnoughStake.stake}`;
+        kickoutReason = `Validator did not have enough pledge: minimum pledge required was ${reason.NotEnoughStake.threshold}, but validator only had ${reason.NotEnoughStake.pledge}`;
     } else {
         kickoutSummary = 'Other';
         kickoutReason = JSON.stringify(reason);

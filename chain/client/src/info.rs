@@ -192,7 +192,7 @@ impl InfoHelper {
         }
     }
 
-    /// The value obtained by multiplying the stake fraction with the expected number of blocks in an epoch
+    /// The value obtained by multiplying the pledge fraction with the expected number of blocks in an epoch
     /// is an estimation, and not an exact value. To obtain a more precise result, it is necessary to examine
     /// all the blocks in the epoch. However, even this method may not be completely accurate because additional
     /// blocks could potentially be added at the end of the epoch.
@@ -207,55 +207,55 @@ impl InfoHelper {
 
             let epoch_height = epoch_info.epoch_height().to_string();
 
-            let mut stake_per_bp = HashMap::<ValidatorId, Balance>::new();
+            let mut pledge_per_bp = HashMap::<ValidatorId, Balance>::new();
 
-            let stake_to_blocks = |stake: Balance, stake_sum: Balance| -> i64 {
-                if stake == 0 {
+            let pledge_to_blocks = |pledge: Balance, pledge_sum: Balance| -> i64 {
+                if pledge == 0 {
                     0
                 } else {
-                    (((stake as f64) / (stake_sum as f64)) * (blocks_in_epoch as f64)) as i64
+                    (((pledge as f64) / (pledge_sum as f64)) * (blocks_in_epoch as f64)) as i64
                 }
             };
 
-            let mut stake_sum = 0;
+            let mut pledge_sum = 0;
             for &id in epoch_info.block_producers_settlement() {
-                let stake = epoch_info.validator_frozen(id);
-                stake_per_bp.insert(id, stake);
-                stake_sum += stake;
+                let pledge = epoch_info.validator_pledge(id);
+                pledge_per_bp.insert(id, pledge);
+                pledge_sum += pledge;
             }
 
-            stake_per_bp.iter().for_each(|(&id, &stake)| {
+            pledge_per_bp.iter().for_each(|(&id, &pledge)| {
                 metrics::BLOCK_PRODUCER_STAKE
                     .with_label_values(&[
                         epoch_info.get_validator(id).account_id().as_str(),
                         &epoch_height,
                     ])
-                    .set((stake / 1e24 as u128) as i64);
+                    .set((pledge / 1e24 as u128) as i64);
                 metrics::VALIDATORS_BLOCKS_EXPECTED_IN_EPOCH
                     .with_label_values(&[
                         epoch_info.get_validator(id).account_id().as_str(),
                         &epoch_height,
                     ])
-                    .set(stake_to_blocks(stake, stake_sum))
+                    .set(pledge_to_blocks(pledge, pledge_sum))
             });
 
             for shard_id in shard_ids {
-                let mut stake_per_cp = HashMap::<ValidatorId, Balance>::new();
-                stake_sum = 0;
+                let mut pledge_per_cp = HashMap::<ValidatorId, Balance>::new();
+                pledge_sum = 0;
                 for &id in &epoch_info.chunk_producers_settlement()[shard_id as usize] {
-                    let stake = epoch_info.validator_frozen(id);
-                    stake_per_cp.insert(id, stake);
-                    stake_sum += stake;
+                    let pledge = epoch_info.validator_pledge(id);
+                    pledge_per_cp.insert(id, pledge);
+                    pledge_sum += pledge;
                 }
 
-                stake_per_cp.iter().for_each(|(&id, &stake)| {
+                pledge_per_cp.iter().for_each(|(&id, &pledge)| {
                     metrics::VALIDATORS_CHUNKS_EXPECTED_IN_EPOCH
                         .with_label_values(&[
                             epoch_info.get_validator(id).account_id().as_str(),
                             &shard_id.to_string(),
                             &epoch_height,
                         ])
-                        .set(stake_to_blocks(stake, stake_sum))
+                        .set(pledge_to_blocks(pledge, pledge_sum))
                 });
             }
         }

@@ -60,20 +60,20 @@ fn rustfmt() {
 #[test]
 fn clippy() {
     let mut cmd = cargo(Some("style"));
-    cmd.args(&["clippy", "--all-targets", "--all-features", "--locked"]);
+    cmd.args(&["clippy", "--all-targets", "--all-features", "--pledging"]);
     ensure_success(cmd);
 }
 
 #[test]
 fn deny() {
     let mut cmd = cargo(None);
-    cmd.args(&["deny", "--all-features", "--locked", "check", "bans"]);
+    cmd.args(&["deny", "--all-features", "--pledging", "check", "bans"]);
     ensure_success(cmd);
 }
 
 #[test]
 fn themis() {
     let mut cmd = cargo(Some("themis"));
-    cmd.args(&["run", "--locked", "-p", "themis"]);
+    cmd.args(&["run", "--pledging", "-p", "themis"]);
     ensure_success(cmd);
 }

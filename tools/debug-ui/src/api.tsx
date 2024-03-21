@@ -197,7 +197,7 @@ export interface CurrentEpochValidatorInfo {
     account_id: string;
     public_key: string;
     is_slashed: boolean;
-    stake: string;
+    pledge: string;
     shards: number[];
     num_produced_blocks: number;
     num_expected_blocks: number;
@@ -208,15 +208,15 @@ export interface CurrentEpochValidatorInfo {
 export interface NextEpochValidatorInfo {
     account_id: string;
     public_key: string;
-    stake: string;
+    pledge: string;
     shards: number[];
 }
 
 export interface ValidatorStakeView {
     account_id: string;
     public_key: string;
-    stake: string;
-    validator_stake_struct_version: 'V1';
+    pledge: string;
+    validator_pledge_struct_version: 'V1';
 }
 
 export interface ValidatorKickoutView {
@@ -228,8 +228,8 @@ export type ValidatorKickoutReason =
     | 'Slashed'
     | { NotEnoughBlocks: { produced: number; expected: number } }
     | { NotEnoughChunks: { produced: number; expected: number } }
-    | 'Unstaked'
-    | { NotEnoughStake: { stake: string; threshold: string } }
+    | 'Unpledged'
+    | { NotEnoughStake: { pledge: string; threshold: string } }
     | 'DidNotGetASeat';
 
 export interface PeerStoreView {

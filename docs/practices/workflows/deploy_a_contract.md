@@ -26,7 +26,7 @@ Account alice.test.unc
   block_hash: 'EEMiLrk4ZiRzjNJXGdhWPJfKXey667YBnSRoJZicFGy9',
   block_height: 24,
   code_hash: '11111111111111111111111111111111',
-  locked: '0',
+  pledging: '0',
   storage_paid_at: 0,
   storage_usage: 182,
   formattedAmount: '100'

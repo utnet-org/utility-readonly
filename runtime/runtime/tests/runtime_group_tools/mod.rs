@@ -27,8 +27,8 @@ pub mod random_config;
 /// Initial balance used in tests.
 pub const TESTING_INIT_BALANCE: Balance = 1_000_000_000 * UNC_BASE;
 
-/// Validator's stake used in tests.
-pub const TESTING_INIT_STAKE: Balance = 50_000_000 * UNC_BASE;
+/// Validator's pledge used in tests.
+pub const TESTING_INIT_PLEDGE: Balance = 50_000_000 * UNC_BASE;
 
 /// One UNC, divisible by 10^24.
 pub const UNC_BASE: Balance = 1_000_000_000_000_000_000_000_000;
@@ -220,7 +220,7 @@ impl RuntimeGroup {
             if (i as u64) < num_existing_accounts {
                 state_records.push(StateRecord::Account {
                     account_id: account_id.clone(),
-                    account: Account::new(TESTING_INIT_BALANCE, TESTING_INIT_STAKE, code_hash, 0),
+                    account: Account::new(TESTING_INIT_BALANCE, TESTING_INIT_PLEDGE, code_hash, 0),
                 });
                 state_records.push(StateRecord::AccessKey {
                     account_id: account_id.clone(),
@@ -232,7 +232,7 @@ impl RuntimeGroup {
                 validators.push(AccountInfo {
                     account_id: signer.account_id.clone(),
                     public_key: signer.public_key.clone(),
-                    amount: TESTING_INIT_STAKE,
+                    amount: TESTING_INIT_PLEDGE,
                 });
             }
             signers.push(signer);

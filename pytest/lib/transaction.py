@@ -129,14 +129,14 @@ def create_payment_action(amount):
 
 
 def create_staking_action(amount, pk):
-    stake = Stake()
-    stake.stake = amount
-    stake.publicKey = PublicKey()
-    stake.publicKey.keyType = 0
-    stake.publicKey.data = pk
+    pledge = Stake()
+    pledge.pledge = amount
+    pledge.publicKey = PublicKey()
+    pledge.publicKey.keyType = 0
+    pledge.publicKey.data = pk
     action = Action()
-    action.enum = 'stake'
-    action.stake = stake
+    action.enum = 'pledge'
+    action.pledge = pledge
     return action
 
 

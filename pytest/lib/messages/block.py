@@ -221,7 +221,7 @@ class PartialEncodedChunkForwardMsg:
     pass
 
 
-class ValidatorStake:
+class ValidatorPledge:
     pass
 
 
@@ -445,7 +445,7 @@ block_schema = [
                 ['chunk_tx_root', [32]],
                 ['challenges_root', [32]],
                 ['random_value', [32]],
-                ['validator_proposals', [ValidatorStake]],
+                ['validator_proposals', [ValidatorPledge]],
                 ['chunk_mask', ['u8']],
                 ['gas_price', 'u128'],
                 ['total_supply', 'u128'],
@@ -478,7 +478,7 @@ block_schema = [
                 ['chunk_tx_root', [32]],
                 ['challenges_root', [32]],
                 ['random_value', [32]],
-                ['validator_proposals', [ValidatorStake]],
+                ['validator_proposals', [ValidatorPledge]],
                 ['chunk_mask', ['u8']],
                 ['gas_price', 'u128'],
                 ['total_supply', 'u128'],
@@ -590,7 +590,7 @@ block_schema = [
                 ['balance_burnt', 'u128'],
                 ['outgoing_receipt_root', [32]],
                 ['tx_root', [32]],
-                ['validator_proposals', [ValidatorStake]],
+                ['validator_proposals', [ValidatorPledge]],
             ]
         }
     ],
@@ -702,7 +702,7 @@ block_schema = [
         }
     ],
     [
-        ValidatorStake, {
+        ValidatorPledge, {
             'kind': 'enum',
             'field': 'enum',
             'values': [['V1', ValidatorStakeV1], ['V2', ValidatorStakeV2]]
@@ -715,7 +715,7 @@ block_schema = [
             'fields': [
                 ['account_id', 'string'],
                 ['public_key', PublicKey],
-                ['stake', 'u128'],
+                ['pledge', 'u128'],
             ]
         }
     ],

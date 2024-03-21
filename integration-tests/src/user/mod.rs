@@ -38,7 +38,7 @@ pub trait User {
 
     fn view_state(&self, account_id: &AccountId, prefix: &[u8]) -> Result<ViewStateResult, String>;
 
-    /// Returns whether the account is locked (has no access keys).
+    /// Returns whether the account is pledging (has no access keys).
     fn is_locked(&self, account_id: &AccountId) -> Result<bool, String>;
 
     fn view_call(
@@ -240,16 +240,16 @@ pub trait User {
         self.delete_account_with_beneficiary_set(signer_id.clone(), receiver_id, signer_id)
     }
 
-    fn stake(
+    fn pledge(
         &self,
         signer_id: AccountId,
         public_key: PublicKey,
-        stake: Balance,
+        pledge: Balance,
     ) -> Result<FinalExecutionOutcomeView, ServerError> {
         self.sign_and_commit_actions(
             signer_id.clone(),
             signer_id,
-            vec![Action::Stake(Box::new(StakeAction { stake, public_key }))],
+            vec![Action::Stake(Box::new(StakeAction { pledge, public_key }))],
         )
     }
 

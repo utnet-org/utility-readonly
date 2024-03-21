@@ -80,7 +80,7 @@ $ cat ~/.unc/genesis.json | jq '.records'
       "account_id": "test.unc",
       "account": {
         "amount": "1000000000000000000000000000000000",
-        "locked": "50000000000000000000000000000000",
+        "pledging": "50000000000000000000000000000000",
         "code_hash": "11111111111111111111111111111111",
         "storage_usage": 0,
         "version": "V1"
@@ -102,7 +102,7 @@ $ cat ~/.unc/genesis.json | jq '.records'
       "account_id": "unc",
       "account": {
         "amount": "1000000000000000000000000000000000",
-        "locked": "0",
+        "pledging": "0",
         "code_hash": "11111111111111111111111111111111",
         "storage_usage": 0,
         "version": "V1"
@@ -343,7 +343,7 @@ vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
         "block_hash": "Hn4v5CpfWf141AJi166gdDK3e3khCxgfeDJ9dSXGpAVi",
         "block_height": 1611,
         "code_hash": "11111111111111111111111111111111",
-        "locked": "50003138579594550524246699058859",
+        "pledging": "50003138579594550524246699058859",
         "storage_paid_at": 0,
         "storage_usage": 182
     }
@@ -391,7 +391,7 @@ Account test.unc
   block_hash: 'ESGN7H1kVLp566CTQ9zkBocooUFWNMhjKwqHg4uCh2Sg',
   block_height: 2110,
   code_hash: '11111111111111111111111111111111',
-  locked: '50005124762657986708532525400812',
+  pledging: '50005124762657986708532525400812',
   storage_paid_at: 0,
   storage_usage: 182,
   formattedAmount: '1,000,000,000'

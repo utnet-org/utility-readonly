@@ -45,11 +45,9 @@ pub struct AccountInfo {
     pub account_id: AccountId,
     pub public_key: PublicKey,
     #[serde(with = "dec_format")]
-    pub amount: Balance,
+    pub pledging: Balance,
     #[serde(with = "dec_format")]
     pub power: Power,
-    #[serde(with = "dec_format")]
-    pub locked: Balance,
 }
 
 /// This type is used to mark keys (arrays of bytes) that are queried from store.
@@ -534,55 +532,55 @@ impl std::str::FromStr for EpochId {
 /// It is necessary because the blocks on the epoch boundary need to contain approvals from both
 /// epochs.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
-pub struct ApprovalFrozen {
-    /// Account that has frozen.
+pub struct ApprovalPledge {
+    /// Account that has pledge.
     pub account_id: AccountId,
     /// Public key of the proposed validator.
     pub public_key: PublicKey,
-    /// Frozen / weight of the validator.
-    pub frozen_this_epoch: Balance,
+    /// Pledge / weight of the validator.
+    pub pledge_this_epoch: Balance,
     /// Stake of the validator.
-    pub frozen_next_epoch: Balance,
+    pub pledge_next_epoch: Balance,
 }
 
-pub mod validator_power_and_frozen {
+pub mod validator_power_and_pledge {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_crypto::PublicKey;
     use unc_primitives_core::types::{AccountId, Balance, Power};
     use serde::Serialize;
-    use crate::types::{ApprovalFrozen};
 
-    pub use super::ValidatorPowerAndFrozenV1;
+    use super::ApprovalPledge;
+    pub use super::ValidatorPowerAndPledgeV1;
 
-    /// Stores validator and its power with frozen.
+    /// Stores validator and its power with pledge.
     #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq, PartialOrd)]
-    #[serde(tag = "validator_power_and_frozen_struct_version")]
-    pub enum ValidatorPowerAndFrozen {
-        V1(ValidatorPowerAndFrozenV1),
+    #[serde(tag = "validator_power_and_pledge_struct_version")]
+    pub enum ValidatorPowerAndPledge {
+        V1(ValidatorPowerAndPledgeV1),
     }
     #[derive(Clone)]
-    pub struct ValidatorPowerAndFrozenIter<'a> {
-        collection: ValidatorPowerAndFrozenIterSource<'a>,
+    pub struct ValidatorPowerAndPledgeIter<'a> {
+        collection: ValidatorPowerAndPledgeIterSource<'a>,
         curr_index: usize,
         len: usize,
     }
 
-    impl<'a> ValidatorPowerAndFrozenIter<'a> {
+    impl<'a> ValidatorPowerAndPledgeIter<'a> {
         pub fn empty() -> Self {
-            Self { collection: ValidatorPowerAndFrozenIterSource::V2(&[]), curr_index: 0, len: 0 }
+            Self { collection: ValidatorPowerAndPledgeIterSource::V2(&[]), curr_index: 0, len: 0 }
         }
 
-        pub fn v1(collection: &'a [ValidatorPowerAndFrozenV1]) -> Self {
+        pub fn v1(collection: &'a [ValidatorPowerAndPledgeV1]) -> Self {
             Self {
-                collection: ValidatorPowerAndFrozenIterSource::V1(collection),
+                collection: ValidatorPowerAndPledgeIterSource::V1(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
         }
 
-        pub fn new(collection: &'a [ValidatorPowerAndFrozen]) -> Self {
+        pub fn new(collection: &'a [ValidatorPowerAndPledge]) -> Self {
             Self {
-                collection: ValidatorPowerAndFrozenIterSource::V2(collection),
+                collection: ValidatorPowerAndPledgeIterSource::V2(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
@@ -593,16 +591,16 @@ pub mod validator_power_and_frozen {
         }
     }
 
-    impl<'a> Iterator for ValidatorPowerAndFrozenIter<'a> {
-        type Item = ValidatorPowerAndFrozen;
+    impl<'a> Iterator for ValidatorPowerAndPledgeIter<'a> {
+        type Item = ValidatorPowerAndPledge;
 
         fn next(&mut self) -> Option<Self::Item> {
             if self.curr_index < self.len {
                 let item = match self.collection {
-                    ValidatorPowerAndFrozenIterSource::V1(collection) => {
-                        ValidatorPowerAndFrozen::V1(collection[self.curr_index].clone())
+                    ValidatorPowerAndPledgeIterSource::V1(collection) => {
+                        ValidatorPowerAndPledge::V1(collection[self.curr_index].clone())
                     }
-                    ValidatorPowerAndFrozenIterSource::V2(collection) => {
+                    ValidatorPowerAndPledgeIterSource::V2(collection) => {
                         collection[self.curr_index].clone()
                     }
                 };
@@ -614,31 +612,31 @@ pub mod validator_power_and_frozen {
         }
     }
     #[derive(Clone)]
-    enum ValidatorPowerAndFrozenIterSource<'a> {
-        V1(&'a [ValidatorPowerAndFrozenV1]),
-        V2(&'a [ValidatorPowerAndFrozen]),
+    enum ValidatorPowerAndPledgeIterSource<'a> {
+        V1(&'a [ValidatorPowerAndPledgeV1]),
+        V2(&'a [ValidatorPowerAndPledge]),
     }
 
-    impl ValidatorPowerAndFrozen {
+    impl ValidatorPowerAndPledge {
         pub fn new_v1(
             account_id: AccountId,
             public_key: PublicKey,
             power: Power,
-            frozen: Balance,
+            pledge: Balance,
         ) -> Self {
-            Self::V1(ValidatorPowerAndFrozenV1 { account_id, public_key, power, frozen })
+            Self::V1(ValidatorPowerAndPledgeV1 { account_id, public_key, power, pledge })
         }
 
         pub fn new(
             account_id: AccountId,
             public_key: PublicKey,
             power: Power,
-            frozen: Balance,
+            pledge: Balance,
         ) -> Self {
-            Self::new_v1(account_id, public_key, power, frozen)
+            Self::new_v1(account_id, public_key, power, pledge)
         }
 
-        pub fn into_v1(self) -> ValidatorPowerAndFrozenV1 {
+        pub fn into_v1(self) -> ValidatorPowerAndPledgeV1 {
             match self {
                 Self::V1(v1) => v1,
             }
@@ -646,9 +644,9 @@ pub mod validator_power_and_frozen {
 
 
         #[inline]
-        pub fn account_and_frozen(self) -> (AccountId, Balance) {
+        pub fn account_and_pledge(self) -> (AccountId, Balance) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.frozen),
+                Self::V1(v1) => (v1.account_id, v1.pledge),
             }
         }
 
@@ -662,7 +660,7 @@ pub mod validator_power_and_frozen {
         #[inline]
         pub fn destructure(self) -> (AccountId, PublicKey, Power, Balance) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.frozen),
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.power, v1.pledge),
             }
         }
 
@@ -709,30 +707,30 @@ pub mod validator_power_and_frozen {
         }
 
         #[inline]
-        pub fn frozen(&self) -> Balance {
+        pub fn pledge(&self) -> Balance {
             match self {
-                Self::V1(v1) => v1.frozen,
+                Self::V1(v1) => v1.pledge,
             }
         }
 
-        pub fn get_approval_frozen(&self, is_next_epoch: bool) -> ApprovalFrozen {
-            ApprovalFrozen {
+        pub fn get_approval_pledge(&self, is_next_epoch: bool) -> ApprovalPledge {
+            ApprovalPledge {
                 account_id: self.account_id().clone(),
                 public_key: self.public_key().clone(),
-                frozen_this_epoch: if is_next_epoch { 0 } else { self.frozen() },
-                frozen_next_epoch: if is_next_epoch { self.frozen() } else { 0 },
+                pledge_this_epoch: if is_next_epoch { 0 } else { self.pledge() },
+                pledge_next_epoch: if is_next_epoch { self.pledge() } else { 0 },
             }
         }
 
-        /// Returns the validator's number of mandates (rounded down) at `frozen_per_seat`.
+        /// Returns the validator's number of mandates (rounded down) at `pledge_per_seat`.
         ///
         /// It returns `u16` since it allows infallible conversion to `usize` and with [`u16::MAX`]
         /// equalling 65_535 it should be sufficient to hold the number of mandates per validator.
         ///
         /// # Why `u16` should be sufficient
         ///
-        /// As of October 2023, a [recommended lower bound] for the frozen required per mandate is
-        /// 25k $UNC. At this price, the validator with highest frozen would have 1_888 mandates,
+        /// As of October 2023, a [recommended lower bound] for the pledge required per mandate is
+        /// 25k $UNC. At this price, the validator with highest pledge would have 1_888 mandates,
         /// which is well below `u16::MAX`.
         ///
         /// From another point of view, with more than `u16::MAX` mandates for validators, sampling
@@ -744,17 +742,17 @@ pub mod validator_power_and_frozen {
         /// # Panics
         ///
         /// Panics if the number of mandates overflows `u16`.
-        pub fn num_mandates(&self, frozen_per_mandate: Balance) -> u16 {
+        pub fn num_mandates(&self, pledge_per_mandate: Balance) -> u16 {
             // Integer division in Rust returns the floor as described here
             // https://doc.rust-lang.org/std/primitive.u64.html#method.div_euclid
-            u16::try_from(self.frozen() / frozen_per_mandate)
+            u16::try_from(self.pledge() / pledge_per_mandate)
                 .expect("number of mandats should fit u16")
         }
 
         /// Returns the weight attributed to the validator's partial mandate.
         ///
         /// A validator has a partial mandate if its power cannot be divided evenly by
-        /// `frozen_per_mandate`. The remainder of that division is the weight of the partial
+        /// `pledge_per_mandate`. The remainder of that division is the weight of the partial
         /// mandate.
         ///
         /// Due to this definintion a validator has exactly one partial mandate with `0 <= weight <
@@ -762,52 +760,52 @@ pub mod validator_power_and_frozen {
         ///
         /// # Example
         ///
-        /// Let `V` be a validator with power of 12. If `frozen_per_mandate` equals 5 then the weight
+        /// Let `V` be a validator with power of 12. If `pledge_per_mandate` equals 5 then the weight
         /// of `V`'s partial mandate is `12 % 5 = 2`.
-        pub fn partial_mandate_weight(&self, frozen_per_mandate: Balance) -> Balance {
-            self.frozen() % frozen_per_mandate
+        pub fn partial_mandate_weight(&self, pledge_per_mandate: Balance) -> Balance {
+            self.pledge() % pledge_per_mandate
         }
     }
 
 }
 
-pub mod validator_frozen {
+pub mod validator_pledge {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_crypto::PublicKey;
     use unc_primitives_core::types::{AccountId, Balance};
     use serde::Serialize;
 
-    pub use super::ValidatorFrozenV1;
+    pub use super::ValidatorPledgeV1;
 
-    /// Stores validator and its frozen.
+    /// Stores validator and its pledge.
     #[derive(BorshSerialize, BorshDeserialize, Serialize, Debug, Clone, PartialEq, Eq)]
     #[serde(tag = "validator_validator_struct_version")]
-    pub enum ValidatorFrozen {
-        V1(ValidatorFrozenV1),
+    pub enum ValidatorPledge {
+        V1(ValidatorPledgeV1),
     }
 
-    pub struct ValidatorFrozenIter<'a> {
-        collection: ValidatorFrozenIterSource<'a>,
+    pub struct ValidatorPledgeIter<'a> {
+        collection: ValidatorPledgeIterSource<'a>,
         curr_index: usize,
         len: usize,
     }
 
-    impl<'a> ValidatorFrozenIter<'a> {
+    impl<'a> ValidatorPledgeIter<'a> {
         pub fn empty() -> Self {
-            Self { collection: ValidatorFrozenIterSource::V2(&[]), curr_index: 0, len: 0 }
+            Self { collection: ValidatorPledgeIterSource::V2(&[]), curr_index: 0, len: 0 }
         }
 
-        pub fn v1(collection: &'a [ValidatorFrozenV1]) -> Self {
+        pub fn v1(collection: &'a [ValidatorPledgeV1]) -> Self {
             Self {
-                collection: ValidatorFrozenIterSource::V1(collection),
+                collection: ValidatorPledgeIterSource::V1(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
         }
 
-        pub fn new(collection: &'a [ValidatorFrozen]) -> Self {
+        pub fn new(collection: &'a [ValidatorPledge]) -> Self {
             Self {
-                collection: ValidatorFrozenIterSource::V2(collection),
+                collection: ValidatorPledgeIterSource::V2(collection),
                 curr_index: 0,
                 len: collection.len(),
             }
@@ -818,16 +816,16 @@ pub mod validator_frozen {
         }
     }
 
-    impl<'a> Iterator for ValidatorFrozenIter<'a> {
-        type Item = ValidatorFrozen;
+    impl<'a> Iterator for ValidatorPledgeIter<'a> {
+        type Item = ValidatorPledge;
 
         fn next(&mut self) -> Option<Self::Item> {
             if self.curr_index < self.len {
                 let item = match self.collection {
-                    ValidatorFrozenIterSource::V1(collection) => {
-                        ValidatorFrozen::V1(collection[self.curr_index].clone())
+                    ValidatorPledgeIterSource::V1(collection) => {
+                        ValidatorPledge::V1(collection[self.curr_index].clone())
                     }
-                    ValidatorFrozenIterSource::V2(collection) => collection[self.curr_index].clone(),
+                    ValidatorPledgeIterSource::V2(collection) => collection[self.curr_index].clone(),
                 };
                 self.curr_index += 1;
                 Some(item)
@@ -837,37 +835,37 @@ pub mod validator_frozen {
         }
     }
 
-    enum ValidatorFrozenIterSource<'a> {
-        V1(&'a [ValidatorFrozenV1]),
-        V2(&'a [ValidatorFrozen]),
+    enum ValidatorPledgeIterSource<'a> {
+        V1(&'a [ValidatorPledgeV1]),
+        V2(&'a [ValidatorPledge]),
     }
 
-    impl ValidatorFrozen {
-        pub fn new_v1(account_id: AccountId, public_key: PublicKey, frozen: Balance) -> Self {
-            Self::V1(ValidatorFrozenV1 { account_id, public_key, frozen })
+    impl ValidatorPledge {
+        pub fn new_v1(account_id: AccountId, public_key: PublicKey, pledge: Balance) -> Self {
+            Self::V1(ValidatorPledgeV1 { account_id, public_key, pledge })
         }
 
-        pub fn new(account_id: AccountId, public_key: PublicKey, frozen: Balance) -> Self {
-            Self::new_v1(account_id, public_key, frozen)
+        pub fn new(account_id: AccountId, public_key: PublicKey, pledge: Balance) -> Self {
+            Self::new_v1(account_id, public_key, pledge)
         }
 
-        pub fn into_v1(self) -> ValidatorFrozenV1 {
+        pub fn into_v1(self) -> ValidatorPledgeV1 {
             match self {
                 Self::V1(v1) => v1,
             }
         }
 
         #[inline]
-        pub fn account_and_frozen(self) -> (AccountId, Balance) {
+        pub fn account_and_pledge(self) -> (AccountId, Balance) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.frozen),
+                Self::V1(v1) => (v1.account_id, v1.pledge),
             }
         }
 
         #[inline]
         pub fn destructure(self) -> (AccountId, PublicKey, Balance) {
             match self {
-                Self::V1(v1) => (v1.account_id, v1.public_key, v1.frozen),
+                Self::V1(v1) => (v1.account_id, v1.public_key, v1.pledge),
             }
         }
 
@@ -900,16 +898,16 @@ pub mod validator_frozen {
         }
 
         #[inline]
-        pub fn frozen(&self) -> Balance {
+        pub fn pledge(&self) -> Balance {
             match self {
-                Self::V1(v1) => v1.frozen,
+                Self::V1(v1) => v1.pledge,
             }
         }
 
         #[inline]
-        pub fn frozen_mut(&mut self) -> &mut Balance {
+        pub fn pledge_mut(&mut self) -> &mut Balance {
             match self {
-                Self::V1(v1) => &mut v1.frozen,
+                Self::V1(v1) => &mut v1.pledge,
             }
         }
     }
@@ -1082,28 +1080,28 @@ pub mod validator_power {
 
     }
 }
-/// Stores validator and its power with frozen.
+/// Stores validator and its power with pledge.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq, PartialOrd)]
-pub struct ValidatorPowerAndFrozenV1 {
+pub struct ValidatorPowerAndPledgeV1 {
     /// Account that has power.
     pub account_id: AccountId,
     /// Public key of the proposed validator.
     pub public_key: PublicKey,
     /// Power / weight of the validator.
     pub power: Power,
-    /// Frozen / weight of the validator.
-    pub frozen: Balance,
+    /// Pledge / weight of the validator.
+    pub pledge: Balance,
 }
 
-/// Stores validator and its frozen.
+/// Stores validator and its pledge.
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, PartialEq, Eq)]
-pub struct ValidatorFrozenV1 {
-    /// Account that has frozen.
+pub struct ValidatorPledgeV1 {
+    /// Account that has pledge.
     pub account_id: AccountId,
     /// Public key of the proposed validator.
     pub public_key: PublicKey,
-    /// Frozen / weight of the validator.
-    pub frozen: Balance,
+    /// Pledge / weight of the validator.
+    pub pledge: Balance,
 }
 
 /// Stores validator and its power.
@@ -1125,7 +1123,7 @@ pub struct BlockExtra {
 
 pub mod chunk_extra {
     use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
-    use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
+    use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
     use crate::types::StateRoot;
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::hash::CryptoHash;
@@ -1149,7 +1147,7 @@ pub mod chunk_extra {
         /// Validator proposals produced by given chunk.
         pub validator_power_proposals: Vec<ValidatorPower>,
         /// Validator proposals produced by given chunk.
-        pub validator_frozen_proposals: Vec<ValidatorFrozen>,
+        pub validator_pledge_proposals: Vec<ValidatorPledge>,
         /// Actually how much gas were used.
         pub gas_used: Gas,
         /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -1167,7 +1165,7 @@ pub mod chunk_extra {
             state_root: &StateRoot,
             outcome_root: CryptoHash,
             validator_power_proposals: Vec<ValidatorPower>,
-            validator_frozen_proposals: Vec<ValidatorFrozen>,
+            validator_pledge_proposals: Vec<ValidatorPledge>,
             gas_used: Gas,
             gas_limit: Gas,
             balance_burnt: Balance,
@@ -1176,7 +1174,7 @@ pub mod chunk_extra {
                 state_root: *state_root,
                 outcome_root,
                 validator_power_proposals,
-                validator_frozen_proposals,
+                validator_pledge_proposals,
                 gas_used,
                 gas_limit,
                 balance_burnt,
@@ -1216,10 +1214,10 @@ pub mod chunk_extra {
         }
 
         #[inline]
-        pub fn validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+        pub fn validator_pledge_proposals(&self) -> ValidatorPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorFrozenIter::v1(&v1.validator_frozen_proposals),
-                Self::V2(v2) => ValidatorFrozenIter::new(&v2.validator_frozen_proposals),
+                Self::V1(v1) => ValidatorPledgeIter::v1(&v1.validator_pledge_proposals),
+                Self::V2(v2) => ValidatorPledgeIter::new(&v2.validator_pledge_proposals),
             }
         }
 
@@ -1259,7 +1257,7 @@ pub struct ChunkExtraV1 {
     /// Validator proposals produced by given chunk.
     pub validator_power_proposals: Vec<ValidatorPowerV1>,
     /// Validator proposals produced by given chunk.
-    pub validator_frozen_proposals: Vec<ValidatorFrozenV1>,
+    pub validator_pledge_proposals: Vec<ValidatorPledgeV1>,
     /// Actually how much gas were used.
     pub gas_used: Gas,
     /// Gas limit, allows to increase or decrease limit based on expected time vs real time for computing the chunk.
@@ -1393,13 +1391,13 @@ pub enum ValidatorKickoutReason {
         #[serde(with = "dec_format", rename = "power_threshold_u128")]
         threshold: Power,
     },
-    /// Validator unfrozen themselves.
-    Unfrozen,
-    /// Validator frozen is now below threshold
-    NotEnoughFrozen {
-        #[serde(with = "dec_format", rename = "frozen_u128")]
-        frozen: Balance,
-        #[serde(with = "dec_format", rename = "frozen_threshold_u128")]
+    /// Validator unpledge themselves.
+    Unpledge,
+    /// Validator pledge is now below threshold
+    NotEnoughPledge {
+        #[serde(with = "dec_format", rename = "pledge_u128")]
+        pledge: Balance,
+        #[serde(with = "dec_format", rename = "pledge_threshold_u128")]
         threshold: Balance,
     },
     /// Enough power but is not chosen because of seat limits.
@@ -1434,23 +1432,23 @@ pub trait EpochInfoProvider {
 
     fn minimum_power(&self, prev_block_hash: &CryptoHash) -> Result<Power, EpochError>;
 
-    /// Get current frozen of a validator in the given epoch.
+    /// Get current pledge of a validator in the given epoch.
     /// If the account is not a validator, returns `None`.
-    fn validator_frozen(
+    fn validator_pledge(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
         account_id: &AccountId,
     ) -> Result<Option<Balance>, EpochError>;
 
-    /// Get the total frozen of the given epoch.
-    fn validator_total_frozen(
+    /// Get the total pledge of the given epoch.
+    fn validator_total_pledge(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
     ) -> Result<Balance, EpochError>;
 
-    fn minimum_frozen(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError>;
+    fn minimum_pledge(&self, prev_block_hash: &CryptoHash) -> Result<Balance, EpochError>;
 }
 
 /// Mode of the trie cache.

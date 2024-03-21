@@ -35,7 +35,7 @@ impl KeyAdder {
         p.transfer(env::attached_deposit())
     }
 
-    pub fn stake(&mut self, amount: Balance, public_key: PublicKey) -> Promise {
-        Promise::new(env::current_account_id()).stake(amount, public_key)
+    pub fn pledge(&mut self, amount: Balance, public_key: PublicKey) -> Promise {
+        Promise::new(env::current_account_id()).pledge(amount, public_key)
     }
 }

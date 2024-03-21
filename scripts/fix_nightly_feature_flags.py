@@ -254,7 +254,7 @@ for crate in crates:
 
     # check 6: if any feature declared locally has a name that coincides with a nightly
     # feature of a transitive dependency, that feature should also be included in the
-    # local nightly list. Otherwise, this is likely a mistake, because nightly would
+    # local nightly list. Otherwise, this is likely a mipledge, because nightly would
     # activate a feature in a dependency crate but not a dependent crate.
     all_dependency_local_nightly_features = []
     for dep in crate.transitive_deps:

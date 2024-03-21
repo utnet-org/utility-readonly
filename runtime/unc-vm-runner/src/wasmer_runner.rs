@@ -168,7 +168,7 @@ impl IntoVMError for wasmer_runtime::error::RuntimeError {
             RuntimeError::Metering(_) => {
                 panic!("Support metering errors properly");
             }
-            // A frozen state of Wasm used to pause and resume execution.
+            // A pledge state of Wasm used to pause and resume execution.
             // As of 0.17.0, can be activated when special memory page
             // (see get_wasm_interrupt_signal_mem()) is accessed.
             // This address is passed via InternalCtx.interrupt_signal_mem

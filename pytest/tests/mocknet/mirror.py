@@ -153,8 +153,8 @@ def init_neard_runners(args, traffic_generator, nodes, remove_home_dir=False):
             }]
         }
     else:
-        # for now this test starts all validators with the same stake, so just make the upgrade
-        # epoch random. If we change the stakes, we should change this to choose how much stake
+        # for now this test starts all validators with the same pledge, so just make the upgrade
+        # epoch random. If we change the pledges, we should change this to choose how much pledge
         # we want to upgrade during each epoch
         configs = []
         for i in range(len(nodes)):

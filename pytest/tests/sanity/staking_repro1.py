@@ -3,7 +3,7 @@
 
 from staking2 import doit
 
-# this repro was created before fake stakes were introduced, so each stake after the first one is duplicated to account for that
+# this repro was created before fake pledges were introduced, so each pledge after the first one is duplicated to account for that
 sequence = [
     [0, 73215476000000000000000000000000, 73203310000000000000000000000000],
     [0, 95711839000000000000000000000000, 75774073000000000000000000000000],

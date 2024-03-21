@@ -64,11 +64,8 @@ make release
 
 You can join all the active networks:
 ```
-# mainnet or testnet node init
-./target/release/uncd --home ~/.unc  init --chain-id [testnet, mainnet] --download-genesis --download-config
-
-# localnet node init
-./target/release/uncd localnet
+# testnet node init
+./target/release/uncd --home ~/.unc  init --chain-id [testnet] --download-genesis --download-config
 
 # node run
 ./target/release/uncd --home ~/.unc  run
@@ -82,12 +79,3 @@ To learn how to become validator, checkout [documentation](https://docs.utnet-or
 The workflow and details of setup to contribute are described in [CONTRIBUTING.md](CONTRIBUTING.md), and security policy is described in [SECURITY.md](SECURITY.md).
 To propose new protocol changes or standards use [Specification & Standards repository](https://github.com/utility/UEPs).
 
-## Getting in Touch
-
-We use Zulip for semi-synchronous technical discussion, feel free to chime in:
-
-https://utnet-org/utility.zulipchat.com/
-
-For non-technical discussion and overall direction of the project, see our Discourse forum:
-
-https://gov.utnet-org/utility.org

@@ -142,8 +142,8 @@ extern "C" {
     // ###############
     // # Validator API #
     // ###############
-    fn validator_stake(account_id_len: u64, account_id_ptr: u64, stake_ptr: u64);
-    fn validator_total_stake(stake_ptr: u64);
+    fn validator_pledge(account_id_len: u64, account_id_ptr: u64, pledge_ptr: u64);
+    fn validator_total_pledge(pledge_ptr: u64);
     // #################
     // # alt_bn128 API #
     // #################

@@ -49,12 +49,12 @@ fn do_random_test<RngImpl: Rng>(
     num_heights: u64,
     do_slashes: bool,
 ) {
-    let stake_amount = 1_000;
+    let pledge_amount = 1_000;
 
     let validators = vec![
-        ("test1".parse().unwrap(), stake_amount),
-        ("test2".parse().unwrap(), stake_amount),
-        ("test3".parse().unwrap(), stake_amount),
+        ("test1".parse().unwrap(), pledge_amount),
+        ("test2".parse().unwrap(), pledge_amount),
+        ("test3".parse().unwrap(), pledge_amount),
     ];
     let mut epoch_manager = setup_default_epoch_manager(validators, epoch_length, 1, 3, 0, 90, 60);
     let h = hash_range(num_heights as usize);
@@ -91,8 +91,8 @@ fn random_proposals<RngImpl: Rng>(rng: &mut RngImpl) -> Vec<ValidatorPower> {
     let proposal_chance = 0.2;
     if rng.gen_range(0.0..1.0) < proposal_chance {
         let account_id = AccountId::try_from(format!("test{}", rng.gen_range(1..6))).unwrap();
-        let stake_amount = rng.gen_range(100..2000);
-        proposals.push(do_power(account_id, stake_amount));
+        let pledge_amount = rng.gen_range(100..2000);
+        proposals.push(do_power(account_id, pledge_amount));
     }
     proposals
 }
@@ -175,33 +175,33 @@ fn verify_epochs(epoch_infos: &[Arc<EpochInfo>]) {
             prev_epoch_info.epoch_height() + 1,
             "epoch height increases by 1"
         );
-        let stakes_before_change = get_stakes_map(prev_epoch_info);
-        assert!(!stakes_before_change.is_empty(), "validator set cannot be empty");
-        for (_, stake) in &stakes_before_change {
-            assert_ne!(*stake, 0, "validators cannot have 0 stake");
+        let pledges_before_change = get_pledges_map(prev_epoch_info);
+        assert!(!pledges_before_change.is_empty(), "validator set cannot be empty");
+        for (_, pledge) in &pledges_before_change {
+            assert_ne!(*pledge, 0, "validators cannot have 0 pledge");
         }
-        let stakes_after_change = get_stakes_map(epoch_info);
-        let mut stakes_with_change = stakes_before_change.clone();
-        for (account_id, new_stake) in epoch_info.stake_change() {
-            if *new_stake == 0 {
-                if stakes_before_change.get(account_id).is_none() {
+        let pledges_after_change = get_pledges_map(epoch_info);
+        let mut pledges_with_change = pledges_before_change.clone();
+        for (account_id, new_pledge) in epoch_info.pledge_change() {
+            if *new_pledge == 0 {
+                if pledges_before_change.get(account_id).is_none() {
                     // Stake change from 0 to 0
                     assert!(prev_epoch_info.validator_kickout().contains_key(account_id));
                     assert!(epoch_info.validator_kickout().contains_key(account_id));
                 }
-                stakes_with_change.remove(account_id);
+                pledges_with_change.remove(account_id);
             } else {
-                stakes_with_change.insert(account_id.clone(), *new_stake);
+                pledges_with_change.insert(account_id.clone(), *new_pledge);
             }
         }
         assert_eq!(
-            stakes_with_change,
-            stakes_after_change,
-            "stake change: {:?}",
-            epoch_info.stake_change()
+            pledges_with_change,
+            pledges_after_change,
+            "pledge change: {:?}",
+            epoch_info.pledge_change()
         );
 
-        for account_id in stakes_after_change.keys() {
+        for account_id in pledges_after_change.keys() {
             assert!(
                 epoch_info.validator_kickout().get(account_id).is_none(),
                 "cannot be in both validator and kickout set"
@@ -277,15 +277,15 @@ fn verify_slashes(
 
             // Epoch boundary.
             // DoubleSign or Other => become AlreadySlashed
-            // AlreadySlashed and in stake_change => keep AlreadySlashed
-            // ALreadySlashed and not in stake_change => remove
+            // AlreadySlashed and in pledge_change => keep AlreadySlashed
+            // ALreadySlashed and not in pledge_change => remove
             for (account, slash_state) in prev_slashes_set {
                 if let Some(slash) = this_block_slashes.get(account) {
                     assert_eq!(slashes_set.get(account), Some(slash));
                     continue;
                 }
                 if slash_state == &SlashState::AlreadySlashed {
-                    if epoch_info.stake_change().contains_key(account) {
+                    if epoch_info.pledge_change().contains_key(account) {
                         assert_eq!(slashes_set.get(account), Some(&SlashState::AlreadySlashed));
                     } else {
                         assert_eq!(slashes_set.get(account), None);
@@ -370,7 +370,7 @@ fn is_possible_bad_epochs_case(prev: &EpochInfo, curr: &EpochInfo) -> bool {
     &copy == curr
 }
 
-fn get_stakes_map(epoch_info: &EpochInfo) -> HashMap<AccountId, Balance> {
+fn get_pledges_map(epoch_info: &EpochInfo) -> HashMap<AccountId, Balance> {
     epoch_info
         .validators_iter()
         .chain(epoch_info.fishermen_iter())

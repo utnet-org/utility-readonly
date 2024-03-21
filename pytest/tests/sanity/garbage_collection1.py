@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Spins up three validating nodes with stake distribution 11, 5, 5.
-# Stop the two nodes with stake 2
+# Spins up three validating nodes with pledge distribution 11, 5, 5.
+# Stop the two nodes with pledge 2
 # Wait for sufficient number of blocks.
 # Restart one of the stopped nodes and wait until it syncs with the running node.
 # Restart the other one. Make sure it can sync as well.
@@ -44,7 +44,7 @@ nodes = start_cluster(
      ["total_supply", "4210000000000000000000000000000000"],
      ["validators", 0, "amount", "260000000000000000000000000000000"],
      [
-         "records", 0, "Account", "account", "locked",
+         "records", 0, "Account", "account", "pledging",
          "260000000000000000000000000000000"
      ]], {
          0: nodes_config,

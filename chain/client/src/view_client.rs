@@ -44,7 +44,7 @@ use std::hash::Hash;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
-use unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
+use unc_primitives::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView;
 
 /// Max number of queries that we keep.
 const QUERY_REQUEST_LIMIT: usize = 500;
@@ -814,7 +814,7 @@ impl Handler<WithSpanContext<GetValidatorInfo>> for ViewClientActor {
 }
 
 impl Handler<WithSpanContext<GetValidatorOrdered>> for ViewClientActor {
-    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndPledgeView>, GetValidatorInfoError>;
 
     #[perf]
     fn handle(

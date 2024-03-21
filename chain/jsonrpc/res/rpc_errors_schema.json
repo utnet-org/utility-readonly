@@ -34,7 +34,7 @@
         "AddKeyAlreadyExists",
         "DeleteAccountStaking",
         "LackBalanceForState",
-        "TriesToUnstake",
+        "TriesToUnpledge",
         "TriesToStake",
         "InsufficientStake",
         "FunctionCallError",
@@ -424,8 +424,8 @@
       "subtypes": [],
       "props": {
         "account_id": "",
-        "minimum_stake": "",
-        "stake": ""
+        "minimum_pledge": "",
+        "pledge": ""
       }
     },
     "IntegerOverflow": {
@@ -823,12 +823,12 @@
       "props": {
         "account_id": "",
         "balance": "",
-        "locked": "",
-        "stake": ""
+        "pledging": "",
+        "pledge": ""
       }
     },
-    "TriesToUnstake": {
-      "name": "TriesToUnstake",
+    "TriesToUnpledge": {
+      "name": "TriesToUnpledge",
       "subtypes": [],
       "props": {
         "account_id": ""

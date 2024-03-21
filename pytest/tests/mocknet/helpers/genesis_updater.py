@@ -42,7 +42,7 @@ def main(argv):
     node_pks = None
     if argv[10]:
         node_pks = argv[10].split(',')
-    increasing_stakes = float(argv[11])
+    increasing_pledges = float(argv[11])
     num_seats = float(argv[12])
     single_shard = str_to_bool(argv[13])
     all_node_pks = None
@@ -80,7 +80,7 @@ def main(argv):
         chain_id=chain_id,
         epoch_length=epoch_length,
         node_pks=node_pks,
-        increasing_stakes=increasing_stakes,
+        increasing_pledges=increasing_pledges,
         num_seats=num_seats,
         single_shard=single_shard,
     )

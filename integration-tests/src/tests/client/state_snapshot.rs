@@ -43,8 +43,6 @@ impl StateSnaptshotTestEnv {
             shard_cache_config: trie_cache_config.clone(),
             view_shard_cache_config: trie_cache_config,
             enable_receipt_prefetching: false,
-            sweat_prefetch_receivers: Vec::new(),
-            sweat_prefetch_senders: Vec::new(),
             load_mem_tries_for_shards: Vec::new(),
             load_mem_tries_for_all_shards: false,
         };

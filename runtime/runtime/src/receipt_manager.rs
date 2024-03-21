@@ -214,7 +214,7 @@ impl ReceiptManager {
     /// # Arguments
     ///
     /// * `receipt_index` - an index of Receipt to append an action
-    /// * `stake` - amount of tokens to stake
+    /// * `pledge` - amount of tokens to pledge
     /// * `public_key` - a validator public key
     ///
     /// # Panics
@@ -223,12 +223,12 @@ impl ReceiptManager {
     pub(super) fn append_action_stake(
         &mut self,
         receipt_index: ReceiptIndex,
-        stake: Balance,
+        pledge: Balance,
         public_key: PublicKey,
     ) {
         self.append_action(
             receipt_index,
-            Action::Stake(Box::new(StakeAction { stake, public_key })),
+            Action::Stake(Box::new(StakeAction { pledge, public_key })),
         );
     }
 

@@ -6,7 +6,6 @@ mod adversarial_behaviors;
 mod cap_max_gas_price;
 mod chunk_nodes_cache;
 mod chunk_validation;
-mod delegate_action;
 #[cfg(feature = "protocol_feature_fix_contract_loading_cost")]
 mod fix_contract_loading_cost;
 mod fix_storage_usage;

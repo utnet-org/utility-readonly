@@ -58,7 +58,7 @@ use unc_primitives::transaction::{
     Transaction,
 };
 use unc_primitives::trie_key::TrieKey;
-use unc_primitives::types::validator_stake::ValidatorStake;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
 use unc_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ProtocolVersion};
 use unc_primitives::utils::to_timestamp;
 use unc_primitives::validator_signer::ValidatorSigner;
@@ -75,7 +75,7 @@ use unc_store::test_utils::create_test_node_storage_with_cold;
 use unc_store::test_utils::create_test_store;
 use unc_store::NodeStorage;
 use unc_store::{get, DBCol, TrieChanges};
-use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_PLEDGE};
 use framework::test_utils::TestEnvNightshadeSetupExt;
 use framework::UNC_BASE;
 use rand::prelude::StdRng;
@@ -773,11 +773,10 @@ fn ban_peer_for_invalid_block_common(mode: InvalidBlockMode) {
             100,
             false,
             false,
-            100,
+            20,
             true,
             vec![false; validators.len()],
-            vec![true; validators.len()],
-            false,
+            true,
             Box::new(
                 move |conns,
                       _,
@@ -811,7 +810,7 @@ fn ban_peer_for_invalid_block_common(mode: InvalidBlockMode) {
                                     InvalidBlockMode::InvalidBlock => {
                                         // produce an invalid block whose invalidity cannot be verified by just
                                         // having its header.
-                                        let proposals = vec![ValidatorStake::new(
+                                        let proposals = vec![ValidatorPledge::new(
                                             "test1".parse().unwrap(),
                                             PublicKey::empty(KeyType::ED25519),
                                             0,
@@ -821,7 +820,7 @@ fn ban_peer_for_invalid_block_common(mode: InvalidBlockMode) {
                                             .mut_header()
                                             .get_mut()
                                             .inner_rest
-                                            .prev_validator_proposals = proposals;
+                                            .prev_validator_pledge_proposals = proposals;
                                         block_mut.mut_header().resign(&validator_signer1);
                                     }
                                 }
@@ -1843,11 +1842,11 @@ fn test_tx_forward_around_epoch_boundary() {
         .build();
     let genesis_hash = *env.clients[0].chain.genesis().hash();
     let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-    let tx = SignedTransaction::stake(
+    let tx = SignedTransaction::pledge(
         1,
         "test1".parse().unwrap(),
         &signer,
-        TESTING_INIT_STAKE,
+        TESTING_INIT_PLEDGE,
         signer.public_key.clone(),
         genesis_hash,
     );
@@ -3019,7 +3018,7 @@ fn test_query_final_state() {
         query_final_state(&mut env.clients[0].chain, runtime.clone(), "test0".parse().unwrap());
 
     assert_eq!(account_state1, account_state2);
-    assert!(account_state1.amount < TESTING_INIT_BALANCE - TESTING_INIT_STAKE);
+    assert!(account_state1.amount < TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE);
 }
 
 // Check that if the same receipt is executed twice in forked chain, both outcomes are recorded
@@ -3370,7 +3369,7 @@ fn test_congestion_receipt_execution() {
 }
 
 #[test]
-fn test_validator_stake_host_function() {
+fn test_validator_pledge_host_function() {
     init_test_logger();
     let epoch_length = 5;
     let mut genesis = Genesis::test(vec!["test0".parse().unwrap(), "test1".parse().unwrap()], 1);
@@ -3394,7 +3393,7 @@ fn test_validator_stake_host_function() {
         "test0".parse().unwrap(),
         &signer,
         vec![Action::FunctionCall(Box::new(FunctionCallAction {
-            method_name: "ext_validator_stake".to_string(),
+            method_name: "ext_validator_pledge".to_string(),
             args: b"test0".to_vec(),
             gas: 100_000_000_000_000,
             deposit: 0,

@@ -6,7 +6,7 @@ use unc_primitives::static_clock::StaticClock;
 use unc_primitives::types::EpochId;
 use std::collections::{HashMap, HashSet};
 use std::time::Duration as TimeDuration;
-use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 /// Helper to keep track of the Epoch Sync
 // TODO #3488
@@ -24,7 +24,7 @@ pub struct EpochSync {
     /// The next epoch id we need to sync
     next_epoch_id: EpochId,
     /// The block producers set to validate the light client block view for the next epoch
-    next_block_producers: Vec<ValidatorPowerAndFrozen>,
+    next_block_producers: Vec<ValidatorPowerAndPledge>,
     /// The last epoch id that we have requested
     requested_epoch_id: EpochId,
     /// When and to whom was the last request made
@@ -55,7 +55,7 @@ impl EpochSync {
         network_adapter: PeerManagerAdapter,
         genesis_epoch_id: EpochId,
         genesis_next_epoch_id: EpochId,
-        first_epoch_block_producers: Vec<ValidatorPowerAndFrozen>,
+        first_epoch_block_producers: Vec<ValidatorPowerAndPledge>,
         request_timeout: TimeDuration,
         peer_timeout: TimeDuration,
     ) -> Self {

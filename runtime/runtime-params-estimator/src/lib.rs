@@ -169,9 +169,9 @@ static ALL_COSTS: &[(Cost, fn(&mut EstimatorContext) -> GasCost)] = &[
     (Cost::ActionDeleteKeySendNotSir, action_costs::delete_key_send_not_sir),
     (Cost::ActionDeleteKeyExec, action_costs::delete_key_exec),
     (Cost::ActionStake, action_stake),
-    (Cost::ActionStakeSendNotSir, action_costs::stake_send_not_sir),
-    (Cost::ActionStakeSendSir, action_costs::stake_send_sir),
-    (Cost::ActionStakeExec, action_costs::stake_exec),
+    (Cost::ActionStakeSendNotSir, action_costs::pledge_send_not_sir),
+    (Cost::ActionStakeSendSir, action_costs::pledge_send_sir),
+    (Cost::ActionStakeExec, action_costs::pledge_exec),
     (Cost::ActionDeployContractBase, action_deploy_contract_base),
     (Cost::ActionDeployContractBaseSendNotSir, action_costs::deploy_contract_base_send_not_sir),
     (Cost::ActionDeployContractBaseSendSir, action_costs::deploy_contract_base_send_sir),
@@ -549,7 +549,7 @@ fn action_stake(ctx: &mut EstimatorContext) -> GasCost {
             let receiver = sender.clone();
 
             let actions = vec![Action::Stake(Box::new(StakeAction {
-                stake: 1,
+                pledge: 1,
                 public_key: "22skMptHjFWNyuEWY22ftn2AbLPSYpmYwGJRGwpNHbTV".parse().unwrap(),
             }))];
             tb.transaction_from_actions(sender, receiver, actions)

@@ -69,14 +69,14 @@ produced by `B0`).
 
 #### Slashing
 
-Slashing is the process of taking away the part of the stake from validators
+Slashing is the process of taking away the part of the pledge from validators
 that are considered malicious.
 
 In the example above, we'll definitely need to slash the ``C1`` - and potentially also any validators that were tracking that shard and did sign the bad block.
 
 Things that we'll have to figure out in the future:
-* how much do we slash? all of the stake? some part?
-* what happens to the slashed stake? is it burned? does it go to some pool?
+* how much do we slash? all of the pledge? some part?
+* what happens to the slashed pledge? is it burned? does it go to some pool?
 
 #### State rollbacks
 
@@ -90,7 +90,7 @@ In the example above, we'd successfully slash the ``C1`` producer - but was it
 enough?
 
 Currently (with 4 shards) you need around 20k UNC to become a chunk producer. 
-If we increase the number of shards to 100, it would drop the minimum stake to 
+If we increase the number of shards to 100, it would drop the minimum pledge to 
 around 1k UNC.
 
 In such scenario, by sacrificing 1k UNC, the malicious node can cause the 
@@ -99,7 +99,7 @@ contracts etc).
 
 On the other side, you could be a non-malicious chunk producer with a corrupted 
 database (or a nasty bug in the code) - and the effect would be the same - the 
-chunk that you produced would be marked as malicious, and you'd lose your stake 
+chunk that you produced would be marked as malicious, and you'd lose your pledge 
 (which will be a super-scary even for any legitimate validator).
 
 
