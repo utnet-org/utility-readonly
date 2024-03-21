@@ -65,7 +65,6 @@ pub fn state_dump(
         .map(|(account_id, (public_key, power,pledge))| AccountInfo {
             account_id: account_id.clone(),
             public_key: public_key.clone(),
-            amount: 0,
             power: *power,
             pledging: *pledge,
         })

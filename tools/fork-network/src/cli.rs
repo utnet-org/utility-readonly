@@ -116,8 +116,6 @@ struct Validator {
     account_id: AccountId,
     public_key: PublicKey,
     #[serde(with = "dec_format")]
-    amount: Option<Balance>,
-    #[serde(with = "dec_format")]
     power: Option<Power>,
     #[serde(with = "dec_format")]
     pledge: Option<Balance>,
@@ -744,9 +742,8 @@ impl ForkNetworkCommand {
         for validator in new_validators.into_iter() {
             let validator_account = AccountInfo {
                 account_id: validator.account_id,
-                amount: validator.amount.unwrap_or(50_000 * UNC_BASE),
+                pledging: validator.pledge.unwrap_or(50_000 * UNC_BASE),
                 power: validator.power.unwrap_or(5),
-                pledging: validator.pledge.unwrap_or(5),
                 public_key: validator.public_key,
             };
             new_validator_accounts.push(validator_account.clone());
@@ -754,7 +751,7 @@ impl ForkNetworkCommand {
                 &validator_account.account_id,
                 Account::new(
                     liquid_balance,
-                    validator_account.amount,
+                    validator_account.pledging,
                     validator_account.power,
                     CryptoHash::default(),
                     storage_bytes,

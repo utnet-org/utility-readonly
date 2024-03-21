@@ -141,8 +141,8 @@ fn validator_records(
     num_bytes_account: u64,
 ) -> anyhow::Result<HashMap<AccountId, AccountRecords>> {
     let mut records = HashMap::new();
-    for AccountInfo { account_id, public_key, amount, power, pledging } in validators.iter() {
-        let mut r = AccountRecords::new_validator(*amount,  *power, *pledging, num_bytes_account);
+    for AccountInfo { account_id, public_key, pledging, power } in validators.iter() {
+        let mut r = AccountRecords::new_validator(*pledging,  *power, *pledging, num_bytes_account);
         r.keys.insert(public_key.clone(), AccessKey::full_access());
         if records.insert(account_id.clone(), r).is_some() {
             anyhow::bail!("validator {} specified twice", account_id);
