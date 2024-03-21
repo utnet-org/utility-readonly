@@ -137,7 +137,7 @@ impl TransactionConfig {
                 signer_id: signer_account.id.clone(),
                 receiver_id: signer_account.id,
                 signer,
-                actions: vec![Action::Stake(StakeAction { stake: amount, public_key })],
+                actions: vec![Action::Stake(StakeAction { pledge: amount, public_key })],
             })
         });
          */
@@ -719,7 +719,7 @@ impl Function {
                 method_name = "ext_attached_deposit";
             }
             Function::ValidatorTotalStake => {
-                method_name = "ext_validators_total_stake";
+                method_name = "ext_validators_total_pledge";
             }
             Function::ExtSha256 => {
                 let len = u.int_in_range(0..=100)?;

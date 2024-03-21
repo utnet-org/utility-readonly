@@ -67,11 +67,8 @@ fn get_genesis_protocol_version(resharding_type: &ReshardingType) -> ProtocolVer
     }
 }
 
-fn get_parent_shard_uids(resharding_type: &ReshardingType) -> Vec<ShardUId> {
-    let shard_layout = match resharding_type {
-        ReshardingType::V1 => ShardLayout::v0_single_shard(),
-        ReshardingType::V2 => ShardLayout::get_simple_nightshade_layout(),
-    };
+fn get_parent_shard_uids(_resharding_type: &ReshardingType) -> Vec<ShardUId> {
+    let shard_layout = ShardLayout::v0_single_shard();
     shard_layout.shard_uids().collect()
 }
 
@@ -864,7 +861,7 @@ fn setup_genesis(
     // resharding and makes it harder to predict. The threshold is set slightly
     // lower here to always ensure that upgrade takes place as soon as possible.
     // This was not fun to debug.
-    genesis.config.protocol_upgrade_stake_threshold = Rational32::new(7, 10);
+    genesis.config.protocol_upgrade_pledge_threshold = Rational32::new(7, 10);
 
     let default_epoch_config = EpochConfig::from(&genesis.config);
     let all_epoch_config = AllEpochConfig::new(true, default_epoch_config, "test-chain");

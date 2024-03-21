@@ -4,7 +4,7 @@ use crate::types::{ValidatorId};
 use borsh::{BorshDeserialize, BorshSerialize};
 use unc_primitives_core::types::Balance;
 use rand::{seq::SliceRandom, Rng};
-use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use crate::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 /// Represents the configuration of [`ValidatorMandates`]. Its parameters are expected to remain
 /// valid for one epoch.
@@ -12,8 +12,8 @@ use crate::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
     BorshSerialize, BorshDeserialize, Default, Copy, Clone, Debug, PartialEq, Eq, serde::Serialize,
 )]
 pub struct ValidatorMandatesConfig {
-    /// The amount of stake that corresponds to one mandate.
-    stake_per_mandate: Balance,
+    /// The amount of pledge that corresponds to one mandate.
+    pledge_per_mandate: Balance,
     /// The minimum number of mandates required per shard.
     min_mandates_per_shard: usize,
     /// The number of shards for the referenced epoch.
@@ -27,23 +27,23 @@ impl ValidatorMandatesConfig {
     ///
     /// Panics in the following cases:
     ///
-    /// - If `stake_per_mandate` is 0 as this would lead to division by 0.
+    /// - If `pledge_per_mandate` is 0 as this would lead to division by 0.
     /// - If `num_shards` is zero.
     pub fn new(
-        stake_per_mandate: Balance,
+        pledge_per_mandate: Balance,
         min_mandates_per_shard: usize,
         num_shards: usize,
     ) -> Self {
-        assert!(stake_per_mandate > 0, "stake_per_mandate of 0 would lead to division by 0");
+        assert!(pledge_per_mandate > 0, "pledge_per_mandate of 0 would lead to division by 0");
         assert!(num_shards > 0, "there should be at least one shard");
-        Self { stake_per_mandate, min_mandates_per_shard, num_shards }
+        Self { pledge_per_mandate, min_mandates_per_shard, num_shards }
     }
 }
 
 /// The mandates for a set of validators given a [`ValidatorMandatesConfig`].
 ///
-/// A mandate is a liability for a validator to validate a shard. Depending on its stake and the
-/// `stake_per_mandate` specified in `ValidatorMandatesConfig`, a validator may hold multiple
+/// A mandate is a liability for a validator to validate a shard. Depending on its pledge and the
+/// `pledge_per_mandate` specified in `ValidatorMandatesConfig`, a validator may hold multiple
 /// mandates. Each mandate may be assigned to a different shard. The assignment of mandates to
 /// shards is calculated with [`Self::sample`], typically at every height.
 ///
@@ -62,7 +62,7 @@ pub struct ValidatorMandates {
     /// For example, an element `(1, 42)` represents the partial mandate of the validator with id 1
     /// which has a weight of 42.
     ///
-    /// Validators whose stake can be distributed across mandates without remainder are not
+    /// Validators whose pledge can be distributed across mandates without remainder are not
     /// represented in this vector.
     partials: Vec<(ValidatorId, Balance)>,
 }
@@ -72,11 +72,11 @@ impl ValidatorMandates {
     /// by id in ascending order, so the validator with `ValidatorId` equal to `i` is given by
     /// `validators[i]`.
     ///
-    /// Only full mandates are assigned, partial mandates are dropped. For example, when the stake
-    /// required for a mandate is 5 and a validator has staked 12, then it will obtain 2 mandates.
-    pub fn new(config: ValidatorMandatesConfig, validators: &[ValidatorPowerAndFrozen]) -> Self {
+    /// Only full mandates are assigned, partial mandates are dropped. For example, when the pledge
+    /// required for a mandate is 5 and a validator has pledging 12, then it will obtain 2 mandates.
+    pub fn new(config: ValidatorMandatesConfig, validators: &[ValidatorPowerAndPledge]) -> Self {
         let num_mandates_per_validator: Vec<u16> =
-            validators.iter().map(|v| v.num_mandates(config.stake_per_mandate)).collect();
+            validators.iter().map(|v| v.num_mandates(config.pledge_per_mandate)).collect();
         let num_total_mandates =
             num_mandates_per_validator.iter().map(|&num| usize::from(num)).sum();
         let mut mandates: Vec<ValidatorId> = Vec::with_capacity(num_total_mandates);
@@ -90,7 +90,7 @@ impl ValidatorMandates {
 
         let required_mandates = config.min_mandates_per_shard * config.num_shards;
         if mandates.len() < required_mandates {
-            // TODO(#10014) dynamically lower `stake_per_mandate` to reach enough mandates
+            // TODO(#10014) dynamically lower `pledge_per_mandate` to reach enough mandates
             panic!(
                 "not enough validator mandates: got {}, need {}",
                 mandates.len(),
@@ -101,11 +101,11 @@ impl ValidatorMandates {
         // Not counting partials towards `required_mandates` as the weight of partials and its
         // distribution across shards may vary widely.
         //
-        // Construct vector with capacity as most likely some validators' stake will not be evenly
-        // divided by `config.stake_per_mandate`, i.e. some validators will have partials.
+        // Construct vector with capacity as most likely some validators' pledge will not be evenly
+        // divided by `config.pledge_per_mandate`, i.e. some validators will have partials.
         let mut partials = Vec::with_capacity(validators.len());
         for i in 0..validators.len() {
-            let partial_weight = validators[i].partial_mandate_weight(config.stake_per_mandate);
+            let partial_weight = validators[i].partial_mandate_weight(config.pledge_per_mandate);
             if partial_weight > 0 {
                 partials.push((i as ValidatorId, partial_weight));
             }
@@ -275,7 +275,7 @@ mod tests {
     use rand_chacha::ChaCha8Rng;
 
     use crate::{
-        types::validator_stake::ValidatorStake, types::ValidatorId,
+        types::validator_pledge::ValidatorPledge, types::ValidatorId,
         validator_mandates::ValidatorMandatesConfig,
     };
 
@@ -291,12 +291,12 @@ mod tests {
 
     #[test]
     fn test_validator_mandates_config_new() {
-        let stake_per_mandate = 10;
+        let pledge_per_mandate = 10;
         let min_mandates_per_shard = 400;
         let num_shards = 4;
         assert_eq!(
-            ValidatorMandatesConfig::new(stake_per_mandate, min_mandates_per_shard, num_shards),
-            ValidatorMandatesConfig { stake_per_mandate, min_mandates_per_shard, num_shards },
+            ValidatorMandatesConfig::new(pledge_per_mandate, min_mandates_per_shard, num_shards),
+            ValidatorMandatesConfig { pledge_per_mandate, min_mandates_per_shard, num_shards },
         )
     }
 
@@ -309,9 +309,9 @@ mod tests {
     ///
     /// The partials are (verified in [`test_validator_mandates_new`]):
     /// `vec![(1, 7), (2, 9), (3, 2), (4, 5), (5, 4), (6, 6)]`
-    fn new_validator_stakes() -> Vec<ValidatorStake> {
-        let new_vs = |account_id: &str, balance: Balance| -> ValidatorStake {
-            ValidatorStake::new(
+    fn new_validator_pledges() -> Vec<ValidatorPledge> {
+        let new_vs = |account_id: &str, balance: Balance| -> ValidatorPledge {
+            ValidatorPledge::new(
                 account_id.parse().unwrap(),
                 PublicKey::empty(unc_crypto::KeyType::ED25519),
                 balance,
@@ -331,16 +331,16 @@ mod tests {
 
     #[test]
     fn test_validator_mandates_new() {
-        let validators = new_validator_stakes();
+        let validators = new_validator_pledges();
         let config = ValidatorMandatesConfig::new(10, 1, 4);
         let mandates = ValidatorMandates::new(config, &validators);
 
-        // At 10 stake per mandate, the first validator holds three mandates, and so on.
-        // Note that "account_2" holds no mandate as its stake is below the threshold.
+        // At 10 pledge per mandate, the first validator holds three mandates, and so on.
+        // Note that "account_2" holds no mandate as its pledge is below the threshold.
         let expected_mandates: Vec<ValidatorId> = vec![0, 0, 0, 1, 1, 3, 4, 4, 4];
         assert_eq!(mandates.mandates, expected_mandates);
 
-        // At 10 stake per mandate, the first validator holds no partial mandate, the second
+        // At 10 pledge per mandate, the first validator holds no partial mandate, the second
         // validator holds a partial mandate with weight 7, and so on.
         let expected_partials: Vec<(ValidatorId, Balance)> =
             vec![(1, 7), (2, 9), (3, 2), (4, 5), (5, 4), (6, 6)];
@@ -358,7 +358,7 @@ mod tests {
         num_shards: usize,
         expected_assignment: Vec<ValidatorId>,
     ) {
-        let validators = new_validator_stakes();
+        let validators = new_validator_pledges();
         let config = ValidatorMandatesConfig::new(10, 1, num_shards);
         let mandates = ValidatorMandates::new(config, &validators);
         let mut rng = new_fixed_rng();
@@ -392,7 +392,7 @@ mod tests {
         num_shards: usize,
         expected_assignment: Vec<(ValidatorId, Balance)>,
     ) {
-        let validators = new_validator_stakes();
+        let validators = new_validator_pledges();
         let config = ValidatorMandatesConfig::new(10, 1, num_shards);
         let mandates = ValidatorMandates::new(config, &validators);
         let mut rng = new_fixed_rng();
@@ -483,7 +483,7 @@ mod tests {
         config: ValidatorMandatesConfig,
         expected_assignment: ValidatorMandatesAssignment,
     ) {
-        let validators = new_validator_stakes();
+        let validators = new_validator_pledges();
         let mandates = ValidatorMandates::new(config, &validators);
 
         let mut rng = new_fixed_rng();

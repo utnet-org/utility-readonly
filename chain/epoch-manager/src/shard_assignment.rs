@@ -1,15 +1,15 @@
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::{Balance, NumShards, Power, ShardId};
-use unc_primitives::types::validator_frozen::ValidatorFrozen;
-use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 use unc_primitives::utils::min_heap::{MinHeap, PeekMut};
 
 /// Assign chunk producers (a.k.a. validators) to shards.  The i-th element
 /// of the output corresponds to the validators assigned to the i-th shard.
 ///
 /// This function ensures that every shard has at least `min_validators_per_shard`
-/// assigned to it, and attempts to balance the stakes between shards (keep the total
-/// stake assigned to each shard approximately equal).
+/// assigned to it, and attempts to balance the pledges between shards (keep the total
+/// pledge assigned to each shard approximately equal).
 ///
 /// This function performs best when the number of chunk producers is greater or
 /// equal than `num_shards * min_validators_per_shard` in which case each chunk
@@ -17,7 +17,7 @@ use unc_primitives::utils::min_heap::{MinHeap, PeekMut};
 /// some of them will be assigned to multiple shards.
 ///
 /// Panics if chunk_producers vector is not sorted in descending order by
-/// producer’s stake.
+/// producer’s pledge.
 pub fn assign_shards<T: HasStake<Balance> + Eq + Clone + PartialOrd>(
     chunk_producers: Vec<T>,
     num_shards: NumShards,
@@ -56,21 +56,21 @@ pub fn assign_shards<T: HasStake<Balance> + Eq + Clone + PartialOrd>(
     );
 
     // Second, if there are any unassigned chunk producers left, distribute them
-    // between shards trying to balance total stake.
+    // between shards trying to balance total pledge.
     let remaining_producers =
         num_chunk_producers.saturating_sub(num_shards as usize * min_validators_per_shard);
     if remaining_producers > 0 {
-        // Re-index shards to favour lowest stake first.
+        // Re-index shards to favour lowest pledge first.
         let mut shard_index: MinHeap<(Balance, usize, ShardId)> = shard_index
             .into_iter()
-            .map(|(count, stake, shard_id)| (stake, count, shard_id))
+            .map(|(count, pledge, shard_id)| (pledge, count, shard_id))
             .collect();
 
         for (_, cp) in chunk_producers.take(remaining_producers) {
-            let (least_stake, least_validator_count, shard_id) =
+            let (least_pledge, least_validator_count, shard_id) =
                 shard_index.pop().expect("shard_index should never be empty");
             let get_value : Balance = cp.get_value();
-            shard_index.push((least_stake + get_value, least_validator_count + 1, shard_id));
+            shard_index.push((least_pledge + get_value, least_validator_count + 1, shard_id));
             result[usize::try_from(shard_id).unwrap()].push(cp);
         }
     }
@@ -153,15 +153,15 @@ impl HasStake<Power> for ValidatorPower {
     }
 }
 
-impl HasStake<Balance> for ValidatorFrozen {
+impl HasStake<Balance> for ValidatorPledge {
     fn get_value(&self) -> Balance {
-        self.frozen()
+        self.pledge()
     }
 }
 
-impl HasStake<Balance> for ValidatorPowerAndFrozen {
+impl HasStake<Balance> for ValidatorPowerAndPledge {
     fn get_value(&self) -> Balance {
-        self.frozen()
+        self.pledge()
     }
 }
 
@@ -197,7 +197,7 @@ mod tests {
     /// The way this scenario works is as follows.  There are three validators
     /// [100, 90, 81] and they are distributed among two shards.  First the code
     /// will assign 100 to shard 0 and then 90 to shard 1.  At that point, both
-    /// shards will have one validator but shard 1 will have less total stake so
+    /// shards will have one validator but shard 1 will have less total pledge so
     /// the code will assign validator 81 to it.  In the last step, shard 0 will
     /// have only one validator so the code will try to assign validator 100 to
     /// it.  However, that validator is already assigned to that shard so the
@@ -220,36 +220,36 @@ mod tests {
         let num_shards = 2;
         let min_validators_per_shard = 2;
         // Note: Could divide as {{100} {10, 10, 10, 10, 10, 10, 10, 10, 10, 10}}
-        // the stakes are equal with this assignment, but this would not result in
+        // the pledges are equal with this assignment, but this would not result in
         // the minimum of 2 validators in the first shard
-        let stakes = &[100, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
-        let assignment = assign_shards(stakes, num_shards, min_validators_per_shard).unwrap();
+        let pledges = &[100, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+        let assignment = assign_shards(pledges, num_shards, min_validators_per_shard).unwrap();
 
         // The algorithm ensures the minimum number of validators is present
-        // in each shard, even if it makes the stakes more uneven.
+        // in each shard, even if it makes the pledges more uneven.
         assert_eq!(
-            &[(min_validators_per_shard, 110), (stakes.len() - min_validators_per_shard, 90)],
+            &[(min_validators_per_shard, 110), (pledges.len() - min_validators_per_shard, 90)],
             &assignment[..]
         );
     }
 
     /// Calls [`super::assign_shards`] and performs basic validation of the
     /// result.  Returns sorted and aggregated data in the form of a vector of
-    /// `(count, stake)` tuples where first element is number of chunk producers
-    /// in a shard and second is total stake assigned to that shard.
+    /// `(count, pledge)` tuples where first element is number of chunk producers
+    /// in a shard and second is total pledge assigned to that shard.
     fn assign_shards(
-        stakes: &[Balance],
+        pledges: &[Balance],
         num_shards: NumShards,
         min_validators_per_shard: usize,
     ) -> Result<Vec<(usize, Balance)>, super::NotEnoughValidators> {
-        let chunk_producers = stakes.iter().copied().enumerate().collect();
+        let chunk_producers = pledges.iter().copied().enumerate().collect();
         let assignments =
             super::assign_shards(chunk_producers, num_shards, min_validators_per_shard)?;
 
         // All chunk producers must be assigned at least once.  Furthermore, no
         // chunk producer can be assigned to more than one shard than chunk
         // producer with lowest number of assignments.
-        let mut chunk_producers_counts = vec![0; stakes.len()];
+        let mut chunk_producers_counts = vec![0; pledges.len()];
         for cp in assignments.iter().flat_map(|shard| shard.iter()) {
             chunk_producers_counts[cp.0] += 1;
         }
@@ -277,7 +277,7 @@ mod tests {
                     shard_id,
                     cps
                 );
-                // If all is good, aggregate as (cps_count, total_stake) pair.
+                // If all is good, aggregate as (cps_count, total_pledge) pair.
                 (cps.len(), cps.iter().map(|cp| cp.1).sum())
             })
             .collect::<Vec<_>>();
@@ -285,14 +285,14 @@ mod tests {
         Ok(assignments)
     }
 
-    fn test_distribution_common(stakes: &[Balance], num_shards: NumShards, diff_tolerance: i128) {
+    fn test_distribution_common(pledges: &[Balance], num_shards: NumShards, diff_tolerance: i128) {
         let min_validators_per_shard = 2;
         let validators_per_shard =
-            std::cmp::max(stakes.len() / (num_shards as usize), min_validators_per_shard);
-        let average_stake_per_shard = (validators_per_shard as Balance)
-            * stakes.iter().sum::<Balance>()
-            / (stakes.len() as Balance);
-        let assignment = assign_shards(stakes, num_shards, min_validators_per_shard)
+            std::cmp::max(pledges.len() / (num_shards as usize), min_validators_per_shard);
+        let average_pledge_per_shard = (validators_per_shard as Balance)
+            * pledges.iter().sum::<Balance>()
+            / (pledges.len() as Balance);
+        let assignment = assign_shards(pledges, num_shards, min_validators_per_shard)
             .expect("There should have been enough validators");
         for (shard_id, &cps) in assignment.iter().enumerate() {
             // Validator distribution should be even.
@@ -303,10 +303,10 @@ mod tests {
             );
 
             // Stake distribution should be even
-            let diff = (cps.1 as i128) - (average_stake_per_shard as i128);
+            let diff = (cps.1 as i128) - (average_pledge_per_shard as i128);
             assert!(
                 diff.abs() < diff_tolerance,
-                "Shard {}'s stake {} is {} away from average; expected less than {} away",
+                "Shard {}'s pledge {} is {} away from average; expected less than {} away",
                 shard_id,
                 cps.1,
                 diff.abs(),
@@ -316,7 +316,7 @@ mod tests {
     }
 
     impl super::HasStake for (usize, Balance) {
-        fn get_stake(&self) -> Balance {
+        fn get_pledge(&self) -> Balance {
             self.1
         }
     }

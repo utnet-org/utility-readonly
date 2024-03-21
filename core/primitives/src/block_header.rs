@@ -3,7 +3,7 @@ use crate::hash::{hash, CryptoHash};
 use crate::merkle::combine_hash;
 use crate::network::PeerId;
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
-use crate::types::{AccountId, Balance, BlockHeight, EpochId, MerkleHash, NumBlocks, ValidatorFrozenV1};
+use crate::types::{AccountId, Balance, BlockHeight, EpochId, MerkleHash, NumBlocks, ValidatorPledgeV1};
 use crate::utils::{from_timestamp, to_timestamp};
 use crate::validator_signer::ValidatorSigner;
 use crate::version::{get_protocol_version, ProtocolVersion, PROTOCOL_VERSION};
@@ -11,7 +11,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::{DateTime, Utc};
 use unc_crypto::{KeyType, PublicKey, Signature};
 use std::sync::Arc;
-use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
+use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, Eq, PartialEq)]
 pub struct BlockHeaderInnerLite {
@@ -49,8 +49,8 @@ pub struct BlockHeaderInnerRest {
     pub random_value: CryptoHash,
     /// Validator power proposals from the previous chunks.
     pub prev_validator_power_proposals: Vec<ValidatorPowerV1>,
-    /// Validator frozen proposals from the previous chunks.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
+    /// Validator pledge proposals from the previous chunks.
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledgeV1>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -88,7 +88,7 @@ pub struct BlockHeaderInnerRestV2 {
     /// Validator proposals from the previous chunks.
     pub prev_validator_power_proposals: Vec<ValidatorPowerV1>,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledgeV1>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -113,7 +113,7 @@ pub struct BlockHeaderInnerRestV2 {
 /// Add `prev_height`
 /// Add `block_ordinal`
 /// Add `epoch_sync_data_hash`
-/// Use new `ValidatorStake` struct
+/// Use new `ValidatorPledge` struct
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, Eq, PartialEq)]
 pub struct BlockHeaderInnerRestV3 {
     /// Root hash of the previous chunks' outgoing receipts in the given block.
@@ -129,7 +129,7 @@ pub struct BlockHeaderInnerRestV3 {
     /// Validator proposals from the previous chunks.
     pub prev_validator_power_proposals: Vec<ValidatorPower>,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledge>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -176,7 +176,7 @@ pub struct BlockHeaderInnerRestV4 {
     /// Validator proposals from the previous chunks.
     pub prev_validator_power_proposals: Vec<ValidatorPower>,
     /// Validator proposals from the previous chunks.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledge>,
     /// Mask for new chunks included in the block
     pub chunk_mask: Vec<bool>,
     /// Gas price for chunks in the next block.
@@ -319,7 +319,7 @@ pub struct BlockHeaderV2 {
     pub hash: CryptoHash,
 }
 
-/// V2 -> V3: Add `prev_height` to `inner_rest` and use new `ValidatorStake`
+/// V2 -> V3: Add `prev_height` to `inner_rest` and use new `ValidatorPledge`
 // Add `block_ordinal` to `inner_rest`
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, Eq, PartialEq)]
 #[borsh(init=init)]
@@ -426,7 +426,7 @@ impl BlockHeader {
         challenges_root: MerkleHash,
         random_value: CryptoHash,
         prev_validator_power_proposals: Vec<ValidatorPower>,
-        prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
+        prev_validator_pledge_proposals: Vec<ValidatorPledge>,
         chunk_mask: Vec<bool>,
         block_ordinal: NumBlocks,
         epoch_id: EpochId,
@@ -473,7 +473,7 @@ impl BlockHeader {
                     .into_iter()
                     .map(|v| v.into_v1())
                     .collect(),
-                prev_validator_frozen_proposals: prev_validator_frozen_proposals
+                prev_validator_pledge_proposals: prev_validator_pledge_proposals
                     .into_iter()
                     .map(|v| v.into_v1())
                     .collect(),
@@ -509,7 +509,7 @@ impl BlockHeader {
                     .into_iter()
                     .map(|v| v.into_v1())
                     .collect(),
-                prev_validator_frozen_proposals: prev_validator_frozen_proposals
+                prev_validator_pledge_proposals: prev_validator_pledge_proposals
                     .into_iter()
                     .map(|v| v.into_v1())
                     .collect(),
@@ -542,7 +542,7 @@ impl BlockHeader {
                 challenges_root,
                 random_value,
                 prev_validator_power_proposals,
-                prev_validator_frozen_proposals,
+                prev_validator_pledge_proposals,
                 chunk_mask,
                 next_gas_price,
                 block_ordinal,
@@ -576,7 +576,7 @@ impl BlockHeader {
                 challenges_root,
                 random_value,
                 prev_validator_power_proposals,
-                prev_validator_frozen_proposals,
+                prev_validator_pledge_proposals,
                 chunk_mask,
                 next_gas_price,
                 block_ordinal,
@@ -641,7 +641,7 @@ impl BlockHeader {
                 challenges_root,
                 random_value: CryptoHash::default(),
                 prev_validator_power_proposals: vec![],
-                prev_validator_frozen_proposals: vec![],
+                prev_validator_pledge_proposals: vec![],
                 chunk_mask: vec![],
                 next_gas_price: initial_gas_price,
                 total_supply: initial_total_supply,
@@ -671,7 +671,7 @@ impl BlockHeader {
                 challenges_root,
                 random_value: CryptoHash::default(),
                 prev_validator_power_proposals: vec![],
-                prev_validator_frozen_proposals: vec![],
+                prev_validator_pledge_proposals: vec![],
                 chunk_mask: vec![true; chunks_included as usize],
                 next_gas_price: initial_gas_price,
                 total_supply: initial_total_supply,
@@ -701,7 +701,7 @@ impl BlockHeader {
                 challenges_root,
                 random_value: CryptoHash::default(),
                 prev_validator_power_proposals: vec![],
-                prev_validator_frozen_proposals: vec![],
+                prev_validator_pledge_proposals: vec![],
                 chunk_mask: vec![true; chunks_included as usize],
                 block_ordinal: 1, // It is guaranteed that Chain has the only Block which is Genesis
                 next_gas_price: initial_gas_price,
@@ -735,7 +735,7 @@ impl BlockHeader {
                 block_body_hash,
                 random_value: CryptoHash::default(),
                 prev_validator_power_proposals: vec![],
-                prev_validator_frozen_proposals: vec![],
+                prev_validator_pledge_proposals: vec![],
                 chunk_mask: vec![true; chunks_included as usize],
                 block_ordinal: 1, // It is guaranteed that Chain has the only Block which is Genesis
                 next_gas_price: initial_gas_price,
@@ -950,19 +950,19 @@ impl BlockHeader {
     }
 
     #[inline]
-    pub fn prev_validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+    pub fn prev_validator_pledge_proposals(&self) -> ValidatorPledgeIter {
         match self {
             BlockHeader::BlockHeaderV1(header) => {
-                ValidatorFrozenIter::v1(&header.inner_rest.prev_validator_frozen_proposals)
+                ValidatorPledgeIter::v1(&header.inner_rest.prev_validator_pledge_proposals)
             }
             BlockHeader::BlockHeaderV2(header) => {
-                ValidatorFrozenIter::v1(&header.inner_rest.prev_validator_frozen_proposals)
+                ValidatorPledgeIter::v1(&header.inner_rest.prev_validator_pledge_proposals)
             }
             BlockHeader::BlockHeaderV3(header) => {
-                ValidatorFrozenIter::new(&header.inner_rest.prev_validator_frozen_proposals)
+                ValidatorPledgeIter::new(&header.inner_rest.prev_validator_pledge_proposals)
             }
             BlockHeader::BlockHeaderV4(header) => {
-                ValidatorFrozenIter::new(&header.inner_rest.prev_validator_frozen_proposals)
+                ValidatorPledgeIter::new(&header.inner_rest.prev_validator_pledge_proposals)
             }
         }
     }

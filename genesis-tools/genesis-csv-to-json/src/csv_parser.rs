@@ -15,12 +15,12 @@ use std::io::Read;
 use std::path::PathBuf;
 
 /// Methods that can be called by a non-privileged access key.
-const REGULAR_METHOD_NAMES: &[&str] = &["stake", "transfer"];
+const REGULAR_METHOD_NAMES: &[&str] = &["pledge", "transfer"];
 /// Methods that can be called by a privileged access key.
 const PRIVILEGED_METHOD_NAMES: &[&str] = &["add_access_key", "remove_access_key"];
 /// Methods that can be called by an access key owned by a "foundation".
 const FOUNDATION_METHOD_NAMES: &[&str] =
-    &["add_access_key", "remove_access_key", "permanently_unstake", "terminate", "init"];
+    &["add_access_key", "remove_access_key", "permanently_unpledge", "terminate", "init"];
 /// Amount of gas that we pass to run the contract initialization function.
 const INIT_GAS: Gas = 1_000_000;
 
@@ -28,16 +28,16 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 impl Row {
     pub fn verify(&self) -> Result<()> {
-        if self.validator_stake > 0 && self.validator_key.is_none() {
+        if self.validator_pledge > 0 && self.validator_key.is_none() {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
-                "Validator key must be specified if validator stake is not 0.",
+                "Validator key must be specified if validator pledge is not 0.",
             )));
         }
-        if self.validator_stake == 0 && self.validator_key.is_some() {
+        if self.validator_pledge == 0 && self.validator_key.is_some() {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
-                "Validator stake should be greater than 0 if validator stake is specified.",
+                "Validator pledge should be greater than 0 if validator pledge is specified.",
             )));
         }
 
@@ -105,7 +105,7 @@ struct Row {
     full_pks: Vec<PublicKey>,
     amount: Balance,
     is_treasury: bool,
-    validator_stake: Balance,
+    validator_pledge: Balance,
     validator_power: Power,
     validator_key: Option<PublicKey>,
     #[serde(with = "crate::serde_with::peer_info_to_str")]
@@ -158,7 +158,7 @@ where
                 public_key: validator_key.clone(),
                 amount: row.amount,
                 power: row.validator_power,
-                locked: row.validator_stake,
+                pledging: row.validator_pledge,
             });
         }
 
@@ -190,7 +190,7 @@ fn account_records(row: &Row, gas_price: Balance) -> Vec<StateRecord> {
 
     let mut res = vec![StateRecord::Account {
         account_id: row.account_id.clone(),
-        account: Account::new(row.amount, row.validator_stake, row.validator_power, smart_contract_hash, 0),
+        account: Account::new(row.amount, row.validator_pledge, row.validator_power, smart_contract_hash, 0),
     }];
 
     // Add restricted access keys.
@@ -311,7 +311,7 @@ mod tests {
                 vesting_start: timestamp(22, 0, 0),
                 vesting_end: timestamp(23, 30, 0),
                 vesting_cliff: timestamp(22, 30, 20),
-                validator_stake: 100,
+                validator_pledge: 100,
                 validator_key: Some(PublicKey::empty(KeyType::ED25519)),
                 peer_info: Some(PeerInfo {
                     id: PeerId::new(PublicKey::empty(KeyType::ED25519)),
@@ -335,7 +335,7 @@ mod tests {
                 vesting_start: None,
                 vesting_end: None,
                 vesting_cliff: None,
-                validator_stake: 0,
+                validator_pledge: 0,
                 validator_key: None,
                 peer_info: None,
                 is_treasury: true,

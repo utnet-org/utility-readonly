@@ -38,31 +38,31 @@ struct AccountRecords {
     extra_records: Vec<StateRecord>,
 }
 
-// set the total balance to what's in src, keeping the locked amount the same
+// set the total balance to what's in src, keeping the pledging amount the same
 fn set_total_balance(dst: &mut Account, src: &Account) {
-    let total = src.amount() + src.locked();
-    if total > dst.locked() {
-        dst.set_amount(total - dst.locked());
+    let total = src.amount() + src.pledging();
+    if total > dst.pledging() {
+        dst.set_amount(total - dst.pledging());
     }
 }
 
 impl AccountRecords {
-    fn new(amount: Balance, locked: Balance, power: Power, num_bytes_account: u64) -> Self {
+    fn new(amount: Balance, pledging: Balance, power: Power, num_bytes_account: u64) -> Self {
         let mut ret = Self::default();
-        ret.set_account(amount, locked, power, num_bytes_account);
+        ret.set_account(amount, pledging, power, num_bytes_account);
         ret
     }
 
-    fn new_validator(amount: Balance, power: Power, frozen: Balance, num_bytes_account: u64) -> Self {
+    fn new_validator(amount: Balance, power: Power, pledge: Balance, num_bytes_account: u64) -> Self {
         let mut ret = Self::default();
-        ret.set_account(amount, frozen, power, num_bytes_account);
+        ret.set_account(amount, pledge, power, num_bytes_account);
         ret.amount_needed = true;
         ret
     }
 
-    fn set_account(&mut self, amount: Balance, locked: Balance, power: Power, num_bytes_account: u64) {
+    fn set_account(&mut self, amount: Balance, pledging: Balance, power: Power, num_bytes_account: u64) {
         assert!(self.account.is_none());
-        let account = Account::new(amount, locked, power, CryptoHash::default(), num_bytes_account);
+        let account = Account::new(amount, pledging, power, CryptoHash::default(), num_bytes_account);
         self.account = Some(account);
     }
 
@@ -81,8 +81,8 @@ impl AccountRecords {
             }
             None => {
                 let mut account = existing.clone();
-                account.set_amount(account.amount() + account.locked());
-                account.set_locked(0);
+                account.set_amount(account.amount() + account.pledging());
+                account.set_pledging(0);
                 account.set_power(0);
                 self.account = Some(account);
             }
@@ -122,7 +122,7 @@ impl AccountRecords {
                 if self.amount_needed {
                     account.set_amount(10_000 * framework::config::UNC_BASE);
                 }
-                *total_supply += account.amount() + account.locked();
+                *total_supply += account.amount() + account.pledging();
                 seq.serialize_element(&StateRecord::Account { account_id, account })?;
                 for record in self.extra_records.iter() {
                     seq.serialize_element(record)?;
@@ -141,8 +141,8 @@ fn validator_records(
     num_bytes_account: u64,
 ) -> anyhow::Result<HashMap<AccountId, AccountRecords>> {
     let mut records = HashMap::new();
-    for AccountInfo { account_id, public_key, amount, power, locked } in validators.iter() {
-        let mut r = AccountRecords::new_validator(*amount,  *power, *locked, num_bytes_account);
+    for AccountInfo { account_id, public_key, amount, power, pledging } in validators.iter() {
+        let mut r = AccountRecords::new_validator(*amount,  *power, *pledging, num_bytes_account);
         r.keys.insert(public_key.clone(), AccessKey::full_access());
         if records.insert(account_id.clone(), r).is_some() {
             anyhow::bail!("validator {} specified twice", account_id);
@@ -182,7 +182,7 @@ fn parse_extra_records(
                     hash_map::Entry::Vacant(e) => {
                         let r = AccountRecords::new(
                             account.amount(),
-                            account.locked(),
+                            account.pledging(),
                             account.power(),
                             num_bytes_account,
                         );
@@ -197,7 +197,7 @@ fn parse_extra_records(
                                 &account_id
                             ));
                         }
-                        r.set_account(account.amount(), account.locked(), account.power(), num_bytes_account);
+                        r.set_account(account.amount(), account.pledging(), account.power(), num_bytes_account);
                     }
                 }
             }
@@ -314,11 +314,11 @@ pub fn amend_genesis(
                 if let Some(acc) = wanted.get_mut(account_id) {
                     acc.update_from_existing(account);
                 } else {
-                    if account.locked() != 0 {
-                        account.set_amount(account.amount() + account.locked());
-                        account.set_locked(0);
+                    if account.pledging() != 0 {
+                        account.set_amount(account.amount() + account.pledging());
+                        account.set_pledging(0);
                     }
-                    total_supply += account.amount() + account.locked();
+                    total_supply += account.amount() + account.pledging();
                     records_seq.serialize_element(&r).unwrap();
                 }
             }
@@ -433,7 +433,7 @@ mod test {
         Account {
             account_id: &'static str,
             amount: Balance,
-            locked: Balance,
+            pledging: Balance,
             /// Storage used by the given account, includes account id, this struct, access keys and other data.
             storage_usage: StorageUsage,
         },
@@ -449,9 +449,9 @@ mod test {
     impl TestStateRecord {
         fn parse(&self) -> StateRecord {
             match &self {
-                Self::Account { account_id, amount, locked, storage_usage } => {
+                Self::Account { account_id, amount, pledging, storage_usage } => {
                     let account =
-                        Account::new(*amount, *locked, CryptoHash::default(), *storage_usage);
+                        Account::new(*amount, *pledging, CryptoHash::default(), *storage_usage);
                     StateRecord::Account { account_id: account_id.parse().unwrap(), account }
                 }
                 Self::AccessKey { account_id, public_key } => StateRecord::AccessKey {
@@ -477,7 +477,7 @@ mod test {
 
     struct TestCase {
         // for convenience, the validators set in the initial genesis file, matching
-        // the accounts in records_in with nonzero `locked`
+        // the accounts in records_in with nonzero `pledging`
         initial_validators: &'static [TestAccountInfo],
         // records to put in the --records-file-in file
         records_in: &'static [TestStateRecord],
@@ -508,7 +508,7 @@ mod test {
                             account_id.clone(),
                             (
                                 account.amount(),
-                                account.locked(),
+                                account.pledging(),
                                 account.code_hash(),
                                 account.storage_usage(),
                             ),
@@ -546,7 +546,7 @@ mod test {
                         account_id,
                         (
                             account.amount(),
-                            account.locked(),
+                            account.pledging(),
                             account.code_hash(),
                             account.storage_usage(),
                         ),
@@ -594,7 +594,7 @@ mod test {
                 ),
                 avg_hidden_validator_seats_per_shard: (0..num_shards).map(|_| 0).collect(),
                 dynamic_resharding: false,
-                protocol_upgrade_stake_threshold:
+                protocol_upgrade_pledge_threshold:
                     framework::config::PROTOCOL_UPGRADE_STAKE_THRESHOLD,
                 epoch_length: 1000,
                 gas_limit: framework::config::INITIAL_GAS_LIMIT,
@@ -709,7 +709,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 1_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -719,7 +719,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo1",
                     amount: 1_000_000,
-                    locked: 2_000_000,
+                    pledging: 2_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -729,7 +729,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "asdf.unc",
                     amount: 1_234_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -758,13 +758,13 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 100_000_000,
-                    locked: 50_000_000,
+                    pledging: 50_000_000,
                     storage_usage: 0,
                 },
                 TestStateRecord::Account {
                     account_id: "extra-account.unc",
                     amount: 9_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::AccessKey {
@@ -776,7 +776,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 149_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -786,7 +786,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo1",
                     amount: 1_000_000,
-                    locked: 2_000_000,
+                    pledging: 2_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -796,7 +796,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo2",
                     amount: 10_000 * framework::config::UNC_BASE,
-                    locked: 3_000_000,
+                    pledging: 3_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -806,7 +806,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "asdf.unc",
                     amount: 1_234_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -816,7 +816,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "extra-account.unc",
                     amount: 9_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -855,7 +855,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 1_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -865,7 +865,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo1",
                     amount: 1_000_000,
-                    locked: 2_000_000,
+                    pledging: 2_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -875,7 +875,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "asdf.unc",
                     amount: 1_234_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -887,13 +887,13 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 100_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::Account {
                     account_id: "foo2",
                     amount: 300_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::AccessKey {
@@ -907,7 +907,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "extra-account.unc",
                     amount: 9_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 0,
                 },
                 TestStateRecord::AccessKey {
@@ -919,7 +919,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 100_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 264,
                 },
                 TestStateRecord::AccessKey {
@@ -933,7 +933,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo1",
                     amount: 3_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 264,
                 },
                 TestStateRecord::AccessKey {
@@ -947,7 +947,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo2",
                     amount: 299_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -957,7 +957,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo3",
                     amount: 10_000 * framework::config::UNC_BASE,
-                    locked: 2_000_000,
+                    pledging: 2_000_000,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -967,7 +967,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "asdf.unc",
                     amount: 1_234_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -977,7 +977,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "extra-account.unc",
                     amount: 9_000_000,
-                    locked: 0,
+                    pledging: 0,
                     storage_usage: 182,
                 },
                 TestStateRecord::AccessKey {
@@ -1002,7 +1002,7 @@ mod test {
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 1_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 183,
                 },
                 TestStateRecord::AccessKey {
@@ -1014,14 +1014,14 @@ mod test {
             extra_records: &[TestStateRecord::Account {
                 account_id: "foo0",
                 amount: 100_000_000,
-                locked: 0,
+                pledging: 0,
                 storage_usage: 0,
             }],
             wanted_records: &[
                 TestStateRecord::Account {
                     account_id: "foo0",
                     amount: 99_000_000,
-                    locked: 1_000_000,
+                    pledging: 1_000_000,
                     storage_usage: 183,
                 },
                 TestStateRecord::AccessKey {

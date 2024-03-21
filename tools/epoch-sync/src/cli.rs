@@ -186,12 +186,12 @@ impl ValidateEpochSyncInfoCmd {
                                                                               fishermen,
                                                                               fishermen_to_index,
                                                                               power_change,
-                                                                              frozen_change,
+                                                                              pledge_change,
                                                                               validator_reward,
                                                                               seat_price,
                                                                               minted_amount,
                                                                               all_power_proposals,
-                                                                              all_frozen_proposals,
+                                                                              all_pledge_proposals,
                                                                               validator_kickout,
                                                                               validator_mandates, ..
                                                                           }) =  BlockSummary::default();
@@ -202,7 +202,7 @@ impl ValidateEpochSyncInfoCmd {
                     *last_header.last_final_block(),
                     *last_header.prev_hash(),
                     last_header.prev_validator_power_proposals().collect(),
-                    last_header.prev_validator_frozen_proposals().collect(),
+                    last_header.prev_validator_pledge_proposals().collect(),
                     last_header.chunk_mask().to_vec(),
                     vec![],
                     last_header.total_supply(),
@@ -217,12 +217,12 @@ impl ValidateEpochSyncInfoCmd {
                     fishermen,
                     fishermen_to_index,
                     power_change,
-                    frozen_change,
+                    pledge_change,
                     validator_reward,
                     seat_price,
                     minted_amount,
                     all_power_proposals,
-                    all_frozen_proposals,
+                    all_pledge_proposals,
                     validator_kickout,
                     validator_mandates
                     // end customized by James Savechives

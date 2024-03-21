@@ -196,9 +196,9 @@ impl<'a> External for RuntimeExt<'a> {
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
-    fn validator_frozen(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
+    fn validator_pledge(&self, account_id: &AccountId) -> ExtResult<Option<Balance>> {
         self.epoch_info_provider
-            .validator_frozen(self.epoch_id, self.prev_block_hash, account_id)
+            .validator_pledge(self.epoch_id, self.prev_block_hash, account_id)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
@@ -208,9 +208,9 @@ impl<'a> External for RuntimeExt<'a> {
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
-    fn validator_total_frozen(&self) -> ExtResult<Balance> {
+    fn validator_total_pledge(&self) -> ExtResult<Balance> {
         self.epoch_info_provider
-            .validator_total_frozen(self.epoch_id, self.prev_block_hash)
+            .validator_total_pledge(self.epoch_id, self.prev_block_hash)
             .map_err(|e| ExternalError::ValidatorError(e).into())
     }
 
@@ -270,10 +270,10 @@ impl<'a> External for RuntimeExt<'a> {
     fn append_action_stake(
         &mut self,
         receipt_index: ReceiptIndex,
-        stake: Balance,
+        pledge: Balance,
         public_key: unc_crypto::PublicKey,
     ) {
-        self.receipt_manager.append_action_stake(receipt_index, stake, public_key)
+        self.receipt_manager.append_action_stake(receipt_index, pledge, public_key)
     }
 
     fn append_action_add_key_with_full_access(

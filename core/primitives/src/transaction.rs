@@ -362,7 +362,7 @@ mod tests {
                 Action::Transfer(TransferAction { deposit: 123 }),
                 Action::Stake(Box::new(StakeAction {
                     public_key: public_key.clone(),
-                    stake: 1_000_000,
+                    pledge: 1_000_000,
                 })),
                 Action::AddKey(Box::new(AddKeyAction {
                     public_key: public_key.clone(),

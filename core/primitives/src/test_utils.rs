@@ -75,8 +75,8 @@ impl Transaction {
         self
     }
 
-    pub fn stake(mut self, stake: Balance, public_key: PublicKey) -> Self {
-        self.actions.push(Action::Stake(Box::new(StakeAction { stake, public_key })));
+    pub fn pledge(mut self, pledge: Balance, public_key: PublicKey) -> Self {
+        self.actions.push(Action::Stake(Box::new(StakeAction { pledge, public_key })));
         self
     }
     pub fn add_key(mut self, public_key: PublicKey, access_key: AccessKey) -> Self {
@@ -133,11 +133,11 @@ impl SignedTransaction {
         )
     }
 
-    pub fn stake(
+    pub fn pledge(
         nonce: Nonce,
         signer_id: AccountId,
         signer: &dyn Signer,
-        stake: Balance,
+        pledge: Balance,
         public_key: PublicKey,
         block_hash: CryptoHash,
     ) -> Self {
@@ -146,7 +146,7 @@ impl SignedTransaction {
             signer_id.clone(),
             signer_id,
             signer,
-            vec![Action::Stake(Box::new(StakeAction { stake, public_key }))],
+            vec![Action::Stake(Box::new(StakeAction { pledge, public_key }))],
             block_hash,
         )
     }
@@ -528,7 +528,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         Ok(0)
     }
 
-    fn validator_frozen(
+    fn validator_pledge(
             &self,
             _epoch_id: &EpochId,
             _last_block_hash: &CryptoHash,
@@ -541,16 +541,16 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         }
     }
 
-    fn validator_total_frozen(
+    fn validator_total_pledge(
         &self,
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,
     ) -> Result<Balance, EpochError> {
-        let total_frozen: Balance = self.validators.values().map(|(_, frozen)| frozen).sum();
-        Ok(total_frozen)
+        let total_pledge: Balance = self.validators.values().map(|(_, pledge)| pledge).sum();
+        Ok(total_pledge)
     }
 
-    fn minimum_frozen(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
+    fn minimum_pledge(&self, _prev_block_hash: &CryptoHash) -> Result<Balance, EpochError> {
         Ok(0)
     }
 }

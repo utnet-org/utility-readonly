@@ -36,15 +36,15 @@ fn one_iter(
     height_goal: BlockHeight,
 ) -> (Duration, BlockHeight) {
     let account_ids = ["test1", "test2", "test3", "test4", "test5", "test6", "test7", "test8"];
-    let stakes = account_ids
+    let pledges = account_ids
         .iter()
         .map(|account_id| ApprovalStake {
             account_id: account_id.parse().unwrap(),
-            stake_this_epoch: 1,
-            stake_next_epoch: 1,
+            pledge_this_epoch: 1,
+            pledge_next_epoch: 1,
             public_key: SecretKey::from_seed(KeyType::ED25519, account_id).public_key(),
         })
-        .map(|stake| (stake, false))
+        .map(|pledge| (pledge, false))
         .collect::<Vec<_>>();
     let signers = account_ids
         .iter()
@@ -109,7 +109,7 @@ fn one_iter(
                     continue;
                 }
 
-                doomslugs[me].on_approval_message(now, &approval.0, &stakes);
+                doomslugs[me].on_approval_message(now, &approval.0, &pledges);
             }
         }
         approval_queue = new_approval_queue;

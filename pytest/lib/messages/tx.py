@@ -100,7 +100,7 @@ tx_schema = [
                 ['deployContract', DeployContract],
                 ['functionCall', FunctionCall],
                 ['transfer', Transfer],
-                ['stake', Stake],
+                ['pledge', Stake],
                 ['addKey', AddKey],
                 ['deleteKey', DeleteKey],
                 ['deleteAccount', DeleteAccount],
@@ -148,7 +148,7 @@ tx_schema = [
     [
         Stake, {
             'kind': 'struct',
-            'fields': [['stake', 'u128'], ['publicKey', PublicKey]]
+            'fields': [['pledge', 'u128'], ['publicKey', PublicKey]]
         }
     ],
     [

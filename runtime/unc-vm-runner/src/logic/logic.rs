@@ -46,7 +46,7 @@ pub struct VMLogic<'a> {
     /// Keeping track of the current account balance, which can decrease when we create promises
     /// and attach balance to them.
     current_account_balance: Balance,
-    /// Current amount of locked tokens, does not automatically change when staking transaction is
+    /// Current amount of pledging tokens, does not automatically change when staking transaction is
     /// issued.
     current_account_locked_balance: Balance,
     /// Storage usage of the current account at the moment
@@ -623,23 +623,23 @@ impl<'a> VMLogic<'a> {
         Ok(self.context.epoch_height)
     }
 
-    /// Get the stake of an account, if the account is currently a validator. Otherwise returns 0.
-    /// writes the value into the` u128` variable pointed by `stake_ptr`.
+    /// Get the pledge of an account, if the account is currently a validator. Otherwise returns 0.
+    /// writes the value into the` u128` variable pointed by `pledge_ptr`.
     ///
     /// # Cost
     ///
-    /// `base + memory_write_base + memory_write_size * 16 + utf8_decoding_base + utf8_decoding_byte * account_id_len + validator_stake_base`.
-    pub fn validator_frozen(
+    /// `base + memory_write_base + memory_write_size * 16 + utf8_decoding_base + utf8_decoding_byte * account_id_len + validator_pledge_base`.
+    pub fn validator_pledge(
         &mut self,
         account_id_len: u64,
         account_id_ptr: u64,
-        frozen_ptr: u64,
+        pledge_ptr: u64,
     ) -> Result<()> {
         self.gas_counter.pay_base(base)?;
         let account_id = self.read_and_parse_account_id(account_id_ptr, account_id_len)?;
-        self.gas_counter.pay_base(validator_frozen_base)?;
-        let frozen = self.ext.validator_frozen(&account_id)?.unwrap_or_default();
-        self.memory.set_u128(&mut self.gas_counter, frozen_ptr, frozen)
+        self.gas_counter.pay_base(validator_pledge_base)?;
+        let pledge = self.ext.validator_pledge(&account_id)?.unwrap_or_default();
+        self.memory.set_u128(&mut self.gas_counter, pledge_ptr, pledge)
     }
 
 
@@ -656,19 +656,19 @@ impl<'a> VMLogic<'a> {
         self.memory.set_u64(&mut self.gas_counter, power_ptr, power)
     }
 
-    /// Get the total validator stake of the current epoch.
-    /// Write the u128 value into `stake_ptr`.
-    /// writes the value into the` u128` variable pointed by `stake_ptr`.
+    /// Get the total validator pledge of the current epoch.
+    /// Write the u128 value into `pledge_ptr`.
+    /// writes the value into the` u128` variable pointed by `pledge_ptr`.
     ///
     /// # Cost
     ///
-    /// `base + memory_write_base + memory_write_size * 16 + validator_total_stake_base`
+    /// `base + memory_write_base + memory_write_size * 16 + validator_total_pledge_base`
     ///
-    pub fn validator_total_frozen(&mut self, frozen_ptr: u64) -> Result<()> {
+    pub fn validator_total_pledge(&mut self, pledge_ptr: u64) -> Result<()> {
         self.gas_counter.pay_base(base)?;
-        self.gas_counter.pay_base(validator_total_frozen_base)?;
-        let total_frozen = self.ext.validator_total_frozen()?;
-        self.memory.set_u128(&mut self.gas_counter, frozen_ptr, total_frozen)
+        self.gas_counter.pay_base(validator_total_pledge_base)?;
+        let total_pledge = self.ext.validator_total_pledge()?;
+        self.memory.set_u128(&mut self.gas_counter, pledge_ptr, total_pledge)
     }
     pub fn validator_total_power(&mut self, power_ptr: u64) -> Result<()> {
         self.gas_counter.pay_base(base)?;
@@ -707,7 +707,7 @@ impl<'a> VMLogic<'a> {
         self.memory.set_u128(&mut self.gas_counter, balance_ptr, self.current_account_balance)
     }
 
-    /// The current amount of tokens locked due to staking.
+    /// The current amount of tokens pledging due to staking.
     ///
     /// # Cost
     ///
@@ -1854,7 +1854,7 @@ impl<'a> VMLogic<'a> {
         let amount = self.memory.get_u128(&mut self.gas_counter, amount_ptr)?;
         let public_key = self.get_public_key(public_key_ptr, public_key_len)?;
         let (receipt_idx, sir) = self.promise_idx_to_receipt_idx_with_sir(promise_idx)?;
-        self.pay_action_base(ActionCosts::stake, sir)?;
+        self.pay_action_base(ActionCosts::pledge, sir)?;
         self.ext.append_action_stake(receipt_idx, amount, public_key.decode()?);
         Ok(())
     }

@@ -6,20 +6,20 @@ use unc_primitives::state_record::StateRecord;
 use unc_primitives::types::{AccountId, Balance};
 
 pub fn alice_account() -> AccountId {
-    "alice.unc".parse().unwrap()
+    "alice".parse().unwrap()
 }
 pub fn bob_account() -> AccountId {
-    "bob.unc".parse().unwrap()
+    "bob".parse().unwrap()
 }
 pub fn carol_account() -> AccountId {
-    "carol.unc".parse().unwrap()
+    "carol".parse().unwrap()
 }
 pub fn eve_dot_alice_account() -> AccountId {
-    "eve.alice.unc".parse().unwrap()
+    "eve".parse().unwrap()
 }
 
 pub fn x_dot_y_dot_alice_account() -> AccountId {
-    "x.y.alice.unc".parse().unwrap()
+    "x.y".parse().unwrap()
 }
 
 /// Pre-deploy in genesis the standard test contract for a given account.

@@ -24,7 +24,7 @@ while true; do
   if [ ${skip} -eq 0 ]; then
     # Not skipping, do the staking.
     echo "$(date): Doing restaking"
-    unc_ENV=shardnet unc --nodeUrl=http://127.0.0.1:3030 stake ${account_id} ${staking_key} ${amount}
+    unc_ENV=shardnet unc --nodeUrl=http://127.0.0.1:3030 pledge ${account_id} ${staking_key} ${amount}
   fi
   echo "$(date): Sleeping for ${delay_sec} seconds"
   sleep ${delay_sec}

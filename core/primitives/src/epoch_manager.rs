@@ -1,9 +1,9 @@
 use crate::challenge::SlashedValidator;
 use crate::num_rational::Rational32;
 use crate::shard_layout::ShardLayout;
-use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenV1};
+use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeV1};
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerV1};
-use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenV1};
+use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeV1};
 
 use crate::types::{
     AccountId, Balance, BlockHeightDelta, EpochHeight, EpochId, NumSeats, ProtocolVersion,
@@ -39,17 +39,17 @@ pub struct BlockConfig {
     /// Criterion for kicking out chunk producers.
     pub chunk_producer_kickout_threshold: u8,
     /// Max ratio of validators that we can kick out in an epoch
-    pub validator_max_kickout_stake_perc: u8,
+    pub validator_max_kickout_pledge_perc: u8,
     /// Online minimum threshold below which validator doesn't receive reward.
     pub online_min_threshold: Rational32,
     /// Online maximum threshold above which validator gets full reward.
     pub online_max_threshold: Rational32,
     /// Stake threshold for becoming a fisherman.
     pub fishermen_threshold: Balance,
-    /// The minimum stake required for staking is last seat price divided by this number.
-    pub minimum_stake_divisor: u64,
-    /// Threshold of stake that needs to indicate that they ready for upgrade.
-    pub protocol_upgrade_stake_threshold: Rational32,
+    /// The minimum pledge required for staking is last seat price divided by this number.
+    pub minimum_pledge_divisor: u64,
+    /// Threshold of pledge that needs to indicate that they ready for upgrade.
+    pub protocol_upgrade_pledge_threshold: Rational32,
     /// Shard layout of this epoch, may change from epoch to epoch
     pub shard_layout: ShardLayout,
     /// Additional config for validator selection algorithm
@@ -72,17 +72,17 @@ pub struct EpochConfig {
     /// Criterion for kicking out chunk producers.
     pub chunk_producer_kickout_threshold: u8,
     /// Max ratio of validators that we can kick out in an epoch
-    pub validator_max_kickout_stake_perc: u8,
+    pub validator_max_kickout_pledge_perc: u8,
     /// Online minimum threshold below which validator doesn't receive reward.
     pub online_min_threshold: Rational32,
     /// Online maximum threshold above which validator gets full reward.
     pub online_max_threshold: Rational32,
     /// Stake threshold for becoming a fisherman.
     pub fishermen_threshold: Balance,
-    /// The minimum stake required for staking is last seat price divided by this number.
-    pub minimum_stake_divisor: u64,
-    /// Threshold of stake that needs to indicate that they ready for upgrade.
-    pub protocol_upgrade_stake_threshold: Rational32,
+    /// The minimum pledge required for staking is last seat price divided by this number.
+    pub minimum_pledge_divisor: u64,
+    /// Threshold of pledge that needs to indicate that they ready for upgrade.
+    pub protocol_upgrade_pledge_threshold: Rational32,
     /// Shard layout of this epoch, may change from epoch to epoch
     pub shard_layout: ShardLayout,
     /// Additional config for validator selection algorithm
@@ -173,7 +173,7 @@ impl AllEpochConfig {
 
         Self::config_chunk_only_producers(&mut config, &self.chain_id, protocol_version);
 
-        Self::config_max_kickout_stake(&mut config, protocol_version);
+        Self::config_max_kickout_pledge(&mut config, protocol_version);
 
         Self::config_test_overrides(&mut config, &self.test_overrides);
 
@@ -225,9 +225,9 @@ impl AllEpochConfig {
         }
     }
 
-    fn config_max_kickout_stake(config: &mut EpochConfig, protocol_version: u32) {
+    fn config_max_kickout_pledge(config: &mut EpochConfig, protocol_version: u32) {
         if checked_feature!("stable", MaxKickoutStake, protocol_version) {
-            config.validator_max_kickout_stake_perc = 30;
+            config.validator_max_kickout_pledge_perc = 30;
         }
     }
 
@@ -258,7 +258,7 @@ pub struct ValidatorSelectionConfig {
     #[default(1)]
     pub minimum_validators_per_shard: NumSeats,
     #[default(Rational32::new(160, 1_000_000))]
-    pub minimum_stake_ratio: Rational32,
+    pub minimum_pledge_ratio: Rational32,
 }
 
 pub mod block_summary {
@@ -267,9 +267,9 @@ pub mod block_summary {
     use unc_primitives_core::hash::CryptoHash;
     use unc_primitives_core::types::{Balance, Power, ValidatorId};
     use crate::types::{AccountId, ValidatorKickoutReason};
-    use crate::types::validator_frozen::ValidatorFrozen;
+    use crate::types::validator_pledge::ValidatorPledge;
     use crate::types::validator_power::ValidatorPower;
-    use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
+    use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
     use crate::validator_mandates::ValidatorMandates;
 
     #[derive(BorshSerialize, BorshDeserialize, Eq, PartialEq, Clone, Debug, serde::Serialize)]
@@ -281,21 +281,21 @@ pub mod block_summary {
         pub this_block_hash: CryptoHash,
         pub prev_block_hash: CryptoHash,
         pub random_value: CryptoHash,
-        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validators: Vec<ValidatorPowerAndPledge>,
         pub validator_to_index: HashMap<AccountId,ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen: Vec<ValidatorPowerAndPledge>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
-        pub frozen_change: BTreeMap<AccountId, Balance>,
+        pub pledge_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub seat_price: Balance,
         pub minted_amount: Balance,
         /// Power proposals from the block, only the latest one per account
         pub all_power_proposals: Vec<ValidatorPower>,
-        /// Frozen proposals from the block, only the latest one per account
-        pub all_frozen_proposals: Vec<ValidatorFrozen>,
+        /// Pledge proposals from the block, only the latest one per account
+        pub all_pledge_proposals: Vec<ValidatorPledge>,
         /// Kickout set, includes slashed
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         /// Only for validators who met the threshold and didn't get slashed
@@ -312,19 +312,19 @@ pub mod block_summary {
             this_block_hash: CryptoHash,
             prev_block_hash: CryptoHash,
             random_value: CryptoHash,
-            validators: Vec<ValidatorPowerAndFrozen>,
+            validators: Vec<ValidatorPowerAndPledge>,
             validator_to_index: HashMap<AccountId,ValidatorId>,
             block_producers_settlement: Vec<ValidatorId>,
             chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-            fishermen: Vec<ValidatorPowerAndFrozen>,
+            fishermen: Vec<ValidatorPowerAndPledge>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
             power_change: BTreeMap<AccountId, Power>,
-            frozen_change: BTreeMap<AccountId, Balance>,
+            pledge_change: BTreeMap<AccountId, Balance>,
             validator_reward: HashMap<AccountId, Balance>,
             seat_price: Balance,
             minted_amount: Balance,
             all_power_proposals: Vec<ValidatorPower>,
-            all_frozen_proposals: Vec<ValidatorFrozen>,
+            all_pledge_proposals: Vec<ValidatorPledge>,
             validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
             validator_mandates: ValidatorMandates,
         ) -> Self {
@@ -339,12 +339,12 @@ pub mod block_summary {
                 fishermen,
                 fishermen_to_index,
                 power_change,
-                frozen_change,
+                pledge_change,
                 validator_reward,
                 seat_price,
                 minted_amount,
                 all_power_proposals,
-                all_frozen_proposals,
+                all_pledge_proposals,
                 validator_kickout,
                 validator_mandates,
             })
@@ -399,9 +399,9 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
+        pub fn pledge_change(&self) -> &BTreeMap<AccountId, Balance> {
             match self {
-                Self::V1(v1) => &v1.frozen_change,
+                Self::V1(v1) => &v1.pledge_change,
             }
         }
 
@@ -420,16 +420,16 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn validators_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn validators_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.validators),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::new(&v1.validators),
             }
         }
 
         #[inline]
-        pub fn fishermen_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn fishermen_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.fishermen),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::new(&v1.fishermen),
             }
         }
 
@@ -441,9 +441,9 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn validator_frozen(&self, validator_id: u64) -> Balance {
+        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
             match self {
-                Self::V1(v1) => v1.validators[validator_id as usize].frozen(),
+                Self::V1(v1) => v1.validators[validator_id as usize].pledge(),
             }
         }
 
@@ -467,7 +467,7 @@ pub mod block_summary {
             }
         }
 
-        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1
                     .validator_to_index
@@ -477,7 +477,7 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndPledge {
             match self {
                 Self::V1(v1) => v1.validators[validator_id as usize].clone(),
             }
@@ -490,7 +490,7 @@ pub mod block_summary {
             }
         }
 
-        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1
                     .fishermen_to_index
@@ -500,7 +500,7 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndPledge {
             match self {
                 Self::V1(v1) => v1.fishermen[fisherman_id as usize].clone(),
             }
@@ -532,8 +532,8 @@ pub mod block_info {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::hash::CryptoHash;
     use unc_primitives_core::types::{AccountId, Balance, BlockHeight, Power, ProtocolVersion, ValidatorId};
-    use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
-    use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
+    use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+    use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
     use crate::validator_mandates::ValidatorMandates;
     pub use super::BlockInfoV1;
 
@@ -558,7 +558,7 @@ pub mod block_info {
             last_final_block_hash: CryptoHash,
             prev_hash: CryptoHash,
             power_proposals: Vec<ValidatorPower>,
-            frozen_proposals: Vec<ValidatorFrozen>,
+            pledge_proposals: Vec<ValidatorPledge>,
             validator_mask: Vec<bool>,
             slashed: Vec<SlashedValidator>,
             total_supply: Balance,
@@ -566,19 +566,19 @@ pub mod block_info {
             timestamp_nanosec: u64,
             // start customized by James Savechives
             random_value: CryptoHash,
-            validators: Vec<ValidatorPowerAndFrozen>,
+            validators: Vec<ValidatorPowerAndPledge>,
             validator_to_index: HashMap<AccountId,ValidatorId>,
             block_producers_settlement: Vec<ValidatorId>,
             chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-            fishermen: Vec<ValidatorPowerAndFrozen>,
+            fishermen: Vec<ValidatorPowerAndPledge>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
             power_change: BTreeMap<AccountId, Power>,
-            frozen_change: BTreeMap<AccountId, Balance>,
+            pledge_change: BTreeMap<AccountId, Balance>,
             validator_reward: HashMap<AccountId, Balance>,
             seat_price: Balance,
             minted_amount: Balance,
             all_power_proposals: Vec<ValidatorPower>,
-            all_frozen_proposals: Vec<ValidatorFrozen>,
+            all_pledge_proposals: Vec<ValidatorPledge>,
             validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
             validator_mandates: ValidatorMandates,
         ) -> Self {
@@ -589,7 +589,7 @@ pub mod block_info {
                 last_final_block_hash,
                 prev_hash,
                 power_proposals,
-                frozen_proposals,
+                pledge_proposals,
                 chunk_mask: validator_mask,
                 latest_protocol_version,
                 slashed: slashed
@@ -616,12 +616,12 @@ pub mod block_info {
                 fishermen,
                 fishermen_to_index,
                 power_change,
-                frozen_change,
+                pledge_change,
                 validator_reward,
                 seat_price,
                 minted_amount,
                 all_power_proposals,
-                all_frozen_proposals,
+                all_pledge_proposals,
                 validator_kickout,
                 validator_mandates,
                 // end customized by James Savechives
@@ -637,10 +637,10 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn frozen_proposals_iter(&self) -> ValidatorFrozenIter {
+        pub fn pledge_proposals_iter(&self) -> ValidatorPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorFrozenIter::v1(&v1.frozen_proposals),
-                Self::V2(v2) => ValidatorFrozenIter::new(&v2.frozen_proposals),
+                Self::V1(v1) => ValidatorPledgeIter::v1(&v1.pledge_proposals),
+                Self::V2(v2) => ValidatorPledgeIter::new(&v2.pledge_proposals),
             }
         }
         #[inline]
@@ -812,10 +812,10 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
+        pub fn pledge_change(&self) -> &BTreeMap<AccountId, Balance> {
             match self {
-                Self::V1(v1) => &v1.frozen_change,
-                Self::V2(v2) => &v2.frozen_change,
+                Self::V1(v1) => &v1.pledge_change,
+                Self::V2(v2) => &v2.pledge_change,
             }
         }
 
@@ -836,18 +836,18 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn validators_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn validators_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.validators),
-                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.validators),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::new(&v1.validators),
+                Self::V2(v2) => ValidatorPowerAndPledgeIter::new(&v2.validators),
             }
         }
 
         #[inline]
-        pub fn fishermen_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn fishermen_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::new(&v1.fishermen),
-                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.fishermen),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::new(&v1.fishermen),
+                Self::V2(v2) => ValidatorPowerAndPledgeIter::new(&v2.fishermen),
             }
         }
 
@@ -860,10 +860,10 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn validator_frozen(&self, validator_id: u64) -> Balance {
+        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
             match self {
-                Self::V1(v1) => v1.validators[validator_id as usize].frozen(),
-                Self::V2(v2) => v2.validators[validator_id as usize].frozen(),
+                Self::V1(v1) => v1.validators[validator_id as usize].pledge(),
+                Self::V2(v2) => v2.validators[validator_id as usize].pledge(),
             }
         }
 
@@ -890,7 +890,7 @@ pub mod block_info {
             }
         }
 
-        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1
                     .validator_to_index
@@ -904,7 +904,7 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndPledge {
             match self {
                 Self::V1(v1) => v1.validators[validator_id as usize].clone(),
                 Self::V2(v2) => v2.validators[validator_id as usize].clone(),
@@ -919,7 +919,7 @@ pub mod block_info {
             }
         }
 
-        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1
                     .fishermen_to_index
@@ -933,7 +933,7 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndPledge {
             match self {
                 Self::V1(v1) => v1.fishermen[fisherman_id as usize].clone(),
                 Self::V2(v2) => v2.fishermen[fisherman_id as usize].clone(),
@@ -955,7 +955,7 @@ pub mod block_info {
 
     }
 
-    // V1 -> V2: Use versioned ValidatorStake structure in proposals
+    // V1 -> V2: Use versioned ValidatorPledge structure in proposals
     #[derive(
         Default, BorshSerialize, BorshDeserialize, Eq, PartialEq, Clone, Debug, serde::Serialize,
     )]
@@ -968,7 +968,7 @@ pub mod block_info {
         pub epoch_first_block: CryptoHash,
         pub epoch_id: EpochId,
         pub power_proposals: Vec<ValidatorPower>,
-        pub frozen_proposals: Vec<ValidatorFrozen>,
+        pub pledge_proposals: Vec<ValidatorPledge>,
         pub chunk_mask: Vec<bool>,
         /// Latest protocol version this validator observes.
         pub latest_protocol_version: ProtocolVersion,
@@ -979,21 +979,21 @@ pub mod block_info {
         pub timestamp_nanosec: u64,
         /// start customized by James Savechives
         pub random_value: CryptoHash,
-        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validators: Vec<ValidatorPowerAndPledge>,
         pub validator_to_index: HashMap<AccountId,ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen: Vec<ValidatorPowerAndPledge>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
-        pub frozen_change: BTreeMap<AccountId, Balance>,
+        pub pledge_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub seat_price: Balance,
         pub minted_amount: Balance,
         /// Power proposals from the block, only the latest one per account
         pub all_power_proposals: Vec<ValidatorPower>,
-        /// Frozen proposals from the block, only the latest one per account
-        pub all_frozen_proposals: Vec<ValidatorFrozen>,
+        /// Pledge proposals from the block, only the latest one per account
+        pub all_pledge_proposals: Vec<ValidatorPledge>,
         /// Kickout set, includes slashed
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         /// Only for validators who met the threshold and didn't get slashed
@@ -1017,7 +1017,7 @@ pub struct BlockInfoV1 {
     pub epoch_first_block: CryptoHash,
     pub epoch_id: EpochId,
     pub power_proposals: Vec<ValidatorPowerV1>,
-    pub frozen_proposals: Vec<ValidatorFrozenV1>,
+    pub pledge_proposals: Vec<ValidatorPledgeV1>,
     pub chunk_mask: Vec<bool>,
     /// Latest protocol version this validator observes.
     pub latest_protocol_version: ProtocolVersion,
@@ -1028,21 +1028,21 @@ pub struct BlockInfoV1 {
     pub timestamp_nanosec: u64,
     /// start customized by James Savechives
     pub random_value: CryptoHash,
-    pub validators: Vec<ValidatorPowerAndFrozen>,
+    pub validators: Vec<ValidatorPowerAndPledge>,
     pub validator_to_index: HashMap<AccountId,ValidatorId>,
     pub block_producers_settlement: Vec<ValidatorId>,
     pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-    pub fishermen: Vec<ValidatorPowerAndFrozen>,
+    pub fishermen: Vec<ValidatorPowerAndPledge>,
     pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
     pub power_change: BTreeMap<AccountId, Power>,
-    pub frozen_change: BTreeMap<AccountId, Balance>,
+    pub pledge_change: BTreeMap<AccountId, Balance>,
     pub validator_reward: HashMap<AccountId, Balance>,
     pub seat_price: Balance,
     pub minted_amount: Balance,
     /// Power proposals from the block, only the latest one per account
     pub all_power_proposals: Vec<ValidatorPower>,
-    /// Frozen proposals from the block, only the latest one per account
-    pub all_frozen_proposals: Vec<ValidatorFrozen>,
+    /// Pledge proposals from the block, only the latest one per account
+    pub all_pledge_proposals: Vec<ValidatorPledge>,
     /// Kickout set, includes slashed
     pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
     /// Only for validators who met the threshold and didn't get slashed
@@ -1058,7 +1058,7 @@ impl BlockInfoV1 {
         last_final_block_hash: CryptoHash,
         prev_hash: CryptoHash,
         power_proposals: Vec<ValidatorPowerV1>,
-        frozen_proposals: Vec<ValidatorFrozenV1>,
+        pledge_proposals: Vec<ValidatorPledgeV1>,
         validator_mask: Vec<bool>,
         slashed: Vec<SlashedValidator>,
         total_supply: Balance,
@@ -1066,19 +1066,19 @@ impl BlockInfoV1 {
         timestamp_nanosec: u64,
         // start customized by James Savechives
         random_value: CryptoHash,
-        validators: Vec<ValidatorPowerAndFrozen>,
+        validators: Vec<ValidatorPowerAndPledge>,
         validator_to_index: HashMap<AccountId,ValidatorId>,
         block_producers_settlement: Vec<ValidatorId>,
         chunk_producers_settlement: Vec<Vec<ValidatorId>>,
-        fishermen: Vec<ValidatorPowerAndFrozen>,
+        fishermen: Vec<ValidatorPowerAndPledge>,
         fishermen_to_index: HashMap<AccountId, ValidatorId>,
         power_change: BTreeMap<AccountId, Power>,
-        frozen_change: BTreeMap<AccountId, Balance>,
+        pledge_change: BTreeMap<AccountId, Balance>,
         validator_reward: HashMap<AccountId, Balance>,
         seat_price: Balance,
         minted_amount: Balance,
         all_power_proposals: Vec<ValidatorPower>,
-        all_frozen_proposals: Vec<ValidatorFrozen>,
+        all_pledge_proposals: Vec<ValidatorPledge>,
         validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         validator_mandates: ValidatorMandates,
         // end customized by James Savechives
@@ -1090,7 +1090,7 @@ impl BlockInfoV1 {
             last_final_block_hash,
             prev_hash,
             power_proposals,
-            frozen_proposals,
+            pledge_proposals,
             chunk_mask: validator_mask,
             latest_protocol_version,
             slashed: slashed
@@ -1114,12 +1114,12 @@ impl BlockInfoV1 {
             fishermen,
             fishermen_to_index,
             power_change,
-            frozen_change,
+            pledge_change,
             validator_reward,
             seat_price,
             minted_amount,
             all_power_proposals,
-            all_frozen_proposals,
+            all_pledge_proposals,
             validator_kickout,
             validator_mandates,
             // end customized by James Savechives
@@ -1135,7 +1135,7 @@ pub struct ValidatorWeight(ValidatorId, u64);
 pub mod epoch_info {
 use crate::epoch_manager::ValidatorWeight;
     use crate::types::validator_power::ValidatorPower;
-    use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason, ValidatorPowerAndFrozenV1};
+    use crate::types::{BlockChunkValidatorStats, ValidatorKickoutReason, ValidatorPowerAndPledgeV1};
     use crate::validator_mandates::{ValidatorMandates, ValidatorMandatesAssignment};
     use crate::version::PROTOCOL_VERSION;
     use borsh::{BorshDeserialize, BorshSerialize};
@@ -1154,8 +1154,8 @@ use crate::epoch_manager::ValidatorWeight;
         hash::hash,
         types::{BlockHeight, ShardId},
     };
-    use crate::types::validator_frozen::ValidatorFrozen;
-    use crate::types::validator_power_and_frozen::{ValidatorPowerAndFrozen, ValidatorPowerAndFrozenIter};
+    use crate::types::validator_pledge::ValidatorPledge;
+    use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
 
     pub use super::EpochInfoV1;
 
@@ -1174,7 +1174,7 @@ use crate::epoch_manager::ValidatorWeight;
         }
     }
 
-    // V1 -> V2: Use versioned ValidatorStake structure in validators and fishermen
+    // V1 -> V2: Use versioned ValidatorPledge structure in validators and fishermen
     #[derive(
         SmartDefault,
         BorshSerialize,
@@ -1190,7 +1190,7 @@ use crate::epoch_manager::ValidatorWeight;
         /// There can be multiple epochs with the same ordinal in case of long forks.
         pub epoch_height: EpochHeight,
         /// List of current validators.
-        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validators: Vec<ValidatorPowerAndPledge>,
         /// Validator account id to index in proposals.
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         /// Settlement of validators responsible for block production.
@@ -1200,13 +1200,13 @@ use crate::epoch_manager::ValidatorWeight;
         /// Settlement of hidden validators with weights used to determine how many shards they will validate.
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
         /// List of current fishermen.
-        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen: Vec<ValidatorPowerAndPledge>,
         /// Fisherman account id to index of proposal.
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         /// New power for validators.
         pub power_change: BTreeMap<AccountId, Power>,
-        /// New stake for validators.
-        pub frozen_change: BTreeMap<AccountId, Balance>,
+        /// New pledge for validators.
+        pub pledge_change: BTreeMap<AccountId, Balance>,
         /// Validator reward for the epoch.
         pub validator_reward: HashMap<AccountId, Balance>,
         /// Validators who are kicked out in this epoch.
@@ -1234,15 +1234,15 @@ use crate::epoch_manager::ValidatorWeight;
     )]
     pub struct EpochInfoV3 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validators: Vec<ValidatorPowerAndPledge>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen: Vec<ValidatorPowerAndPledge>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
-        pub frozen_change: BTreeMap<AccountId, Balance>,
+        pub pledge_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         pub minted_amount: Balance,
@@ -1268,15 +1268,15 @@ use crate::epoch_manager::ValidatorWeight;
     )]
     pub struct EpochInfoV4 {
         pub epoch_height: EpochHeight,
-        pub validators: Vec<ValidatorPowerAndFrozen>,
+        pub validators: Vec<ValidatorPowerAndPledge>,
         pub validator_to_index: HashMap<AccountId, ValidatorId>,
         pub block_producers_settlement: Vec<ValidatorId>,
         pub chunk_producers_settlement: Vec<Vec<ValidatorId>>,
         pub hidden_validators_settlement: Vec<ValidatorWeight>,
-        pub fishermen: Vec<ValidatorPowerAndFrozen>,
+        pub fishermen: Vec<ValidatorPowerAndPledge>,
         pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
         pub power_change: BTreeMap<AccountId, Power>,
-        pub frozen_change: BTreeMap<AccountId, Balance>,
+        pub pledge_change: BTreeMap<AccountId, Balance>,
         pub validator_reward: HashMap<AccountId, Balance>,
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         pub minted_amount: Balance,
@@ -1294,15 +1294,15 @@ use crate::epoch_manager::ValidatorWeight;
     impl EpochInfo {
         pub fn new(
             epoch_height: EpochHeight,
-            validators: Vec<ValidatorPowerAndFrozen>,
+            validators: Vec<ValidatorPowerAndPledge>,
             validator_to_index: HashMap<AccountId, ValidatorId>,
             block_producers_settlement: Vec<ValidatorId>,
             chunk_producers_settlement: Vec<Vec<ValidatorId>>,
             hidden_validators_settlement: Vec<ValidatorWeight>,
-            fishermen: Vec<ValidatorPowerAndFrozen>,
+            fishermen: Vec<ValidatorPowerAndPledge>,
             fishermen_to_index: HashMap<AccountId, ValidatorId>,
             power_change: BTreeMap<AccountId, Power>,
-            frozen_change: BTreeMap<AccountId, Balance>,
+            pledge_change: BTreeMap<AccountId, Balance>,
             validator_reward: HashMap<AccountId, Balance>,
             validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
             minted_amount: Balance,
@@ -1333,7 +1333,7 @@ use crate::epoch_manager::ValidatorWeight;
                         chunk_producers_settlement,
                         hidden_validators_settlement,
                         power_change,
-                        frozen_change,
+                        pledge_change,
                         validator_reward,
                         validator_kickout,
                         fishermen_to_index,
@@ -1355,7 +1355,7 @@ use crate::epoch_manager::ValidatorWeight;
                         chunk_producers_settlement,
                         hidden_validators_settlement,
                         power_change,
-                        frozen_change,
+                        pledge_change,
                         validator_reward,
                         validator_kickout,
                         fishermen_to_index,
@@ -1377,7 +1377,7 @@ use crate::epoch_manager::ValidatorWeight;
                     chunk_producers_settlement,
                     hidden_validators_settlement,
                     power_change,
-                    frozen_change,
+                    pledge_change,
                     validator_reward,
                     validator_kickout,
                     fishermen_to_index,
@@ -1392,21 +1392,21 @@ use crate::epoch_manager::ValidatorWeight;
             Self::V1(EpochInfoV1 {
                 epoch_height: 10,
                 validators: vec![
-                    ValidatorPowerAndFrozenV1 {
+                    ValidatorPowerAndPledgeV1 {
                         account_id: "test".parse().unwrap(),
                         public_key: "ed25519:6E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
                         power: 0,
-                        frozen: 0,
+                        pledge: 0,
                     },
-                    ValidatorPowerAndFrozenV1 {
+                    ValidatorPowerAndPledgeV1 {
                         account_id: "validator".parse().unwrap(),
                         public_key: "ed25519:9E8sCci9badyRkXb3JoRpBj5p8C6Tw41ELDZoiihKEtp"
                             .parse()
                             .unwrap(),
                         power: 0,
-                        frozen: 0,
+                        pledge: 0,
                     },
                 ],
                 validator_to_index: HashMap::new(),
@@ -1416,7 +1416,7 @@ use crate::epoch_manager::ValidatorWeight;
                 fishermen: vec![],
                 fishermen_to_index: HashMap::new(),
                 power_change: BTreeMap::new(),
-                frozen_change: BTreeMap::new(),
+                pledge_change: BTreeMap::new(),
                 validator_reward: HashMap::new(),
                 validator_kickout: HashMap::new(),
                 minted_amount: 1,
@@ -1506,12 +1506,12 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn frozen_change(&self) -> &BTreeMap<AccountId, Balance> {
+        pub fn pledge_change(&self) -> &BTreeMap<AccountId, Balance> {
             match self {
-                Self::V1(v1) => &v1.frozen_change,
-                Self::V2(v2) => &v2.frozen_change,
-                Self::V3(v3) => &v3.frozen_change,
-                Self::V4(v4) => &v4.frozen_change,
+                Self::V1(v1) => &v1.pledge_change,
+                Self::V2(v2) => &v2.pledge_change,
+                Self::V3(v3) => &v3.pledge_change,
+                Self::V4(v4) => &v4.pledge_change,
             }
         }
 
@@ -1536,22 +1536,22 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn validators_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn validators_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::v1(&v1.validators),
-                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.validators),
-                Self::V3(v3) => ValidatorPowerAndFrozenIter::new(&v3.validators),
-                Self::V4(v4) => ValidatorPowerAndFrozenIter::new(&v4.validators),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::v1(&v1.validators),
+                Self::V2(v2) => ValidatorPowerAndPledgeIter::new(&v2.validators),
+                Self::V3(v3) => ValidatorPowerAndPledgeIter::new(&v3.validators),
+                Self::V4(v4) => ValidatorPowerAndPledgeIter::new(&v4.validators),
             }
         }
 
         #[inline]
-        pub fn fishermen_iter(&self) -> ValidatorPowerAndFrozenIter {
+        pub fn fishermen_iter(&self) -> ValidatorPowerAndPledgeIter {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozenIter::v1(&v1.fishermen),
-                Self::V2(v2) => ValidatorPowerAndFrozenIter::new(&v2.fishermen),
-                Self::V3(v3) => ValidatorPowerAndFrozenIter::new(&v3.fishermen),
-                Self::V4(v4) => ValidatorPowerAndFrozenIter::new(&v4.fishermen),
+                Self::V1(v1) => ValidatorPowerAndPledgeIter::v1(&v1.fishermen),
+                Self::V2(v2) => ValidatorPowerAndPledgeIter::new(&v2.fishermen),
+                Self::V3(v3) => ValidatorPowerAndPledgeIter::new(&v3.fishermen),
+                Self::V4(v4) => ValidatorPowerAndPledgeIter::new(&v4.fishermen),
             }
         }
 
@@ -1566,12 +1566,12 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn validator_frozen(&self, validator_id: u64) -> Balance {
+        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
             match self {
-                Self::V1(v1) => v1.validators[validator_id as usize].frozen,
-                Self::V2(v2) => v2.validators[validator_id as usize].frozen(),
-                Self::V3(v3) => v3.validators[validator_id as usize].frozen(),
-                Self::V4(v4) => v4.validators[validator_id as usize].frozen(),
+                Self::V1(v1) => v1.validators[validator_id as usize].pledge,
+                Self::V2(v2) => v2.validators[validator_id as usize].pledge(),
+                Self::V3(v3) => v3.validators[validator_id as usize].pledge(),
+                Self::V4(v4) => v4.validators[validator_id as usize].pledge(),
             }
         }
 
@@ -1604,10 +1604,10 @@ use crate::epoch_manager::ValidatorWeight;
             }
         }
 
-        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_validator_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1.validator_to_index.get(account_id).map(|validator_id| {
-                    ValidatorPowerAndFrozen::V1(v1.validators[*validator_id as usize].clone())
+                    ValidatorPowerAndPledge::V1(v1.validators[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .validator_to_index
@@ -1625,9 +1625,9 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_validator(&self, validator_id: u64) -> ValidatorPowerAndPledge {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozen::V1(v1.validators[validator_id as usize].clone()),
+                Self::V1(v1) => ValidatorPowerAndPledge::V1(v1.validators[validator_id as usize].clone()),
                 Self::V2(v2) => v2.validators[validator_id as usize].clone(),
                 Self::V3(v3) => v3.validators[validator_id as usize].clone(),
                 Self::V4(v4) => v4.validators[validator_id as usize].clone(),
@@ -1644,10 +1644,10 @@ use crate::epoch_manager::ValidatorWeight;
             }
         }
 
-        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndFrozen> {
+        pub fn get_fisherman_by_account(&self, account_id: &AccountId) -> Option<ValidatorPowerAndPledge> {
             match self {
                 Self::V1(v1) => v1.fishermen_to_index.get(account_id).map(|validator_id| {
-                    ValidatorPowerAndFrozen::V1(v1.fishermen[*validator_id as usize].clone())
+                    ValidatorPowerAndPledge::V1(v1.fishermen[*validator_id as usize].clone())
                 }),
                 Self::V2(v2) => v2
                     .fishermen_to_index
@@ -1665,9 +1665,9 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndFrozen {
+        pub fn get_fisherman(&self, fisherman_id: u64) -> ValidatorPowerAndPledge {
             match self {
-                Self::V1(v1) => ValidatorPowerAndFrozen::V1(v1.fishermen[fisherman_id as usize].clone()),
+                Self::V1(v1) => ValidatorPowerAndPledge::V1(v1.fishermen[fisherman_id as usize].clone()),
                 Self::V2(v2) => v2.fishermen[fisherman_id as usize].clone(),
                 Self::V3(v3) => v3.fishermen[fisherman_id as usize].clone(),
                 Self::V4(v4) => v4.fishermen[fisherman_id as usize].clone(),
@@ -1807,8 +1807,8 @@ use crate::epoch_manager::ValidatorWeight;
         pub prev_epoch_last_block_hash: CryptoHash,
         /// Power proposals from the epoch, only the latest one per account
         pub all_power_proposals: Vec<ValidatorPower>,
-        /// Frozen proposals from the epoch, only the latest one per account
-        pub all_frozen_proposals: Vec<ValidatorFrozen>,
+        /// Pledge proposals from the epoch, only the latest one per account
+        pub all_pledge_proposals: Vec<ValidatorPledge>,
         /// Kickout set, includes slashed
         pub validator_kickout: HashMap<AccountId, ValidatorKickoutReason>,
         /// Only for validators who met the threshold and didn't get slashed
@@ -1827,7 +1827,7 @@ pub struct EpochInfoV1 {
     /// There can be multiple epochs with the same ordinal in case of long forks.
     pub epoch_height: EpochHeight,
     /// List of current validators.
-    pub validators: Vec<ValidatorPowerAndFrozenV1>,
+    pub validators: Vec<ValidatorPowerAndPledgeV1>,
     /// Validator account id to index in proposals.
     pub validator_to_index: HashMap<AccountId, ValidatorId>,
     /// Settlement of validators responsible for block production.
@@ -1837,13 +1837,13 @@ pub struct EpochInfoV1 {
     /// Settlement of hidden validators with weights used to determine how many shards they will validate.
     pub hidden_validators_settlement: Vec<ValidatorWeight>,
     /// List of current fishermen.
-    pub fishermen: Vec<ValidatorPowerAndFrozenV1>,
+    pub fishermen: Vec<ValidatorPowerAndPledgeV1>,
     /// Fisherman account id to index of proposal.
     pub fishermen_to_index: HashMap<AccountId, ValidatorId>,
     /// New power for validators.
     pub power_change: BTreeMap<AccountId, Power>,
-    /// New stake for validators.
-    pub frozen_change: BTreeMap<AccountId, Balance>,
+    /// New pledge for validators.
+    pub pledge_change: BTreeMap<AccountId, Balance>,
     /// Validator reward for the epoch.
     pub validator_reward: HashMap<AccountId, Balance>,
     /// Validators who are kicked out in this epoch.
@@ -1977,12 +1977,12 @@ pub mod epoch_sync {
                                      fishermen,
                                      fishermen_to_index,
                                      power_change,
-                                     frozen_change,
+                                     pledge_change,
                                      validator_reward,
                                      seat_price,
                                      minted_amount,
                                      all_power_proposals,
-                                     all_frozen_proposals,
+                                     all_pledge_proposals,
                                      validator_kickout,
                                      validator_mandates, ..
                                  }) =  BlockSummary::default();
@@ -1994,7 +1994,7 @@ pub mod epoch_sync {
                 *header.last_final_block(),
                 *header.prev_hash(),
                 header.prev_validator_power_proposals().collect(),
-                header.prev_validator_frozen_proposals().collect(),
+                header.prev_validator_pledge_proposals().collect(),
                 header.chunk_mask().to_vec(),
                 vec![],
                 header.total_supply(),
@@ -2009,12 +2009,12 @@ pub mod epoch_sync {
                 fishermen,
                 fishermen_to_index,
                 power_change,
-                frozen_change,
+                pledge_change,
                 validator_reward,
                 seat_price,
                 minted_amount,
                 all_power_proposals,
-                all_frozen_proposals,
+                all_pledge_proposals,
                 validator_kickout,
                 validator_mandates
                 // end customized by James Savechives

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Spins up with two validators, and one non-validator
 # Stakes for the non-validators, ensures it becomes a validator
-# Unstakes for them, makes sure they stop being a validator
+# Unpledges for them, makes sure they stop being a validator
 
 import sys, time, base58, random, datetime
 import pathlib
@@ -31,9 +31,9 @@ def get_validators():
     return set([x['account_id'] for x in nodes[0].get_status()['validators']])
 
 
-def get_stakes():
+def get_pledges():
     return [
-        int(nodes[2].get_account("test%s" % i)['result']['locked'])
+        int(nodes[2].get_account("test%s" % i)['result']['pledging'])
         for i in range(3)
     ]
 
@@ -44,7 +44,7 @@ tx = sign_staking_tx(nodes[2].signer_key, nodes[2].validator_key,
                      100000000000000000000000000000000, 2, hash_)
 nodes[0].send_tx(tx)
 
-logger.info("Initial stakes: %s" % get_stakes())
+logger.info("Initial pledges: %s" % get_pledges())
 for height, _ in utils.poll_blocks(nodes[0], timeout=TIMEOUT):
     if 'test2' in get_validators():
         logger.info("Normalin, normalin")

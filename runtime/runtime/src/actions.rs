@@ -37,7 +37,7 @@ use unc_vm_runner::ContractCode;
 use unc_wallet_contract::{wallet_contract, wallet_contract_magic_bytes};
 
 use std::sync::Arc;
-use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
 
 /// Returns `ContractCode` (if exists) for the given `account` or returns `StorageError`.
 /// For ETH-implicit accounts returns `Wallet Contract` implementation that it is a part
@@ -109,7 +109,7 @@ pub(crate) fn execute_function_call(
         block_timestamp: apply_state.block_timestamp,
         epoch_height: apply_state.epoch_height,
         account_balance: account.amount(),
-        account_locked_balance: account.locked(),
+        account_locked_balance: account.pledging(),
         storage_usage: account.storage_usage(),
         attached_deposit: function_call.deposit,
         prepaid_gas: function_call.gas,
@@ -317,48 +317,48 @@ pub(crate) fn action_stake(
     account: &mut Account,
     result: &mut ActionResult,
     account_id: &AccountId,
-    stake: &StakeAction,
+    pledge: &StakeAction,
     last_block_hash: &CryptoHash,
     epoch_info_provider: &dyn EpochInfoProvider,
 ) -> Result<(), RuntimeError> {
-    let increment = stake.stake.saturating_sub(account.locked());
+    let increment = pledge.pledge.saturating_sub(account.pledging());
 
     if account.amount() >= increment {
-        if account.locked() == 0 && stake.stake == 0 {
-            // if the account hasn't staked, it cannot unstake
+        if account.pledging() == 0 && pledge.pledge == 0 {
+            // if the account hasn't pledging, it cannot unpledge
             result.result =
-                Err(ActionErrorKind::TriesToUnstake { account_id: account_id.clone() }.into());
+                Err(ActionErrorKind::TriesToUnpledge { account_id: account_id.clone() }.into());
             return Ok(());
         }
 
-        if stake.stake > 0 {
-            let minimum_stake = epoch_info_provider.minimum_frozen(last_block_hash)?;
-            if stake.stake < minimum_stake {
+        if pledge.pledge > 0 {
+            let minimum_pledge = epoch_info_provider.minimum_pledge(last_block_hash)?;
+            if pledge.pledge < minimum_pledge {
                 result.result = Err(ActionErrorKind::InsufficientStake {
                     account_id: account_id.clone(),
-                    stake: stake.stake,
-                    minimum_stake,
+                    pledge: pledge.pledge,
+                    minimum_pledge,
                 }
                 .into());
                 return Ok(());
             }
         }
 
-        result.validator_frozen_proposals.push(ValidatorFrozen::new(
+        result.validator_pledge_proposals.push(ValidatorPledge::new(
             account_id.clone(),
-            stake.public_key.clone(),
-            stake.stake,
+            pledge.public_key.clone(),
+            pledge.pledge,
         ));
-        if stake.stake > account.locked() {
+        if pledge.pledge > account.pledging() {
             // We've checked above `account.amount >= increment`
             account.set_amount(account.amount() - increment);
-            account.set_locked(stake.stake);
+            account.set_pledging(pledge.pledge);
         }
     } else {
         result.result = Err(ActionErrorKind::TriesToStake {
             account_id: account_id.clone(),
-            stake: stake.stake,
-            locked: account.locked(),
+            pledge: pledge.pledge,
+            pledging: account.pledging(),
             balance: account.amount(),
         }
         .into());
@@ -1052,7 +1052,7 @@ pub(crate) fn check_actor_permissions(
                 .into());
             }
             let account = account.as_ref().unwrap();
-            if account.locked() != 0 {
+            if account.pledging() != 0 {
                 return Err(ActionErrorKind::DeleteAccountStaking {
                     account_id: account_id.clone(),
                 }

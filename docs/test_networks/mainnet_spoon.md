@@ -95,7 +95,7 @@ the following in `~/test-chain-scratch/extra-records.json`:
       "account_id": "my-test-account.unc",
       "account": {
         "amount": "10000000000000000000000000000000000",
-        "locked": "0",
+        "pledging": "0",
         "code_hash": "11111111111111111111111111111111",
         "storage_usage": 182,
         "version": "V1"

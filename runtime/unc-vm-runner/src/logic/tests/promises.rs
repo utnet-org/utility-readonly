@@ -386,7 +386,7 @@ fn test_promise_batch_action_stake() {
 
     logic
         .promise_batch_action_stake(index, num_110u128.ptr, key.len, key.ptr)
-        .expect("should add an action to stake");
+        .expect("should add an action to pledge");
     assert_eq!(logic.used_gas().unwrap(), 5138414976215);
     expect_test::expect![[r#"
         [
@@ -429,7 +429,7 @@ fn test_promise_batch_action_stake() {
           {
             "Stake": {
               "receipt_index": 0,
-              "stake": 110,
+              "pledge": 110,
               "public_key": "ed25519:5do5nkAEVhL8iteDvXNgxi4pWK78Y7DDadX11ArFNyrf"
             }
           }

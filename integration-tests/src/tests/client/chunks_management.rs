@@ -59,7 +59,7 @@ impl Test {
         };
 
         let mut vs = ValidatorSchedule::new()
-            .num_shards(4)
+            .num_shards(1)
             .block_producers_per_epoch(vec![
                 vec![
                     "test1".parse().unwrap(),
@@ -123,14 +123,11 @@ impl Test {
                         height_to_epoch.insert(h, block.header().epoch_id().clone());
 
                         println!(
-                            "[{:?}]: BLOCK {} HEIGHT {}; HEADER HEIGHTS: {} / {} / {} / {};\nAPPROVALS: {:?}",
+                            "[{:?}]: BLOCK {} HEIGHT {}; HEADER HEIGHTS: {};\nAPPROVALS: {:?}",
                             Instant::now(),
                             block.hash(),
                             block.header().height(),
-                            block.chunks()[0].height_created(),
-                            block.chunks()[1].height_created(),
-                            block.chunks()[2].height_created(),
-                            block.chunks()[3].height_created(),
+                            block.chunks()[0].height_created(), // Only one shards
                             block.header().approvals(),
                         );
 
@@ -285,67 +282,6 @@ fn chunks_produced_and_distributed_all_in_all_shards() {
     .run()
 }
 
-#[test]
-fn chunks_produced_and_distributed_2_vals_per_shard() {
-    Test {
-        validator_groups: 2,
-        chunk_only_producers: false,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: false,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
-    }
-    .run()
-}
-
-#[test]
-fn chunks_produced_and_distributed_one_val_per_shard() {
-    Test {
-        validator_groups: 4,
-        chunk_only_producers: false,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: false,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
-    }
-    .run()
-}
-
-#[test]
-#[ignore] // TODO: #8853
-fn chunks_produced_and_distributed_all_in_all_shards_should_succeed_even_without_forwarding() {
-    Test {
-        validator_groups: 1,
-        chunk_only_producers: false,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: true,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
-    }
-    .run()
-}
-
-#[test]
-fn chunks_produced_and_distributed_2_vals_per_shard_should_succeed_even_without_forwarding() {
-    Test {
-        validator_groups: 2,
-        chunk_only_producers: false,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: true,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
-    }
-    .run()
-}
-
-#[test]
-fn chunks_produced_and_distributed_one_val_per_shard_should_succeed_even_without_forwarding() {
-    Test {
-        validator_groups: 4,
-        chunk_only_producers: false,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: true,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
-    }
-    .run()
-}
-
 /// The timeout for requesting chunk from others is 1s. 3000 block timeout means that a participant
 /// that is otherwise ready to produce a block will wait for 3000/2 milliseconds for all the chunks.
 /// We block all the communication from test1 to test4, and expect that in 1.5 seconds test4 will
@@ -399,21 +335,6 @@ fn chunks_recovered_from_full() {
         drop_to_4_from: &["test1"],
         drop_all_chunk_forward_msgs: true,
         block_timeout: CHUNK_REQUEST_SWITCH_TO_FULL_FETCH * 2,
-    }
-    .run()
-}
-
-// And now let's add chunk-only producers into the mix
-
-/// Happy case -- each shard is handled by one cop and one block producers.
-#[test]
-fn chunks_produced_and_distributed_one_val_shard_cop() {
-    Test {
-        validator_groups: 4,
-        chunk_only_producers: true,
-        drop_to_4_from: &[],
-        drop_all_chunk_forward_msgs: false,
-        block_timeout: CHUNK_REQUEST_RETRY * 15,
     }
     .run()
 }

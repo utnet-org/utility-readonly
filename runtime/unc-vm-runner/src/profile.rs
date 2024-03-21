@@ -300,8 +300,8 @@ mod test {
             promise_and_base -> 48 [2% host]
             promise_and_per_promise -> 49 [2% host]
             promise_return -> 50 [2% host]
-            validator_stake_base -> 51 [2% host]
-            validator_total_stake_base -> 52 [2% host]
+            validator_pledge_base -> 51 [2% host]
+            validator_total_pledge_base -> 52 [2% host]
             alt_bn128_g1_multiexp_base -> 53 [2% host]
             alt_bn128_g1_multiexp_element -> 54 [2% host]
             alt_bn128_pairing_check_base -> 55 [3% host]
@@ -318,7 +318,7 @@ mod test {
             function_call_base -> 1004
             function_call_byte -> 1005
             transfer -> 1006
-            stake -> 1007
+            pledge -> 1007
             add_full_access_key -> 1008
             add_function_call_key_base -> 1009
             add_function_call_key_byte -> 1010

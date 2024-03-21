@@ -9,7 +9,7 @@ use unc_primitives::network::PeerId;
 use unc_primitives::sharding::ShardChunkHeader;
 use unc_primitives::sharding::ShardChunkHeaderV3;
 use unc_primitives::test_utils::create_test_signer;
-use unc_primitives::types::validator_stake::ValidatorStake;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
 use unc_primitives::utils::MaybeValidated;
 use std::sync::Arc;
 
@@ -26,7 +26,7 @@ fn test_not_process_height_twice() {
     let validator_signer = create_test_signer("test0");
 
     let proposals =
-        vec![ValidatorStake::new("test1".parse().unwrap(), PublicKey::empty(KeyType::ED25519), 0)];
+        vec![ValidatorPledge::new("test1".parse().unwrap(), PublicKey::empty(KeyType::ED25519), 0)];
     duplicate_block.mut_header().get_mut().inner_rest.prev_validator_proposals = proposals;
     duplicate_block.mut_header().resign(&validator_signer);
     let dup_block_hash = *duplicate_block.hash();

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Starts three validating nodes and one non-validating node
-# Make the validating nodes unstake and the non-validating node stake
+# Make the validating nodes unpledge and the non-validating node pledge
 # so that the next epoch block producers set is completely different
 # Make sure all nodes can still sync.
 
@@ -34,11 +34,11 @@ time.sleep(3)
 hash_ = nodes[0].get_latest_block().hash_bytes
 
 for i in range(4):
-    stake = 50000000000000000000000000000000 if i == 3 else 0
-    tx = sign_staking_tx(nodes[i].signer_key, nodes[i].validator_key, stake, 1,
+    pledge = 50000000000000000000000000000000 if i == 3 else 0
+    tx = sign_staking_tx(nodes[i].signer_key, nodes[i].validator_key, pledge, 1,
                          hash_)
     nodes[0].send_tx(tx)
-    logger.info("test%s stakes %d" % (i, stake))
+    logger.info("test%s pledges %d" % (i, pledge))
 
 for cur_height, _ in utils.poll_blocks(nodes[0], poll_interval=1):
     if cur_height >= EPOCH_LENGTH * 2:

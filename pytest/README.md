@@ -169,7 +169,7 @@ For example, a simple test for checking implementation of
 ### NayDuck environment
 
 When executed on NayDuck, tests have access to `uncd`,
-`genesis-populate` and `restaked` binaries in `../target/debug` or
+`genesis-populate` and `repledged` binaries in `../target/debug` or
 `../target/release` directory (depending if the test has been
 scheduled with `--release` flag) just as if they were executed on
 local machine.  Similarly, freshly built UNC test contracts will be

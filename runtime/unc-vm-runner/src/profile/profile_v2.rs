@@ -130,7 +130,7 @@ impl Index<ActionCosts> for ProfileDataV2 {
             ActionCosts::function_call_base => 3,
             ActionCosts::function_call_byte => 3,
             ActionCosts::transfer => 4,
-            ActionCosts::stake => 5,
+            ActionCosts::pledge => 5,
             ActionCosts::add_full_access_key => 6,
             ActionCosts::add_function_call_key_base => 6,
             ActionCosts::add_function_call_key_byte => 6,
@@ -201,8 +201,8 @@ impl Index<ExtCosts> for ProfileDataV2 {
             ExtCosts::promise_and_base => 57,
             ExtCosts::promise_and_per_promise => 58,
             ExtCosts::promise_return => 59,
-            ExtCosts::validator_frozen_base => 60,
-            ExtCosts::validator_total_frozen_base => 61,
+            ExtCosts::validator_pledge_base => 60,
+            ExtCosts::validator_total_pledge_base => 61,
             ExtCosts::read_cached_trie_node => 63,
             ExtCosts::alt_bn128_g1_multiexp_base => 64,
             ExtCosts::alt_bn128_g1_multiexp_element => 65,
@@ -308,8 +308,8 @@ mod test {
             promise_and_base -> 47 [2% host]
             promise_and_per_promise -> 48 [2% host]
             promise_return -> 49 [2% host]
-            validator_stake_base -> 50 [2% host]
-            validator_total_stake_base -> 51 [2% host]
+            validator_pledge_base -> 50 [2% host]
+            validator_total_pledge_base -> 51 [2% host]
             alt_bn128_g1_multiexp_base -> 54 [3% host]
             alt_bn128_g1_multiexp_element -> 55 [3% host]
             alt_bn128_pairing_check_base -> 56 [3% host]
@@ -322,7 +322,7 @@ mod test {
             deploy_contract -> 1002
             function_call -> 1003
             transfer -> 1004
-            stake -> 1005
+            pledge -> 1005
             add_key -> 1006
             delete_key -> 1007
             new_data_receipt_byte -> 1008

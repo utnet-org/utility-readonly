@@ -564,11 +564,11 @@ impl Chain {
         let bps = epoch_manager.get_epoch_block_producers_ordered(&epoch_id, last_known_hash)?;
         let protocol_version = epoch_manager.get_epoch_protocol_version(&prev_epoch_id)?;
         if checked_feature!("stable", BlockHeaderV3, protocol_version) {
-            let validator_stakes = bps.into_iter().map(|(bp, _)| bp);
-            Ok(CryptoHash::hash_borsh_iter(validator_stakes))
+            let validator_pledges = bps.into_iter().map(|(bp, _)| bp);
+            Ok(CryptoHash::hash_borsh_iter(validator_pledges))
         } else {
-            let validator_stakes = bps.into_iter().map(|(bp, _)| bp.into_v1());
-            Ok(CryptoHash::hash_borsh_iter(validator_stakes))
+            let validator_pledges = bps.into_iter().map(|(bp, _)| bp.into_v1());
+            Ok(CryptoHash::hash_borsh_iter(validator_pledges))
         }
     }
 
@@ -920,16 +920,16 @@ impl Chain {
                 return Err(Error::InvalidApprovals);
             };
 
-            let stakes = self
+            let pledges = self
                 .epoch_manager
                 .get_epoch_block_approvers_ordered(header.prev_hash())?
                 .iter()
-                .map(|(x, is_slashed)| (x.frozen_this_epoch, x.frozen_next_epoch, *is_slashed))
+                .map(|(x, is_slashed)| (x.pledge_this_epoch, x.pledge_next_epoch, *is_slashed))
                 .collect::<Vec<_>>();
             if !Doomslug::can_approved_block_be_produced(
                 self.doomslug_threshold_mode,
                 header.approvals(),
-                &stakes,
+                &pledges,
             ) {
                 return Err(Error::NotEnoughApprovals);
             }
@@ -1134,8 +1134,8 @@ impl Chain {
             .chunks()
             .iter()
             .filter(|chunk| block_height == chunk.height_included())
-            .flat_map(|chunk| chunk.prev_validator_frozen_proposals())
-            .zip_longest(block.header().prev_validator_frozen_proposals())
+            .flat_map(|chunk| chunk.prev_validator_pledge_proposals())
+            .zip_longest(block.header().prev_validator_pledge_proposals())
         {
             match pair {
                 itertools::EitherOrBoth::Both(cp, hp) => {
@@ -1801,7 +1801,7 @@ impl Chain {
 
         // Update flat storage head to be the last final block. Note that this update happens
         // in a separate db transaction from the update from block processing. This is intentional
-        // because flat_storage need to be locked during the update of flat head, otherwise
+        // because flat_storage need to be pledging during the update of flat head, otherwise
         // flat_storage is in an inconsistent state that could be accessed by the other
         // apply chunks processes. This means, the flat head is not always the same as
         // the last final block on chain, which is OK, because in the flat storage implementation
@@ -1846,14 +1846,14 @@ impl Chain {
         if let Some(tip) = &new_head {
             // TODO: move this logic of tracking validators metrics to EpochManager
             let mut count = 0;
-            let mut stake = 0;
+            let mut pledge = 0;
             if let Ok(producers) = self.epoch_manager.get_epoch_chunk_producers(&tip.epoch_id) {
-                stake += producers.iter().map(|info| info.frozen()).sum::<Balance>();
+                pledge += producers.iter().map(|info| info.pledge()).sum::<Balance>();
                 count += producers.len();
             }
 
-            stake /= UNC_BASE;
-            metrics::VALIDATOR_AMOUNT_STAKED.set(i64::try_from(stake).unwrap_or(i64::MAX));
+            pledge /= UNC_BASE;
+            metrics::VALIDATOR_AMOUNT_STAKED.set(i64::try_from(pledge).unwrap_or(i64::MAX));
             metrics::VALIDATOR_ACTIVE_TOTAL.set(i64::try_from(count).unwrap_or(i64::MAX));
 
             self.last_time_head_updated = StaticClock::instant();
@@ -3742,7 +3742,7 @@ impl Chain {
                     &apply_result.new_root,
                     outcome_root,
                     apply_result.validator_power_proposals,
-                    apply_result.validator_frozen_proposals,
+                    apply_result.validator_pledge_proposals,
                     apply_result.total_gas_burnt,
                     gas_limit,
                     apply_result.total_balance_burnt,

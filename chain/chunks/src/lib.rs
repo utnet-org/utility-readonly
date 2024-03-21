@@ -128,7 +128,7 @@ use rand::Rng;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::{debug, debug_span, error, warn};
-use unc_primitives::types::validator_frozen::ValidatorFrozen;
+use unc_primitives::types::validator_pledge::ValidatorPledge;
 
 pub mod adapter;
 mod chunk_cache;
@@ -483,8 +483,8 @@ impl ShardsManager {
             .epoch_manager
             .get_epoch_block_producers_ordered(&epoch_id, parent_hash)?
             .into_iter()
-            .filter_map(|(validator_stake, is_slashed)| {
-                let account_id = validator_stake.take_account_id();
+            .filter_map(|(validator_pledge, is_slashed)| {
+                let account_id = validator_pledge.take_account_id();
                 if !is_slashed
                     && cares_about_shard_this_or_next_epoch(
                         Some(&account_id),
@@ -1872,7 +1872,7 @@ impl ShardsManager {
         gas_limit: Gas,
         prev_balance_burnt: Balance,
         prev_validator_power_proposals: Vec<ValidatorPower>,
-        prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
+        prev_validator_pledge_proposals: Vec<ValidatorPledge>,
         transactions: Vec<SignedTransaction>,
         prev_outgoing_receipts: &[Receipt],
         prev_outgoing_receipts_root: CryptoHash,
@@ -1893,7 +1893,7 @@ impl ShardsManager {
             prev_balance_burnt,
             tx_root,
             prev_validator_power_proposals,
-            prev_validator_frozen_proposals,
+            prev_validator_pledge_proposals,
             transactions,
             prev_outgoing_receipts,
             prev_outgoing_receipts_root,

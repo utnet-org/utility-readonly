@@ -375,6 +375,7 @@ fn test_verify_chunk_invalid_state_challenge() {
     let total_parts = env.clients[0].epoch_manager.num_total_parts();
     let data_parts = env.clients[0].epoch_manager.num_data_parts();
     let parity_parts = total_parts - data_parts;
+    let receipts = Vec::new();
     let mut rs = ReedSolomonWrapper::new(data_parts, parity_parts);
     let (mut invalid_chunk, merkle_paths) = ShardsManager::create_encoded_shard_chunk(
         *last_block.hash(),
@@ -387,7 +388,8 @@ fn test_verify_chunk_invalid_state_challenge() {
         0,
         vec![],
         vec![],
-        &[],
+        Vec::new(),
+        &receipts,
         last_block.chunks()[0].prev_outgoing_receipts_root(),
         CryptoHash::default(),
         &validator_signer,

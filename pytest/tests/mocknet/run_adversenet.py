@@ -120,11 +120,11 @@ if __name__ == '__main__':
         required=False,
         default=100,
         help="number of validator seats. Only used when mode == new")
-    parser.add_argument('--bad-stake',
+    parser.add_argument('--bad-pledge',
                         required=False,
                         default=5,
                         type=int,
-                        help="Total stake percentage for bad validators")
+                        help="Total pledge percentage for bad validators")
     parser.add_argument('--binary-url',
                         required=False,
                         help="url to download uncd binary")
@@ -145,14 +145,14 @@ if __name__ == '__main__':
         n.instance_name for n in all_nodes if get_role(n) == Role.BadValidator
     ]
     TOTAL_STAKE = 1000000
-    bad_validator_stake = int(TOTAL_STAKE * args.bad_stake /
+    bad_validator_pledge = int(TOTAL_STAKE * args.bad_pledge /
                               (100 * len(bad_validators)))
-    good_validator_stake = int(TOTAL_STAKE * (100 - args.bad_stake) /
+    good_validator_pledge = int(TOTAL_STAKE * (100 - args.bad_pledge) /
                                (100 * len(good_validators)))
 
     logger.info(f'Starting chain {chain_id} with {len(all_nodes)} nodes. \n\
-        Good validators: {good_validators} each with stake {good_validator_stake} UNC\n\
-        Bad validators: {bad_validators} each with stake {bad_validator_stake} UNC\n\
+        Good validators: {good_validators} each with pledge {good_validator_pledge} UNC\n\
+        Bad validators: {bad_validators} each with pledge {bad_validator_pledge} UNC\n\
         RPC nodes: {rpcs}\n')
 
     answer = input("Enter y to continue: ")
@@ -169,9 +169,9 @@ if __name__ == '__main__':
         logger.info(f'Configuring nodes from scratch')
         mocknet.clear_data(all_nodes)
         mocknet.create_and_upload_genesis_file_from_empty_genesis(
-            # Give bad validators less stake.
-            [(node, bad_validator_stake * mocknet.ONE_NEAR if get_role(node)
-              == Role.BadValidator else good_validator_stake * mocknet.ONE_NEAR)
+            # Give bad validators less pledge.
+            [(node, bad_validator_pledge * mocknet.ONE_NEAR if get_role(node)
+              == Role.BadValidator else good_validator_pledge * mocknet.ONE_NEAR)
              for node in validator_nodes],
             rpc_nodes,
             chain_id,

@@ -136,7 +136,8 @@ fn genesis_state_from_genesis(store: Store, genesis: &Genesis) -> Vec<StateRoot>
                         Some((
                             account_info.account_id.clone(),
                             account_info.public_key.clone(),
-                            account_info.amount,
+                            account_info.pledging,
+                            account_info.power,
                         ))
                     } else {
                         None

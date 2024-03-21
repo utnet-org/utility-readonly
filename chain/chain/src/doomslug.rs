@@ -9,7 +9,7 @@ use unc_crypto::Signature;
 use unc_primitives::block::{Approval, ApprovalInner};
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::static_clock::StaticClock;
-use unc_primitives::types::{AccountId, ApprovalFrozen, Balance, BlockHeight, BlockHeightDelta};
+use unc_primitives::types::{AccountId, ApprovalPledge, Balance, BlockHeight, BlockHeightDelta};
 use unc_primitives::validator_signer::ValidatorSigner;
 use tracing::{debug, debug_span, field, info};
 
@@ -31,7 +31,7 @@ const MAX_HEIGHTS_BEFORE_TO_STORE_APPROVALS: u64 = 20;
 const MAX_HISTORY_SIZE: usize = 1000;
 
 /// The threshold for doomslug to create a block.
-/// `TwoThirds` means the block can only be produced if at least 2/3 of the stake is approving it,
+/// `TwoThirds` means the block can only be produced if at least 2/3 of the pledge is approving it,
 ///             and is what should be used in production (and what guarantees finality)
 /// `NoApprovals` means the block production is not blocked on approvals. This is used
 ///             in many tests (e.g. `cross_shard_tx`) to create lots of forkfulness.
@@ -65,11 +65,11 @@ struct DoomslugTip {
 
 struct DoomslugApprovalsTracker {
     witness: HashMap<AccountId, (Approval, chrono::DateTime<chrono::Utc>)>,
-    account_id_to_stakes: HashMap<AccountId, (Balance, Balance)>,
-    total_stake_this_epoch: Balance,
-    approved_stake_this_epoch: Balance,
-    total_stake_next_epoch: Balance,
-    approved_stake_next_epoch: Balance,
+    account_id_to_pledges: HashMap<AccountId, (Balance, Balance)>,
+    total_pledge_this_epoch: Balance,
+    approved_pledge_this_epoch: Balance,
+    total_pledge_next_epoch: Balance,
+    approved_pledge_next_epoch: Balance,
     time_passed_threshold: Option<Instant>,
     threshold_mode: DoomslugThresholdMode,
 }
@@ -163,26 +163,26 @@ impl DoomslugTimer {
 
 impl DoomslugApprovalsTracker {
     fn new(
-        account_id_to_stakes: HashMap<AccountId, (Balance, Balance)>,
+        account_id_to_pledges: HashMap<AccountId, (Balance, Balance)>,
         threshold_mode: DoomslugThresholdMode,
     ) -> Self {
-        let total_stake_this_epoch = account_id_to_stakes.values().map(|(x, _)| x).sum::<Balance>();
-        let total_stake_next_epoch = account_id_to_stakes.values().map(|(_, x)| x).sum::<Balance>();
+        let total_pledge_this_epoch = account_id_to_pledges.values().map(|(x, _)| x).sum::<Balance>();
+        let total_pledge_next_epoch = account_id_to_pledges.values().map(|(_, x)| x).sum::<Balance>();
 
         DoomslugApprovalsTracker {
             witness: Default::default(),
-            account_id_to_stakes,
-            total_stake_this_epoch,
-            total_stake_next_epoch,
-            approved_stake_this_epoch: 0,
-            approved_stake_next_epoch: 0,
+            account_id_to_pledges,
+            total_pledge_this_epoch,
+            total_pledge_next_epoch,
+            approved_pledge_this_epoch: 0,
+            approved_pledge_next_epoch: 0,
             time_passed_threshold: None,
             threshold_mode,
         }
     }
 
     /// Given a single approval (either an endorsement or a skip-message) updates the approved
-    /// stake on the block that is being approved, and returns whether the block is now ready to be
+    /// pledge on the block that is being approved, and returns whether the block is now ready to be
     /// produced.
     ///
     /// # Arguments
@@ -196,16 +196,16 @@ impl DoomslugApprovalsTracker {
         now: Instant,
         approval: &Approval,
     ) -> DoomslugBlockProductionReadiness {
-        let mut increment_approved_stake = false;
+        let mut increment_approved_pledge = false;
         self.witness.entry(approval.account_id.clone()).or_insert_with(|| {
-            increment_approved_stake = true;
+            increment_approved_pledge = true;
             (approval.clone(), chrono::Utc::now())
         });
 
-        if increment_approved_stake {
-            let stakes = self.account_id_to_stakes.get(&approval.account_id).map_or((0, 0), |x| *x);
-            self.approved_stake_this_epoch += stakes.0;
-            self.approved_stake_next_epoch += stakes.1;
+        if increment_approved_pledge {
+            let pledges = self.account_id_to_pledges.get(&approval.account_id).map_or((0, 0), |x| *x);
+            self.approved_pledge_this_epoch += pledges.0;
+            self.approved_pledge_next_epoch += pledges.1;
         }
 
         // We call to `get_block_production_readiness` here so that if the number of approvals crossed
@@ -215,16 +215,16 @@ impl DoomslugApprovalsTracker {
 
     /// Withdraws an approval. This happens if a newer approval for the same `target_height` comes
     /// from the same account. Removes the approval from the `witness` and updates approved and
-    /// endorsed stakes.
+    /// endorsed pledges.
     fn withdraw_approval(&mut self, account_id: &AccountId) {
         let approval = match self.witness.remove(account_id) {
             None => return,
             Some(approval) => approval.0,
         };
 
-        let stakes = self.account_id_to_stakes.get(&approval.account_id).map_or((0, 0), |x| *x);
-        self.approved_stake_this_epoch -= stakes.0;
-        self.approved_stake_next_epoch -= stakes.1;
+        let pledges = self.account_id_to_pledges.get(&approval.account_id).map_or((0, 0), |x| *x);
+        self.approved_pledge_this_epoch -= pledges.0;
+        self.approved_pledge_next_epoch -= pledges.1;
     }
 
     /// Returns whether the block has enough approvals, and if yes, since what moment it does.
@@ -237,9 +237,9 @@ impl DoomslugApprovalsTracker {
     /// `ReadySince` if the block has enough approvals to pass the threshold, and since when it
     ///     does
     fn get_block_production_readiness(&mut self, now: Instant) -> DoomslugBlockProductionReadiness {
-        if (self.approved_stake_this_epoch > self.total_stake_this_epoch * 2 / 3
-            && (self.approved_stake_next_epoch > self.total_stake_next_epoch * 2 / 3
-                || self.total_stake_next_epoch == 0))
+        if (self.approved_pledge_this_epoch > self.total_pledge_this_epoch * 2 / 3
+            && (self.approved_pledge_next_epoch > self.total_pledge_next_epoch * 2 / 3
+                || self.total_pledge_next_epoch == 0))
             || self.threshold_mode == DoomslugThresholdMode::NoApprovals
         {
             if self.time_passed_threshold == None {
@@ -274,7 +274,7 @@ impl DoomslugApprovalsTrackersAtHeight {
     /// # Arguments
     /// * `now`      - the current timestamp
     /// * `approval` - the approval to be processed
-    /// * `stakes`   - all the stakes of all the block producers in the current epoch
+    /// * `pledges`   - all the pledges of all the block producers in the current epoch
     /// * `threshold_mode` - how many approvals are needed to produce a block. Is used to compute
     ///                the return value
     ///
@@ -284,7 +284,7 @@ impl DoomslugApprovalsTrackersAtHeight {
         &mut self,
         now: Instant,
         approval: &Approval,
-        stakes: &[(ApprovalFrozen, bool)],
+        pledges: &[(ApprovalPledge, bool)],
         threshold_mode: DoomslugThresholdMode,
     ) -> DoomslugBlockProductionReadiness {
         if let Some(last_parent) = self.last_approval_per_account.get(&approval.account_id) {
@@ -302,27 +302,27 @@ impl DoomslugApprovalsTrackersAtHeight {
             }
         }
 
-        let account_id_to_stakes = stakes
+        let account_id_to_pledges = pledges
             .iter()
             .filter_map(|(x, is_slashed)| {
                 if *is_slashed {
                     None
                 } else {
-                    Some((x.account_id.clone(), (x.frozen_this_epoch, x.frozen_next_epoch)))
+                    Some((x.account_id.clone(), (x.pledge_this_epoch, x.pledge_next_epoch)))
                 }
             })
             .collect::<HashMap<_, _>>();
 
-        assert_eq!(account_id_to_stakes.len(), stakes.len());
+        assert_eq!(account_id_to_pledges.len(), pledges.len());
 
-        if !account_id_to_stakes.contains_key(&approval.account_id) {
+        if !account_id_to_pledges.contains_key(&approval.account_id) {
             return DoomslugBlockProductionReadiness::NotReady;
         }
 
         self.last_approval_per_account.insert(approval.account_id.clone(), approval.inner.clone());
         self.approval_trackers
             .entry(approval.inner.clone())
-            .or_insert_with(|| DoomslugApprovalsTracker::new(account_id_to_stakes, threshold_mode))
+            .or_insert_with(|| DoomslugApprovalsTracker::new(account_id_to_pledges, threshold_mode))
             .process_approval(now, approval)
     }
 
@@ -537,42 +537,42 @@ impl Doomslug {
     }
 
     /// Determines whether a block has enough approvals to be produced.
-    /// In production (with `mode == HalfStake`) we require the total stake of all the approvals to
-    /// be strictly more than half of the total stake. For many non-doomslug specific tests
+    /// In production (with `mode == HalfStake`) we require the total pledge of all the approvals to
+    /// be strictly more than half of the total pledge. For many non-doomslug specific tests
     /// (with `mode == NoApprovals`) no approvals are needed.
     ///
     /// # Arguments
-    /// * `mode`      - whether we want half of the total stake or just a single approval
+    /// * `mode`      - whether we want half of the total pledge or just a single approval
     /// * `approvals` - the set of approvals in the current block
-    /// * `stakes`    - the vector of validator stakes in the current epoch
+    /// * `pledges`    - the vector of validator pledges in the current epoch
     pub fn can_approved_block_be_produced(
         mode: DoomslugThresholdMode,
         approvals: &[Option<Box<Signature>>],
-        stakes: &[(Balance, Balance, bool)],
+        pledges: &[(Balance, Balance, bool)],
     ) -> bool {
         if mode == DoomslugThresholdMode::NoApprovals {
             return true;
         }
 
-        let threshold1 = stakes.iter().map(|(x, _, _)| x).sum::<Balance>() * 2 / 3;
-        let threshold2 = stakes.iter().map(|(_, x, _)| x).sum::<Balance>() * 2 / 3;
+        let threshold1 = pledges.iter().map(|(x, _, _)| x).sum::<Balance>() * 2 / 3;
+        let threshold2 = pledges.iter().map(|(_, x, _)| x).sum::<Balance>() * 2 / 3;
 
-        let approved_stake1 = approvals
+        let approved_pledge1 = approvals
             .iter()
-            .zip(stakes.iter())
+            .zip(pledges.iter())
             .filter(|(_, (_, _, is_slashed))| !*is_slashed)
-            .map(|(approval, (stake, _, _))| if approval.is_some() { *stake } else { 0 })
+            .map(|(approval, (pledge, _, _))| if approval.is_some() { *pledge } else { 0 })
             .sum::<Balance>();
 
-        let approved_stake2 = approvals
+        let approved_pledge2 = approvals
             .iter()
-            .zip(stakes.iter())
+            .zip(pledges.iter())
             .filter(|(_, (_, _, is_slashed))| !*is_slashed)
-            .map(|(approval, (_, stake, _))| if approval.is_some() { *stake } else { 0 })
+            .map(|(approval, (_, pledge, _))| if approval.is_some() { *pledge } else { 0 })
             .sum::<Balance>();
 
-        (approved_stake1 > threshold1 || threshold1 == 0)
-            && (approved_stake2 > threshold2 || threshold2 == 0)
+        (approved_pledge1 > threshold1 || threshold1 == 0)
+            && (approved_pledge2 > threshold2 || threshold2 == 0)
     }
 
     pub fn get_witness(
@@ -631,14 +631,14 @@ impl Doomslug {
         &mut self,
         now: Instant,
         approval: &Approval,
-        all_frozen: &[(ApprovalFrozen, bool)],
+        all_pledge: &[(ApprovalPledge, bool)],
     ) -> DoomslugBlockProductionReadiness {
         let threshold_mode = self.threshold_mode;
         let ret = self
             .approval_tracking
             .entry(approval.target_height)
             .or_insert_with(|| DoomslugApprovalsTrackersAtHeight::new())
-            .process_approval(now, approval, all_frozen, threshold_mode);
+            .process_approval(now, approval, all_pledge, threshold_mode);
 
         if approval.target_height > self.largest_approval_height.get() {
             self.largest_approval_height.set(approval.target_height);
@@ -658,7 +658,7 @@ impl Doomslug {
         &mut self,
         now: Instant,
         approval: &Approval,
-        all_frozen: &[(ApprovalFrozen, bool)],
+        all_pledge: &[(ApprovalPledge, bool)],
     ) {
         if approval.target_height < self.tip.height
             || approval.target_height > self.tip.height + MAX_HEIGHTS_AHEAD_TO_STORE_APPROVALS
@@ -666,7 +666,7 @@ impl Doomslug {
             return;
         }
 
-        let _ = self.on_approval_message_internal(now, approval, all_frozen);
+        let _ = self.on_approval_message_internal(now, approval, all_pledge);
     }
 
     /// Gets the current status of approvals for a given height.
@@ -918,15 +918,15 @@ mod tests {
     fn test_doomslug_approvals() {
         let accounts: Vec<(&str, u128, u128)> =
             vec![("test1", 2, 0), ("test2", 1, 0), ("test3", 3, 0), ("test4", 1, 0)];
-        let stakes = accounts
+        let pledges = accounts
             .iter()
-            .map(|(account_id, stake_this_epoch, stake_next_epoch)| ApprovalStake {
+            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalStake {
                 account_id: account_id.parse().unwrap(),
-                stake_this_epoch: *stake_this_epoch,
-                stake_next_epoch: *stake_next_epoch,
+                pledge_this_epoch: *pledge_this_epoch,
+                pledge_next_epoch: *pledge_next_epoch,
                 public_key: SecretKey::from_seed(KeyType::ED25519, account_id).public_key(),
             })
-            .map(|stake| (stake, false))
+            .map(|pledge| (pledge, false))
             .collect::<Vec<_>>();
         let signers = accounts
             .iter()
@@ -947,15 +947,15 @@ mod tests {
         let mut now = StaticClock::instant();
 
         // In the comments below the format is
-        // account, height -> approved stake
-        // The total stake is 7, so the threshold is 5
+        // account, height -> approved pledge
+        // The total pledge is 7, so the threshold is 5
 
         // "test1", 2 -> 2
         assert_eq!(
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 2, &signers[0]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -965,7 +965,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 4, &signers[2]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -975,7 +975,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 4, &signers[3]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -985,7 +985,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now + Duration::from_millis(100),
                 &Approval::new(hash(&[1]), 1, 4, &signers[3]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -995,7 +995,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 4, &signers[1]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::ReadySince(now),
         );
@@ -1005,7 +1005,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 4, &signers[0]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::ReadySince(now),
         );
@@ -1015,7 +1015,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 2, &signers[3]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -1027,7 +1027,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[1]), 1, 2, &signers[2]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::ReadySince(now),
         );
@@ -1037,7 +1037,7 @@ mod tests {
             ds.on_approval_message_internal(
                 now,
                 &Approval::new(hash(&[2]), 2, 4, &signers[1]),
-                &stakes,
+                &pledges,
             ),
             DoomslugBlockProductionReadiness::NotReady,
         );
@@ -1050,15 +1050,15 @@ mod tests {
             .iter()
             .map(|(account_id, _, _)| create_test_signer(account_id))
             .collect::<Vec<_>>();
-        let stakes = accounts
+        let pledges = accounts
             .into_iter()
-            .map(|(account_id, stake_this_epoch, stake_next_epoch)| ApprovalStake {
+            .map(|(account_id, pledge_this_epoch, pledge_next_epoch)| ApprovalStake {
                 account_id: account_id.parse().unwrap(),
-                stake_this_epoch,
-                stake_next_epoch,
+                pledge_this_epoch,
+                pledge_next_epoch,
                 public_key: SecretKey::from_seed(KeyType::ED25519, account_id).public_key(),
             })
-            .map(|stake| (stake, false))
+            .map(|pledge| (pledge, false))
             .collect::<Vec<_>>();
         let mut tracker = DoomslugApprovalsTrackersAtHeight::new();
 
@@ -1074,7 +1074,7 @@ mod tests {
         tracker.process_approval(
             StaticClock::instant(),
             &a1_1,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1083,7 +1083,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             2
         );
 
@@ -1092,14 +1092,14 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             0
         );
 
         tracker.process_approval(
             StaticClock::instant(),
             &a1_1,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1108,7 +1108,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             2
         );
 
@@ -1117,7 +1117,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             0
         );
 
@@ -1125,13 +1125,13 @@ mod tests {
         tracker.process_approval(
             StaticClock::instant(),
             &a1_2,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
         tracker.process_approval(
             StaticClock::instant(),
             &a1_3,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1140,7 +1140,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             6
         );
 
@@ -1149,15 +1149,15 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             5
         );
 
-        // Process new approvals one by one, expect the approved and endorsed stake to slowly decrease
+        // Process new approvals one by one, expect the approved and endorsed pledge to slowly decrease
         tracker.process_approval(
             StaticClock::instant(),
             &a2_1,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1166,7 +1166,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             4
         );
 
@@ -1175,14 +1175,14 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             5
         );
 
         tracker.process_approval(
             StaticClock::instant(),
             &a2_2,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1191,7 +1191,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             3
         );
 
@@ -1200,7 +1200,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Skip(1))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             3
         );
 
@@ -1208,13 +1208,13 @@ mod tests {
         tracker.process_approval(
             StaticClock::instant(),
             &a2_3,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
         assert!(tracker.approval_trackers.get(&ApprovalInner::Skip(1)).is_none());
 
-        // Check the approved and endorsed stake for the new block, and also ensure that processing one of the same approvals
+        // Check the approved and endorsed pledge for the new block, and also ensure that processing one of the same approvals
         // again works fine
 
         assert_eq!(
@@ -1222,7 +1222,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Endorsement(hash(&[3])))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             6
         );
 
@@ -1231,14 +1231,14 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Endorsement(hash(&[3])))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             5
         );
 
         tracker.process_approval(
             StaticClock::instant(),
             &a2_3,
-            &stakes,
+            &pledges,
             DoomslugThresholdMode::TwoThirds,
         );
 
@@ -1247,7 +1247,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Endorsement(hash(&[3])))
                 .unwrap()
-                .approved_stake_this_epoch,
+                .approved_pledge_this_epoch,
             6
         );
 
@@ -1256,7 +1256,7 @@ mod tests {
                 .approval_trackers
                 .get(&ApprovalInner::Endorsement(hash(&[3])))
                 .unwrap()
-                .approved_stake_next_epoch,
+                .approved_pledge_next_epoch,
             5
         );
     }

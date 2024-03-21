@@ -428,7 +428,7 @@ def transfer_between_nodes(nodes):
     assert bob_final_balance - bob_initial_balance == transfer_amount
 
 
-def stake_node(node):
+def pledge_node(node):
     account = get_validator_account(node)
     logger.info(f'Staking {account.account_id}.')
     nonce = node.get_nonce_for_pk(account.account_id, account.pk)
@@ -436,14 +436,14 @@ def stake_node(node):
     validators = node.get_validators(timeout=None)['result']
     if account.account_id in validators['current_validators']:
         return
-    stake_amount = max(
-        map(lambda v: int(v['stake']), validators['current_validators']))
+    pledge_amount = max(
+        map(lambda v: int(v['pledge']), validators['current_validators']))
 
     latest_block_hash = node.get_status()['sync_info']['latest_block_hash']
     last_block_hash_decoded = base58.b58decode(latest_block_hash.encode('utf8'))
 
     staking_tx, staking_tx_hash = sign_staking_tx_and_get_hash(
-        account, account, stake_amount, nonce + 1, last_block_hash_decoded)
+        account, account, pledge_amount, nonce + 1, last_block_hash_decoded)
     send_transaction(node, staking_tx, staking_tx_hash, account.account_id)
 
 
@@ -529,7 +529,7 @@ def create_and_upload_genesis(
     rpc_nodes=None,
     epoch_length=20000,
     node_pks=None,
-    increasing_stakes=0.0,
+    increasing_pledges=0.0,
     num_seats=100,
     single_shard=False,
     all_node_pks=None,
@@ -563,7 +563,7 @@ def create_and_upload_genesis(
             done_filename=done_filename,
             epoch_length=epoch_length,
             node_pks=node_pks,
-            increasing_stakes=increasing_stakes,
+            increasing_pledges=increasing_pledges,
             num_seats=num_seats,
             single_shard=single_shard,
             all_node_pks=all_node_pks,
@@ -577,7 +577,7 @@ def create_and_upload_genesis(
 
 
 def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
-                          seen_accounts, num_seats, increasing_stakes):
+                          seen_accounts, num_seats, increasing_pledges):
     records = []
 
     VALIDATOR_BALANCE = (10**2) * ONE_NEAR
@@ -591,7 +591,7 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
                     'account_id': account_id,
                     'account': {
                         'amount': str(balance),
-                        'locked': '0',
+                        'pledging': '0',
                         'code_hash': '11111111111111111111111111111111',
                         'storage_usage': 0,
                         'version': 'V1'
@@ -613,28 +613,28 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
                 }
             })
 
-    stakes = []
-    prev_stake = None
+    pledges = []
+    prev_pledge = None
     for i, account_id in enumerate(validator_keys):
         logger.info(f'Adding account {account_id}')
-        if increasing_stakes:
+        if increasing_pledges:
             if i * 5 < num_seats * 3 and i < len(MAINNET_STAKES):
-                staked = MAINNET_STAKES[i] * ONE_NEAR
-            elif prev_stake is None:
-                prev_stake = MIN_STAKE - STAKE_STEP
-                staked = prev_stake * ONE_NEAR
+                pledging = MAINNET_STAKES[i] * ONE_NEAR
+            elif prev_pledge is None:
+                prev_pledge = MIN_STAKE - STAKE_STEP
+                pledging = prev_pledge * ONE_NEAR
             else:
-                prev_stake = prev_stake + STAKE_STEP
-                staked = prev_stake * ONE_NEAR
+                prev_pledge = prev_pledge + STAKE_STEP
+                pledging = prev_pledge * ONE_NEAR
         else:
-            staked = MIN_STAKE
-        stakes.append((staked, account_id))
+            pledging = MIN_STAKE
+        pledges.append((pledging, account_id))
         records.append({
             'Account': {
                 'account_id': account_id,
                 'account': {
                     'amount': str(VALIDATOR_BALANCE),
-                    'locked': str(staked),
+                    'pledging': str(pledging),
                     'code_hash': '11111111111111111111111111111111',
                     'storage_usage': 0,
                     'version': 'V1'
@@ -659,7 +659,7 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
                     'account_id': load_testing_account,
                     'account': {
                         'amount': str(LOAD_TESTER_BALANCE),
-                        'locked': str(0),
+                        'pledging': str(0),
                         'code_hash': '11111111111111111111111111111111',
                         'storage_usage': 0,
                         'version': 'V1'
@@ -684,7 +684,7 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
                 'account_id': account_id,
                 'account': {
                     'amount': str(RPC_BALANCE),
-                    'locked': str(0),
+                    'pledging': str(0),
                     'code_hash': '11111111111111111111111111111111',
                     'storage_usage': 0,
                     'version': 'V1'
@@ -703,15 +703,15 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
         })
 
     validators = []
-    seats = compute_seats(stakes, num_seats)
+    seats = compute_seats(pledges, num_seats)
     seats_taken = 0
-    for seats, staked, account_id in seats:
+    for seats, pledging, account_id in seats:
         if seats + seats_taken > num_seats:
             break
         validators.append({
             'account_id': account_id,
             'public_key': validator_keys[account_id],
-            'amount': str(staked),
+            'amount': str(pledging),
         })
         seats_taken += seats
 
@@ -720,12 +720,12 @@ def extra_genesis_records(validator_keys, rpc_node_names, node_pks,
 
 def neard_amend_genesis(uncd, validator_keys, genesis_filename_in,
                         records_filename_in, out_dir, rpc_node_names, chain_id,
-                        epoch_length, node_pks, increasing_stakes, num_seats,
+                        epoch_length, node_pks, increasing_pledges, num_seats,
                         single_shard):
     extra_records, validators = extra_genesis_records(validator_keys,
                                                       rpc_node_names, node_pks,
                                                       set(), num_seats,
-                                                      increasing_stakes)
+                                                      increasing_pledges)
 
     validators_filename = os.path.join(out_dir, 'validators.json')
     extra_records_filename = os.path.join(out_dir, 'extra-records.json')
@@ -778,13 +778,13 @@ def neard_amend_genesis(uncd, validator_keys, genesis_filename_in,
 
 
 def create_and_upload_genesis_file_from_empty_genesis(
-    validator_node_and_stakes,
+    validator_node_and_pledges,
     rpc_nodes,
     chain_id=None,
     epoch_length=None,
     num_seats=None,
 ):
-    node0 = validator_node_and_stakes[0][0]
+    node0 = validator_node_and_pledges[0][0]
     node0.machine.run(
         'rm -rf /home/ubuntu/.unc-tmp && mkdir /home/ubuntu/.unc-tmp && /home/ubuntu/uncd --home /home/ubuntu/.unc-tmp init --chain-id {}'
         .format(chain_id))
@@ -824,7 +824,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
                 'account_id': account_id,
                 'account': {
                     'amount': str(balance),
-                    'locked': '0',
+                    'pledging': '0',
                     'code_hash': '11111111111111111111111111111111',
                     'storage_usage': 0,
                     'version': 'V1'
@@ -842,20 +842,20 @@ def create_and_upload_genesis_file_from_empty_genesis(
             }
         })
 
-    stakes = []
+    pledges = []
     account_id_to_validator_pk = {}
-    for i, (node, stake_multiplier) in enumerate(validator_node_and_stakes):
+    for i, (node, pledge_multiplier) in enumerate(validator_node_and_pledges):
         validator = get_validator_account(node)
         logger.info(f'Adding account {validator.account_id}')
         account_id_to_validator_pk[validator.account_id] = validator.pk
-        staked = MIN_STAKE * stake_multiplier
-        stakes.append((staked, validator.account_id))
+        pledging = MIN_STAKE * pledge_multiplier
+        pledges.append((pledging, validator.account_id))
         records.append({
             'Account': {
                 'account_id': validator.account_id,
                 'account': {
                     'amount': str(VALIDATOR_BALANCE),
-                    'locked': str(staked),
+                    'pledging': str(pledging),
                     'code_hash': '11111111111111111111111111111111',
                     'storage_usage': 0,
                     'version': 'V1'
@@ -881,7 +881,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
                     'account_id': load_testing_account,
                     'account': {
                         'amount': str(LOAD_TESTER_BALANCE),
-                        'locked': str(0),
+                        'pledging': str(0),
                         'code_hash': '11111111111111111111111111111111',
                         'storage_usage': 0,
                         'version': 'V1'
@@ -900,22 +900,22 @@ def create_and_upload_genesis_file_from_empty_genesis(
             })
 
     genesis_config['validators'] = []
-    seats = compute_seats(stakes, num_seats)
+    seats = compute_seats(pledges, num_seats)
     seats_taken = 0
-    for seats, staked, account_id in seats:
+    for seats, pledging, account_id in seats:
         if seats + seats_taken > num_seats:
             break
         genesis_config['validators'].append({
             'account_id': account_id,
             'public_key': account_id_to_validator_pk[account_id],
-            'amount': str(staked),
+            'amount': str(pledging),
         })
         seats_taken += seats
 
     total_supply = 0
     for record in records:
         account = record.get('Account', {}).get('account', {})
-        total_supply += int(account.get('locked', 0))
+        total_supply += int(account.get('pledging', 0))
         total_supply += int(account.get('amount', 0))
     genesis_config['total_supply'] = str(total_supply)
     genesis_config['protocol_version'] = 57
@@ -934,7 +934,7 @@ def create_and_upload_genesis_file_from_empty_genesis(
     genesis_config['num_block_producer_seats_per_shard'] = [int(num_seats)] * 4
 
     genesis_config['records'] = records
-    for node in [node for (node, _) in validator_node_and_stakes] + rpc_nodes:
+    for node in [node for (node, _) in validator_node_and_pledges] + rpc_nodes:
         upload_json(node, '/home/ubuntu/.unc/genesis.json', genesis_config)
 
 
@@ -1155,7 +1155,7 @@ def start_genesis_updater_script(
     done_filename,
     epoch_length,
     node_pks,
-    increasing_stakes,
+    increasing_pledges,
     num_seats,
     single_shard,
     all_node_pks,
@@ -1179,7 +1179,7 @@ def start_genesis_updater_script(
             done_filename,
             epoch_length,
             ','.join(node_pks),
-            increasing_stakes,
+            increasing_pledges,
             num_seats,
             single_shard,
             ','.join(all_node_pks),
@@ -1196,7 +1196,7 @@ def start_genesis_updater_script(
 def start_genesis_updater(node, script, genesis_filename_in,
                           records_filename_in, config_filename_in, out_dir,
                           chain_id, validator_keys, rpc_nodes, done_filename,
-                          epoch_length, node_pks, increasing_stakes, num_seats,
+                          epoch_length, node_pks, increasing_pledges, num_seats,
                           single_shard, all_node_pks, node_ips, uncd):
     logger.info(f'Starting genesis_updater on {node.instance_name}')
     node.machine.run(
@@ -1213,7 +1213,7 @@ def start_genesis_updater(node, script, genesis_filename_in,
             done_filename,
             epoch_length,
             node_pks,
-            increasing_stakes,
+            increasing_pledges,
             num_seats,
             single_shard,
             all_node_pks,
@@ -1284,39 +1284,39 @@ def create_upgrade_schedule(
     rpc_nodes,
     validator_nodes,
     progressive_upgrade,
-    increasing_stakes,
+    increasing_pledges,
     num_block_producer_seats,
 ):
     schedule = {}
     if progressive_upgrade:
-        # Re-create stakes assignment.
-        stakes = []
-        if increasing_stakes:
-            prev_stake = None
+        # Re-create pledges assignment.
+        pledges = []
+        if increasing_pledges:
+            prev_pledge = None
             for i, node in enumerate(validator_nodes):
                 if (i * 5 < num_block_producer_seats * 3 and
                         i < len(MAINNET_STAKES)):
-                    staked = MAINNET_STAKES[i] * ONE_NEAR
-                elif prev_stake is None:
-                    prev_stake = MIN_STAKE - STAKE_STEP
-                    staked = prev_stake * ONE_NEAR
+                    pledging = MAINNET_STAKES[i] * ONE_NEAR
+                elif prev_pledge is None:
+                    prev_pledge = MIN_STAKE - STAKE_STEP
+                    pledging = prev_pledge * ONE_NEAR
                 else:
-                    prev_stake = prev_stake + STAKE_STEP
-                    staked = prev_stake * ONE_NEAR
-                stakes.append((staked, node.instance_name))
+                    prev_pledge = prev_pledge + STAKE_STEP
+                    pledging = prev_pledge * ONE_NEAR
+                pledges.append((pledging, node.instance_name))
 
         else:
             for node in validator_nodes:
-                stakes.append((MIN_STAKE, node.instance_name))
+                pledges.append((MIN_STAKE, node.instance_name))
         logger.info(f'create_upgrade_schedule')
-        for stake, instance_name in stakes:
-            logger.debug(f'instance_name: {instance_name} - stake: {stake}')
+        for pledge, instance_name in pledges:
+            logger.debug(f'instance_name: {instance_name} - pledge: {pledge}')
 
         # Compute seat assignments.
-        seats = compute_seats(stakes, num_block_producer_seats)
+        seats = compute_seats(pledges, num_block_producer_seats)
 
         seats_upgraded = 0
-        for seat, stake, instance_name in seats:
+        for seat, pledge, instance_name in seats:
             # As the protocol upgrade takes place after 80% of the nodes are
             # upgraded, stop a bit earlier to start in a non-upgraded state.
             if (seats_upgraded + seat) * 100 > 75 * num_block_producer_seats:
@@ -1353,20 +1353,20 @@ def create_upgrade_schedule(
     return schedule
 
 
-def compute_seats(stakes, num_block_producer_seats):
-    max_stake = 0
-    for i in stakes:
-        max_stake = max(max_stake, i[0])
+def compute_seats(pledges, num_block_producer_seats):
+    max_pledge = 0
+    for i in pledges:
+        max_pledge = max(max_pledge, i[0])
 
     # Compute seats assignment.
     l = 0
-    r = max_stake + 1
+    r = max_pledge + 1
     seat_price = -1
     while r - l > 1:
         tmp_seat_price = (l + r) // 2
         num_seats = 0
-        for i in range(len(stakes)):
-            num_seats += stakes[i][0] // tmp_seat_price
+        for i in range(len(pledges)):
+            num_seats += pledges[i][0] // tmp_seat_price
         if num_seats <= num_block_producer_seats:
             r = tmp_seat_price
         else:
@@ -1375,8 +1375,8 @@ def compute_seats(stakes, num_block_producer_seats):
     logger.info(f'compute_seats seat_price: {seat_price}')
 
     seats = []
-    for stake, item in stakes:
-        seats.append((stake // seat_price, stake, item))
+    for pledge, item in pledges:
+        seats.append((pledge // seat_price, pledge, item))
     seats.sort(reverse=True)
     return seats
 
@@ -1447,27 +1447,27 @@ def upgrade_node(node):
 STAKING_TIMEOUT = 60
 
 
-# If the available amount of whole UNC tokens is above 10**3, then stakes all available amount.
+# If the available amount of whole UNC tokens is above 10**3, then pledges all available amount.
 # Runs only if `last_staking` is at least `STAKING_TIMEOUT` seconds in the past.
-def stake_available_amount(node_account, last_staking):
+def pledge_available_amount(node_account, last_staking):
     # Repeat the staking transactions in case the validator selection algorithm changes.
     # Don't query the balance too often, avoid overloading the RPC node.
     if time.time() - last_staking > STAKING_TIMEOUT:
         # Make several attempts just in case the RPC node doesn't respond.
         for attempt in range(3):
             try:
-                stake_amount = node_account.get_amount_yoctounc()
+                pledge_amount = node_account.get_amount_yoctounc()
                 logger.info(
-                    f'Amount of {node_account.key.account_id} is {stake_amount}'
+                    f'Amount of {node_account.key.account_id} is {pledge_amount}'
                 )
-                if stake_amount > (10**3) * ONE_NEAR:
+                if pledge_amount > (10**3) * ONE_NEAR:
                     logger.info(
-                        f'Staking {stake_amount} for {node_account.key.account_id}'
+                        f'Staking {pledge_amount} for {node_account.key.account_id}'
                     )
-                    node_account.send_stake_tx(stake_amount)
+                    node_account.send_pledge_tx(pledge_amount)
                 logger.info(
-                    f'Staked {stake_amount} for {node_account.key.account_id}')
+                    f'Staked {pledge_amount} for {node_account.key.account_id}')
                 return time.time()
             except Exception as e:
-                logger.info('Failed to stake')
+                logger.info('Failed to pledge')
     return None

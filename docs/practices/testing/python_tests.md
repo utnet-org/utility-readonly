@@ -101,7 +101,7 @@ should be `None`, in which case the config is picked up from the environment
 variable as shown above.
 
 `start_cluster` will spin up `num_validating_nodes` nodes that are block
-producers (with pre-staked tokens), `num_observers` non-validating nodes and
+producers (with pre-pledging tokens), `num_observers` non-validating nodes and
 will configure the system to have `num_shards` shards. The fifth argument
 changes the genesis config. Each element is a list of some length `n` where the
 first `n-1` elements are a path in the genesis JSON file, and the last element

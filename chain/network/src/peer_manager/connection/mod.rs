@@ -354,7 +354,7 @@ impl Pool {
                 }
                 // Detect a situation in which a different node tries to connect
                 // to us with the same PeerId. This can happen iff the node key
-                // has been stolen (or just copied over by mistake).
+                // has been stolen (or just copied over by mipledge).
                 if !pool.ready.contains_key(&id) && !pool.outbound_handshakes.contains(&id) {
                     return Err(PoolError::UnexpectedLoopConnection);
                 }

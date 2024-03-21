@@ -81,19 +81,19 @@ def validate_light_client_block(last_known_block,
             assert False
         return False
 
-    total_stake = 0
-    approved_stake = 0
+    total_pledge = 0
+    approved_pledge = 0
 
-    for approval, stake in zip(new_block['approvals_after_next'],
+    for approval, pledge in zip(new_block['approvals_after_next'],
                                block_producers):
-        total_stake += int(stake['stake'])
+        total_pledge += int(pledge['pledge'])
 
         if approval is None:
             continue
 
-        approved_stake += int(stake['stake'])
+        approved_pledge += int(pledge['pledge'])
 
-        public_key = stake['public_key']
+        public_key = pledge['public_key']
 
         signature = base58.b58decode(approval[len(ED_PREFIX):])
         verify_key = nacl.signing.VerifyKey(
@@ -108,8 +108,8 @@ def validate_light_client_block(last_known_block,
         approval_message = bytes(approval_message)
         verify_key.verify(approval_message, signature)
 
-    threshold = total_stake * 2 // 3
-    if approved_stake <= threshold:
+    threshold = total_pledge * 2 // 3
+    if approved_pledge <= threshold:
         if panic:
             assert False
         return False
@@ -128,9 +128,9 @@ def validate_light_client_block(last_known_block,
             serialized_next_bp.append(0)
         for bp in new_block['next_bps']:
             version = 0
-            if 'validator_stake_struct_version' in bp:
-                # version of ValidatorStake enum
-                version = int(bp['validator_stake_struct_version'][1:]) - 1
+            if 'validator_pledge_struct_version' in bp:
+                # version of ValidatorPledge enum
+                version = int(bp['validator_pledge_struct_version'][1:]) - 1
                 serialized_next_bp.append(version)
             serialized_next_bp.append(5)
             for i in range(3):
@@ -139,10 +139,10 @@ def validate_light_client_block(last_known_block,
             serialized_next_bp.append(0)  # public key type
             serialized_next_bp += base58.b58decode(
                 bp['public_key'][len(ED_PREFIX):])
-            stake = int(bp['stake'])
+            pledge = int(bp['pledge'])
             for i in range(16):
-                serialized_next_bp.append(stake & 255)
-                stake >>= 8
+                serialized_next_bp.append(pledge & 255)
+                pledge >>= 8
 
         serialized_next_bp = bytes(serialized_next_bp)
 

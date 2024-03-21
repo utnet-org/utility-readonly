@@ -50,10 +50,10 @@ fn main() {
                 .action(clap::ArgAction::Set),
         )
         .arg(
-            Arg::new("stake-amount")
-                .long("stake-amount")
+            Arg::new("pledge-amount")
+                .long("pledge-amount")
                 .default_value("0")
-                .help("Stake amount in UNC, if 0 is used it restakes last seen staked amount")
+                .help("Stake amount in UNC, if 0 is used it repledges last seen pledging amount")
                 .action(clap::ArgAction::Set),
         )
         .get_matches();
@@ -64,8 +64,8 @@ fn main() {
         .map(|s| s.parse().expect("Wait period must be a number"))
         .unwrap();
     let rpc_url = matches.get_one::<String>("rpc-url").unwrap();
-    let stake_amount = matches
-        .get_one::<String>("stake-amount")
+    let pledge_amount = matches
+        .get_one::<String>("pledge-amount")
         .map(|s| s.parse().expect("Stake amount must be a number"))
         .unwrap();
 
@@ -79,11 +79,11 @@ fn main() {
         panic!("Failed to initialize signer from key file at {:?}: {:#}", key_path, e)
     });
     let account_id = signer.account_id.clone();
-    let mut last_stake_amount = stake_amount;
+    let mut last_pledge_amount = pledge_amount;
 
     assert_eq!(
         signer.account_id, key_file.account_id,
-        "Only can stake for the same account as given signer key"
+        "Only can pledge for the same account as given signer key"
     );
 
     let user = RpcUser::new(rpc_url, account_id.clone(), Arc::new(signer));
@@ -93,37 +93,37 @@ fn main() {
         //  - don't already have a proposal
         //  - too many missing blocks in current validators
         //  - missing in next validators
-        if validators.current_frozen_proposals.iter().any(|proposal| proposal.account_id() == &account_id)
+        if validators.current_pledge_proposals.iter().any(|proposal| proposal.account_id() == &account_id)
         {
             continue;
         }
-        let mut restake = false;
+        let mut repledge = false;
         validators
             .current_validators
             .iter()
             .filter(|validator_info| validator_info.account_id == account_id)
             .last()
             .map(|validator_info| {
-                last_stake_amount = validator_info.frozen;
+                last_pledge_amount = validator_info.pledge;
                 if maybe_kicked_out(validator_info) {
-                    restake = true;
+                    repledge = true;
                 }
             });
-        restake |= !validators
+        repledge |= !validators
             .next_validators
             .iter()
             .any(|validator_info| validator_info.account_id == account_id);
-        if restake {
+        if repledge {
             // Already kicked out or getting kicked out.
-            let amount = if stake_amount == 0 { last_stake_amount } else { stake_amount };
+            let amount = if pledge_amount == 0 { last_pledge_amount } else { pledge_amount };
             info!(
-                target: "restaked",
+                target: "repledged",
                 "Sending staking transaction {} -> {}", key_file.account_id, amount
             );
             if let Err(err) =
-                user.stake(key_file.account_id.clone(), key_file.public_key.clone(), amount)
+                user.pledge(key_file.account_id.clone(), key_file.public_key.clone(), amount)
             {
-                error!(target: "restaked", "Failed to send staking transaction: {}", err);
+                error!(target: "repledged", "Failed to send staking transaction: {}", err);
             }
         }
         std::thread::sleep(Duration::from_secs(wait_period));

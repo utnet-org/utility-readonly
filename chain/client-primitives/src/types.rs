@@ -19,7 +19,7 @@ use tracing::debug_span;
 use yansi::Color::Magenta;
 use yansi::Style;
 use unc_primitives::errors::EpochError;
-use unc_primitives::views::validator_power_and_frozen_view::ValidatorPowerAndFrozenView;
+use unc_primitives::views::validator_power_and_pledge_view::ValidatorPowerAndPledgeView;
 
 /// Combines errors coming from chain, tx pool and block producer.
 #[derive(Debug, thiserror::Error)]
@@ -905,7 +905,7 @@ pub struct GetValidatorOrdered {
 }
 
 impl Message for GetValidatorOrdered {
-    type Result = Result<Vec<ValidatorPowerAndFrozenView>, GetValidatorInfoError>;
+    type Result = Result<Vec<ValidatorPowerAndPledgeView>, GetValidatorInfoError>;
 }
 
 #[derive(Debug)]

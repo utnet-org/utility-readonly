@@ -26,7 +26,7 @@ TARGET_HEIGHT = int(EPOCH_LENGTH * 2.8)
 
 config = load_config()
 node_config = state_sync_lib.get_state_sync_config_combined()
-# give more stake to the bootnode so that it can produce the blocks alone
+# give more pledge to the bootnode so that it can produce the blocks alone
 unc_root, node_dirs = init_cluster(
     4, 1, 4, config,
     [["min_gas_price", 0], ["max_inflation_rate", [0, 1]],
@@ -105,7 +105,7 @@ def get_validators():
 
 logger.info(get_validators())
 
-# The stake for node1 must be higher than that of boot_node, so that it can produce blocks
+# The pledge for node1 must be higher than that of boot_node, so that it can produce blocks
 # after the boot_node is brought down
 tx = sign_staking_tx(node1.signer_key, node1.validator_key,
                      50000000000000000000000000000000, 20,

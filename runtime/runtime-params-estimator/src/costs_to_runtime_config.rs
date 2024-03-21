@@ -62,7 +62,7 @@ fn runtime_fees_config(cost_table: &CostTable) -> anyhow::Result<RuntimeFeesConf
             ActionCosts::function_call_base => fee(Cost::ActionFunctionCallBase)?,
             ActionCosts::function_call_byte => fee(Cost::ActionFunctionCallPerByte)?,
             ActionCosts::transfer => fee(Cost::ActionTransfer)?,
-            ActionCosts::stake => fee(Cost::ActionStake)?,
+            ActionCosts::pledge => fee(Cost::ActionStake)?,
             ActionCosts::add_full_access_key => fee(Cost::ActionAddFullAccessKey)?,
             ActionCosts::add_function_call_key_base => fee(Cost::ActionAddFunctionAccessKeyBase)?,
             ActionCosts::add_function_call_key_byte => fee(Cost::ActionAddFunctionAccessKeyPerByte)?,
@@ -92,8 +92,8 @@ fn ext_costs_config(cost_table: &CostTable) -> anyhow::Result<ExtCostsConfig> {
             ExtCosts::storage_iter_next_key_byte => 0,
             ExtCosts::storage_iter_next_value_byte => 0,
             // TODO: accurately price host functions that expose validator information.
-            ExtCosts::validator_frozen_base => 303944908800,
-            ExtCosts::validator_total_frozen_base => 303944908800,
+            ExtCosts::validator_pledge_base => 303944908800,
+            ExtCosts::validator_total_pledge_base => 303944908800,
             cost => {
                 let estimation = estimation(cost).with_context(|| format!("external WASM cost has no estimation defined: {}", cost))?;
                 cost_table.get(estimation).with_context(|| format!("undefined external WASM cost: {}", cost))?

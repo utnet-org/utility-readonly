@@ -12,7 +12,7 @@ use unc_primitives::receipt::{DelayedReceiptIndices, Receipt, ReceiptEnum, Recei
 use unc_primitives::shard_layout::ShardUId;
 use unc_primitives::state_record::{state_record_to_account_id, StateRecord};
 use unc_primitives::trie_key::TrieKey;
-use unc_primitives::types::{AccountId, Balance, ShardId, StateChangeCause, StateRoot};
+use unc_primitives::types::{AccountId, Balance, Power, ShardId, StateChangeCause, StateRoot};
 use unc_vm_runner::ContractCode;
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic;
@@ -164,7 +164,7 @@ impl GenesisStateApplier {
         storage: &mut AutoFlushingTrieUpdate,
         delayed_receipts_indices: &mut DelayedReceiptIndices,
         shard_uid: ShardUId,
-        validators: &[(AccountId, PublicKey, Balance)],
+        validators: &[(AccountId, PublicKey, Balance, Power)],
         config: &StorageUsageConfig,
         genesis: &Genesis,
         account_ids: HashSet<AccountId>,
@@ -310,7 +310,7 @@ impl GenesisStateApplier {
             }
         }
 
-        for (account_id, _, amount) in validators {
+        for (account_id, _, pledge, power) in validators {
             if !account_ids.contains(account_id) {
                 continue;
             }
@@ -318,7 +318,8 @@ impl GenesisStateApplier {
                 let mut account: Account = get_account(state_update, account_id)
                     .expect("Genesis storage error")
                     .expect("account must exist");
-                account.set_locked(*amount);
+                account.set_pledging(*pledge);
+                account.set_power(*power);
                 set_account(state_update, account_id.clone(), &account);
             });
         }
@@ -339,7 +340,7 @@ impl GenesisStateApplier {
         op_limit: &atomic::AtomicUsize,
         tries: ShardTries,
         shard_id: ShardId,
-        validators: &[(AccountId, PublicKey, Balance)],
+        validators: &[(AccountId, PublicKey, Balance, Power)],
         config: &StorageUsageConfig,
         genesis: &Genesis,
         shard_account_ids: HashSet<AccountId>,

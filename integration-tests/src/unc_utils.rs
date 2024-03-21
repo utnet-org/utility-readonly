@@ -12,10 +12,10 @@ use unc_primitives::hash::CryptoHash;
 use unc_primitives::merkle::PartialMerkleTree;
 use unc_primitives::num_rational::{Ratio, Rational32};
 use unc_primitives::types::{BlockHeightDelta, EpochId};
-use unc_primitives::types::validator_power_and_frozen::ValidatorPowerAndFrozen;
+use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 use unc_primitives::validator_signer::ValidatorSigner;
 use unc_primitives::version::PROTOCOL_VERSION;
-use framework::config::{GenesisExt, TESTING_INIT_POWER, TESTING_INIT_STAKE};
+use framework::config::{GenesisExt, TESTING_INIT_POWER, TESTING_INIT_PLEDGE};
 use framework::{load_test_config, UncConfig};
 
 // This assumes that there is no height skipped. Otherwise epoch hash calculation will be wrong.
@@ -47,11 +47,11 @@ pub fn add_blocks(
 
         let next_epoch_id = EpochId(*blocks[prev_epoch_last_block_height as usize].hash());
 
-        let next_bp_hash = CryptoHash::hash_borsh_iter([ValidatorPowerAndFrozen::new(
+        let next_bp_hash = CryptoHash::hash_borsh_iter([ValidatorPowerAndPledge::new(
             "other".parse().unwrap(),
             signer.public_key(),
             TESTING_INIT_POWER,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
         )]);
         let block = Block::produce(
             PROTOCOL_VERSION,

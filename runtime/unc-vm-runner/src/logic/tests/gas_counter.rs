@@ -586,17 +586,17 @@ fn out_of_gas_transfer() {
 
 /// see longer comment above for how this test works
 #[test]
-fn out_of_gas_stake() {
-    check_action_gas_exceeds_limit(ActionCosts::stake, 1, promise_stake);
+fn out_of_gas_pledge() {
+    check_action_gas_exceeds_limit(ActionCosts::pledge, 1, promise_pledge);
 
     check_action_gas_exceeds_attached(
-        ActionCosts::stake,
+        ActionCosts::pledge,
         1,
         expect!["122375106518 burnt 10000000000000 used"],
-        promise_stake,
+        promise_pledge,
     );
 
-    fn promise_stake(logic: &mut TestVMLogic) -> Result<(), VMLogicError> {
+    fn promise_pledge(logic: &mut TestVMLogic) -> Result<(), VMLogicError> {
         let account_id = "pool.test";
         let idx = promise_batch_create(logic, account_id)?;
         let attached_balance = logic.internal_mem_write(&1u128.to_be_bytes());

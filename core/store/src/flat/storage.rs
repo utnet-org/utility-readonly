@@ -360,7 +360,7 @@ impl FlatStorage {
 
         for block_hash in blocks.into_iter().rev() {
             let mut store_update = StoreUpdate::new(guard.store.storage.clone());
-            // Delta must exist because flat storage is locked and we could retrieve
+            // Delta must exist because flat storage is pledging and we could retrieve
             // path from old to new head. Otherwise we return internal error.
             let changes = store_helper::get_delta_changes(&guard.store, shard_uid, block_hash)?
                 .ok_or_else(|| missing_delta_error(&block_hash))?;

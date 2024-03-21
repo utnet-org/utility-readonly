@@ -120,7 +120,7 @@ struct Validator {
     #[serde(with = "dec_format")]
     power: Option<Power>,
     #[serde(with = "dec_format")]
-    frozen: Option<Balance>,
+    pledge: Option<Balance>,
 }
 
 type MakeSingleShardStorageMutatorFn =
@@ -746,7 +746,7 @@ impl ForkNetworkCommand {
                 account_id: validator.account_id,
                 amount: validator.amount.unwrap_or(50_000 * UNC_BASE),
                 power: validator.power.unwrap_or(5),
-                locked: validator.frozen.unwrap_or(5),
+                pledging: validator.pledge.unwrap_or(5),
                 public_key: validator.public_key,
             };
             new_validator_accounts.push(validator_account.clone());
@@ -797,12 +797,12 @@ impl ForkNetworkCommand {
             avg_hidden_validator_seats_per_shard: epoch_config.avg_hidden_validator_seats_per_shard,
             block_producer_kickout_threshold: 0,
             chunk_producer_kickout_threshold: 0,
-            max_kickout_stake_perc: 0,
+            max_kickout_pledge_perc: 0,
             online_min_threshold: epoch_config.online_min_threshold,
             online_max_threshold: epoch_config.online_max_threshold,
             fishermen_threshold: epoch_config.fishermen_threshold,
-            minimum_stake_divisor: epoch_config.minimum_stake_divisor,
-            protocol_upgrade_stake_threshold: epoch_config.protocol_upgrade_stake_threshold,
+            minimum_pledge_divisor: epoch_config.minimum_pledge_divisor,
+            protocol_upgrade_pledge_threshold: epoch_config.protocol_upgrade_pledge_threshold,
             shard_layout: epoch_config.shard_layout.clone(),
             num_chunk_only_producer_seats: epoch_config
                 .validator_selection_config
@@ -810,7 +810,7 @@ impl ForkNetworkCommand {
             minimum_validators_per_shard: epoch_config
                 .validator_selection_config
                 .minimum_validators_per_shard,
-            minimum_stake_ratio: epoch_config.validator_selection_config.minimum_stake_ratio,
+            minimum_pledge_ratio: epoch_config.validator_selection_config.minimum_pledge_ratio,
             dynamic_resharding: false,
             protocol_version: epoch_info.protocol_version(),
             validators: new_validator_accounts,

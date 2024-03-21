@@ -138,12 +138,12 @@ def main():
     while time.monotonic() - start_time < args.test_timeout:
         try:
             # Repeat the staking transactions in case the validator selection algorithm changes.
-            staked_time = mocknet.stake_available_amount(
+            pledged_time = mocknet.pledge_available_amount(
                 test_state.node_account,
                 last_staking,
             )
-            if staked_time is not None:
-                last_staking = staked_time
+            if pledged_time is not None:
+                last_staking = pledged_time
 
             elapsed_time = time.monotonic() - start_time
             total_tx_sent = mocknet_helpers.throttle_txns(

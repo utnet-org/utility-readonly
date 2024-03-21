@@ -52,7 +52,7 @@ You can read specific details on our
 ## How do we pick the next validators?
 
 **TL;DR:** in the last block of the epoch T, we look at the accounts that have
-highest stake and we pick them to become validators in **T+2**.
+highest pledge and we pick them to become validators in **T+2**.
 
 We are deciding on validators for T+2 (and not T+1) as we want to make sure that
 validators have enough time to prepare for block production and validation (they
@@ -101,9 +101,9 @@ order should they produce the blocks.
 EpochInfo.V3(
   epoch_height=7,
   validators=ListContainer([
-    validator_stake.V1(account_id='node0', public_key=public_key.ED25519(tuple_data=ListContainer([b'7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX'])), stake=51084320187874404740382878961615),
-    validator_stake.V1(account_id='node2', public_key=public_key.ED25519(tuple_data=ListContainer([b'GkDv7nSMS3xcqA45cpMvFmfV1o4fRF6zYo1JRR6mNqg5'])), stake=51084320187874404740382878961615),
-    validator_stake.V1(account_id='node1', public_key=public_key.ED25519(tuple_data=ListContainer([b'6DSjZ8mvsRZDvFqFxo8tCKePG96omXW7eVYVSySmDk8e'])), stake=50569171534262067815663761517574)]),
+    validator_pledge.V1(account_id='node0', public_key=public_key.ED25519(tuple_data=ListContainer([b'7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX'])), pledge=51084320187874404740382878961615),
+    validator_pledge.V1(account_id='node2', public_key=public_key.ED25519(tuple_data=ListContainer([b'GkDv7nSMS3xcqA45cpMvFmfV1o4fRF6zYo1JRR6mNqg5'])), pledge=51084320187874404740382878961615),
+    validator_pledge.V1(account_id='node1', public_key=public_key.ED25519(tuple_data=ListContainer([b'6DSjZ8mvsRZDvFqFxo8tCKePG96omXW7eVYVSySmDk8e'])), pledge=50569171534262067815663761517574)]),
 
   validator_to_index={'node0': 0, 'node1': 2, 'node2': 1},
 
@@ -113,7 +113,7 @@ EpochInfo.V3(
   hidden_validators_settlement=ListContainer([]),
   fishermen=ListContainer([]),
   fishermen_to_index={},
-  stake_change={'node0': 51084320187874404740382878961615, 'node1': 50569171534262067815663761517574, 'node2': 51084320187874404740382878961615},
+  pledge_change={'node0': 51084320187874404740382878961615, 'node1': 50569171534262067815663761517574, 'node2': 51084320187874404740382878961615},
   validator_reward={'unc': 37059603312899067633082436, 'node0': 111553789870214657675206177, 'node1': 110428850075662293347329569, 'node2': 111553789870214657675206177},
   validator_kickout={},
   minted_amount=370596033128990676330824359,

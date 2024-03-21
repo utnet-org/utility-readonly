@@ -234,7 +234,7 @@ async fn listen_blocks(mut stream: mpsc::Receiver<unc_indexer::StreamerMessage>)
         //                 account_id: "test.unc",
         //                 account: AccountView {
         //                     amount: 1000000000000000000000000000000000,
-        //                     locked: 50000000000000000000000000000000,
+        //                     pledging: 50000000000000000000000000000000,
         //                     code_hash: `11111111111111111111111111111111`,
         //                     storage_usage: 182,
         //                     storage_paid_at: 0,

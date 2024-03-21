@@ -235,7 +235,7 @@ fn apply_block_from_range(
                 ApplyChunkShardContext {
                     shard_id,
                     last_validator_power_proposals: chunk_inner.prev_validator_power_proposals(),
-                    last_validator_frozen_proposals: chunk_inner.prev_validator_frozen_proposals(),
+                    last_validator_pledge_proposals: chunk_inner.prev_validator_pledge_proposals(),
                     gas_limit: chunk_inner.gas_limit(),
                     is_new_chunk: true,
                     is_first_block_with_chunk_of_version,
@@ -260,7 +260,7 @@ fn apply_block_from_range(
                 ApplyChunkShardContext {
                     shard_id,
                     last_validator_power_proposals: chunk_extra.validator_power_proposals(),
-                    last_validator_frozen_proposals: chunk_extra.validator_frozen_proposals(),
+                    last_validator_pledge_proposals: chunk_extra.validator_pledge_proposals(),
                     gas_limit: chunk_extra.gas_limit(),
                     is_new_chunk: false,
                     is_first_block_with_chunk_of_version: false,
@@ -280,7 +280,7 @@ fn apply_block_from_range(
         &apply_result.new_root,
         outcome_root,
         apply_result.validator_power_proposals,
-        apply_result.validator_frozen_proposals,
+        apply_result.validator_pledge_proposals,
         apply_result.total_gas_burnt,
         genesis.config.gas_limit,
         apply_result.total_balance_burnt,
@@ -446,8 +446,8 @@ fn smart_equals(extra1: &ChunkExtra, extra2: &ChunkExtra) -> bool {
             return false;
         }
     }
-    let mut proposals1 = extra1.validator_frozen_proposals();
-    let mut proposals2 = extra2.validator_frozen_proposals();
+    let mut proposals1 = extra1.validator_pledge_proposals();
+    let mut proposals2 = extra2.validator_pledge_proposals();
     if proposals1.len() != proposals2.len() {
         return false;
     }
@@ -479,7 +479,7 @@ mod test {
     use unc_store::test_utils::create_test_store;
     use unc_store::Store;
     use framework::config::GenesisExt;
-    use framework::config::TESTING_INIT_STAKE;
+    use framework::config::TESTING_INIT_PLEDGE;
     use framework::NightshadeRuntime;
 
     use crate::apply_chain_range::apply_chain_range;
@@ -513,7 +513,7 @@ mod test {
 
     /// Produces blocks, avoiding the potential failure where the client is not the
     /// block producer for each subsequent height (this can happen when a new validator
-    /// is staked since they will also have heights where they should produce the block instead).
+    /// is pledging since they will also have heights where they should produce the block instead).
     fn safe_produce_blocks(
         env: &mut TestEnv,
         initial_height: BlockHeight,
@@ -551,11 +551,11 @@ mod test {
         let (store, genesis, mut env) = setup(epoch_length);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -593,11 +593,11 @@ mod test {
         let (store, genesis, mut env) = setup(epoch_length);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );

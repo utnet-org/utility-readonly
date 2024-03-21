@@ -246,7 +246,7 @@ pub enum ActionsValidationError {
     FunctionCallMethodNameLengthExceeded { length: u64, limit: u64 },
     /// The length of the arguments exceeded the limit in a Function Call action.
     FunctionCallArgumentsLengthExceeded { length: u64, limit: u64 },
-    /// An attempt to stake with a public key that is not convertible to ristretto.
+    /// An attempt to pledge with a public key that is not convertible to ristretto.
     UnsuitableStakingKey { public_key: Box<PublicKey> },
     /// The attached amount of gas in a FunctionCall action has to be a positive number.
     FunctionCallZeroAttachedGas,
@@ -463,24 +463,24 @@ pub enum ActionErrorKind {
         #[serde(with = "dec_format")]
         amount: Balance,
     },
-    /// Account is not yet staked, but tries to unstake
-    TriesToUnstake { account_id: AccountId },
-    /// The account doesn't have enough balance to increase the stake.
+    /// Account is not yet pledging, but tries to unpledge
+    TriesToUnpledge { account_id: AccountId },
+    /// The account doesn't have enough balance to increase the pledge.
     TriesToStake {
         account_id: AccountId,
         #[serde(with = "dec_format")]
-        stake: Balance,
+        pledge: Balance,
         #[serde(with = "dec_format")]
-        locked: Balance,
+        pledging: Balance,
         #[serde(with = "dec_format")]
         balance: Balance,
     },
     InsufficientStake {
         account_id: AccountId,
         #[serde(with = "dec_format")]
-        stake: Balance,
+        pledge: Balance,
         #[serde(with = "dec_format")]
-        minimum_stake: Balance,
+        minimum_pledge: Balance,
     },
     /// An error occurred during a `FunctionCall` Action, parameter is debug message.
     FunctionCallError(FunctionCallError),
@@ -791,13 +791,13 @@ impl Display for ActionErrorKind {
                 "The account {} wouldn't have enough balance to cover storage, required to have {} yoctoUNC more",
                 account_id, amount
             ),
-            ActionErrorKind::TriesToUnstake { account_id } => {
-                write!(f, "Account {:?} is not yet staked, but tries to unstake", account_id)
+            ActionErrorKind::TriesToUnpledge { account_id } => {
+                write!(f, "Account {:?} is not yet pledging, but tries to unpledge", account_id)
             }
-            ActionErrorKind::TriesToStake { account_id, stake, locked, balance } => write!(
+            ActionErrorKind::TriesToStake { account_id, pledge, pledging, balance } => write!(
                 f,
-                "Account {:?} tries to stake {}, but has staked {} and only has {}",
-                account_id, stake, locked, balance
+                "Account {:?} tries to pledge {}, but has pledging {} and only has {}",
+                account_id, pledge, pledging, balance
             ),
             ActionErrorKind::CreateAccountOnlyByRegistrar { account_id, registrar_account_id, predecessor_id } => write!(
                 f,
@@ -826,7 +826,7 @@ impl Display for ActionErrorKind {
             ActionErrorKind::NewReceiptValidationError(e) => {
                 write!(f, "An new action receipt created during a FunctionCall is not valid: {}", e)
             }
-            ActionErrorKind::InsufficientStake { account_id, stake, minimum_stake } => write!(f, "Account {} tries to stake {} but minimum required stake is {}", account_id, stake, minimum_stake),
+            ActionErrorKind::InsufficientStake { account_id, pledge, minimum_pledge } => write!(f, "Account {} tries to pledge {} but minimum required pledge is {}", account_id, pledge, minimum_pledge),
             ActionErrorKind::OnlyImplicitAccountCreationAllowed { account_id } => write!(f, "CreateAccount action is called on hex-characters account of length 64 {}", account_id),
             ActionErrorKind::DeleteAccountWithLargeState { account_id } => write!(f, "The state of account {} is too large and therefore cannot be deleted", account_id),
             ActionErrorKind::DelegateActionInvalidSignature => write!(f, "DelegateAction is not signed with the given public key"),
@@ -845,10 +845,10 @@ impl Display for ActionErrorKind {
 }
 #[derive(Eq, PartialEq, Clone)]
 pub enum BlockError {
-    /// Error calculating threshold from given stakes for given number of seats.
-    /// Only should happened if calling code doesn't check for integer value of stake > number of seats.
+    /// Error calculating threshold from given pledges for given number of seats.
+    /// Only should happened if calling code doesn't check for integer value of pledge > number of seats.
     ThresholdError {
-        stake_sum: Balance,
+        pledge_sum: Balance,
         num_seats: u64,
     },
     /// Requesting validators for an epoch that wasn't computed yet.
@@ -878,10 +878,10 @@ impl std::error::Error for crate::errors::BlockError {}
 impl Display for crate::errors::BlockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            crate::errors::BlockError::ThresholdError { stake_sum, num_seats } => write!(
+            crate::errors::BlockError::ThresholdError { pledge_sum, num_seats } => write!(
                 f,
-                "Total stake {} must be higher than the number of seats {}",
-                stake_sum, num_seats
+                "Total pledge {} must be higher than the number of seats {}",
+                pledge_sum, num_seats
             ),
             crate::errors::BlockError::BlockOutOfBounds(block_height) => {
                 write!(f, "Block {:?} is out of bounds", block_height)
@@ -911,8 +911,8 @@ impl Display for crate::errors::BlockError {
 impl Debug for crate::errors::BlockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            crate::errors::BlockError::ThresholdError { stake_sum, num_seats } => {
-                write!(f, "ThresholdError({}, {})", stake_sum, num_seats)
+            crate::errors::BlockError::ThresholdError { pledge_sum, num_seats } => {
+                write!(f, "ThresholdError({}, {})", pledge_sum, num_seats)
             }
             crate::errors::BlockError::BlockOutOfBounds(block_height) => write!(f, "EpochOutOfBounds({:?})", block_height),
             crate::errors::BlockError::MissingBlock(hash) => write!(f, "MissingBlock({})", hash),
@@ -968,11 +968,11 @@ impl From<EpochError> for BlockError {
                 BlockError::ShardingError(error.to_string())
             },
             EpochError::ThresholdError{
-                stake_sum: stake,
+                pledge_sum: pledge,
                 num_seats: seats,
             } => {
                 BlockError::ThresholdError{
-                    stake_sum: stake,
+                    pledge_sum: pledge,
                     num_seats: seats,
                 }
             }
@@ -982,10 +982,10 @@ impl From<EpochError> for BlockError {
 }
 #[derive(Eq, PartialEq, Clone)]
 pub enum EpochError {
-    /// Error calculating threshold from given stakes for given number of seats.
-    /// Only should happened if calling code doesn't check for integer value of stake > number of seats.
+    /// Error calculating threshold from given pledges for given number of seats.
+    /// Only should happened if calling code doesn't check for integer value of pledge > number of seats.
     ThresholdError {
-        stake_sum: Balance,
+        pledge_sum: Balance,
         num_seats: u64,
     },
     /// Requesting validators for an epoch that wasn't computed yet.
@@ -1011,10 +1011,10 @@ impl std::error::Error for EpochError {}
 impl Display for EpochError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            EpochError::ThresholdError { stake_sum, num_seats } => write!(
+            EpochError::ThresholdError { pledge_sum, num_seats } => write!(
                 f,
-                "Total stake {} must be higher than the number of seats {}",
-                stake_sum, num_seats
+                "Total pledge {} must be higher than the number of seats {}",
+                pledge_sum, num_seats
             ),
             EpochError::EpochOutOfBounds(epoch_id) => {
                 write!(f, "Epoch {:?} is out of bounds", epoch_id)
@@ -1038,8 +1038,8 @@ impl Display for EpochError {
 impl Debug for EpochError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            EpochError::ThresholdError { stake_sum, num_seats } => {
-                write!(f, "ThresholdError({}, {})", stake_sum, num_seats)
+            EpochError::ThresholdError { pledge_sum, num_seats } => {
+                write!(f, "ThresholdError({}, {})", pledge_sum, num_seats)
             }
             EpochError::EpochOutOfBounds(epoch_id) => write!(f, "EpochOutOfBounds({:?})", epoch_id),
             EpochError::MissingBlock(hash) => write!(f, "MissingBlock({})", hash),
@@ -1089,11 +1089,11 @@ impl From<BlockError> for EpochError {
                 EpochError::ShardingError(error.to_string())
             },
             BlockError::ThresholdError{
-                stake_sum: stake,
+                pledge_sum: pledge,
                 num_seats: seats,
             } => {
                 EpochError::ThresholdError{
-                    stake_sum: stake,
+                    pledge_sum: pledge,
                     num_seats: seats,
                 }
             },

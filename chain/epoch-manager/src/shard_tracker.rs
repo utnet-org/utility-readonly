@@ -113,7 +113,7 @@ mod tests {
     use num_rational::Ratio;
     use std::collections::HashSet;
     use std::sync::Arc;
-    use unc_primitives::types::validator_frozen::ValidatorFrozen;
+    use unc_primitives::types::validator_pledge::ValidatorPledge;
 
     const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
 
@@ -133,11 +133,11 @@ mod tests {
             fishermen_threshold: 0,
             online_max_threshold: Ratio::from_integer(1),
             online_min_threshold: Ratio::new(90, 100),
-            minimum_stake_divisor: 1,
-            protocol_upgrade_stake_threshold: Ratio::new(80, 100),
+            minimum_pledge_divisor: 1,
+            protocol_upgrade_pledge_threshold: Ratio::new(80, 100),
             shard_layout: ShardLayout::v0(num_shards, 0),
             validator_selection_config: Default::default(),
-            validator_max_kickout_stake_perc: 100,
+            validator_max_kickout_pledge_perc: 100,
         };
         let reward_calculator = RewardCalculator {
             max_inflation_rate: Ratio::from_integer(0),
@@ -170,7 +170,7 @@ mod tests {
         cur_h: CryptoHash,
         height: BlockHeight,
         power_proposals: Vec<ValidatorPower>,
-        frozen_proposals: Vec<ValidatorFrozen>,
+        pledge_proposals: Vec<ValidatorPledge>,
         protocol_version: ProtocolVersion,
     ) {
         epoch_manager
@@ -182,7 +182,7 @@ mod tests {
                     prev_h,
                     prev_h,
                     power_proposals,
-                    frozen_proposals,
+                    pledge_proposals,
                     vec![],
                     vec![],
                     DEFAULT_TOTAL_SUPPLY,

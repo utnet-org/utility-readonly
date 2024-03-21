@@ -118,7 +118,7 @@ impl fmt::Debug for FunctionCallAction {
     }
 }
 
-/// An action which stakes signer_id tokens and setup's validator public key
+/// An action which pledges signer_id tokens and setup's validator public key
 #[derive(
     BorshSerialize,
     BorshDeserialize,
@@ -130,9 +130,9 @@ impl fmt::Debug for FunctionCallAction {
     serde::Deserialize,
 )]
 pub struct StakeAction {
-    /// Amount of tokens to stake.
+    /// Amount of tokens to pledge.
     #[serde(with = "dec_format")]
-    pub stake: Balance,
+    pub pledge: Balance,
     /// Validator key which will be used to sign transactions on behalf of signer_id
     pub public_key: PublicKey,
 }
@@ -288,8 +288,8 @@ impl From<TransferAction> for Action {
 }
 
 impl From<StakeAction> for Action {
-    fn from(stake_action: StakeAction) -> Self {
-        Self::Stake(Box::new(stake_action))
+    fn from(pledge_action: StakeAction) -> Self {
+        Self::Stake(Box::new(pledge_action))
     }
 }
 

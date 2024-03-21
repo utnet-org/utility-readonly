@@ -28,7 +28,7 @@ def get_lock(home):
     try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
-        raise Exception(f'{lock_file} is currently locked by another process')
+        raise Exception(f'{lock_file} is currently pledging by another process')
     return fd
 
 
@@ -762,7 +762,7 @@ class NeardRunner:
                         }
                     }
                     genesis_config['num_chunk_only_producer_seats'] = 200
-                    genesis_config['max_kickout_stake_perc'] = 30
+                    genesis_config['max_kickout_pledge_perc'] = 30
                     json.dump(genesis_config, f, indent=2)
                 initlog_path = os.path.join(self.neard_logs_dir, 'initlog.txt')
                 with open(initlog_path, 'ab') as out:

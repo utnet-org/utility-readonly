@@ -26,31 +26,31 @@ def create_account(node, unc_pk, unc_sk):
     return result.returncode
 
 
-def restart_restaked(node, delay_sec, unc_pk, unc_sk, need_create_accounts):
+def restart_repledged(node, delay_sec, unc_pk, unc_sk, need_create_accounts):
     if need_create_accounts and not node.instance_name.startswith(
             'shardnet-boot'):
         try:
             create_account(node, unc_pk, unc_sk)
         except RetryError:
             logger.error(
-                f'Skipping stake step after errors running create_account.sh on {node.instance_name}'
+                f'Skipping pledge step after errors running create_account.sh on {node.instance_name}'
             )
             return
 
-    node.machine.upload('tests/shardnet/scripts/restaked.sh',
+    node.machine.upload('tests/shardnet/scripts/repledged.sh',
                         '/home/ubuntu',
                         switch_user='ubuntu')
     s = '''
-        nohup bash ./restaked.sh {delay_sec} {stake_amount} 1>>/home/ubuntu/restaked.out 2>>/home/ubuntu/restaked.err </dev/null &
-    '''.format(stake_amount=shlex.quote(str(random.randint(10**3, 10**5))),
+        nohup bash ./repledged.sh {delay_sec} {pledge_amount} 1>>/home/ubuntu/repledged.out 2>>/home/ubuntu/repledged.err </dev/null &
+    '''.format(pledge_amount=shlex.quote(str(random.randint(10**3, 10**5))),
                delay_sec=shlex.quote(str(delay_sec)))
-    logger.info(f'Starting restaked on {node.instance_name}: {s}')
+    logger.info(f'Starting repledged on {node.instance_name}: {s}')
     node.machine.run('bash', input=s)
 
 
 if __name__ == '__main__':
-    logger.info('Starting restaker.')
-    parser = argparse.ArgumentParser(description='Run restaker')
+    logger.info('Starting repledger.')
+    parser = argparse.ArgumentParser(description='Run repledger')
     parser.add_argument('--delay-sec', type=int, required=True)
     parser.add_argument('--unc-pk', required=True)
     parser.add_argument('--unc-sk', required=True)
@@ -67,5 +67,5 @@ if __name__ == '__main__':
     random.shuffle(all_machines)
 
     pmap(
-        lambda machine: restart_restaked(machine, delay_sec, unc_pk, unc_sk,
+        lambda machine: restart_repledged(machine, delay_sec, unc_pk, unc_sk,
                                          need_create_accounts), all_machines)

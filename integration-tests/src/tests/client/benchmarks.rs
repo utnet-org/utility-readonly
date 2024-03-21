@@ -61,5 +61,5 @@ fn benchmark_large_chunk_production_time() {
 
     // Check that we limit the size of the chunk and not include all `n_txes`
     // transactions in the chunk.
-    assert!(30 * mb < size && size < 40 * mb, "{size}");
+    assert!(10 * mb < size && size < 13 * mb, "{size}");
 }

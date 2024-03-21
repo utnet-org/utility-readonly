@@ -421,7 +421,7 @@ def create_genesis(home, is_release, nodocker, image, chain_id, tracked_shards):
     print("Genesis created")
 
 
-def start_stakewars(home, is_release, nodocker, image, telemetry_url, verbose,
+def start_pledgewars(home, is_release, nodocker, image, telemetry_url, verbose,
                     tracked_shards):
     if nodocker:
         install_cargo()
@@ -433,7 +433,7 @@ def start_stakewars(home, is_release, nodocker, image, telemetry_url, verbose,
         except subprocess.CalledProcessError as exc:
             print("Failed to fetch docker containers: %s" % exc)
             exit(1)
-    create_genesis(home, is_release, nodocker, image, 'stakewars',
+    create_genesis(home, is_release, nodocker, image, 'pledgewars',
                    tracked_shards)
     if nodocker:
         run_nodocker(home,

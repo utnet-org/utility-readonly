@@ -1,9 +1,9 @@
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter, ValidatorPowerV1};
-use crate::types::{StateRoot, ValidatorFrozenV1};
+use crate::types::{StateRoot, ValidatorPledgeV1};
 use borsh::{BorshDeserialize, BorshSerialize};
 use unc_primitives_core::hash::CryptoHash;
 use unc_primitives_core::types::{Balance, BlockHeight, Gas, ShardId};
-use crate::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
+use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum ShardChunkHeaderInner {
@@ -53,10 +53,10 @@ impl ShardChunkHeaderInner {
     }
 
     #[inline]
-    pub fn prev_validator_frozen_proposals(&self) -> ValidatorFrozenIter {
+    pub fn prev_validator_pledge_proposals(&self) -> ValidatorPledgeIter {
         match self {
-            Self::V1(inner) => ValidatorFrozenIter::v1(&inner.prev_validator_frozen_proposals),
-            Self::V2(inner) => ValidatorFrozenIter::new(&inner.prev_validator_frozen_proposals),
+            Self::V1(inner) => ValidatorPledgeIter::v1(&inner.prev_validator_pledge_proposals),
+            Self::V2(inner) => ValidatorPledgeIter::new(&inner.prev_validator_pledge_proposals),
         }
     }
 
@@ -150,10 +150,10 @@ pub struct ShardChunkHeaderInnerV1 {
     /// Validator proposals from the previous chunk.
     pub prev_validator_power_proposals: Vec<ValidatorPowerV1>,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozenV1>,
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledgeV1>,
 }
 
-// V1 -> V2: Use versioned ValidatorStake structure in proposals
+// V1 -> V2: Use versioned ValidatorPledge structure in proposals
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ShardChunkHeaderInnerV2 {
     /// Previous block hash.
@@ -179,5 +179,5 @@ pub struct ShardChunkHeaderInnerV2 {
     /// Validator proposals from the previous chunk.
     pub prev_validator_power_proposals: Vec<ValidatorPower>,
     /// Validator proposals from the previous chunk.
-    pub prev_validator_frozen_proposals: Vec<ValidatorFrozen>,
+    pub prev_validator_pledge_proposals: Vec<ValidatorPledge>,
 }

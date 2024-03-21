@@ -167,8 +167,8 @@ expensive integration-tests integration_tests tests::framework::sync_nodes::sync
 expensive integration-tests integration_tests tests::framework::sync_nodes::sync_after_sync_nodes --features nightly
 expensive integration-tests integration_tests tests::framework::sync_nodes::sync_nodes
 expensive integration-tests integration_tests tests::framework::sync_nodes::sync_nodes --features nightly
-expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_stake_change
-expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_stake_change --features nightly
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_pledge_change
+expensive integration-tests integration_tests tests::framework::sync_nodes::sync_state_pledge_change --features nightly
 
 expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_block_unknown_block_error
 expensive integration-tests integration_tests tests::framework::rpc_error_structs::test_block_unknown_block_error --features nightly
@@ -214,14 +214,14 @@ expensive integration-tests integration_tests tests::framework::run_nodes::run_n
 expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_4_4_2
 expensive integration-tests integration_tests tests::framework::run_nodes::run_nodes_4_4_2 --features nightly
 
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_inflation
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_inflation --features nightly
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_stake_nodes
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_stake_nodes --features nightly
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_join
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_join --features nightly
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_kickout
-expensive integration-tests integration_tests tests::framework::stake_nodes::test_validator_kickout --features nightly
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_inflation
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_inflation --features nightly
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_pledge_nodes
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_pledge_nodes --features nightly
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_validator_join
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_validator_join --features nightly
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_validator_kickout
+expensive integration-tests integration_tests tests::framework::pledge_nodes::test_validator_kickout --features nightly
 
 expensive integration-tests integration_tests tests::framework::track_shards::track_shards
 expensive integration-tests integration_tests tests::framework::track_shards::track_shards --features nightly

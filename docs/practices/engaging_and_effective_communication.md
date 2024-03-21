@@ -37,7 +37,7 @@ After seeing the message, team members opens the link and read the doc. As every
 Nala starts a new topic on Zulip regarding a storage issue.
 
 *“I have a new idea to address the storage issue we have been having recently. Here is how it goes. …[idea overview]… But there are several outstanding problems with this approach. … [problem statement]… And here are the potential way to resolve them. …[solution]… I would like to get some feedback from the team and see if we can get aligned.”*
-* **Potential issue**: potential stakeholders may not subscribe the stream where the message is posted and never participate in the discussion.
+* **Potential issue**: potential pledgeholders may not subscribe the stream where the message is posted and never participate in the discussion.
   * **Proposal**: Tag people/team whom you want to participate in the discussion or who you think will find the discussion valuable. Pay special attention to the way you tag them though, to not make the topic ‘exclusive’ to those people. On the other hand, avoid using @ all or @ everyone tag as that can be spammy and too broad.
 
 The message sits there for two days, some people reads the message, but do not participate.
@@ -63,7 +63,7 @@ The topic discussion is ongoing for several days. Nala has to take care of other
   * **Proposal**: Occasionally summarizing the discussion up to certain point can be helpful for everyone to quickly gather/refresh context. If it is an important discussion that better be documented, consider creating a Google doc so discussion points can be structured and archived.
 
 * **Potential issue**: As other participants also have their own jobs to do, they may quickly lose their interest and forget about the discussion.
-  * **Proposal**: As someone who started the topic, it is your responsibility to make sure that the topic thread stays alive. If you cannot get back to this anytime soon, let the stakeholders know and share when you plan to pick up the discussion again so everyone can set the right expectation.
+  * **Proposal**: As someone who started the topic, it is your responsibility to make sure that the topic thread stays alive. If you cannot get back to this anytime soon, let the pledgeholders know and share when you plan to pick up the discussion again so everyone can set the right expectation.
 
 Some time later, Nala asynchronously works with other engineers and align on the solution.
 * **Potential issue**: From the Zulip topic point of view, the topic is never resolved and discussion is dropped in the middle. As a result, people who were not part of the offline discussion do not know the final state of the topic.

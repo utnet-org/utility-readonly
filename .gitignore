@@ -48,10 +48,6 @@ tmp/
 *.swp
 rusty-tags.vi
 
-# testnet genesis
-/framework/res/testnet.json
-/framework/res/testnet_genesis_records*.json
-
 # logs from mocknet nodes
 /pytest/logs/
 

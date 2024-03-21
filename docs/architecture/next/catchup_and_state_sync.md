@@ -13,7 +13,7 @@ State sync is used in two situations:
 
 In the past (and currently) - the state sync was mostly used in the first scenario (as all block & chunk producers had to track all the shards for security reasons - so they didn't actually have to do catchup at all).
 
-As we progress towards phase 2 and keep increasing number of shards - the catchup part starts being a lot more critical. When we're running a network with a 100 shards, the single machine is simply not capable of tracking (a.k.a applying all transactions) of all shards - so it will have to track just a subset. And it will have to change this subset almost every epoch (as protocol rebalances the shard-to-producer assignment based on the stakes).
+As we progress towards phase 2 and keep increasing number of shards - the catchup part starts being a lot more critical. When we're running a network with a 100 shards, the single machine is simply not capable of tracking (a.k.a applying all transactions) of all shards - so it will have to track just a subset. And it will have to change this subset almost every epoch (as protocol rebalances the shard-to-producer assignment based on the pledges).
 
 This means that we have to do some larger changes to the state sync design, as requirements start to differ a lot:
 * catchups are high priority (the validator MUST catchup within 1 epoch - otherwise it will not be able to produce blocks for the new shards in the next epoch - and therefore it will not earn rewards).

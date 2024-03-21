@@ -66,7 +66,7 @@ pub fn csv_to_json_configs(home: &Path, chain_id: String, tracked_shards: Vec<Sh
         ),
         avg_hidden_validator_seats_per_shard: SHARDS.iter().map(|_| 0).collect(),
         dynamic_resharding: false,
-        protocol_upgrade_stake_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
+        protocol_upgrade_pledge_threshold: PROTOCOL_UPGRADE_STAKE_THRESHOLD,
         epoch_length: EXPECTED_EPOCH_LENGTH,
         gas_limit: INITIAL_GAS_LIMIT,
         gas_price_adjustment_rate: GAS_PRICE_ADJUSTMENT_RATE,

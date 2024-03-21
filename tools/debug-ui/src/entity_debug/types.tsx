@@ -83,7 +83,7 @@ export type FieldSemantic =
           /// titleKey is present then display the value of that child field as the
           /// title of the struct node. This is useful for visualizing arrays where
           /// otherwise each element of the array would have to be separately expanded
-          /// to know which element that is (for example an array of ValidatorStake).
+          /// to know which element that is (for example an array of ValidatorPledge).
           titleKey?: string;
       }
     /// Undefined means there's no special customization for this field.

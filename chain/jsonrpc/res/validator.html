@@ -79,15 +79,15 @@
 
                 all_validators.forEach(entry => {
                     let validator = entry[0];
-                    let stake = entry[1];
+                    let pledge = entry[1];
                     if (approvals[validator] == null) {
-                        missingCount += stake;
+                        missingCount += pledge;
                     } else {
                         if (approvals[validator][0]["Endorsement"] != null) {
-                            approvalsMap.set(0, (approvalsMap.get(0) ?? 0) + stake);
+                            approvalsMap.set(0, (approvalsMap.get(0) ?? 0) + pledge);
                         } else {
                             let skip_delta = height - approvals[validator][0]["Skip"];
-                            approvalsMap.set(skip_delta, (approvalsMap.get(skip_delta) ?? 0) + stake);
+                            approvalsMap.set(skip_delta, (approvalsMap.get(skip_delta) ?? 0) + pledge);
                         }
                         let ts = Date.parse(approvals[validator][1]);
                         if (fastestValidator == null || fastestValidator > ts) {

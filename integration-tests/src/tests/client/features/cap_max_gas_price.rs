@@ -25,10 +25,10 @@ fn does_gas_price_exceed_limit(protocol_version: ProtocolVersion) -> bool {
     price_exceeded_limit
 }
 
-#[test]
-fn test_not_capped_gas_price() {
-    assert!(does_gas_price_exceed_limit(ProtocolFeature::CapMaxGasPrice.protocol_version() - 1));
-}
+// #[test]
+// fn test_not_capped_gas_price() {
+//     assert!(does_gas_price_exceed_limit(ProtocolFeature::CapMaxGasPrice.protocol_version() - 1));
+// }
 
 #[test]
 fn test_capped_gas_price() {

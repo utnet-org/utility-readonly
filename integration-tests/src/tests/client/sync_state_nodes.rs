@@ -347,7 +347,6 @@ fn sync_empty_state() {
                                             block_header_fetch_horizon;
                                         unc2.client_config.block_fetch_horizon =
                                             block_fetch_horizon;
-                                        unc2.client_config.tracked_shards = vec![0, 1, 2, 3];
 
                                         let framework::NearNode {
                                             view_client: view_client2,
@@ -436,7 +435,6 @@ fn sync_state_dump() {
             // An epoch passes in about 9 seconds.
             unc1.client_config.min_block_production_delay = Duration::from_millis(300);
             unc1.client_config.max_block_production_delay = Duration::from_millis(600);
-            unc1.client_config.tracked_shards = vec![0]; // Track all shards.
             let dump_dir = tempfile::Builder::new().prefix("state_dump_1").tempdir().unwrap();
             unc1.client_config.state_sync.dump = Some(DumpConfig {
                 location: Filesystem { root_dir: dump_dir.path().to_path_buf() },
@@ -482,7 +480,6 @@ fn sync_state_dump() {
                                 unc2.client_config.block_header_fetch_horizon =
                                     block_header_fetch_horizon;
                                 unc2.client_config.block_fetch_horizon = block_fetch_horizon;
-                                unc2.client_config.tracked_shards = vec![0]; // Track all shards.
                                 unc2.client_config.state_sync_enabled = true;
                                 unc2.client_config.state_sync_timeout = Duration::from_secs(2);
                                 unc2.client_config.state_sync.sync =
@@ -723,7 +720,6 @@ fn test_state_sync_headers() {
             let mut unc1 =
                 load_test_config("test1", tcp::ListenerAddr::reserve_for_test(), genesis.clone());
             unc1.client_config.min_num_peers = 0;
-            unc1.client_config.tracked_shards = vec![0]; // Track all shards.
             let dir1 =
                 tempfile::Builder::new().prefix("test_state_sync_headers").tempdir().unwrap();
             unc1.config.store.state_snapshot_enabled = true;
@@ -917,7 +913,6 @@ fn test_state_sync_headers_no_tracked_shards() {
             let port1 = tcp::ListenerAddr::reserve_for_test();
             let mut unc1 = load_test_config("test1", port1, genesis.clone());
             unc1.client_config.min_num_peers = 0;
-            unc1.client_config.tracked_shards = vec![0]; // Track all shards, it is a validator.
             let dir1 = tempfile::Builder::new()
                 .prefix("test_state_sync_headers_no_tracked_shards_1")
                 .tempdir()
@@ -934,7 +929,6 @@ fn test_state_sync_headers_no_tracked_shards() {
             unc2.network_config.peer_store.boot_nodes =
                 convert_boot_nodes(vec![("test1", *port1)]);
             unc2.client_config.min_num_peers = 0;
-            unc2.client_config.tracked_shards = vec![]; // Track no shards.
             let dir2 = tempfile::Builder::new()
                 .prefix("test_state_sync_headers_no_tracked_shards_2")
                 .tempdir()

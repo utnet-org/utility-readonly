@@ -20,7 +20,7 @@ use unc_primitives::hash::CryptoHash;
 use unc_primitives::transaction::SignedTransaction;
 use unc_primitives::types::{AccountId, BlockHeightDelta, BlockReference, NumSeats};
 use unc_primitives::views::{QueryRequest, QueryResponseKind, ValidatorInfo};
-use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_STAKE};
+use framework::config::{GenesisExt, TESTING_INIT_BALANCE, TESTING_INIT_PLEDGE};
 use framework::{load_test_config, start_with_config, UncConfig, UNC_BASE};
 
 use unc_o11y::WithSpanContextExt;
@@ -42,7 +42,7 @@ fn init_test_staking(
     num_validator_seats: NumSeats,
     epoch_length: BlockHeightDelta,
     enable_rewards: bool,
-    minimum_stake_divisor: u64,
+    minimum_pledge_divisor: u64,
     state_snapshot_enabled: bool,
     track_all_shards: bool,
 ) -> Vec<TestNode> {
@@ -55,7 +55,7 @@ fn init_test_staking(
     genesis.config.num_block_producer_seats = num_node_seats;
     genesis.config.block_producer_kickout_threshold = 20;
     genesis.config.chunk_producer_kickout_threshold = 20;
-    genesis.config.minimum_stake_divisor = minimum_stake_divisor;
+    genesis.config.minimum_pledge_divisor = minimum_pledge_divisor;
     if !enable_rewards {
         genesis.config.max_inflation_rate = Ratio::from_integer(0);
         genesis.config.min_gas_price = 0;
@@ -73,7 +73,6 @@ fn init_test_staking(
         config.config.store.state_snapshot_enabled = state_snapshot_enabled;
         if track_all_shards {
             config.config.tracked_shards = vec![0];
-            config.client_config.tracked_shards = vec![0];
         }
         if i != 0 {
             config.network_config.peer_store.boot_nodes =
@@ -103,12 +102,12 @@ fn init_test_staking(
 /// waits until it becomes a validator.
 #[test]
 #[cfg_attr(not(feature = "expensive_tests"), ignore)]
-fn test_stake_nodes() {
+fn test_pledge_nodes() {
     heavy_test(|| {
         let num_nodes = 2;
         let dirs = (0..num_nodes)
             .map(|i| {
-                tempfile::Builder::new().prefix(&format!("stake_node_{}", i)).tempdir().unwrap()
+                tempfile::Builder::new().prefix(&format!("pledge_node_{}", i)).tempdir().unwrap()
             })
             .collect::<Vec<_>>();
         run_actix(async {
@@ -123,12 +122,12 @@ fn test_stake_nodes() {
                 false,
             );
 
-            let tx = SignedTransaction::stake(
+            let tx = SignedTransaction::pledge(
                 1,
                 test_nodes[1].account_id.clone(),
                 // &*test_nodes[1].config.block_producer.as_ref().unwrap().signer,
                 &*test_nodes[1].signer,
-                TESTING_INIT_STAKE,
+                TESTING_INIT_PLEDGE,
                 test_nodes[1].config.validator_signer.as_ref().unwrap().public_key(),
                 test_nodes[1].genesis_hash,
             );
@@ -204,37 +203,37 @@ fn test_validator_kickout() {
                 4,
                 15,
                 false,
-                (TESTING_INIT_STAKE / UNC_BASE) as u64 + 1,
+                (TESTING_INIT_PLEDGE / UNC_BASE) as u64 + 1,
                 false,
                 false,
             );
             let mut rng = rand::thread_rng();
-            let stakes = (0..num_nodes / 2).map(|_| UNC_BASE + rng.gen_range(1..100));
-            let stake_transactions = stakes.enumerate().map(|(i, stake)| {
+            let pledges = (0..num_nodes / 2).map(|_| UNC_BASE + rng.gen_range(1..100));
+            let pledge_transactions = pledges.enumerate().map(|(i, pledge)| {
                 let test_node = &test_nodes[i];
                 let signer = Arc::new(InMemorySigner::from_seed(
                     test_node.account_id.clone(),
                     KeyType::ED25519,
                     test_node.account_id.as_ref(),
                 ));
-                SignedTransaction::stake(
+                SignedTransaction::pledge(
                     1,
                     test_node.account_id.clone(),
                     &*signer,
-                    stake,
+                    pledge,
                     test_node.config.validator_signer.as_ref().unwrap().public_key(),
                     test_node.genesis_hash,
                 )
             });
 
-            for (i, stake_transaction) in stake_transactions.enumerate() {
+            for (i, pledge_transaction) in pledge_transactions.enumerate() {
                 let test_node = &test_nodes[i];
                 actix::spawn(
                     test_node
                         .client
                         .send(
                             ProcessTxRequest {
-                                transaction: stake_transaction,
+                                transaction: pledge_transaction,
                                 is_forwarded: false,
                                 check_only: false,
                             }
@@ -282,7 +281,7 @@ fn test_validator_kickout() {
                                 let actor =
                                     actor.then(move |res| match res.unwrap().unwrap().kind {
                                         QueryResponseKind::ViewAccount(result) => {
-                                            if result.locked == 0
+                                            if result.pledging == 0
                                                 || result.amount == TESTING_INIT_BALANCE
                                             {
                                                 mark.store(true, Ordering::SeqCst);
@@ -308,10 +307,10 @@ fn test_validator_kickout() {
                                 let actor =
                                     actor.then(move |res| match res.unwrap().unwrap().kind {
                                         QueryResponseKind::ViewAccount(result) => {
-                                            assert_eq!(result.locked, TESTING_INIT_STAKE);
+                                            assert_eq!(result.pledging, TESTING_INIT_PLEDGE);
                                             assert_eq!(
                                                 result.amount,
-                                                TESTING_INIT_BALANCE - TESTING_INIT_STAKE
+                                                TESTING_INIT_BALANCE - TESTING_INIT_PLEDGE
                                             );
                                             mark.store(true, Ordering::SeqCst);
                                             future::ready(())
@@ -340,10 +339,10 @@ fn test_validator_kickout() {
 #[test]
 #[cfg_attr(not(feature = "expensive_tests"), ignore)]
 /// Starts 4 nodes, genesis has 2 validator seats.
-/// Node1 unstakes, Node2 stakes.
+/// Node1 unpledges, Node2 pledges.
 /// Submit the transactions via Node1 and Node2.
 /// Poll `/status` until you see the change of validator assignments.
-/// Afterwards check that `locked` amount on accounts Node1 and Node2 are 0 and TESTING_INIT_STAKE.
+/// Afterwards check that `pledging` amount on accounts Node1 and Node2 are 0 and TESTING_INIT_PLEDGE.
 fn test_validator_join() {
     heavy_test(|| {
         let num_nodes = 4;
@@ -368,7 +367,7 @@ fn test_validator_join() {
                 KeyType::ED25519,
                 test_nodes[1].account_id.as_ref(),
             ));
-            let unstake_transaction = SignedTransaction::stake(
+            let unpledge_transaction = SignedTransaction::pledge(
                 1,
                 test_nodes[1].account_id.clone(),
                 &*signer,
@@ -382,11 +381,11 @@ fn test_validator_join() {
                 KeyType::ED25519,
                 test_nodes[2].account_id.as_ref(),
             ));
-            let stake_transaction = SignedTransaction::stake(
+            let pledge_transaction = SignedTransaction::pledge(
                 1,
                 test_nodes[2].account_id.clone(),
                 &*signer,
-                TESTING_INIT_STAKE,
+                TESTING_INIT_PLEDGE,
                 test_nodes[2].config.validator_signer.as_ref().unwrap().public_key(),
                 test_nodes[2].genesis_hash,
             );
@@ -396,7 +395,7 @@ fn test_validator_join() {
                     .client
                     .send(
                         ProcessTxRequest {
-                            transaction: unstake_transaction,
+                            transaction: unpledge_transaction,
                             is_forwarded: false,
                             check_only: false,
                         }
@@ -409,7 +408,7 @@ fn test_validator_join() {
                     .client
                     .send(
                         ProcessTxRequest {
-                            transaction: stake_transaction,
+                            transaction: pledge_transaction,
                             is_forwarded: false,
                             check_only: false,
                         }
@@ -456,7 +455,7 @@ fn test_validator_join() {
                             );
                             let actor = actor.then(move |res| match res.unwrap().unwrap().kind {
                                 QueryResponseKind::ViewAccount(result) => {
-                                    if result.locked == 0 {
+                                    if result.pledging == 0 {
                                         done1_copy2.store(true, Ordering::SeqCst);
                                     }
                                     future::ready(())
@@ -475,7 +474,7 @@ fn test_validator_join() {
                             );
                             let actor = actor.then(move |res| match res.unwrap().unwrap().kind {
                                 QueryResponseKind::ViewAccount(result) => {
-                                    if result.locked == TESTING_INIT_STAKE {
+                                    if result.pledging == TESTING_INIT_PLEDGE {
                                         done2_copy2.store(true, Ordering::SeqCst);
                                     }
 
@@ -510,7 +509,7 @@ fn test_inflation() {
         let num_nodes = 1;
         let dirs = (0..num_nodes)
             .map(|i| {
-                tempfile::Builder::new().prefix(&format!("stake_node_{}", i)).tempdir().unwrap()
+                tempfile::Builder::new().prefix(&format!("pledge_node_{}", i)).tempdir().unwrap()
             })
             .collect::<Vec<_>>();
         let epoch_length = 10;

@@ -13,7 +13,7 @@ use unc_o11y::testonly::init_integration_logger;
 use unc_o11y::WithSpanContextExt;
 use unc_primitives::test_utils::create_test_signer;
 use unc_primitives::transaction::SignedTransaction;
-use framework::config::{GenesisExt, TESTING_INIT_STAKE};
+use framework::config::{GenesisExt, TESTING_INIT_PLEDGE};
 use framework::{load_test_config, start_with_config};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
@@ -123,11 +123,11 @@ fn sync_after_sync_nodes() {
     });
 }
 
-/// Starts one validation node, it reduces it's stake to 1/2 of the stake.
+/// Starts one validation node, it reduces it's pledge to 1/2 of the pledge.
 /// Second node starts after 1s, needs to catchup & state sync and then make sure it's
 #[test]
 #[cfg_attr(not(feature = "expensive_tests"), ignore)]
-fn sync_state_stake_change() {
+fn sync_state_pledge_change() {
     heavy_test(|| {
         init_integration_logger();
 
@@ -148,8 +148,8 @@ fn sync_state_stake_change() {
         near2.client_config.min_num_peers = 1;
         near2.client_config.skip_sync_wait = false;
 
-        let dir1 = tempfile::Builder::new().prefix("sync_state_stake_change_1").tempdir().unwrap();
-        let dir2 = tempfile::Builder::new().prefix("sync_state_stake_change_2").tempdir().unwrap();
+        let dir1 = tempfile::Builder::new().prefix("sync_state_pledge_change_1").tempdir().unwrap();
+        let dir2 = tempfile::Builder::new().prefix("sync_state_pledge_change_2").tempdir().unwrap();
         run_actix(async {
             let framework::NearNode { client: client1, view_client: view_client1, .. } =
                 start_with_config(dir1.path(), near1.clone()).expect("start_with_config");
@@ -160,11 +160,11 @@ fn sync_state_stake_change() {
                 KeyType::ED25519,
                 "test1",
             ));
-            let unstake_transaction = SignedTransaction::stake(
+            let unpledge_transaction = SignedTransaction::pledge(
                 1,
                 "test1".parse().unwrap(),
                 &*signer,
-                TESTING_INIT_STAKE / 2,
+                TESTING_INIT_PLEDGE / 2,
                 near1.validator_signer.as_ref().unwrap().public_key(),
                 genesis_hash,
             );
@@ -172,7 +172,7 @@ fn sync_state_stake_change() {
                 client1
                     .send(
                         ProcessTxRequest {
-                            transaction: unstake_transaction,
+                            transaction: unpledge_transaction,
                             is_forwarded: false,
                             check_only: false,
                         }

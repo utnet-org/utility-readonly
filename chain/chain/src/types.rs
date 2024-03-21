@@ -37,7 +37,7 @@ use unc_store::{PartialStorage, ShardTries, Store, Trie, WrappedTrieChanges};
 
 pub use unc_epoch_manager::EpochManagerAdapter;
 pub use unc_primitives::block::{Block, BlockHeader, Tip};
-use unc_primitives::types::validator_frozen::{ValidatorFrozen, ValidatorFrozenIter};
+use unc_primitives::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum BlockStatus {
@@ -107,7 +107,7 @@ pub struct ApplyChunkResult {
     pub outcomes: Vec<ExecutionOutcomeWithId>,
     pub outgoing_receipts: Vec<Receipt>,
     pub validator_power_proposals: Vec<ValidatorPower>,
-    pub validator_frozen_proposals: Vec<ValidatorFrozen>,
+    pub validator_pledge_proposals: Vec<ValidatorPledge>,
     pub total_gas_burnt: Gas,
     pub total_balance_burnt: Balance,
     pub proof: Option<PartialStorage>,
@@ -308,7 +308,7 @@ impl ApplyChunkBlockContext {
 pub struct ApplyChunkShardContext<'a> {
     pub shard_id: ShardId,
     pub last_validator_power_proposals: ValidatorPowerIter<'a>,
-    pub last_validator_frozen_proposals: ValidatorFrozenIter<'a>,
+    pub last_validator_pledge_proposals: ValidatorPledgeIter<'a>,
     pub gas_limit: Gas,
     pub is_new_chunk: bool,
     pub is_first_block_with_chunk_of_version: bool,
@@ -503,7 +503,7 @@ mod tests {
         let shard_ids: Vec<_> = (0..32).collect();
         let genesis_chunks =
             genesis_chunks(vec![Trie::EMPTY_ROOT], &shard_ids, 1_000_000, 0, PROTOCOL_VERSION);
-        let genesis_bps: Vec<ValidatorStake> = Vec::new();
+        let genesis_bps: Vec<ValidatorPledge> = Vec::new();
         let genesis = Block::genesis(
             PROTOCOL_VERSION,
             genesis_chunks.into_iter().map(|chunk| chunk.take_header()).collect(),

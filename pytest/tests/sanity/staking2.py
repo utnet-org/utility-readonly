@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Runs randomized staking transactions and makes some basic checks on the final `staked` values
+# Runs randomized staking transactions and makes some basic checks on the final `pledging` values
 # In each epoch sends two sets of staking transactions, one when (last_height % 12 == 4), called "fake", and
 # one when (last_height % 12 == 7), called "real" (because the former will be overwritten by the later).
-# Before the "fake" tx we expect the stakes to be equal to the largest of the last three "real" stakes for
-# each node. Before "real" txs it is the largest of the same value, and the last "fake" stake.
+# Before the "fake" tx we expect the pledges to be equal to the largest of the last three "real" pledges for
+# each node. Before "real" txs it is the largest of the same value, and the last "fake" pledge.
 
 import sys, time, base58, random, logging
 import pathlib
@@ -21,12 +21,12 @@ FAKE_OFFSET = 6
 REAL_OFFSET = 12
 EPOCH_LENGTH = 18
 
-all_stakes = []
-fake_stakes = [0, 0, 0]
+all_pledges = []
+fake_pledges = [0, 0, 0]
 next_nonce = 3
 
-# other tests can set `sequence` to some sequence of triplets of stakes
-# `do_moar_stakes` first uses the elements of `sequence` for stakes before switching to
+# other tests can set `sequence` to some sequence of triplets of pledges
+# `do_moar_pledges` first uses the elements of `sequence` for pledges before switching to
 # random. See `staking_repro1.py` for an example
 sequence = []
 
@@ -35,58 +35,58 @@ def get_validators():
     return set([x['account_id'] for x in nodes[0].get_status()['validators']])
 
 
-def get_stakes():
+def get_pledges():
     return [
-        int(nodes[2].get_account("test%s" % i)['result']['locked'])
+        int(nodes[2].get_account("test%s" % i)['result']['pledging'])
         for i in range(3)
     ]
 
 
-def get_expected_stakes():
-    global all_stakes
+def get_expected_pledges():
+    global all_pledges
     return [
-        max(fake_stakes[i], max([x[i]
-                                 for x in all_stakes[-3:]]))
+        max(fake_pledges[i], max([x[i]
+                                 for x in all_pledges[-3:]]))
         for i in range(3)
     ]
 
 
-def do_moar_stakes(last_block_hash, update_expected):
-    global next_nonce, all_stakes, fake_stakes, sequence
+def do_moar_pledges(last_block_hash, update_expected):
+    global next_nonce, all_pledges, fake_pledges, sequence
 
     if len(sequence) == 0:
-        stakes = [0, 0, 0]
-        # have 1-2 validators with stake, and the remaining without
-        # make numbers dibisable by 1M so that we can easily distinguish a situation when the current locked amt has some reward added to it (not divisable by 1M) vs not (divisable by 1M)
-        stakes[random.randint(0, 2)] = random.randint(
+        pledges = [0, 0, 0]
+        # have 1-2 validators with pledge, and the remaining without
+        # make numbers dibisable by 1M so that we can easily distinguish a situation when the current pledging amt has some reward added to it (not divisable by 1M) vs not (divisable by 1M)
+        pledges[random.randint(0, 2)] = random.randint(
             70000000000000000000000000, 100000000000000000000000000) * 1000000
-        stakes[random.randint(0, 2)] = random.randint(
+        pledges[random.randint(0, 2)] = random.randint(
             70000000000000000000000000, 100000000000000000000000000) * 1000000
     else:
-        stakes = sequence[0]
+        pledges = sequence[0]
         sequence = sequence[1:]
 
     vals = get_validators()
     val_id = int(list(vals)[0][4:])
     for i in range(3):
         tx = sign_staking_tx(nodes[i].signer_key, nodes[i].validator_key,
-                             stakes[i], next_nonce,
+                             pledges[i], next_nonce,
                              base58.b58decode(last_block_hash.encode('utf8')))
         nodes[val_id].send_tx(tx)
         next_nonce += 1
 
     if update_expected:
-        fake_stakes = [0, 0, 0]
-        all_stakes.append(stakes)
+        fake_pledges = [0, 0, 0]
+        all_pledges.append(pledges)
     else:
-        fake_stakes = stakes
+        fake_pledges = pledges
 
     logger.info("Sent %s staking txs: %s" %
-                ("REAL" if update_expected else "fake", stakes))
+                ("REAL" if update_expected else "fake", pledges))
 
 
 def doit(seq=[]):
-    global nodes, all_stakes, sequence
+    global nodes, all_pledges, sequence
     sequence = seq
 
     config = None
@@ -141,12 +141,12 @@ def doit(seq=[]):
     for i in range(3):
         nodes[i].stop_checking_store()
 
-    logger.info("Initial stakes: %s" % get_stakes())
-    all_stakes.append(get_stakes())
+    logger.info("Initial pledges: %s" % get_pledges())
+    all_pledges.append(get_pledges())
 
-    do_moar_stakes(hash_, True)
-    last_fake_stakes_height = FAKE_OFFSET
-    last_staked_height = REAL_OFFSET
+    do_moar_pledges(hash_, True)
+    last_fake_pledges_height = FAKE_OFFSET
+    last_pledged_height = REAL_OFFSET
 
     while True:
         if time.time() - started >= TIMEOUT:
@@ -161,37 +161,37 @@ def doit(seq=[]):
         send_fakes = send_reals = False
 
         if (height + EPOCH_LENGTH - FAKE_OFFSET) // EPOCH_LENGTH > (
-                last_fake_stakes_height + EPOCH_LENGTH -
+                last_fake_pledges_height + EPOCH_LENGTH -
                 FAKE_OFFSET) // EPOCH_LENGTH:
             last_iter = time.time()
 
             send_fakes = True
 
         if (height + EPOCH_LENGTH - REAL_OFFSET) // EPOCH_LENGTH > (
-                last_staked_height + EPOCH_LENGTH -
+                last_pledged_height + EPOCH_LENGTH -
                 REAL_OFFSET) // EPOCH_LENGTH:
 
             send_reals = True
 
         if send_fakes or send_reals:
-            cur_stakes = get_stakes()
-            logger.info("Current stakes: %s" % cur_stakes)
-            if len(all_stakes) > 1:
-                expected_stakes = get_expected_stakes()
-                logger.info("Expect  stakes: %s" % expected_stakes)
-                for (cur, expected) in zip(cur_stakes, expected_stakes):
+            cur_pledges = get_pledges()
+            logger.info("Current pledges: %s" % cur_pledges)
+            if len(all_pledges) > 1:
+                expected_pledges = get_expected_pledges()
+                logger.info("Expect  pledges: %s" % expected_pledges)
+                for (cur, expected) in zip(cur_pledges, expected_pledges):
                     if cur % 1000000 == 0:
                         assert cur == expected
                     else:
                         assert expected <= cur <= expected * 1.1
 
-            do_moar_stakes(hash_, update_expected=send_reals)
+            do_moar_pledges(hash_, update_expected=send_reals)
 
         if send_fakes:
-            last_fake_stakes_height += EPOCH_LENGTH
+            last_fake_pledges_height += EPOCH_LENGTH
 
         elif send_reals:
-            last_staked_height += EPOCH_LENGTH
+            last_pledged_height += EPOCH_LENGTH
 
         time.sleep(1)
 

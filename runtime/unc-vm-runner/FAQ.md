@@ -238,10 +238,10 @@ discussion.
 
 Dichotomy here is either taking a paternalistic approach for the users, and trying to constraint
 them as much as possible through eDSL to the point where we minimize the chance of them making
-some common contract-specific mistake. Or we take a liberal approach and consider typical
-contract mistakes to be under full users’ responsibility. Most of the modern blockchains
+some common contract-specific mipledge. Or we take a liberal approach and consider typical
+contract mipledges to be under full users’ responsibility. Most of the modern blockchains
 follow the latter approach, sometimes augmented with the static analysis tools to help users
-avoid certain classes of mistakes.
+avoid certain classes of mipledges.
 
 ### Who is responsible for the safety of contract execution in the blockchain?
 

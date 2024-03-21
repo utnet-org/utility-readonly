@@ -260,7 +260,7 @@ impl FlatStorageManager {
         } else {
             // Do rollback.
             // It does allow for a data race if somebody updates move_head_enabled on individual shards.
-            // The assumption is that all shards get locked/unlocked at the same time.
+            // The assumption is that all shards get pledging/unlocked at the same time.
             for flat_storage in updated_flat_storages {
                 flat_storage.set_flat_head_update_mode(!enabled);
             }

@@ -27,7 +27,7 @@ const ONE_NEAR: u128 = 1_000_000_000_000_000_000_000_000;
 fn test_in_memory_trie_node_consistency() {
     // Recommended to run with RUST_LOG=memtrie=debug,chunks=error,info
     init_test_logger();
-    let validator_stake = 1000000 * ONE_NEAR;
+    let validator_pledge = 1000000 * ONE_NEAR;
     let initial_balance = 10000 * ONE_NEAR;
     let accounts =
         (0..100).map(|i| format!("account{}", i).parse().unwrap()).collect::<Vec<AccountId>>();
@@ -65,12 +65,14 @@ fn test_in_memory_trie_node_consistency() {
         validators: vec![
             AccountInfo {
                 account_id: accounts[0].clone(),
-                amount: validator_stake,
+                power: 0,
+                pledging: validator_pledge,
                 public_key: create_test_signer(accounts[0].as_str()).public_key(),
             },
             AccountInfo {
                 account_id: accounts[1].clone(),
-                amount: validator_stake,
+                power: 0,
+                pledging: validator_pledge,
                 public_key: create_test_signer(accounts[1].as_str()).public_key(),
             },
         ],
@@ -98,11 +100,11 @@ fn test_in_memory_trie_node_consistency() {
     // we can send transactions from them.
     let mut records = Vec::new();
     for (i, account) in accounts.iter().enumerate() {
-        // The staked amount must be consistent with validators from genesis.
-        let staked = if i < 2 { validator_stake } else { 0 };
+        // The pledging amount must be consistent with validators from genesis.
+        let pledging = if i < 2 { validator_pledge } else { 0 };
         records.push(StateRecord::Account {
             account_id: account.clone(),
-            account: Account::new(initial_balance, staked, CryptoHash::default(), 0),
+            account: Account::new(initial_balance, pledging, 0,  CryptoHash::default(), 0),
         });
         records.push(StateRecord::AccessKey {
             account_id: account.clone(),
@@ -110,7 +112,7 @@ fn test_in_memory_trie_node_consistency() {
             access_key: AccessKey::full_access(),
         });
         // The total supply must be correct to pass validation.
-        genesis_config.total_supply += initial_balance + staked;
+        genesis_config.total_supply += initial_balance + pledging;
     }
     let genesis = Genesis::new(genesis_config, GenesisRecords(records)).unwrap();
     let chain_genesis = ChainGenesis::new(&genesis);

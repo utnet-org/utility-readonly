@@ -25,12 +25,12 @@ pub enum AccountVersion {
 /// Per account information stored in the state.
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Account {
-    /// The total not locked tokens.
+    /// The total not pledging tokens.
     #[serde(with = "dec_format")]
     amount: Balance,
-    /// The amount locked due to staking.
+    /// The amount pledging due to staking.
     #[serde(with = "dec_format")]
-    locked: Balance,
+    pledging: Balance,
     ///
     #[serde(with = "dec_format")]
     power: Power,
@@ -50,12 +50,12 @@ impl Account {
 
     pub fn new(
         amount: Balance,
-        locked: Balance,
+        pledging: Balance,
         power:  Power,
         code_hash: CryptoHash,
         storage_usage: StorageUsage,
     ) -> Self {
-        Account { amount, locked, power, code_hash, storage_usage, version: AccountVersion::V1 }
+        Account { amount, pledging, power, code_hash, storage_usage, version: AccountVersion::V1 }
     }
 
     #[inline]
@@ -64,8 +64,8 @@ impl Account {
     }
 
     #[inline]
-    pub fn locked(&self) -> Balance {
-        self.locked
+    pub fn pledging(&self) -> Balance {
+        self.pledging
     }
 
     #[inline]
@@ -95,8 +95,8 @@ impl Account {
     pub fn set_power(&mut self, power: Power) { self.power = power; }
 
     #[inline]
-    pub fn set_locked(&mut self, locked: Balance) {
-        self.locked = locked;
+    pub fn set_pledging(&mut self, pledging: Balance) {
+        self.pledging = pledging;
     }
 
     #[inline]
@@ -117,7 +117,7 @@ impl Account {
 #[derive(BorshSerialize, BorshDeserialize)]
 struct LegacyAccount {
     amount: Balance,
-    locked: Balance,
+    pledging: Balance,
     power: Power,
     code_hash: CryptoHash,
     storage_usage: StorageUsage,
@@ -130,7 +130,7 @@ impl BorshDeserialize for Account {
         let deserialized_account = LegacyAccount::deserialize_reader(rd)?;
         Ok(Account {
             amount: deserialized_account.amount,
-            locked: deserialized_account.locked,
+            pledging: deserialized_account.pledging,
             power: deserialized_account.power,
             code_hash: deserialized_account.code_hash,
             storage_usage: deserialized_account.storage_usage,
@@ -144,7 +144,7 @@ impl BorshSerialize for Account {
         match self.version {
             AccountVersion::V1 => LegacyAccount {
                 amount: self.amount,
-                locked: self.locked,
+                pledging: self.pledging,
                 power:  self.power,
                 code_hash: self.code_hash,
                 storage_usage: self.storage_usage,
@@ -263,7 +263,7 @@ mod tests {
     fn test_account_deserialization() {
         let old_account = LegacyAccount {
             amount: 100,
-            locked: 200,
+            pledging: 200,
             power: 5,
             code_hash: CryptoHash::default(),
             storage_usage: 300,
@@ -271,7 +271,7 @@ mod tests {
         let mut old_bytes = &borsh::to_vec(&old_account).unwrap()[..];
         let new_account = <Account as BorshDeserialize>::deserialize(&mut old_bytes).unwrap();
         assert_eq!(new_account.amount, old_account.amount);
-        assert_eq!(new_account.locked, old_account.locked);
+        assert_eq!(new_account.pledging, old_account.pledging);
         assert_eq!(new_account.power, old_account.power);
         assert_eq!(new_account.code_hash, old_account.code_hash);
         assert_eq!(new_account.storage_usage, old_account.storage_usage);

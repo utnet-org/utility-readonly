@@ -230,7 +230,7 @@ pub fn inline_flat_state_values(
         let mut inlined_batch_count = 0;
         let mut batch_duration = std::time::Duration::ZERO;
         if !hash_to_value.is_empty() {
-            // Possibly flat storage head can be locked. If that happens wait a little bit and try again.
+            // Possibly flat storage head can be pledging. If that happens wait a little bit and try again.
             // The number of attempts is infinite because flat storage head is supposed to be usually unlocked.
             interrupted = lock_flat_head_blocking(flat_storage_manager, keep_running, batch_index);
             if interrupted {
@@ -281,7 +281,7 @@ pub fn inline_flat_state_values(
     !interrupted
 }
 
-/// Blocks until the flat head is locked or until the thread is interrupted.
+/// Blocks until the flat head is pledging or until the thread is interrupted.
 /// Returns whether it was interrupted.
 fn lock_flat_head_blocking(
     flat_storage_manager: &FlatStorageManager,

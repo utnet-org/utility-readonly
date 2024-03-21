@@ -485,23 +485,23 @@ pub(crate) fn transfer_exec(ctx: &mut EstimatorContext) -> GasCost {
     ActionEstimation::new_sir(ctx).add_action(transfer_action()).apply_cost(&mut ctx.testbed())
 }
 
-pub(crate) fn stake_send_sir(ctx: &mut EstimatorContext) -> GasCost {
-    ActionEstimation::new_sir(ctx).add_action(stake_action()).verify_cost(&mut ctx.testbed())
+pub(crate) fn pledge_send_sir(ctx: &mut EstimatorContext) -> GasCost {
+    ActionEstimation::new_sir(ctx).add_action(pledge_action()).verify_cost(&mut ctx.testbed())
 }
 
 /// This is not a useful action, as staking only works with sender = receiver.
 /// But since this fails only in the exec step, we must still charge a fitting
 /// amount of gas in the send step.
-pub(crate) fn stake_send_not_sir(ctx: &mut EstimatorContext) -> GasCost {
+pub(crate) fn pledge_send_not_sir(ctx: &mut EstimatorContext) -> GasCost {
     ActionEstimation::new(ctx)
-        .add_action(stake_action())
+        .add_action(pledge_action())
         .predecessor(AccountRequirement::SameAsSigner)
         .verify_cost(&mut ctx.testbed())
 }
 
-pub(crate) fn stake_exec(ctx: &mut EstimatorContext) -> GasCost {
+pub(crate) fn pledge_exec(ctx: &mut EstimatorContext) -> GasCost {
     ActionEstimation::new_sir(ctx)
-        .add_action(stake_action())
+        .add_action(pledge_action())
         .predecessor(AccountRequirement::SameAsSigner)
         .receiver(AccountRequirement::SameAsSigner) // staking must be local
         .apply_cost(&mut ctx.testbed())
@@ -685,9 +685,9 @@ fn create_transfer_action() -> Action {
     Action::Transfer(unc_primitives::transaction::TransferAction { deposit: 10u128.pow(24) })
 }
 
-fn stake_action() -> Action {
+fn pledge_action() -> Action {
     Action::Stake(Box::new(unc_primitives::transaction::StakeAction {
-        stake: 5u128.pow(28), // some arbitrary positive number
+        pledge: 5u128.pow(28), // some arbitrary positive number
         public_key: PublicKey::from_seed(KeyType::ED25519, "seed"),
     }))
 }

@@ -47,8 +47,8 @@ pub fn state_dump(
         .into_iter()
         .filter_map(|(info, is_slashed)| {
             if !is_slashed {
-                let (account_id, public_key, power, frozen) = info.destructure();
-                Some((account_id, (public_key, power, frozen)))
+                let (account_id, public_key, power, pledge) = info.destructure();
+                Some((account_id, (public_key, power, pledge)))
             } else {
                 None
             }
@@ -62,12 +62,12 @@ pub fn state_dump(
     genesis_config.genesis_time = Utc::now();
     genesis_config.validators = validators
         .iter()
-        .map(|(account_id, (public_key, power,frozen))| AccountInfo {
+        .map(|(account_id, (public_key, power,pledge))| AccountInfo {
             account_id: account_id.clone(),
             public_key: public_key.clone(),
             amount: 0,
             power: *power,
-            locked: *frozen,
+            pledging: *pledge,
         })
         .collect();
     genesis_config.validators.sort_by_key(|account_info| account_info.account_id.clone());
@@ -245,14 +245,14 @@ fn iterate_over_records(
                     continue;
                 }
                 if let StateRecord::Account { account_id, account } = &mut sr {
-                    if account.locked() > 0 {
-                        let stake = *validators.get(account_id).map(|(_,_, s)| s).unwrap_or(&0);
-                        if account.locked() > stake {
-                            account.set_amount(account.amount() + account.locked() - stake);
+                    if account.pledging() > 0 {
+                        let pledge = *validators.get(account_id).map(|(_,_, s)| s).unwrap_or(&0);
+                        if account.pledging() > pledge {
+                            account.set_amount(account.amount() + account.pledging() - pledge);
                         }
-                        account.set_locked(stake);
+                        account.set_pledging(pledge);
                     }
-                    total_supply += account.amount() + account.locked();
+                    total_supply += account.amount() + account.pledging();
                 }
                 change_state_record(&mut sr, change_config);
                 callback(sr);
@@ -263,14 +263,14 @@ fn iterate_over_records(
 }
 
 /// Change record according to genesis_change_config.
-/// 1. Remove stake from non-whitelisted validators;
+/// 1. Remove pledge from non-whitelisted validators;
 pub fn change_state_record(record: &mut StateRecord, genesis_change_config: &GenesisChangeConfig) {
     // Kick validators outside of whitelist
     if let Some(whitelist) = &genesis_change_config.whitelist_validators {
         if let StateRecord::Account { account_id, account } = record {
             if !whitelist.contains(account_id) {
-                account.set_amount(account.amount() + account.locked());
-                account.set_locked(0);
+                account.set_amount(account.amount() + account.pledging());
+                account.set_pledging(0);
             }
         }
     }
@@ -314,7 +314,7 @@ mod test {
     use unc_store::test_utils::create_test_store;
     use unc_store::Store;
     use framework::config::GenesisExt;
-    use framework::config::TESTING_INIT_STAKE;
+    use framework::config::TESTING_INIT_PLEDGE;
     use framework::config::{Config, UncConfig};
     use framework::test_utils::TestEnvNightshadeSetupExt;
     use framework::NightshadeRuntime;
@@ -374,7 +374,7 @@ mod test {
 
     /// Produces blocks, avoiding the potential failure where the client is not the
     /// block producer for each subsequent height (this can happen when a new validator
-    /// is staked since they will also have heights where they should produce the block instead).
+    /// is pledging since they will also have heights where they should produce the block instead).
     fn safe_produce_blocks(
         env: &mut TestEnv,
         initial_height: BlockHeight,
@@ -400,11 +400,11 @@ mod test {
         let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -464,11 +464,11 @@ mod test {
             })],
             genesis_hash,
         );
-        let tx01 = SignedTransaction::stake(
+        let tx01 = SignedTransaction::pledge(
             1,
             "test0".parse().unwrap(),
             &signer0,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer0.public_key.clone(),
             genesis_hash,
         );
@@ -477,11 +477,11 @@ mod test {
 
         let signer1 =
             InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx1 = SignedTransaction::stake(
+        let tx1 = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer1,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer1.public_key.clone(),
             genesis_hash,
         );
@@ -540,11 +540,11 @@ mod test {
         let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -584,18 +584,18 @@ mod test {
         validate_genesis(&new_genesis).unwrap();
     }
 
-    /// Test that we return locked tokens for accounts that are not validators.
+    /// Test that we return pledging tokens for accounts that are not validators.
     #[test]
     fn test_dump_state_return_locked() {
         let epoch_length = 4;
         let (store, genesis, mut env, unc_config) = setup(epoch_length, PROTOCOL_VERSION, false);
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -799,11 +799,11 @@ mod test {
             .build();
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -866,11 +866,11 @@ mod test {
 
         let genesis_hash = *env.clients[0].chain.genesis().hash();
         let signer = InMemorySigner::from_seed("test1".parse().unwrap(), KeyType::ED25519, "test1");
-        let tx = SignedTransaction::stake(
+        let tx = SignedTransaction::pledge(
             1,
             "test1".parse().unwrap(),
             &signer,
-            TESTING_INIT_STAKE,
+            TESTING_INIT_PLEDGE,
             signer.public_key.clone(),
             genesis_hash,
         );
@@ -921,15 +921,15 @@ mod test {
             vec!["test1"]
         );
 
-        let mut stake = HashMap::<AccountId, Balance>::new();
+        let mut pledge = HashMap::<AccountId, Balance>::new();
         new_genesis.for_each_record(|record| {
             if let StateRecord::Account { account_id, account } = record {
-                stake.insert(account_id.clone(), account.locked());
+                pledge.insert(account_id.clone(), account.pledging());
             }
         });
 
         assert_eq!(
-            stake.get(AccountIdRef::new_or_panic("test0")).unwrap_or(&(0 as Balance)),
+            pledge.get(AccountIdRef::new_or_panic("test0")).unwrap_or(&(0 as Balance)),
             &(0 as Balance)
         );
 

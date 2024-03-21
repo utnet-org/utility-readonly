@@ -29,7 +29,7 @@ fn test_chunk_validation_basic() {
         return;
     }
 
-    let validator_stake = 1000000 * ONE_NEAR;
+    let validator_pledge = 1000000 * ONE_NEAR;
     let accounts =
         (0..9).map(|i| format!("account{}", i).parse().unwrap()).collect::<Vec<AccountId>>();
     let mut genesis_config = GenesisConfig {
@@ -39,7 +39,7 @@ fn test_chunk_validation_basic() {
         // Some arbitrary starting height. Doesn't matter.
         genesis_height: 10000,
         // We'll use four shards for this test.
-        shard_layout: ShardLayout::get_simple_nightshade_layout(),
+        shard_layout: ShardLayout::v0_single_shard(),
         // Make 8 validators, which means 2 will be assigned as chunk validators
         // for each chunk.
         validators: accounts
@@ -48,7 +48,8 @@ fn test_chunk_validation_basic() {
             .map(|account_id| AccountInfo {
                 account_id: account_id.clone(),
                 public_key: create_test_signer(account_id.as_str()).public_key(),
-                amount: validator_stake,
+                pledging: validator_pledge,
+                power: 0,
             })
             .collect(),
         // We don't care about epoch transitions in this test.
@@ -69,14 +70,14 @@ fn test_chunk_validation_basic() {
     // Set up the records corresponding to the validator accounts.
     let mut records = Vec::new();
     for (i, account) in accounts.iter().enumerate() {
-        // The staked amount must be consistent with validators from genesis.
-        let staked = if i < 8 { validator_stake } else { 0 };
+        // The pledging amount must be consistent with validators from genesis.
+        let pledging = if i < 8 { validator_pledge } else { 0 };
         records.push(StateRecord::Account {
             account_id: account.clone(),
-            account: Account::new(0, staked, CryptoHash::default(), 0),
+            account: Account::new(0, pledging, 0, CryptoHash::default(), 0),
         });
         // The total supply must be correct to pass validation.
-        genesis_config.total_supply += staked;
+        genesis_config.total_supply += pledging;
     }
     let genesis = Genesis::new(genesis_config, GenesisRecords(records)).unwrap();
     let chain_genesis = ChainGenesis::new(&genesis);
@@ -128,7 +129,7 @@ fn test_chunk_validation_basic() {
 
     // Wait a bit and check that we've received at least some chunk approvals.
     // TODO(#10265): We need to make this not time-based, and we need to assert
-    // exactly how many approvals (or total stake) we have.
+    // exactly how many approvals (or total pledge) we have.
     std::thread::sleep(std::time::Duration::from_secs(1));
     let approvals = env.get_all_chunk_endorsements();
     assert!(!approvals.is_empty());
