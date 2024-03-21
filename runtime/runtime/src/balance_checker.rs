@@ -13,6 +13,7 @@ use unc_primitives::trie_key::TrieKey;
 use unc_primitives::types::{AccountId, Balance};
 use unc_store::{get, get_account, get_postponed_receipt, TrieAccess, TrieUpdate};
 use std::collections::HashSet;
+#[allow(unused_imports)]
 use tracing::log::debug;
 
 /// Returns delayed receipts with given range of indices.
@@ -147,16 +148,15 @@ pub(crate) fn check_balance(
             if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
                 all_accounts_ids.insert(account_id.clone());
             }
+
             validator_accounts_update
                     .validator_rewards
                     .values()
                     .try_fold(0u128, |res, balance| safe_add_balance(res, *balance))?
-
         }
         else {
             0
         };
-    debug!("incoming_validator_rewards : {}", incoming_validator_rewards);
     let initial_accounts_balance = total_accounts_balance(initial_state, &all_accounts_ids)?;
     let final_accounts_balance = total_accounts_balance(final_state, &all_accounts_ids)?;
     // Receipts
