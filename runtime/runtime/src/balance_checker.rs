@@ -13,6 +13,7 @@ use unc_primitives::trie_key::TrieKey;
 use unc_primitives::types::{AccountId, Balance};
 use unc_store::{get, get_account, get_postponed_receipt, TrieAccess, TrieUpdate};
 use std::collections::HashSet;
+use tracing::log::debug;
 
 /// Returns delayed receipts with given range of indices.
 fn get_delayed_receipts(
@@ -138,6 +139,7 @@ pub(crate) fn check_balance(
     let incoming_validator_rewards =
         if let Some(validator_accounts_update) = validator_accounts_update {
             all_accounts_ids.extend(validator_accounts_update.power_info.keys().cloned());
+            all_accounts_ids.extend(validator_accounts_update.frozen_info.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.validator_rewards.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.last_power_proposals.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.last_frozen_proposals.keys().cloned());
@@ -146,13 +148,15 @@ pub(crate) fn check_balance(
                 all_accounts_ids.insert(account_id.clone());
             }
             validator_accounts_update
-                .validator_rewards
-                .values()
-                .try_fold(0u128, |res, balance| safe_add_balance(res, *balance))?
-        } else {
+                    .validator_rewards
+                    .values()
+                    .try_fold(0u128, |res, balance| safe_add_balance(res, *balance))?
+
+        }
+        else {
             0
         };
-
+    debug!("incoming_validator_rewards : {}", incoming_validator_rewards);
     let initial_accounts_balance = total_accounts_balance(initial_state, &all_accounts_ids)?;
     let final_accounts_balance = total_accounts_balance(final_state, &all_accounts_ids)?;
     // Receipts
@@ -214,6 +218,7 @@ pub(crate) fn check_balance(
         stats.slashed_burnt_amount,
         stats.other_burnt_amount
     );
+
     if initial_balance != final_balance {
         Err(BalanceMismatchError {
             // Inputs

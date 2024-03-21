@@ -1158,7 +1158,8 @@ impl Runtime {
         // start customized by james savechives
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
-            if !validator_accounts_update.power_info.contains_key(account_id) {
+            let miner_id = "miner".parse::<AccountId>().unwrap();
+            if !validator_accounts_update.frozen_info.contains_key(account_id) && !validator_accounts_update.frozen_info.contains_key(&miner_id) {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",
@@ -1308,7 +1309,7 @@ impl Runtime {
 
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury stakes, then the rewards was already distributed above.
-            if !validator_accounts_update.power_info.contains_key(account_id) {
+            if !validator_accounts_update.frozen_info.contains_key(account_id) {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",
@@ -1427,7 +1428,7 @@ impl Runtime {
         let mut stats = ApplyStats::default();
 
         if let Some(validator_accounts_update) = validator_accounts_update {
-            self.update_validator_accounts(
+            self.update_validator_accounts_in_block(
                 &mut state_update,
                 validator_accounts_update,
                 &mut stats,
