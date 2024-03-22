@@ -244,13 +244,13 @@ pub trait External {
     /// Returns amount of touched trie nodes by storage operations
     fn get_trie_nodes_count(&self) -> TrieNodesCount;
 
-    /// Returns the validator pledge for given account in the current epoch.
+    /// Returns the validator stake for given account in the current epoch.
     /// If the account is not a validator, returns `None`.
-    fn validator_pledge(&self, account_id: &AccountId) -> Result<Option<Balance>>;
+    fn validator_stake(&self, account_id: &AccountId) -> Result<Option<Balance>>;
     fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>>;
 
-    /// Returns total pledge of validators in the current epoch.
-    fn validator_total_pledge(&self) -> Result<Balance>;
+    /// Returns total stake of validators in the current epoch.
+    fn validator_total_stake(&self) -> Result<Balance>;
     fn validator_total_power(&self) -> Result<Power>;
 
     /// Create a receipt which will be executed after all the receipts identified by
@@ -351,16 +351,16 @@ pub trait External {
     /// # Arguments
     ///
     /// * `receipt_index` - an index of Receipt to append an action
-    /// * `pledge` - amount of tokens to pledge
+    /// * `stake` - amount of tokens to stake
     /// * `public_key` - a validator public key
     ///
     /// # Panics
     ///
     /// Panics if the `receipt_index` does not refer to a known receipt.
-    fn append_action_pledge(
+    fn append_action_stake(
         &mut self,
         receipt_index: ReceiptIndex,
-        pledge: Balance,
+        stake: Balance,
         public_key: PublicKey,
     );
 

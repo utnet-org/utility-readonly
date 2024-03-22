@@ -46,7 +46,7 @@ pub struct VMLogic<'a> {
     /// Keeping track of the current account balance, which can decrease when we create promises
     /// and attach balance to them.
     current_account_balance: Balance,
-    /// Current amount of pledging tokens, does not automatically change when staking transaction is
+    /// Current amount of staking tokens, does not automatically change when staking transaction is
     /// issued.
     current_account_locked_balance: Balance,
     /// Storage usage of the current account at the moment
@@ -623,23 +623,23 @@ impl<'a> VMLogic<'a> {
         Ok(self.context.epoch_height)
     }
 
-    /// Get the pledge of an account, if the account is currently a validator. Otherwise returns 0.
-    /// writes the value into the` u128` variable pointed by `pledge_ptr`.
+    /// Get the stake of an account, if the account is currently a validator. Otherwise returns 0.
+    /// writes the value into the` u128` variable pointed by `stake_ptr`.
     ///
     /// # Cost
     ///
-    /// `base + memory_write_base + memory_write_size * 16 + utf8_decoding_base + utf8_decoding_byte * account_id_len + validator_pledge_base`.
-    pub fn validator_pledge(
+    /// `base + memory_write_base + memory_write_size * 16 + utf8_decoding_base + utf8_decoding_byte * account_id_len + validator_stake_base`.
+    pub fn validator_stake(
         &mut self,
         account_id_len: u64,
         account_id_ptr: u64,
-        pledge_ptr: u64,
+        stake_ptr: u64,
     ) -> Result<()> {
         self.gas_counter.pay_base(base)?;
         let account_id = self.read_and_parse_account_id(account_id_ptr, account_id_len)?;
         self.gas_counter.pay_base(validator_pledge_base)?;
-        let pledge = self.ext.validator_pledge(&account_id)?.unwrap_or_default();
-        self.memory.set_u128(&mut self.gas_counter, pledge_ptr, pledge)
+        let stake = self.ext.validator_stake(&account_id)?.unwrap_or_default();
+        self.memory.set_u128(&mut self.gas_counter, stake_ptr, stake)
     }
 
 
@@ -656,19 +656,19 @@ impl<'a> VMLogic<'a> {
         self.memory.set_u64(&mut self.gas_counter, power_ptr, power)
     }
 
-    /// Get the total validator pledge of the current epoch.
-    /// Write the u128 value into `pledge_ptr`.
-    /// writes the value into the` u128` variable pointed by `pledge_ptr`.
+    /// Get the total validator stake of the current epoch.
+    /// Write the u128 value into `stake_ptr`.
+    /// writes the value into the` u128` variable pointed by `stake_ptr`.
     ///
     /// # Cost
     ///
-    /// `base + memory_write_base + memory_write_size * 16 + validator_total_pledge_base`
+    /// `base + memory_write_base + memory_write_size * 16 + validator_total_stake_base`
     ///
-    pub fn validator_total_pledge(&mut self, pledge_ptr: u64) -> Result<()> {
+    pub fn validator_total_stake(&mut self, stake_ptr: u64) -> Result<()> {
         self.gas_counter.pay_base(base)?;
         self.gas_counter.pay_base(validator_total_pledge_base)?;
-        let total_pledge = self.ext.validator_total_pledge()?;
-        self.memory.set_u128(&mut self.gas_counter, pledge_ptr, total_pledge)
+        let total_stake = self.ext.validator_total_stake()?;
+        self.memory.set_u128(&mut self.gas_counter, stake_ptr, total_stake)
     }
     pub fn validator_total_power(&mut self, power_ptr: u64) -> Result<()> {
         self.gas_counter.pay_base(base)?;
@@ -707,7 +707,7 @@ impl<'a> VMLogic<'a> {
         self.memory.set_u128(&mut self.gas_counter, balance_ptr, self.current_account_balance)
     }
 
-    /// The current amount of tokens pledging due to staking.
+    /// The current amount of tokens Staking due to staking.
     ///
     /// # Cost
     ///
@@ -1820,7 +1820,7 @@ impl<'a> VMLogic<'a> {
         Ok(())
     }
 
-    /// Appends `Pledge` action to the batch of actions for the given promise pointed by
+    /// Appends `Stake` action to the batch of actions for the given promise pointed by
     /// `promise_idx`.
     ///
     /// # Errors
@@ -1837,7 +1837,7 @@ impl<'a> VMLogic<'a> {
     ///
     /// `burnt_gas := base + dispatch action base fee + dispatch action per byte fee * num bytes + cost of reading public key from memory `
     /// `used_gas := burnt_gas + exec action base fee + exec action per byte fee * num bytes`
-    pub fn promise_batch_action_pledge(
+    pub fn promise_batch_action_stake(
         &mut self,
         promise_idx: u64,
         amount_ptr: u64,
@@ -1847,7 +1847,7 @@ impl<'a> VMLogic<'a> {
         self.gas_counter.pay_base(base)?;
         if self.context.is_view() {
             return Err(HostError::ProhibitedInView {
-                method_name: "promise_batch_action_pledge".to_string(),
+                method_name: "promise_batch_action_stake".to_string(),
             }
             .into());
         }
@@ -1855,7 +1855,7 @@ impl<'a> VMLogic<'a> {
         let public_key = self.get_public_key(public_key_ptr, public_key_len)?;
         let (receipt_idx, sir) = self.promise_idx_to_receipt_idx_with_sir(promise_idx)?;
         self.pay_action_base(ActionCosts::pledge, sir)?;
-        self.ext.append_action_pledge(receipt_idx, amount, public_key.decode()?);
+        self.ext.append_action_stake(receipt_idx, amount, public_key.decode()?);
         Ok(())
     }
 
