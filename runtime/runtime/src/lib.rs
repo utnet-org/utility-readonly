@@ -1116,6 +1116,11 @@ impl Runtime {
                             .checked_sub(return_pledge)
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
+                    account.set_amount(account
+                                           .amount()
+                                           .checked_add(return_pledge)
+                                           .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                    );
                     set_account(state_update, account_id.clone(), &account);
                 } else if *max_of_pledge > 0 {
                     // if max_of_power > 0, it means that the account must have power
@@ -1312,7 +1317,7 @@ impl Runtime {
 
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury pledges, then the rewards was already distributed above.
-            if !validator_accounts_update.power_info.contains_key(account_id) {
+            if !validator_accounts_update.pledge_info.contains_key(account_id) {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",
