@@ -138,6 +138,7 @@ pub(crate) fn check_balance(
     let incoming_validator_rewards =
         if let Some(validator_accounts_update) = validator_accounts_update {
             all_accounts_ids.extend(validator_accounts_update.power_info.keys().cloned());
+            all_accounts_ids.extend(validator_accounts_update.pledge_info.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.validator_rewards.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.last_power_proposals.keys().cloned());
             all_accounts_ids.extend(validator_accounts_update.last_pledge_proposals.keys().cloned());

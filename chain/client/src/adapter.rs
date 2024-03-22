@@ -123,14 +123,17 @@ pub(crate) struct RecvChallenge(pub Challenge);
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
+#[allow(dead_code)]
 pub(crate) struct RecvPartialEncodedChunkForward(pub PartialEncodedChunkForwardMsg);
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
+#[allow(dead_code)]
 pub(crate) struct RecvPartialEncodedChunk(pub PartialEncodedChunk);
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
+#[allow(dead_code)]
 pub(crate) struct RecvPartialEncodedChunkResponse(
     pub PartialEncodedChunkResponseMsg,
     pub std::time::Instant,
@@ -138,6 +141,7 @@ pub(crate) struct RecvPartialEncodedChunkResponse(
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
+#[allow(dead_code)]
 pub(crate) struct RecvPartialEncodedChunkRequest(pub PartialEncodedChunkRequestMsg, pub CryptoHash);
 
 #[derive(actix::Message, Debug)]

@@ -1079,52 +1079,56 @@ impl Runtime {
             }
         }
 
+        let root_id = &validator_accounts_update.protocol_treasury_account_id.clone().unwrap();
         for (account_id, max_of_pledge) in &validator_accounts_update.pledge_info {
-            if let Some(mut account) = get_account(state_update, account_id)? {
-                if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to pledging {}", account_id, reward, account.pledging());
-                    account.set_pledging(
-                        account
-                            .pledging()
-                            .checked_add(*reward)
-                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                    );
-                }
-                debug!(target: "runtime",
+            if account_id != root_id  {
+                if let Some(mut account) = get_account(state_update, account_id)? {
+                    if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
+                        debug!(target: "runtime", "account {} adding reward {} to pledging {}", account_id, reward, account.pledging());
+                        account.set_pledging(
+                            account
+                                .pledging()
+                                .checked_add(*reward)
+                                .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                        );
+                    }
+                    debug!(target: "runtime",
                        "account {} pledging {} max_of_pledge: {}",
                        account_id, account.pledging(), max_of_pledge
                 );
-                // customized by james savechives
-                if account.pledging() < *max_of_pledge {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. \
+                    // customized by james savechives
+                    if account.pledging() < *max_of_pledge {
+                        return Err(StorageError::StorageInconsistentState(format!(
+                            "FATAL: staking invariant does not hold. \
                          Account pledge {} is less than maximum of pledging {} in the past three epochs",
-                        account.pledging(),
-                        max_of_pledge)).into());
-                }
-                let last_pledge_proposal =
-                    *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
-                let return_pledge = account
-                    .pledging()
-                    .checked_sub(max(*max_of_pledge, last_pledge_proposal))
-                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return pledge {}", account_id, return_pledge);
-                account.set_pledging(
-                    account
+                            account.pledging(),
+                            max_of_pledge)).into());
+                    }
+                    let last_pledge_proposal =
+                        *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
+                    let return_pledge = account
                         .pledging()
-                        .checked_sub(return_pledge)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_pledge > 0 {
-                // if max_of_power > 0, it means that the account must have power
-                // and therefore must exist
-                return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of pledging {} is not found",
-                    account_id, max_of_pledge
-                ))
-                    .into());
+                        .checked_sub(max(*max_of_pledge, last_pledge_proposal))
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+                    debug!(target: "runtime", "account {} return pledge {}", account_id, return_pledge);
+                    account.set_pledging(
+                        account
+                            .pledging()
+                            .checked_sub(return_pledge)
+                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                    );
+                    set_account(state_update, account_id.clone(), &account);
+                } else if *max_of_pledge > 0 {
+                    // if max_of_power > 0, it means that the account must have power
+                    // and therefore must exist
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "Account {} with max of pledging {} is not found",
+                        account_id, max_of_pledge
+                    ))
+                        .into());
+                }
             }
+
         }
         // Slash only to the accounts that are in the current shard.
         for (account_id, pledge) in validator_accounts_update.slashing_info.iter() {
@@ -1158,7 +1162,8 @@ impl Runtime {
         // start customized by james savechives
         if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
             // If protocol treasury pledges, then the rewards was already distributed above.
-            if !validator_accounts_update.power_info.contains_key(account_id) {
+        //    if !validator_accounts_update.pledge_info.contains_key(account_id)
+            {
                 let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
                     StorageError::StorageInconsistentState(format!(
                         "Protocol treasury account {} is not found",
@@ -1427,7 +1432,7 @@ impl Runtime {
         let mut stats = ApplyStats::default();
 
         if let Some(validator_accounts_update) = validator_accounts_update {
-            self.update_validator_accounts(
+            self.update_validator_accounts_in_block(
                 &mut state_update,
                 validator_accounts_update,
                 &mut stats,
