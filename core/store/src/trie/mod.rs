@@ -555,7 +555,6 @@ pub struct ApplyStatePartResult {
     pub contract_codes: Vec<ContractCode>,
 }
 
-#[allow(dead_code)]
 enum NodeOrValue {
     Node(Box<RawTrieNodeWithSize>),
     Value(std::sync::Arc<[u8]>),
