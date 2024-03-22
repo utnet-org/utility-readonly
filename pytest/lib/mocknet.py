@@ -430,7 +430,7 @@ def transfer_between_nodes(nodes):
 
 def pledge_node(node):
     account = get_validator_account(node)
-    logger.info(f'Staking {account.account_id}.')
+    logger.info(f'Pledging{account.account_id}.')
     nonce = node.get_nonce_for_pk(account.account_id, account.pk)
 
     validators = node.get_validators(timeout=None)['result']
@@ -1462,7 +1462,7 @@ def pledge_available_amount(node_account, last_staking):
                 )
                 if pledge_amount > (10**3) * ONE_NEAR:
                     logger.info(
-                        f'Staking {pledge_amount} for {node_account.key.account_id}'
+                        f'Pledging{pledge_amount} for {node_account.key.account_id}'
                     )
                     node_account.send_pledge_tx(pledge_amount)
                 logger.info(

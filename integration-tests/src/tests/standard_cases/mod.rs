@@ -1327,7 +1327,7 @@ pub fn test_delete_account_while_staking(node: impl Node) {
         FinalExecutionStatus::Failure(
             ActionError {
                 index: Some(0),
-                kind: ActionErrorKind::DeleteAccountStaking { account_id: eve_dot_alice_account() }
+                kind: ActionErrorKind::DeleteAccountPledging{ account_id: eve_dot_alice_account() }
             }
             .into()
         )
