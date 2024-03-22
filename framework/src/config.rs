@@ -99,7 +99,7 @@ const CATCHUP_STEP_PERIOD: u64 = 100 * 30;
 const CHUNK_REQUEST_RETRY_PERIOD: u64 = 400;
 
 /// Expected epoch length.
-pub const EXPECTED_EPOCH_LENGTH: BlockHeightDelta = (6 * 3 * 1000) / MIN_BLOCK_PRODUCTION_DELAY;
+pub const EXPECTED_EPOCH_LENGTH: BlockHeightDelta = (6 * 60 * 1000) / MIN_BLOCK_PRODUCTION_DELAY;
 
 /// Criterion for kicking out block producers.
 pub const BLOCK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
@@ -110,7 +110,7 @@ pub const CHUNK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
 /// Fast mode constants for testing/developing.
 pub const FAST_MIN_BLOCK_PRODUCTION_DELAY: u64 = 120 * 30;
 pub const FAST_MAX_BLOCK_PRODUCTION_DELAY: u64 = 500 * 30;
-pub const FAST_EPOCH_LENGTH: BlockHeightDelta = 1;
+pub const FAST_EPOCH_LENGTH: BlockHeightDelta = 20;
 
 /// Expected number of blocks per year
 pub const NUM_BLOCKS_PER_YEAR: u64 = 365 * 24 * 60 * 60 / 30;
