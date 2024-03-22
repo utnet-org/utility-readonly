@@ -285,7 +285,7 @@ impl TestEnv {
             self.last_shard_proposals.insert(shard_id, proposals);
         }
         self.epoch_manager
-            .add_validator_proposals(BlockHeaderInfo {
+            .add_validator_proposals_for_blocks(BlockHeaderInfo {
                 prev_hash: self.head.last_block_hash,
                 hash: new_hash,
                 random_value: [0; 32].as_ref().try_into().unwrap(),
@@ -688,7 +688,7 @@ fn test_state_sync() {
         };
         new_env
             .epoch_manager
-            .add_validator_proposals(BlockHeaderInfo {
+            .add_validator_proposals_for_blocks(BlockHeaderInfo {
                 prev_hash,
                 hash: cur_hash,
                 random_value: [0; 32].as_ref().try_into().unwrap(),
