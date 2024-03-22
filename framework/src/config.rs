@@ -110,7 +110,7 @@ pub const CHUNK_PRODUCER_KICKOUT_THRESHOLD: u8 = 90;
 /// Fast mode constants for testing/developing.
 pub const FAST_MIN_BLOCK_PRODUCTION_DELAY: u64 = 120 * 30;
 pub const FAST_MAX_BLOCK_PRODUCTION_DELAY: u64 = 500 * 30;
-pub const FAST_EPOCH_LENGTH: BlockHeightDelta = 60;
+pub const FAST_EPOCH_LENGTH: BlockHeightDelta = 20;
 
 /// Expected number of blocks per year
 pub const NUM_BLOCKS_PER_YEAR: u64 = 365 * 24 * 60 * 60 / 30;

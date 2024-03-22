@@ -26,7 +26,6 @@ utility-cli/target/debug/unc tokens miner send-unc 8e42ce2442abe82f49be2cc44d7b6
 sleep 2
 utility-cli/target/debug/unc tokens miner send-unc 41e2f1cc1b5133917ba8b9e49f74e9cb57e45b0f4c2672830659ab8287168a87 '20000000 unc' network-config testnet sign-with-keychain send
 
-
 ## cargo install unc-validator
 ## pledge new accounts
 sleep 2
@@ -37,5 +36,24 @@ sleep 2
 utility-cli/target/debug/unc validator pledging pledge-proposal 41e2f1cc1b5133917ba8b9e49f74e9cb57e45b0f4c2672830659ab8287168a87 ed25519:2VuiWqdedrmv9FNxRWFomr77hgykwXgrhptdKbHcgoFp '30000000 unc' network-config testnet sign-with-plaintext-private-key --signer-public-key ed25519:2VuiWqdedrmv9FNxRWFomr77hgykwXgrhptdKbHcgoFp --signer-private-key ed25519:3NWVkj5Gnz6obeGUBJK7NFeVzErm7uKGgnbnitQgVyXbDVjADTYLwNBPBBGKYqQJwcPTfBfB4wJwT8hhjxHDHFf8 send
 
 
+## unpledge accounts
+## utility-cli/target/debug/unc validator pledging unpledge-proposal 41e2f1cc1b5133917ba8b9e49f74e9cb57e45b0f4c2672830659ab8287168a87 ed25519:2VuiWqdedrmv9FNxRWFomr77hgykwXgrhptdKbHcgoFp '30000000 unc' network-config testnet sign-with-plaintext-private-key --signer-public-key ed25519:2VuiWqdedrmv9FNxRWFomr77hgykwXgrhptdKbHcgoFp --signer-private-key ed25519:3NWVkj5Gnz6obeGUBJK7NFeVzErm7uKGgnbnitQgVyXbDVjADTYLwNBPBBGKYqQJwcPTfBfB4wJwT8hhjxHDHFf8 send
+
+
 ## view tx status
-./target/debug/unc transaction view-status EWHzhriCRTbDVd9SH6Vk88hSHqzJ7pipXW6eUhWTBkvS network-config testnet
+## ./target/debug/unc transaction view-status EWHzhriCRTbDVd9SH6Vk88hSHqzJ7pipXW6eUhWTBkvS network-config testnet
+
+##/// validator pledge 类似FIL
+##cargo install unc-validator
+##///获取验证者列表
+##unc-validator validators network-config testnet now
+##./target/debug/unc pledging validator-list network-config testnet
+
+##///proposals 展示新提案和当前验证者隐式提案
+##unc-validator proposals network-config testnet
+##///pledging
+##//查看直接质押金额
+##unc-validator pledging view-pledge 60595eb3cb90fdeb0cd3743b90388f6a3fcd24fda09c9732f1f256e9a01ae5a9 network-config testnet now
+##///直接发起质押
+##unc-validator pledging pledge-proposal 60595eb3cb90fdeb0cd3743b90388f6a3fcd24fda09c9732f1f256e9a01ae5a9 ed25519:7V7BLUwwYS92NPsLVDyGChUv8fbwj3c8ktPcx5sYwbWp '1500 UNC' network-config testnet sign-with-keychain send
+##unc-validator pledging pledge-proposal miner ed25519:8FhzmFG24qXxJ9BJLHTxwhxYY4yu4NV8YPxtksmC86Nv '1500 UNC' network-config testnet sign-with-keychain send

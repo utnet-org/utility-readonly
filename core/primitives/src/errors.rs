@@ -247,7 +247,7 @@ pub enum ActionsValidationError {
     /// The length of the arguments exceeded the limit in a Function Call action.
     FunctionCallArgumentsLengthExceeded { length: u64, limit: u64 },
     /// An attempt to pledge with a public key that is not convertible to ristretto.
-    UnsuitableStakingKey { public_key: Box<PublicKey> },
+    UnsuitablePledgingKey { public_key: Box<PublicKey> },
     /// The attached amount of gas in a FunctionCall action has to be a positive number.
     FunctionCallZeroAttachedGas,
     /// There should be the only one DelegateAction
@@ -374,7 +374,7 @@ impl Display for ActionsValidationError {
                 "The length of the arguments {} exceeds the maximum allowed length {} in a FunctionCall action",
                 length, limit
             ),
-            ActionsValidationError::UnsuitableStakingKey { public_key } => write!(
+            ActionsValidationError::UnsuitablePledgingKey { public_key } => write!(
                 f,
                 "The staking key must be ristretto compatible ED25519 key. {} is provided instead.",
                 public_key,
@@ -454,7 +454,7 @@ pub enum ActionErrorKind {
     /// The public key is already used for an existing access key
     AddKeyAlreadyExists { account_id: AccountId, public_key: Box<PublicKey> },
     /// Account is staking and can not be deleted
-    DeleteAccountStaking { account_id: AccountId },
+    DeleteAccountPledging{ account_id: AccountId },
     /// ActionReceipt can't be completed, because the remaining balance will not be enough to cover storage.
     LackBalanceForState {
         /// An account which needs balance
@@ -819,7 +819,7 @@ impl Display for ActionErrorKind {
                 "The public key {:?} is already used for an existing access key",
                 public_key
             ),
-            ActionErrorKind::DeleteAccountStaking { account_id } => {
+            ActionErrorKind::DeleteAccountPledging{ account_id } => {
                 write!(f, "Account {:?} is staking and can not be deleted", account_id)
             }
             ActionErrorKind::FunctionCallError(s) => write!(f, "{:?}", s),

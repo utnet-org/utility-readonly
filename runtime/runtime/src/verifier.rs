@@ -463,7 +463,7 @@ fn validate_function_call_action(
 /// Validates `PledgeAction`. Checks that the `public_key` is a valid staking key.
 fn validate_pledge_action(action: &PledgeAction) -> Result<(), ActionsValidationError> {
     if !is_valid_staking_key(&action.public_key) {
-        return Err(ActionsValidationError::UnsuitableStakingKey {
+        return Err(ActionsValidationError::UnsuitablePledgingKey {
             public_key: Box::new(action.public_key.clone()),
         });
     }
@@ -525,7 +525,7 @@ fn validate_register_rsa2048_keys_action(
 
 fn validate_create_rsa2048_challenge_action(action: &CreateRsa2048ChallengeAction) -> Result<(), ActionsValidationError> {
     if !is_valid_challenge_key(&action.public_key) {
-        return Err(ActionsValidationError::UnsuitableStakingKey {
+        return Err(ActionsValidationError::UnsuitablePledgingKey {
             public_key: Box::new(action.public_key.clone()),
         });
     }
@@ -1786,7 +1786,7 @@ mod tests {
                 PROTOCOL_VERSION,
             )
             .expect_err("Expected an error"),
-            ActionsValidationError::UnsuitableStakingKey {
+            ActionsValidationError::UnsuitablePledgingKey {
                 public_key: PublicKey::empty(KeyType::ED25519).into(),
             },
         );

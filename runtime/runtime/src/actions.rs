@@ -1053,7 +1053,7 @@ pub(crate) fn check_actor_permissions(
             }
             let account = account.as_ref().unwrap();
             if account.pledging() != 0 {
-                return Err(ActionErrorKind::DeleteAccountStaking {
+                return Err(ActionErrorKind::DeleteAccountPledging{
                     account_id: account_id.clone(),
                 }
                 .into());

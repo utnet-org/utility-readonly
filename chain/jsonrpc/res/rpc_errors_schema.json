@@ -65,7 +65,7 @@
         "ContractSizeExceeded",
         "FunctionCallMethodNameLengthExceeded",
         "FunctionCallArgumentsLengthExceeded",
-        "UnsuitableStakingKey",
+        "UnsuitablePledgingKey",
         "FunctionCallZeroAttachedGas",
         "DelegateActionMustBeOnlyOne",
         "UnsupportedProtocolFeature"
@@ -847,8 +847,8 @@
       "subtypes": [],
       "props": {}
     },
-    "UnsuitableStakingKey": {
-      "name": "UnsuitableStakingKey",
+    "UnsuitablePledgingKey": {
+      "name": "UnsuitablePledgingKey",
       "subtypes": [],
       "props": {
         "public_key": ""
