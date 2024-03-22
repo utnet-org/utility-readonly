@@ -131,7 +131,6 @@ pub(crate) struct RecvPartialEncodedChunk(pub PartialEncodedChunk);
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "()")]
-#[allow(dead_code)]
 pub(crate) struct RecvPartialEncodedChunkResponse(
     pub PartialEncodedChunkResponseMsg,
     pub std::time::Instant,
