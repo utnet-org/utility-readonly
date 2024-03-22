@@ -188,7 +188,7 @@ imports! {
         gas_weight: u64
     ] -> []>,
     promise_batch_action_transfer<[promise_index: u64, amount_ptr: u64] -> []>,
-    promise_batch_action_pledge<[
+    promise_batch_action_stake<[
         promise_index: u64,
         amount_ptr: u64,
         public_key_len: u64,
@@ -242,8 +242,8 @@ imports! {
     // ###############
     // # Validator API #
     // ###############
-    validator_pledge<[account_id_len: u64, account_id_ptr: u64, pledge_ptr: u64] -> []>,
-    validator_total_pledge<[pledge_ptr: u64] -> []>,
+    validator_stake<[account_id_len: u64, account_id_ptr: u64, stake_ptr: u64] -> []>,
+    validator_total_stake<[stake_ptr: u64] -> []>,
     validator_power<[account_id_len: u64, account_id_ptr: u64, power_ptr: u64] -> []>,
     validator_total_power<[power_ptr: u64] -> []>,
     // #############

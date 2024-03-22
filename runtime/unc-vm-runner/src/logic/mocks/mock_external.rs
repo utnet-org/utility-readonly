@@ -36,9 +36,9 @@ pub enum MockAction {
         receipt_index: ReceiptIndex,
         deposit: u128,
     },
-    Pledge {
+    Stake {
         receipt_index: ReceiptIndex,
-        pledge: u128,
+        stake: u128,
         public_key: unc_crypto::PublicKey,
     },
     DeleteAccount {
@@ -143,7 +143,7 @@ impl External for MockedExternal {
         TrieNodesCount { db_reads: 0, mem_reads: 0 }
     }
 
-    fn validator_pledge(&self, account_id: &AccountId) -> Result<Option<Balance>> {
+    fn validator_stake(&self, account_id: &AccountId) -> Result<Option<Balance>> {
         if let Some((_power, balance)) = self.validators.get(account_id) {
             Ok(Some(balance).cloned())
         } else {
@@ -151,9 +151,9 @@ impl External for MockedExternal {
         }
     }
 
-    fn validator_total_pledge(&self) -> Result<Balance> {
-        let total_pledge: Balance = self.validators.values().map(|(_, pledge)| pledge).sum();
-        Ok(total_pledge)
+    fn validator_total_stake(&self) -> Result<Balance> {
+        let total_stake: Balance = self.validators.values().map(|(_, stake)| stake).sum();
+        Ok(total_stake)
     }
 
     fn validator_power(&self, account_id: &AccountId) -> Result<Option<Power>> {
@@ -225,13 +225,13 @@ impl External for MockedExternal {
         Ok(())
     }
 
-    fn append_action_pledge(
+    fn append_action_stake(
         &mut self,
         receipt_index: ReceiptIndex,
-        pledge: Balance,
+        stake: Balance,
         public_key: unc_crypto::PublicKey,
     ) {
-        self.action_log.push(MockAction::Pledge { receipt_index, pledge, public_key });
+        self.action_log.push(MockAction::Stake { receipt_index, stake, public_key });
     }
 
     fn append_action_add_key_with_full_access(
