@@ -92,7 +92,9 @@ impl Account {
     }
 
     #[inline]
-    pub fn set_power(&mut self, power: Power) { self.power = power; }
+    pub fn set_power(&mut self, power: Power) { 
+        self.power = power; 
+    }
 
     #[inline]
     pub fn set_pledging(&mut self, pledging: Balance) {

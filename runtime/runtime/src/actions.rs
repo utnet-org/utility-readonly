@@ -733,7 +733,7 @@ pub(crate) fn action_create_rsa2048_challenge(
     account_id: &AccountId,
     challenge: &CreateRsa2048ChallengeAction,
 ) -> Result<(), RuntimeError>{
-    //TODO: 从root 基金会获取的公钥， 匹配验证签名以及附加参数(如算力, 矿工信息, dev_id, 等)
+    //TODO: 从unc 基金会获取的公钥， 匹配验证签名以及附加参数(如算力, 矿工信息, dev_id, 等)
     let root_id = "unc".parse::<AccountId>().unwrap();
     if get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.is_none() {
         result.result = Err(ActionErrorKind::RsaKeysNotFound {
@@ -744,7 +744,7 @@ pub(crate) fn action_create_rsa2048_challenge(
     }
 
     //FIXME： 计算发起challenge 的nonce 随机数
-    // 直接使用 root证书里面的args, 如算力
+    // 直接使用 unc证书里面的args, 如算力
     let registered_keys = get_rsa2048_keys(state_update, &root_id, &challenge.public_key)?.unwrap();
     let args = registered_keys.clone().args;
     match serde_json::from_slice::<serde_json::Value>(&args) {
@@ -765,18 +765,17 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     total_power.clone(),
                                 ));
                                 // attach power to account
-                                println!("original power is : {}, new power is : {}, total power is : {}", account.power(), power.clone(),total_power.clone());
+                                info!("original power is : {}, new power is : {}, total power is : {}", account.power(), power, total_power.clone());
                                 account.set_power(total_power);
-                                println!("Power (as u128): {}", power);
                             }
-                            Err(_) => println!("Power value is not a valid u128 number"),
+                            Err(_) => error!("Power value is not a valid u128 number"),
                         }
                     },
                     None => {
                         if let Some(power_number) = power_val.as_u64() {
-                            println!("Power (as u64, converted from u128): {}", power_number);
+                            info!("Power (as u64, converted from u128): {}", power_number);
                         } else {
-                            println!("Power value is not a string or a number that fits into u64");
+                            info!("Power value is not a string or a number that fits into u64");
                         }
                     }
                 }

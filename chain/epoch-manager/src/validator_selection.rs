@@ -746,9 +746,6 @@ fn create_power_map(heap: &BinaryHeap<OrderedValidatorPower>) -> HashMap<Account
 
 
 // Use the function with the appropriate account_id and store
-
-
-
 // Takes the top N proposals (by pledge), or fewer if there are not enough or the
 // next proposals is too small relative to the others. In the case where all N
 // slots are filled, or the pledge ratio falls too low, the threshold pledge to be included

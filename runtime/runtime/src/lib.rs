@@ -1024,10 +1024,10 @@ impl Runtime {
         validator_accounts_update: &ValidatorAccountsUpdate,
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        for (account_id, max_of_stakes) in &validator_accounts_update.pledge_info {
+        for (account_id, max_of_pledges) in &validator_accounts_update.pledge_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to stake {}", account_id, reward, account.pledging());
+                    debug!(target: "runtime", "account {} adding reward {} to pledge {}", account_id, reward, account.pledging());
                     account.set_pledging(
                         account
                             .pledging()
@@ -1037,23 +1037,23 @@ impl Runtime {
                 }
 
                 debug!(target: "runtime",
-                       "account {} stake {} max_of_stakes: {}",
-                       account_id, account.pledging(), max_of_stakes
+                       "account {} pledge {} max_of_pledges: {}",
+                       account_id, account.pledging(), max_of_pledges
                 );
-                if account.pledging() < *max_of_stakes {
+                if account.pledging() < *max_of_pledges {
                     return Err(StorageError::StorageInconsistentState(format!(
                         "FATAL: staking invariant does not hold. \
-                         Account stake {} is less than maximum of stakes {} in the past three epochs",
+                         Account pledge {} is less than maximum of stakes {} in the past three epochs",
                         account.pledging(),
-                        max_of_stakes)).into());
+                        max_of_pledges)).into());
                 }
                 let last_proposal =
                     *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
                 let return_stake = account
                     .pledging()
-                    .checked_sub(max(*max_of_stakes, last_proposal))
+                    .checked_sub(max(*max_of_pledges, last_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return stake {}", account_id, return_stake);
+                debug!(target: "runtime", "account {} return pledge {}", account_id, return_stake);
                 account.set_pledging(
                     account
                         .pledging()
@@ -1068,20 +1068,52 @@ impl Runtime {
                 );
 
                 set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_stakes > 0 {
-                // if max_of_stakes > 0, it means that the account must have pledging balance
+            } else if *max_of_pledges > 0 {
+                // if max_of_pledges > 0, it means that the account must have pledging balance
                 // and therefore must exist
                 return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of stakes {} is not found",
-                    account_id, max_of_stakes
+                    "Account {} with max of pledges {} is not found",
+                    account_id, max_of_pledges
                 ))
                 .into());
             }
         }
 
-        for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
+        for (account_id, max_of_powers) in &validator_accounts_update.power_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
-                let amount_to_slash = stake.unwrap_or(account.pledging());
+                debug!(target: "runtime",
+                       "account {} power {} max_of_power: {}",
+                       account_id, account.power(), max_of_powers
+                );
+                if account.power() < *max_of_powers {
+                    return Err(StorageError::StorageInconsistentState(format!(
+                        "FATAL: rent power invariant does not hold. \
+                         Account power {} is less than maximum of powers {} in the past three epochs",
+                        account.power(),
+                        max_of_powers)).into());
+                }
+                let last_power_proposal =
+                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
+                let _power = account
+                    .power()
+                    .checked_sub(max(*max_of_powers, last_power_proposal))
+                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
+
+                set_account(state_update, account_id.clone(), &account);
+            } else if *max_of_powers > 0 {
+                // if max_of_powers > 0, it means that the account must have renting power
+                // and therefore must exist
+                return Err(StorageError::StorageInconsistentState(format!(
+                    "Account {} with max of powers {} is not found",
+                    account_id, max_of_powers
+                ))
+                .into());
+            }
+        }
+
+        for (account_id, pledge) in validator_accounts_update.slashing_info.iter() {
+            if let Some(mut account) = get_account(state_update, account_id)? {
+                let amount_to_slash = pledge.unwrap_or(account.pledging());
                 debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.pledging(), account_id);
                 if account.pledging() < amount_to_slash {
                     return Err(StorageError::StorageInconsistentState(format!(
@@ -1139,8 +1171,6 @@ impl Runtime {
 
         Ok(())
     }
-
-
 
     pub fn apply_migrations(
         &self,
