@@ -11,7 +11,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::{DateTime, Utc};
 use unc_crypto::{KeyType, PublicKey, Signature};
 use std::sync::Arc;
-use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+use crate::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(BorshSerialize, BorshDeserialize, serde::Serialize, Debug, Clone, Eq, PartialEq)]
 pub struct BlockHeaderInnerLite {

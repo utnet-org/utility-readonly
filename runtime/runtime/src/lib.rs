@@ -24,15 +24,15 @@ pub use unc_primitives::runtime::apply_state::ApplyState;
 use unc_primitives::runtime::migration_data::{MigrationData, MigrationFlags};
 use unc_primitives::sandbox::state_patch::SandboxStatePatch;
 use unc_primitives::state_record::StateRecord;
-use unc_primitives::transaction::ExecutionMetadata;
 use unc_primitives::transaction::{
-    Action, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus, LogEntry, SignedTransaction,
+    Action, ExecutionMetadata, ExecutionOutcome, ExecutionOutcomeWithId, ExecutionStatus, LogEntry, SignedTransaction,
 };
 use unc_primitives::trie_key::TrieKey;
 use unc_primitives::types::{
-    validator_power::ValidatorPower, AccountId, Balance, Compute, EpochInfoProvider, Gas,
+    validator_stake::ValidatorPledge, validator_power::ValidatorPower, AccountId, Balance, Power, Compute, EpochInfoProvider, Gas,
     RawStateChangesWithTrieKey, StateChangeCause, StateRoot,
 };
+
 use unc_primitives::utils::{
     create_action_hash, create_receipt_id_from_receipt, create_receipt_id_from_transaction,
 };
@@ -52,8 +52,6 @@ use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::debug;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
-use unc_primitives_core::types::Power;
 
 mod actions;
 pub mod adapter;
@@ -70,27 +68,10 @@ const EXPECT_ACCOUNT_EXISTS: &str = "account exists, checked above";
 
 /// Contains information to update validators accounts at the first block of a new epoch.
 #[derive(Debug)]
-pub struct ValidatorAccountsUpdateInBlock {
-    /// Maximum power across last 3 epochs.
-    pub power_info: HashMap<AccountId, Power>,
-    /// Maximum pledge across last 3 epochs.
-    pub pledge_info: HashMap<AccountId, Balance>,
-    /// Rewards to distribute to validators.
-    pub validator_rewards: HashMap<AccountId, Balance>,
-    /// Power proposals from the last chunk.
-    pub last_power_proposals: HashMap<AccountId, Power>,
-    /// Pledge proposals from the last chunk.
-    pub last_pledge_proposals: HashMap<AccountId, Balance>,
-    /// The ID of the protocol treasury account if it belongs to the current shard.
-    pub protocol_treasury_account_id: Option<AccountId>,
-    /// Accounts to slash and the slashed amount (None means everything)
-    pub slashing_info: HashMap<AccountId, Option<Balance>>,
-}
-#[derive(Debug)]
 pub struct ValidatorAccountsUpdate {
-    /// Maximum power across last 3 epochs.
+    /// Maximum power
     pub power_info: HashMap<AccountId, Power>,
-    /// Maximum pledge across last 3 epochs.
+    /// Maximum pledge
     pub pledge_info: HashMap<AccountId, Balance>,
     /// Rewards to distribute to validators.
     pub validator_rewards: HashMap<AccountId, Balance>,
@@ -849,7 +830,7 @@ impl Runtime {
                 gas_balance_refund = 0;
             }
         } else {
-            // Refund for the difference of the purchased gas price and the the current gas price.
+            // Refund for the difference of the purchased gas price and the current gas price.
             gas_balance_refund = safe_add_balance(
                 gas_balance_refund,
                 safe_gas_to_balance(
@@ -1037,212 +1018,16 @@ impl Runtime {
     /// Iterates over the validators in the current shard and updates their accounts to return pledge
     /// and allocate rewards. Also updates protocol treasury account if it belongs to the current
     /// shard.
-
-    fn update_validator_accounts_in_block(
-        &self,
-        state_update: &mut TrieUpdate,
-        validator_accounts_update: &ValidatorAccountsUpdate,
-        stats: &mut ApplyStats,
-    ) -> Result<(), RuntimeError> {
-        for (account_id, max_of_power) in &validator_accounts_update.power_info {
-            if let Some(account) = get_account(state_update, account_id)? {
-                if account.power() < *max_of_power {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: powering invariant does not hold. \
-                         Account power {} is less than maximum of power {} in the past three epochs",
-                        account.power(),
-                        max_of_power)).into());
-                }
-                let last_power_proposal =
-                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
-                let return_power = account
-                    .power()
-                    .checked_sub(max(*max_of_power, last_power_proposal))
-                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
-                // account.set_power(
-                //     account
-                //         .power()
-                //         .checked_sub(return_power)
-                //         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                // );
-                set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_power > 0 {
-                // if max_of_power > 0, it means that the account must have power
-                // and therefore must exist
-                return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of power {} is not found",
-                    account_id, max_of_power
-                ))
-                .into());
-            }
-        }
-
-        let root_id = &validator_accounts_update.protocol_treasury_account_id.clone().unwrap();
-        for (account_id, max_of_pledge) in &validator_accounts_update.pledge_info {
-            if account_id != root_id  {
-                if let Some(mut account) = get_account(state_update, account_id)? {
-                    if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                        debug!(target: "runtime", "account {} adding reward {} to pledging {}", account_id, reward, account.pledging());
-                        account.set_pledging(
-                            account
-                                .pledging()
-                                .checked_add(*reward)
-                                .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                        );
-                    }
-                    debug!(target: "runtime",
-                       "account {} pledging {} max_of_pledge: {}",
-                       account_id, account.pledging(), max_of_pledge
-                );
-                    // customized by james savechives
-                    if account.pledging() < *max_of_pledge {
-                        return Err(StorageError::StorageInconsistentState(format!(
-                            "FATAL: staking invariant does not hold. \
-                         Account pledge {} is less than maximum of pledging {} in the past three epochs",
-                            account.pledging(),
-                            max_of_pledge)).into());
-                    }
-                    let last_pledge_proposal =
-                        *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
-                    let return_pledge = account
-                        .pledging()
-                        .checked_sub(max(*max_of_pledge, last_pledge_proposal))
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                    debug!(target: "runtime", "account {} return pledge {}", account_id, return_pledge);
-                    account.set_pledging(
-                        account
-                            .pledging()
-                            .checked_sub(return_pledge)
-                            .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                    );
-                    account.set_amount(account
-                                           .amount()
-                                           .checked_add(return_pledge)
-                                           .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                    );
-                    set_account(state_update, account_id.clone(), &account);
-                } else if *max_of_pledge > 0 {
-                    // if max_of_power > 0, it means that the account must have power
-                    // and therefore must exist
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "Account {} with max of pledging {} is not found",
-                        account_id, max_of_pledge
-                    ))
-                        .into());
-                }
-            }
-
-        }
-        // Slash only to the accounts that are in the current shard.
-        for (account_id, pledge) in validator_accounts_update.slashing_info.iter() {
-            if let Some(mut account) = get_account(state_update, account_id)? {
-                let amount_to_slash = pledge.unwrap_or(account.pledging());
-                debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.pledging(), account_id);
-                if account.pledging() < amount_to_slash {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. Account pledging {} is less than slashed {}",
-                        account.pledging(), amount_to_slash)).into());
-                }
-                stats.slashed_burnt_amount = stats
-                    .slashed_burnt_amount
-                    .checked_add(amount_to_slash)
-                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                account.set_pledging(
-                    account
-                        .pledging()
-                        .checked_sub(amount_to_slash)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                set_account(state_update, account_id.clone(), &account);
-            } else {
-                return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} to slash is not found",
-                    account_id
-                ))
-                .into());
-            }
-        }
-        // start customized by james savechives
-        if let Some(account_id) = &validator_accounts_update.protocol_treasury_account_id {
-            // If protocol treasury pledges, then the rewards was already distributed above.
-        //    if !validator_accounts_update.pledge_info.contains_key(account_id)
-            {
-                let mut account = get_account(state_update, account_id)?.ok_or_else(|| {
-                    StorageError::StorageInconsistentState(format!(
-                        "Protocol treasury account {} is not found",
-                        account_id
-                    ))
-                })?;
-                let treasury_reward = *validator_accounts_update
-                    .validator_rewards
-                    .get(account_id)
-                    .ok_or_else(|| {
-                        StorageError::StorageInconsistentState(format!(
-                            "Validator reward for the protocol treasury account {} is not found",
-                            account_id
-                        ))
-                    })?;
-                account.set_amount(
-                    account
-                        .amount()
-                        .checked_add(treasury_reward)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                set_account(state_update, account_id.clone(), &account);
-            }
-        }
-        // end customized by James Savechives
-        state_update.commit(StateChangeCause::ValidatorAccountsUpdate);
-
-        Ok(())
-    }
-
-    #[allow(dead_code)]
     fn update_validator_accounts(
         &self,
         state_update: &mut TrieUpdate,
         validator_accounts_update: &ValidatorAccountsUpdate,
         stats: &mut ApplyStats,
     ) -> Result<(), RuntimeError> {
-        for (account_id, max_of_power) in &validator_accounts_update.power_info {
-            if let Some(mut account) = get_account(state_update, account_id)? {
-                if account.power() < *max_of_power {
-                    return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: powering invariant does not hold. \
-                         Account power {} is less than maximum of power {} in the past three epochs",
-                        account.power(),
-                        max_of_power)).into());
-                }
-                let last_power_proposal =
-                    *validator_accounts_update.last_power_proposals.get(account_id).unwrap_or(&0);
-                let return_power = account
-                    .power()
-                    .checked_sub(max(*max_of_power, last_power_proposal))
-                    .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return power {}", account_id, return_power);
-                account.set_power(
-                    account
-                        .power()
-                        .checked_sub(return_power)
-                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
-                );
-                set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_power > 0 {
-                // if max_of_power > 0, it means that the account must have power
-                // and therefore must exist
-                return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of power {} is not found",
-                    account_id, max_of_power
-                ))
-                    .into());
-            }
-        }
-
-        for (account_id, max_of_pledge) in &validator_accounts_update.pledge_info {
+        for (account_id, max_of_stakes) in &validator_accounts_update.pledge_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to pledging {}", account_id, reward, account.pledging());
+                    debug!(target: "runtime", "account {} adding reward {} to stake {}", account_id, reward, account.pledging());
                     account.set_pledging(
                         account
                             .pledging()
@@ -1250,45 +1035,53 @@ impl Runtime {
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
                 }
+
                 debug!(target: "runtime",
-                       "account {} pledging {} max_of_pledge: {}",
-                       account_id, account.pledging(), max_of_pledge
+                       "account {} stake {} max_of_stakes: {}",
+                       account_id, account.pledging(), max_of_stakes
                 );
-                if account.pledging() < *max_of_pledge {
+                if account.pledging() < *max_of_stakes {
                     return Err(StorageError::StorageInconsistentState(format!(
                         "FATAL: staking invariant does not hold. \
-                         Account power {} is less than maximum of pledging {} in the past three epochs",
+                         Account stake {} is less than maximum of stakes {} in the past three epochs",
                         account.pledging(),
-                        max_of_pledge)).into());
+                        max_of_stakes)).into());
                 }
-                let last_pledge_proposal =
+                let last_proposal =
                     *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
-                let return_pledge = account
+                let return_stake = account
                     .pledging()
-                    .checked_sub(max(*max_of_pledge, last_pledge_proposal))
+                    .checked_sub(max(*max_of_stakes, last_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return pledge {}", account_id, return_pledge);
+                debug!(target: "runtime", "account {} return stake {}", account_id, return_stake);
                 account.set_pledging(
                     account
                         .pledging()
-                        .checked_sub(return_pledge)
+                        .checked_sub(return_stake)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
+                account.set_amount(
+                    account
+                        .amount()
+                        .checked_add(return_stake)
+                        .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
+                );
+
                 set_account(state_update, account_id.clone(), &account);
-            } else if *max_of_pledge > 0 {
-                // if max_of_power > 0, it means that the account must have power
+            } else if *max_of_stakes > 0 {
+                // if max_of_stakes > 0, it means that the account must have pledging balance
                 // and therefore must exist
                 return Err(StorageError::StorageInconsistentState(format!(
-                    "Account {} with max of pledging {} is not found",
-                    account_id, max_of_pledge
+                    "Account {} with max of stakes {} is not found",
+                    account_id, max_of_stakes
                 ))
-                    .into());
+                .into());
             }
         }
-        // Slash only to the accounts that are in the current shard.
-        for (account_id, pledge) in validator_accounts_update.slashing_info.iter() {
+
+        for (account_id, stake) in validator_accounts_update.slashing_info.iter() {
             if let Some(mut account) = get_account(state_update, account_id)? {
-                let amount_to_slash = pledge.unwrap_or(account.pledging());
+                let amount_to_slash = stake.unwrap_or(account.pledging());
                 debug!(target: "runtime", "slashing {} of {} from {}", amount_to_slash, account.pledging(), account_id);
                 if account.pledging() < amount_to_slash {
                     return Err(StorageError::StorageInconsistentState(format!(
@@ -1311,7 +1104,7 @@ impl Runtime {
                     "Account {} to slash is not found",
                     account_id
                 ))
-                    .into());
+                .into());
             }
         }
 
@@ -1377,7 +1170,6 @@ impl Runtime {
         // Re-introduce receipts lost because of a bug in apply_chunks.
         // We take the first block with existing chunk in the first epoch in which protocol feature
         // RestoreReceiptsAfterFixApplyChunks was enabled, and put the restored receipts there.
-        // See https://github.com/utnet-org/utility/pull/4248/ for more details.
         let receipts_to_restore = if ProtocolFeature::RestoreReceiptsAfterFixApplyChunks
             .protocol_version()
             == protocol_version
@@ -1436,7 +1228,7 @@ impl Runtime {
         let mut stats = ApplyStats::default();
 
         if let Some(validator_accounts_update) = validator_accounts_update {
-            self.update_validator_accounts_in_block(
+            self.update_validator_accounts(
                 &mut state_update,
                 validator_accounts_update,
                 &mut stats,
@@ -1688,9 +1480,6 @@ impl Runtime {
         if delayed_receipts_indices != initial_delayed_receipt_indices {
             set(&mut state_update, TrieKey::DelayedReceiptIndices, &delayed_receipts_indices);
         }
-
-        // Just ignore this checker for now.
-        // We will work on this later.
         check_balance(
             &apply_state.config,
             &state_update,
@@ -1709,6 +1498,7 @@ impl Runtime {
         // The order is deterministically changed.
         let mut unique_power_proposals = vec![];
         let mut unique_pledge_proposals = vec![];
+
         let mut power_account_ids = HashSet::new();
         let mut pledge_account_ids = HashSet::new();
         for power_proposal in validator_power_proposals.into_iter().rev() {
@@ -1799,8 +1589,8 @@ mod tests {
         unc * 10u128.pow(24)
     }
 
-    fn to_yocto2(unc: Power) -> Power {
-        unc * 10u128.pow(12)
+    fn to_tera(unc: Power) -> Power {
+        unc * 10u64.pow(12)
     }
 
     fn create_receipt_with_actions(
@@ -1917,7 +1707,7 @@ mod tests {
     #[test]
     fn test_apply_no_op() {
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), 0,0, 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), 0, 0, 10u64.pow(15));
         runtime
             .apply(
                 tries.get_trie_for_shard(ShardUId::single_shard(), root),
@@ -1934,7 +1724,7 @@ mod tests {
     #[test]
     fn test_apply_check_balance_validation_rewards() {
         let initial_locked = to_yocto(500_000);
-        let initial_power = to_yocto2(5);
+        let initial_power = to_tera(5);
         let reward = to_yocto(10_000_000);
         let small_refund = to_yocto(500);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
@@ -1943,6 +1733,7 @@ mod tests {
         let validator_accounts_update = ValidatorAccountsUpdate {
             power_info: vec![(alice_account(), initial_power)].into_iter().collect(),
             pledge_info: vec![(alice_account(), initial_locked)].into_iter().collect(),
+	
             validator_rewards: vec![(alice_account(), reward)].into_iter().collect(),
             last_power_proposals: Default::default(),
             last_pledge_proposals: Default::default(),
@@ -1967,7 +1758,7 @@ mod tests {
     fn test_apply_refund_receipts() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power = to_yocto2(5);
+        let initial_power = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
@@ -2013,7 +1804,7 @@ mod tests {
     fn test_apply_delayed_receipts_feed_all_at_once() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power = to_yocto2(5);
+        let initial_power = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
@@ -2059,7 +1850,7 @@ mod tests {
     fn test_apply_delayed_receipts_add_more_using_chunks() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power           = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
@@ -2111,7 +1902,7 @@ mod tests {
     fn test_apply_delayed_receipts_adjustable_gas_limit() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power           = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
@@ -2215,7 +2006,7 @@ mod tests {
     fn test_apply_delayed_receipts_local_tx() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power           = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
@@ -2461,7 +2252,7 @@ mod tests {
     fn test_apply_deficit_gas_for_transfer() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power           = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let small_transfer = to_yocto(10_000);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
@@ -2491,7 +2282,7 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_covered() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power   = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
@@ -2555,7 +2346,7 @@ mod tests {
     fn test_apply_deficit_gas_for_function_call_partial() {
         let initial_balance = to_yocto(1_000_000);
         let initial_locked = to_yocto(500_000);
-        let initial_power           = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
@@ -2611,7 +2402,7 @@ mod tests {
     #[test]
     fn test_delete_key_add_key() {
         let initial_locked = to_yocto(500_000);
-        let initial_power   = to_yocto2(5);
+        let initial_power   = to_tera(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
             setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
@@ -2656,7 +2447,7 @@ mod tests {
     #[test]
     fn test_delete_key_underflow() {
         let initial_locked = to_yocto(500_000);
-        let initial_power   = to_yocto2(5);
+        let initial_power  = to_tera(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
             setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
@@ -2746,7 +2537,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit() {
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 1);
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_tera(5), 1);
 
         let mut free_config = RuntimeConfig::free();
         let sha256_cost = ParameterCost {
@@ -2843,7 +2634,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit_with_failed_receipt() {
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_yocto2(5), 10u64.pow(15));
+            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_tera(5), 10u64.pow(15));
 
         let deploy_contract_receipt = create_receipt_with_actions(
             alice_account(),
@@ -2894,7 +2685,7 @@ pub mod estimator {
     use unc_primitives::transaction::ExecutionOutcomeWithId;
     use unc_primitives::types::validator_power::ValidatorPower;
     use unc_primitives::types::EpochInfoProvider;
-    use unc_primitives::types::validator_pledge::ValidatorPledge;
+    use unc_primitives::types::validator_stake::ValidatorPledge;
     use unc_store::TrieUpdate;
 
     use crate::ApplyStats;

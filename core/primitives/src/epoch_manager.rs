@@ -3,7 +3,7 @@ use crate::num_rational::Rational32;
 use crate::shard_layout::ShardLayout;
 use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeV1};
 use crate::types::validator_power::{ValidatorPower, ValidatorPowerV1};
-use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeV1};
+use crate::types::validator_stake::{ValidatorPledge, ValidatorPledgeV1};
 
 use crate::types::{
     AccountId, Balance, BlockHeightDelta, EpochHeight, EpochId, NumSeats, ProtocolVersion,
@@ -267,7 +267,7 @@ pub mod block_summary {
     use unc_primitives_core::hash::CryptoHash;
     use unc_primitives_core::types::{Balance, Power, ValidatorId};
     use crate::types::{AccountId, ValidatorKickoutReason};
-    use crate::types::validator_pledge::ValidatorPledge;
+    use crate::types::validator_stake::ValidatorPledge;
     use crate::types::validator_power::ValidatorPower;
     use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
     use crate::validator_mandates::ValidatorMandates;
@@ -441,7 +441,7 @@ pub mod block_summary {
         }
 
         #[inline]
-        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
+        pub fn validator_stake(&self, validator_id: u64) -> Balance {
             match self {
                 Self::V1(v1) => v1.validators[validator_id as usize].pledge(),
             }
@@ -532,7 +532,7 @@ pub mod block_info {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::hash::CryptoHash;
     use unc_primitives_core::types::{AccountId, Balance, BlockHeight, Power, ProtocolVersion, ValidatorId};
-    use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+    use crate::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
     use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
     use crate::validator_mandates::ValidatorMandates;
     pub use super::BlockInfoV1;
@@ -860,7 +860,7 @@ pub mod block_info {
         }
 
         #[inline]
-        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
+        pub fn validator_stake(&self, validator_id: u64) -> Balance {
             match self {
                 Self::V1(v1) => v1.validators[validator_id as usize].pledge(),
                 Self::V2(v2) => v2.validators[validator_id as usize].pledge(),
@@ -1154,7 +1154,7 @@ use crate::epoch_manager::ValidatorWeight;
         hash::hash,
         types::{BlockHeight, ShardId},
     };
-    use crate::types::validator_pledge::ValidatorPledge;
+    use crate::types::validator_stake::ValidatorPledge;
     use crate::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
 
     pub use super::EpochInfoV1;
@@ -1566,7 +1566,7 @@ use crate::epoch_manager::ValidatorWeight;
         }
 
         #[inline]
-        pub fn validator_pledge(&self, validator_id: u64) -> Balance {
+        pub fn validator_stake(&self, validator_id: u64) -> Balance {
             match self {
                 Self::V1(v1) => v1.validators[validator_id as usize].pledge,
                 Self::V2(v2) => v2.validators[validator_id as usize].pledge(),

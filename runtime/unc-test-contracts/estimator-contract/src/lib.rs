@@ -111,7 +111,7 @@ extern "C" {
         gas: u64,
     );
     fn promise_batch_action_transfer(promise_index: u64, amount_ptr: u64);
-    fn promise_batch_action_pledge(
+    fn promise_batch_action_stake(
         promise_index: u64,
         amount_ptr: u64,
         public_key_len: u64,

@@ -128,7 +128,7 @@ use rand::Rng;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tracing::{debug, debug_span, error, warn};
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 
 pub mod adapter;
 mod chunk_cache;
@@ -483,8 +483,8 @@ impl ShardsManager {
             .epoch_manager
             .get_epoch_block_producers_ordered(&epoch_id, parent_hash)?
             .into_iter()
-            .filter_map(|(validator_pledge, is_slashed)| {
-                let account_id = validator_pledge.take_account_id();
+            .filter_map(|(validator_stake, is_slashed)| {
+                let account_id = validator_stake.take_account_id();
                 if !is_slashed
                     && cares_about_shard_this_or_next_epoch(
                         Some(&account_id),

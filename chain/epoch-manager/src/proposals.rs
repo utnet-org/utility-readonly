@@ -8,7 +8,7 @@ use unc_primitives::epoch_manager::block_summary::BlockSummary;
 use unc_primitives::errors::{BlockError, EpochError};
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::types::validator_power::ValidatorPower;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::{AccountId, Balance, NumSeats, ProtocolVersion, ValidatorKickoutReason};
 
 /// Find threshold of pledge per seat, given provided pledges and required number of seats.
@@ -114,7 +114,7 @@ mod old_validator_selection {
     use unc_primitives::epoch_manager::EpochConfig;
     use unc_primitives::errors::EpochError;
     use unc_primitives::types::validator_power::ValidatorPower;
-    use unc_primitives::types::validator_pledge::ValidatorPledge;
+    use unc_primitives::types::validator_stake::ValidatorPledge;
     use unc_primitives::types::{AccountId, Balance, NumSeats, ValidatorPledgeV1, ValidatorId, ValidatorKickoutReason, ValidatorPowerAndPledgeV1, ValidatorPowerV1};
     use unc_primitives::validator_mandates::ValidatorMandates;
     use unc_primitives::version::ProtocolVersion;

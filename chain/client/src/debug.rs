@@ -196,9 +196,9 @@ impl ClientActor {
             .epoch_manager
             .get_epoch_block_producers_ordered(epoch_id, last_known_block_hash)?
             .into_iter()
-            .map(|(validator_pledge, is_slashed)| {
-                block_producers_set.insert(validator_pledge.account_id().as_str().to_owned());
-                ValidatorInfo { account_id: validator_pledge.take_account_id(), is_slashed }
+            .map(|(validator_stake, is_slashed)| {
+                block_producers_set.insert(validator_stake.account_id().as_str().to_owned());
+                ValidatorInfo { account_id: validator_stake.take_account_id(), is_slashed }
             })
             .collect();
         let chunk_only_producers = self

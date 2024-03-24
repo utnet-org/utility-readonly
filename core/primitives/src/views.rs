@@ -1936,7 +1936,7 @@ pub mod validator_pledge_view {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::types::AccountId;
     use serde::Deserialize;
-    use crate::types::validator_pledge::ValidatorPledge;
+    use crate::types::validator_stake::ValidatorPledge;
 
     #[derive(
     BorshSerialize, BorshDeserialize, serde::Serialize, Deserialize, Debug, Clone, Eq, PartialEq,

@@ -528,7 +528,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         Ok(0)
     }
 
-    fn validator_pledge(
+    fn validator_stake(
             &self,
             _epoch_id: &EpochId,
             _last_block_hash: &CryptoHash,
@@ -541,7 +541,7 @@ impl EpochInfoProvider for MockEpochInfoProvider {
         }
     }
 
-    fn validator_total_pledge(
+    fn validator_total_stake(
         &self,
         _epoch_id: &EpochId,
         _last_block_hash: &CryptoHash,

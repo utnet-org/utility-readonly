@@ -9,7 +9,7 @@ use unc_primitives::network::PeerId;
 use unc_primitives::sharding::ShardChunkHeader;
 use unc_primitives::sharding::ShardChunkHeaderV3;
 use unc_primitives::test_utils::create_test_signer;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::utils::MaybeValidated;
 use std::sync::Arc;
 

@@ -26,7 +26,7 @@ use unc_store::test_utils::create_test_store;
 
 use unc_primitives::shard_layout::ShardLayout;
 use {crate::reward_calculator::NUM_NS_IN_SECOND, crate::NUM_SECONDS_IN_A_YEAR};
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 pub const DEFAULT_GAS_PRICE: u128 = 100;

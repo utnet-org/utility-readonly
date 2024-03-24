@@ -28,13 +28,13 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 impl Row {
     pub fn verify(&self) -> Result<()> {
-        if self.validator_pledge > 0 && self.validator_key.is_none() {
+        if self.validator_stake > 0 && self.validator_key.is_none() {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
                 "Validator key must be specified if validator pledge is not 0.",
             )));
         }
-        if self.validator_pledge == 0 && self.validator_key.is_some() {
+        if self.validator_stake == 0 && self.validator_key.is_some() {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
                 "Validator pledge should be greater than 0 if validator pledge is specified.",
@@ -105,7 +105,7 @@ struct Row {
     full_pks: Vec<PublicKey>,
     amount: Balance,
     is_treasury: bool,
-    validator_pledge: Balance,
+    validator_stake: Balance,
     validator_power: Power,
     validator_key: Option<PublicKey>,
     #[serde(with = "crate::serde_with::peer_info_to_str")]
@@ -157,7 +157,7 @@ where
                 account_id: row.account_id.clone(),
                 public_key: validator_key.clone(),
                 power: row.validator_power,
-                pledging: row.validator_pledge,
+                pledging: row.validator_stake,
             });
         }
 
@@ -189,7 +189,7 @@ fn account_records(row: &Row, gas_price: Balance) -> Vec<StateRecord> {
 
     let mut res = vec![StateRecord::Account {
         account_id: row.account_id.clone(),
-        account: Account::new(row.amount, row.validator_pledge, row.validator_power, smart_contract_hash, 0),
+        account: Account::new(row.amount, row.validator_stake, row.validator_power, smart_contract_hash, 0),
     }];
 
     // Add restricted access keys.
@@ -310,7 +310,7 @@ mod tests {
                 vesting_start: timestamp(22, 0, 0),
                 vesting_end: timestamp(23, 30, 0),
                 vesting_cliff: timestamp(22, 30, 20),
-                validator_pledge: 100,
+                validator_stake: 100,
                 validator_key: Some(PublicKey::empty(KeyType::ED25519)),
                 peer_info: Some(PeerInfo {
                     id: PeerId::new(PublicKey::empty(KeyType::ED25519)),
@@ -334,7 +334,7 @@ mod tests {
                 vesting_start: None,
                 vesting_end: None,
                 vesting_cliff: None,
-                validator_pledge: 0,
+                validator_stake: 0,
                 validator_key: None,
                 peer_info: None,
                 is_treasury: true,

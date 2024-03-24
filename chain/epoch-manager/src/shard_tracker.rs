@@ -113,7 +113,7 @@ mod tests {
     use num_rational::Ratio;
     use std::collections::HashSet;
     use std::sync::Arc;
-    use unc_primitives::types::validator_pledge::ValidatorPledge;
+    use unc_primitives::types::validator_stake::ValidatorPledge;
 
     const DEFAULT_TOTAL_SUPPLY: u128 = 1_000_000_000_000;
 

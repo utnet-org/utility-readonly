@@ -275,7 +275,7 @@ mod tests {
     use rand_chacha::ChaCha8Rng;
 
     use crate::{
-        types::validator_pledge::ValidatorPledge, types::ValidatorId,
+        types::validator_stake::ValidatorPledge, types::ValidatorId,
         validator_mandates::ValidatorMandatesConfig,
     };
 

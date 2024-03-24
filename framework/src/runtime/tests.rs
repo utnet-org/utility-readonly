@@ -5,7 +5,7 @@ use unc_chain::{Chain, ChainGenesis};
 use unc_epoch_manager::types::BlockHeaderInfo;
 use unc_epoch_manager::EpochManager;
 use unc_primitives::test_utils::create_test_signer;
-use unc_primitives::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+use unc_primitives::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
 use unc_store::flat::{FlatStateChanges, FlatStateDelta, FlatStateDeltaMetadata};
 use unc_store::genesis::initialize_genesis_state;
 use num_rational::Ratio;
@@ -61,7 +61,7 @@ impl NightshadeRuntime {
         block_hash: &CryptoHash,
         receipts: &[Receipt],
         transactions: &[SignedTransaction],
-        last_validator_proposals: ValidatorPledgeIter,
+        last_validator_pledge_proposals: ValidatorPledgeIter,
         gas_price: Balance,
         gas_limit: Gas,
         challenges_result: &ChallengesResult,
@@ -71,7 +71,7 @@ impl NightshadeRuntime {
                 RuntimeStorageConfig::new(*state_root, true),
                 ApplyChunkShardContext {
                     shard_id,
-                    last_validator_proposals,
+                    last_validator_pledge_proposals,
                     gas_limit,
                     is_new_chunk: true,
                     is_first_block_with_chunk_of_version: false,

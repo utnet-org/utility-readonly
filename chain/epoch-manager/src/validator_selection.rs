@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
 use unc_primitives::epoch_manager::block_info::BlockInfo;
 use unc_primitives::epoch_manager::block_summary::BlockSummary;
 use unc_primitives::hash::CryptoHash;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 
 fn remove_duplicate_power_proposals(power_proposals: Vec<ValidatorPower>) -> Vec<ValidatorPower> {

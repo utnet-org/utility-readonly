@@ -71,7 +71,7 @@ pub mod shard_chunk_header_inner;
 pub use shard_chunk_header_inner::{
     ShardChunkHeaderInner, ShardChunkHeaderInnerV1, ShardChunkHeaderInnerV2,
 };
-use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+use crate::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Eq, Debug)]
 #[borsh(init=init)]

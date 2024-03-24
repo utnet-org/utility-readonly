@@ -414,10 +414,10 @@ pub struct ExtCostsConfigView {
     // ###############
     // # Validator API #
     // ###############
-    /// Cost of calling `validator_pledge`.
+    /// Cost of calling `validator_stake`.
     pub validator_pledge_base: Gas,
     pub validator_power_base: Gas,
-    /// Cost of calling `validator_total_pledge`.
+    /// Cost of calling `validator_total_stake`.
     pub validator_total_pledge_base: Gas,
     pub validator_total_power_base: Gas,
 

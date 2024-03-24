@@ -769,7 +769,7 @@ pub mod validator_power_and_pledge {
 
 }
 
-pub mod validator_pledge {
+pub mod validator_stake {
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_crypto::PublicKey;
     use unc_primitives_core::types::{AccountId, Balance};
@@ -1123,7 +1123,7 @@ pub struct BlockExtra {
 
 pub mod chunk_extra {
     use crate::types::validator_power::{ValidatorPower, ValidatorPowerIter};
-    use crate::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+    use crate::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
     use crate::types::StateRoot;
     use borsh::{BorshDeserialize, BorshSerialize};
     use unc_primitives_core::hash::CryptoHash;
@@ -1434,7 +1434,7 @@ pub trait EpochInfoProvider {
 
     /// Get current pledge of a validator in the given epoch.
     /// If the account is not a validator, returns `None`.
-    fn validator_pledge(
+    fn validator_stake(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
@@ -1442,7 +1442,7 @@ pub trait EpochInfoProvider {
     ) -> Result<Option<Balance>, EpochError>;
 
     /// Get the total pledge of the given epoch.
-    fn validator_total_pledge(
+    fn validator_total_stake(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,

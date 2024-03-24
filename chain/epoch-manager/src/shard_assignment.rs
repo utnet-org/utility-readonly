@@ -1,6 +1,6 @@
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::{Balance, NumShards, Power, ShardId};
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::validator_power_and_pledge::ValidatorPowerAndPledge;
 use unc_primitives::utils::min_heap::{MinHeap, PeekMut};
 

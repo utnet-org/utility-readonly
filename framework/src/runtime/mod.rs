@@ -47,7 +47,7 @@ use unc_vm_runner::ContractCode;
 use node_runtime::adapter::ViewRuntimeAdapter;
 use node_runtime::state_viewer::TrieViewer;
 #[allow(unused_imports)]
-use node_runtime::{validate_transaction, verify_and_charge_transaction, ApplyState, Runtime, ValidatorAccountsUpdate, ValidatorAccountsUpdateInBlock};
+use node_runtime::{validate_transaction, verify_and_charge_transaction, ApplyState, Runtime, ValidatorAccountsUpdate};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;

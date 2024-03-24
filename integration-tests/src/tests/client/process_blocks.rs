@@ -58,7 +58,7 @@ use unc_primitives::transaction::{
     Transaction,
 };
 use unc_primitives::trie_key::TrieKey;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::{AccountId, BlockHeight, EpochId, NumBlocks, ProtocolVersion};
 use unc_primitives::utils::to_timestamp;
 use unc_primitives::validator_signer::ValidatorSigner;

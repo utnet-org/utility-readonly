@@ -214,7 +214,6 @@ mod test {
         config.validators = vec![AccountInfo {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
-            amount: 10,
             power: 10,
             pledging: 10,
         }];
@@ -233,7 +232,6 @@ mod test {
         config.validators = vec![AccountInfo {
             account_id: "test".parse().unwrap(),
             public_key: PublicKey::empty(KeyType::ED25519),
-            amount: 10,
             power: 10,
             pledging: 10,
         }];
@@ -252,7 +250,6 @@ mod test {
         config.validators = vec![AccountInfo {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
-            amount: 100,
             power: 100,
             pledging: 100,
         }];
@@ -284,7 +281,6 @@ mod test {
         config.validators = vec![AccountInfo {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
-            amount: 10,
             power: 10,
             pledging: 10,
         }];
@@ -308,7 +304,6 @@ mod test {
         config.validators = vec![AccountInfo {
             account_id: "test".parse().unwrap(),
             public_key: VALID_ED25519_RISTRETTO_KEY.parse().unwrap(),
-            amount: 10,
             power: 10,
             pledging: 10,
         }];

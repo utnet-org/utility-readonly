@@ -95,7 +95,7 @@ extern "C" {
         gas_weight: u64,
     );
     fn promise_batch_action_transfer(promise_index: u64, amount_ptr: u64);
-    fn promise_batch_action_pledge(
+    fn promise_batch_action_stake(
         promise_index: u64,
         amount_ptr: u64,
         public_key_len: u64,
@@ -154,8 +154,8 @@ extern "C" {
     // #################
     // # Validator API #
     // #################
-    fn validator_pledge(account_id_len: u64, account_id_ptr: u64, pledge_ptr: u64);
-    fn validator_total_pledge(pledge_ptr: u64);
+    fn validator_stake(account_id_len: u64, account_id_ptr: u64, pledge_ptr: u64);
+    fn validator_total_stake(pledge_ptr: u64);
     // ###################
     // # Math Extensions #
     // ###################
@@ -220,7 +220,7 @@ ext_test!(ext_account_id, current_account_id);
 ext_test_u128!(ext_account_balance, account_balance);
 ext_test_u128!(ext_attached_deposit, attached_deposit);
 
-ext_test_u128!(ext_validator_total_pledge, validator_total_pledge);
+ext_test_u128!(ext_validator_total_pledge, validator_total_stake);
 
 #[no_mangle]
 pub unsafe fn ext_sha256() {
@@ -255,7 +255,7 @@ pub unsafe fn ext_validator_pledge() {
     let account_id = vec![0; register_len(0) as usize];
     read_register(0, account_id.as_ptr() as *const u64 as u64);
     let result = [0u8; size_of::<u128>()];
-    validator_pledge(
+    validator_stake(
         account_id.len() as u64,
         account_id.as_ptr() as *const u64 as u64,
         result.as_ptr() as *const u64 as u64,
@@ -714,7 +714,7 @@ fn call_promise() {
                 let promise_index = action["promise_index"].as_i64().unwrap() as u64;
                 let amount = action["amount"].as_str().unwrap().parse::<u128>().unwrap();
                 let public_key = from_base64(action["public_key"].as_str().unwrap());
-                promise_batch_action_pledge(
+                promise_batch_action_stake(
                     promise_index,
                     &amount as *const u128 as *const u64 as u64,
                     public_key.len() as u64,
@@ -1088,7 +1088,7 @@ pub unsafe fn sanity_check() {
         batch_promise_idx,
         &amount_non_zero as *const u128 as *const u64 as u64,
     );
-    promise_batch_action_pledge(
+    promise_batch_action_stake(
         batch_promise_idx,
         &amount_pledge as *const u128 as *const u64 as u64,
         account_public_key.len() as u64,
@@ -1176,8 +1176,8 @@ pub unsafe fn sanity_check() {
     // #################
     let pledge = [0u8; size_of::<u128>()];
     let validator_id = input_args["validator_id"].as_str().unwrap().as_bytes();
-    validator_pledge(validator_id.len() as u64, validator_id.as_ptr() as u64, pledge.as_ptr() as u64);
-    validator_total_pledge(pledge.as_ptr() as u64);
+    validator_stake(validator_id.len() as u64, validator_id.as_ptr() as u64, pledge.as_ptr() as u64);
+    validator_total_stake(pledge.as_ptr() as u64);
 
     // ###################
     // # Math Extensions #

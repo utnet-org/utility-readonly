@@ -617,13 +617,13 @@ impl Client {
             debug!(target: "client", "Should reschedule block");
             return Ok(None);
         }
-        let (validator_pledge, _) = self.epoch_manager.get_validator_by_account_id(
+        let (validator_stake, _) = self.epoch_manager.get_validator_by_account_id(
             &epoch_id,
             &prev_hash,
             &next_block_proposer,
         )?;
 
-        let validator_pk = validator_pledge.take_public_key();
+        let validator_pk = validator_stake.take_public_key();
         if validator_pk != validator_signer.public_key() {
             debug!(target: "client",
                 local_validator_key = ?validator_signer.public_key(),
@@ -1866,8 +1866,8 @@ impl Client {
                     .epoch_manager
                     .get_validator_by_account_id(epoch_id, block_hash, account_id)
                 {
-                    Ok((validator_pledge, is_slashed)) => {
-                        !is_slashed && validator_pledge.take_public_key() == signer.public_key()
+                    Ok((validator_stake, is_slashed)) => {
+                        !is_slashed && validator_stake.take_public_key() == signer.public_key()
                     }
                     Err(_) => false,
                 }

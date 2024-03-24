@@ -333,13 +333,13 @@ impl KeyValueRuntime {
             .with_shard_layout(0, num_shards)
             .build();
         let mut initial_amounts = HashMap::new();
-        for (i, validator_pledge) in epoch_manager
+        for (i, validator_stake) in epoch_manager
             .validators_by_valset
             .iter()
             .flat_map(|set| set.block_producers.iter())
             .enumerate()
         {
-            initial_amounts.insert(validator_pledge.account_id().clone(), (1000 + 100 * i) as u128);
+            initial_amounts.insert(validator_stake.account_id().clone(), (1000 + 100 * i) as u128);
         }
 
         let kv_state = KVState {
@@ -720,14 +720,14 @@ impl EpochManagerAdapter for MockEpochManager {
         account_id: &AccountId,
     ) -> Result<(ValidatorPowerAndPledge, bool), EpochError> {
         let validators = &self.validators_by_valset[self.get_valset_for_epoch(epoch_id)?];
-        for validator_pledge in validators.block_producers.iter() {
-            if validator_pledge.account_id() == account_id {
-                return Ok((validator_pledge.clone(), false));
+        for validator_stake in validators.block_producers.iter() {
+            if validator_stake.account_id() == account_id {
+                return Ok((validator_stake.clone(), false));
             }
         }
-        for validator_pledge in validators.chunk_producers.iter().flatten() {
-            if validator_pledge.account_id() == account_id {
-                return Ok((validator_pledge.clone(), false));
+        for validator_stake in validators.chunk_producers.iter().flatten() {
+            if validator_stake.account_id() == account_id {
+                return Ok((validator_stake.clone(), false));
             }
         }
         Err(EpochError::NotAValidator(account_id.clone(), epoch_id.clone()))
@@ -853,8 +853,8 @@ impl EpochManagerAdapter for MockEpochManager {
 
     fn verify_header_signature(&self, header: &BlockHeader) -> Result<bool, Error> {
         let validator = self.get_block_producer(&header.epoch_id(), header.height())?;
-        let validator_pledge = &self.validators[&validator];
-        Ok(header.verify_block_producer(validator_pledge.public_key()))
+        let validator_stake = &self.validators[&validator];
+        Ok(header.verify_block_producer(validator_stake.public_key()))
     }
 
     fn verify_chunk_signature_with_header_parts(

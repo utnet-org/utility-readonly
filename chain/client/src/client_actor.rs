@@ -649,8 +649,8 @@ impl Handler<WithSpanContext<Status>> for ClientActor {
             .get_epoch_block_producers_ordered(&head.epoch_id, &head.last_block_hash)
             .into_chain_error()?
             .into_iter()
-            .map(|(validator_pledge, is_slashed)| ValidatorInfo {
-                account_id: validator_pledge.take_account_id(),
+            .map(|(validator_stake, is_slashed)| ValidatorInfo {
+                account_id: validator_stake.take_account_id(),
                 is_slashed,
             })
             .collect();

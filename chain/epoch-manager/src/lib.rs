@@ -15,7 +15,7 @@ use unc_primitives::epoch_manager::{
 use unc_primitives::errors::{BlockError, EpochError};
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::shard_layout::ShardLayout;
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
 use unc_primitives::types::{AccountId, ApprovalPledge, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
@@ -112,7 +112,7 @@ impl EpochInfoProvider for EpochManagerHandle {
         let epoch_manager = self.read();
         epoch_manager.minimum_power(prev_block_hash)
     }
-    fn validator_pledge(
+    fn validator_stake(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
@@ -124,10 +124,10 @@ impl EpochInfoProvider for EpochManagerHandle {
             return Ok(None);
         }
         let epoch_info = epoch_manager.get_epoch_info(epoch_id)?;
-        Ok(epoch_info.get_validator_id(account_id).map(|id| epoch_info.validator_pledge(*id)))
+        Ok(epoch_info.get_validator_id(account_id).map(|id| epoch_info.validator_stake(*id)))
     }
 
-    fn validator_total_pledge(
+    fn validator_total_stake(
         &self,
         epoch_id: &EpochId,
         last_block_hash: &CryptoHash,
@@ -649,7 +649,7 @@ impl EpochManager {
         // Implements https://github.com/utility/UEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
         let mut versions = HashMap::new();
         for (validator_id, version) in version_tracker {
-            let pledge = epoch_info.validator_pledge(validator_id);
+            let pledge = epoch_info.validator_stake(validator_id);
             *versions.entry(version).or_insert(0) += pledge;
         }
         let total_block_producer_pledge: u128 = epoch_info
@@ -658,7 +658,7 @@ impl EpochManager {
             .copied()
             .collect::<HashSet<_>>()
             .iter()
-            .map(|&id| epoch_info.validator_pledge(id))
+            .map(|&id| epoch_info.validator_stake(id))
             .sum();
 
         let protocol_version =
@@ -752,7 +752,7 @@ impl EpochManager {
         rng_seed: RngSeed,
     ) -> Result<BlockSummary, BlockError> {
 
-        let validator_pledge =
+        let validator_stake =
             block_info.validators_iter().map(|r| r.account_and_pledge()).collect::<HashMap<_, _>>();
 
         let (
@@ -784,7 +784,7 @@ impl EpochManager {
                 block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
             self.reward_calculator.calculate_reward(
                 validator_block_chunk_stats,
-                &validator_pledge,
+                &validator_stake,
                 *block_info.total_supply(),
                 0u32,
                 self.genesis_protocol_version,
@@ -833,7 +833,7 @@ impl EpochManager {
         let epoch_summary = self.collect_blocks_info(block_info, last_block_hash)?;
         let epoch_info = self.get_epoch_info(block_info.epoch_id())?;
         let epoch_protocol_version = epoch_info.protocol_version();
-        let validator_pledge =
+        let validator_stake =
             epoch_info.validators_iter().map(|r| r.account_and_pledge()).collect::<HashMap<_, _>>();
         let next_epoch_id = self.get_next_epoch_id_from_info(block_info)?;
         let next_epoch_info = self.get_epoch_info(&next_epoch_id)?;
@@ -874,7 +874,7 @@ impl EpochManager {
                 block_info.timestamp_nanosec() - last_block_in_last_epoch.timestamp_nanosec();
             self.reward_calculator.calculate_reward(
                 validator_block_chunk_stats,
-                &validator_pledge,
+                &validator_stake,
                 *block_info.total_supply(),
                 epoch_protocol_version,
                 self.genesis_protocol_version,
@@ -1121,10 +1121,10 @@ impl EpochManager {
                 .block_producers_settlement()
                 .iter()
                 .map(|&validator_id| {
-                    let validator_pledge = epoch_info.get_validator(validator_id);
+                    let validator_stake = epoch_info.get_validator(validator_id);
                     let is_slashed =
-                        block_info.slashed().contains_key(validator_pledge.account_id());
-                    (validator_pledge, is_slashed)
+                        block_info.slashed().contains_key(validator_stake.account_id());
+                    (validator_stake, is_slashed)
                 })
                 .collect();
             Ok(result)
@@ -1143,8 +1143,8 @@ impl EpochManager {
             let mut validators: HashSet<AccountId> = HashSet::default();
             let result = settlement
                 .iter()
-                .filter(|(validator_pledge, _is_slashed)| {
-                    let account_id = validator_pledge.account_id();
+                .filter(|(validator_stake, _is_slashed)| {
+                    let account_id = validator_stake.account_id();
                     validators.insert(account_id.clone())
                 })
                 .cloned()
@@ -1206,10 +1206,10 @@ impl EpochManager {
         let mut result = vec![];
         let mut validators: HashSet<AccountId> = HashSet::new();
         for validator_id in epoch_info.block_producers_settlement().into_iter() {
-            let validator_pledge = epoch_info.get_validator(*validator_id);
-            let account_id = validator_pledge.account_id();
+            let validator_stake = epoch_info.get_validator(*validator_id);
+            let account_id = validator_stake.account_id();
             if validators.insert(account_id.clone()) {
-                result.push(validator_pledge.get_approval_pledge(false));
+                result.push(validator_stake.get_approval_pledge(false));
             }
         }
 
@@ -1239,19 +1239,19 @@ impl EpochManager {
 
         let mut result = vec![];
         let mut validators: HashMap<AccountId, usize> = HashMap::default();
-        for (ord, (validator_pledge, is_slashed)) in settlement.into_iter().enumerate() {
-            let account_id = validator_pledge.account_id();
+        for (ord, (validator_stake, is_slashed)) in settlement.into_iter().enumerate() {
+            let account_id = validator_stake.account_id();
             match validators.get(account_id) {
                 None => {
                     validators.insert(account_id.clone(), result.len());
                     result.push((
-                        validator_pledge.get_approval_pledge(ord >= settlement_epoch_boundary),
+                        validator_stake.get_approval_pledge(ord >= settlement_epoch_boundary),
                         is_slashed,
                     ));
                 }
                 Some(old_ord) => {
                     if ord >= settlement_epoch_boundary {
-                        result[*old_ord].0.pledge_next_epoch = validator_pledge.pledge();
+                        result[*old_ord].0.pledge_next_epoch = validator_stake.pledge();
                     };
                 }
             };
@@ -1563,7 +1563,7 @@ impl EpochManager {
                 SlashState::DoubleSign => Some(
                     epoch_info
                         .get_validator_id(account_id)
-                        .map_or(0, |id| epoch_info.validator_pledge(*id)),
+                        .map_or(0, |id| epoch_info.validator_stake(*id)),
                 ),
                 _ => None,
             })
@@ -1573,7 +1573,7 @@ impl EpochManager {
         for (account_id, slash_state) in last_block_info.slashed() {
             if let SlashState::DoubleSign = slash_state {
                 if let Some(&idx) = epoch_info.get_validator_id(account_id) {
-                    let pledge = epoch_info.validator_pledge(idx);
+                    let pledge = epoch_info.validator_stake(idx);
                     let slashed_pledge = if is_totally_slashed {
                         pledge
                     } else {

@@ -252,7 +252,7 @@ pub enum Cost {
     //  - Reading from a register: The data from the register is copied into
     //    WASM memory.
     //  - Host function calls such as `account_balance()` and
-    //    `validator_pledge()` that return a value by writing it to a pointer.
+    //    `validator_stake()` that return a value by writing it to a pointer.
     //
     /// Estimates `ext_costs.read_memory_base` which is charged once every time
     /// data is copied from WASM memory to the hosting runtime as a result of
@@ -587,14 +587,14 @@ pub enum Cost {
     /// Estimation: Currently not estimated
     PromiseReturn,
     /// Estimates `validator_pledge_base` which is charged for each call to
-    /// `validator_pledge`, covering the cost for looking up if an account is a
+    /// `validator_stake`, covering the cost for looking up if an account is a
     /// validator and if so, how much it has pledging. This information is
     /// available from the local EpochManager.
     ///
     /// Estimation: Currently not estimated
     ValidatorPledgeBase,
     /// Estimates `validator_total_pledge_base` which is charged for each call to
-    /// `validator_total_pledge`, covering the cost for looking up the total
+    /// `validator_total_stake`, covering the cost for looking up the total
     /// pledging tokens for the current epoch. This information is
     /// available from the local EpochManager.
     ///

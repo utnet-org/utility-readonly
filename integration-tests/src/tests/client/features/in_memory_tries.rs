@@ -27,7 +27,7 @@ const ONE_NEAR: u128 = 1_000_000_000_000_000_000_000_000;
 fn test_in_memory_trie_node_consistency() {
     // Recommended to run with RUST_LOG=memtrie=debug,chunks=error,info
     init_test_logger();
-    let validator_pledge = 1000000 * ONE_NEAR;
+    let validator_stake = 1000000 * ONE_NEAR;
     let initial_balance = 10000 * ONE_NEAR;
     let accounts =
         (0..100).map(|i| format!("account{}", i).parse().unwrap()).collect::<Vec<AccountId>>();
@@ -66,13 +66,13 @@ fn test_in_memory_trie_node_consistency() {
             AccountInfo {
                 account_id: accounts[0].clone(),
                 power: 0,
-                pledging: validator_pledge,
+                pledging: validator_stake,
                 public_key: create_test_signer(accounts[0].as_str()).public_key(),
             },
             AccountInfo {
                 account_id: accounts[1].clone(),
                 power: 0,
-                pledging: validator_pledge,
+                pledging: validator_stake,
                 public_key: create_test_signer(accounts[1].as_str()).public_key(),
             },
         ],
@@ -101,7 +101,7 @@ fn test_in_memory_trie_node_consistency() {
     let mut records = Vec::new();
     for (i, account) in accounts.iter().enumerate() {
         // The pledging amount must be consistent with validators from genesis.
-        let pledging = if i < 2 { validator_pledge } else { 0 };
+        let pledging = if i < 2 { validator_stake } else { 0 };
         records.push(StateRecord::Account {
             account_id: account.clone(),
             account: Account::new(initial_balance, pledging, 0,  CryptoHash::default(), 0),

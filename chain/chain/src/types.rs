@@ -37,7 +37,7 @@ use unc_store::{PartialStorage, ShardTries, Store, Trie, WrappedTrieChanges};
 
 pub use unc_epoch_manager::EpochManagerAdapter;
 pub use unc_primitives::block::{Block, BlockHeader, Tip};
-use unc_primitives::types::validator_pledge::{ValidatorPledge, ValidatorPledgeIter};
+use unc_primitives::types::validator_stake::{ValidatorPledge, ValidatorPledgeIter};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum BlockStatus {

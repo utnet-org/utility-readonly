@@ -11,7 +11,7 @@ use unc_primitives::types::{
 use unc_primitives::version::ProtocolVersion;
 use std::collections::{BTreeMap, HashMap};
 use tracing::{debug, debug_span};
-use unc_primitives::types::validator_pledge::ValidatorPledge;
+use unc_primitives::types::validator_stake::ValidatorPledge;
 
 use crate::EpochManager;
 

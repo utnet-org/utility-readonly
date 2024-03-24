@@ -29,7 +29,7 @@ fn test_chunk_validation_basic() {
         return;
     }
 
-    let validator_pledge = 1000000 * ONE_NEAR;
+    let validator_stake = 1000000 * ONE_NEAR;
     let accounts =
         (0..9).map(|i| format!("account{}", i).parse().unwrap()).collect::<Vec<AccountId>>();
     let mut genesis_config = GenesisConfig {
@@ -48,7 +48,7 @@ fn test_chunk_validation_basic() {
             .map(|account_id| AccountInfo {
                 account_id: account_id.clone(),
                 public_key: create_test_signer(account_id.as_str()).public_key(),
-                pledging: validator_pledge,
+                pledging: validator_stake,
                 power: 0,
             })
             .collect(),
@@ -71,7 +71,7 @@ fn test_chunk_validation_basic() {
     let mut records = Vec::new();
     for (i, account) in accounts.iter().enumerate() {
         // The pledging amount must be consistent with validators from genesis.
-        let pledging = if i < 8 { validator_pledge } else { 0 };
+        let pledging = if i < 8 { validator_stake } else { 0 };
         records.push(StateRecord::Account {
             account_id: account.clone(),
             account: Account::new(0, pledging, 0, CryptoHash::default(), 0),

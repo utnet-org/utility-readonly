@@ -101,9 +101,9 @@ order should they produce the blocks.
 EpochInfo.V3(
   epoch_height=7,
   validators=ListContainer([
-    validator_pledge.V1(account_id='node0', public_key=public_key.ED25519(tuple_data=ListContainer([b'7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX'])), pledge=51084320187874404740382878961615),
-    validator_pledge.V1(account_id='node2', public_key=public_key.ED25519(tuple_data=ListContainer([b'GkDv7nSMS3xcqA45cpMvFmfV1o4fRF6zYo1JRR6mNqg5'])), pledge=51084320187874404740382878961615),
-    validator_pledge.V1(account_id='node1', public_key=public_key.ED25519(tuple_data=ListContainer([b'6DSjZ8mvsRZDvFqFxo8tCKePG96omXW7eVYVSySmDk8e'])), pledge=50569171534262067815663761517574)]),
+    validator_stake.V1(account_id='node0', public_key=public_key.ED25519(tuple_data=ListContainer([b'7PGseFbWxvYVgZ89K1uTJKYoKetWs7BJtbyXDzfbAcqX'])), pledge=51084320187874404740382878961615),
+    validator_stake.V1(account_id='node2', public_key=public_key.ED25519(tuple_data=ListContainer([b'GkDv7nSMS3xcqA45cpMvFmfV1o4fRF6zYo1JRR6mNqg5'])), pledge=51084320187874404740382878961615),
+    validator_stake.V1(account_id='node1', public_key=public_key.ED25519(tuple_data=ListContainer([b'6DSjZ8mvsRZDvFqFxo8tCKePG96omXW7eVYVSySmDk8e'])), pledge=50569171534262067815663761517574)]),
 
   validator_to_index={'node0': 0, 'node1': 2, 'node2': 1},
 

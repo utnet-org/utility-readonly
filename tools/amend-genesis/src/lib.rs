@@ -142,7 +142,7 @@ fn validator_records(
 ) -> anyhow::Result<HashMap<AccountId, AccountRecords>> {
     let mut records = HashMap::new();
     for AccountInfo { account_id, public_key, pledging, power } in validators.iter() {
-        let mut r = AccountRecords::new_validator(*pledging,  *power, *pledging, num_bytes_account);
+        let mut r: AccountRecords = AccountRecords::new_validator(*pledging,  *power, *pledging, num_bytes_account);
         r.keys.insert(public_key.clone(), AccessKey::full_access());
         if records.insert(account_id.clone(), r).is_some() {
             anyhow::bail!("validator {} specified twice", account_id);
@@ -424,7 +424,8 @@ mod test {
             AccountInfo {
                 account_id: self.account_id.parse().unwrap(),
                 public_key: self.public_key.parse().unwrap(),
-                amount: self.amount,
+                pledging: self.amount,
+                power: 0,
             }
         }
     }
