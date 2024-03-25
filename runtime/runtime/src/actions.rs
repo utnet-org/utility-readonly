@@ -765,7 +765,7 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     total_power.clone(),
                                 ));
                                 // attach power to account
-                                tracing::debug!("original power is : {}, new power is : {}, total power is : {}", account.power(), power, total_power.clone());
+                                tracing::info!("original power is : {}, new power is : {}, total power is : {}", account.power(), power, total_power.clone());
                                 account.set_power(total_power);
                             }
                             Err(_) => tracing::error!("Power value is not a valid u128 number"),
@@ -773,9 +773,9 @@ pub(crate) fn action_create_rsa2048_challenge(
                     },
                     None => {
                         if let Some(power_number) = power_val.as_u64() {
-                            info!("Power (as u64, converted from u128): {}", power_number);
+                            tracing::warn!("Power (as u64, converted from u128): {}", power_number);
                         } else {
-                            info!("Power value is not a string or a number that fits into u64");
+                            tracing::error!("Power value is not a string or a number that fits into u64");
                         }
                     }
                 }

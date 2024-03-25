@@ -1080,7 +1080,7 @@ impl Runtime {
         }
 
         for (account_id, max_of_powers) in &validator_accounts_update.power_info {
-            if let Some(mut account) = get_account(state_update, account_id)? {
+            if let Some(account) = get_account(state_update, account_id)? {
                 debug!(target: "runtime",
                        "account {} power {} max_of_power: {}",
                        account_id, account.power(), max_of_powers
