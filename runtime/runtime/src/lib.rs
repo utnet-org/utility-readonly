@@ -1027,10 +1027,10 @@ impl Runtime {
         for (account_id, max_of_pledges) in &validator_accounts_update.pledge_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to pledge {}", account_id, reward, account.pledging());
-                    account.set_pledging(
+                    debug!(target: "runtime", "account {} adding reward {} to balance {}", account_id, reward, account.pledging());
+                    account.set_amount(
                         account
-                            .pledging()
+                            .amount()
                             .checked_add(*reward)
                             .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                     );
@@ -1042,28 +1042,28 @@ impl Runtime {
                 );
                 if account.pledging() < *max_of_pledges {
                     return Err(StorageError::StorageInconsistentState(format!(
-                        "FATAL: staking invariant does not hold. \
-                         Account pledge {} is less than maximum of stakes {} in the past three epochs",
+                        "FATAL: pledging invariant does not hold. \
+                         Account pledge {} is less than maximum of pledges {} in the past three epochs",
                         account.pledging(),
                         max_of_pledges)).into());
                 }
-                let last_proposal =
+                let last_pledge_proposal =
                     *validator_accounts_update.last_pledge_proposals.get(account_id).unwrap_or(&0);
-                let return_stake = account
+                let return_pledge = account
                     .pledging()
-                    .checked_sub(max(*max_of_pledges, last_proposal))
+                    .checked_sub(max(*max_of_pledges, last_pledge_proposal))
                     .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?;
-                debug!(target: "runtime", "account {} return pledge {}", account_id, return_stake);
+                debug!(target: "runtime", "account {} return pledge {}", account_id, return_pledge);
                 account.set_pledging(
                     account
                         .pledging()
-                        .checked_sub(return_stake)
+                        .checked_sub(return_pledge)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
                 account.set_amount(
                     account
                         .amount()
-                        .checked_add(return_stake)
+                        .checked_add(return_pledge)
                         .ok_or_else(|| RuntimeError::UnexpectedIntegerOverflow)?,
                 );
 
