@@ -658,9 +658,9 @@ fn proposals_with_rollover(
         // The reward will given to the validator in the next epoch, 
         //  so we need to add it to the pledge but not power.
         let f = pledge_proposals_by_account.entry(account_id.clone()).or_insert(r_f);
-        if let Some(reward) = validator_reward.get(f.account_id()) {
-            *f.pledge_mut() += *reward;
-        }
+        // if let Some(reward) = validator_reward.get(f.account_id()) {
+        //     *f.pledge_mut() += *reward;
+        // }
         pledge_change.insert(f.account_id().clone(), f.pledge());
 
         let p = power_proposals_by_account.entry(account_id).or_insert(r_p);
