@@ -1027,7 +1027,7 @@ impl Runtime {
         for (account_id, max_of_pledges) in &validator_accounts_update.pledge_info {
             if let Some(mut account) = get_account(state_update, account_id)? {
                 if let Some(reward) = validator_accounts_update.validator_rewards.get(account_id) {
-                    debug!(target: "runtime", "account {} adding reward {} to balance {}", account_id, reward, account.pledging());
+                    debug!(target: "runtime", "account {} adding reward {} to balance {}", account_id, reward, account.amount());
                     account.set_amount(
                         account
                             .amount()

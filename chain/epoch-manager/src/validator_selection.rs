@@ -522,7 +522,7 @@ fn proposals_with_rollover_block(
     power_proposals: Vec<ValidatorPower>,
     pledge_proposals: Vec<ValidatorPledge>,
     prev_block_summary: &BlockInfo,
-    validator_reward: &HashMap<AccountId, Balance>,
+    _validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
     power_change: &mut BTreeMap<AccountId, Power>,
     pledge_change: &mut BTreeMap<AccountId, Balance>,
@@ -567,11 +567,11 @@ fn proposals_with_rollover_block(
             power : r.power().clone(),
         });
         // The reward will given to the validator in the next epoch,
-        //  so we need to add it to the pledge but not power.
+        // so we need to add it to the balance but not pledge.
         let f = pledge_proposals_by_account.entry(account_id.clone()).or_insert(r_f);
-        if let Some(reward) = validator_reward.get(f.account_id()) {
-            *f.pledge_mut() += *reward;
-        }
+        // if let Some(reward) = validator_reward.get(f.account_id()) {
+        //     *f.pledge_mut() += *reward;
+        // }
         pledge_change.insert(f.account_id().clone(), f.pledge());
 
         let p = power_proposals_by_account.entry(account_id).or_insert(r_p);

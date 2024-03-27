@@ -772,7 +772,17 @@ impl EpochManager {
             },
         };
 
-        let validator_block_chunk_stats = HashMap::default();
+        //FIXME: This is a hack to get the block reward and minted amount
+        let epoch_summary = self.collect_blocks_info(block_info, last_block_hash)?;
+        let EpochSummary {
+            //    all_power_proposals,
+            //    all_pledge_proposals,
+            //    validator_kickout,
+            validator_block_chunk_stats,
+            //next_version,
+            ..
+        } = epoch_summary;
+
         let next_version = 1u16 as ProtocolVersion;
 
         let (validator_reward, minted_amount) = {

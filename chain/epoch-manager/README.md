@@ -25,7 +25,7 @@ EpochManager has also a lot of methords that allows you to fetch information fro
 ## RewardCalculator
 
 RewardCalculator is responsible for computing rewards for the validators at the end of the epoch, based on their block/chunk productions.
-You can see more details on [the Nomicon documentation](https://nomicon.io/Economics/Economic#validator-rewards-calculation).
+You can see more details on [the Nomicon documentation](https://xx.io/Economics/Economic#validator-rewards-calculation).
 
 ## Validator Selection / proposals / proposals_to_epoch_info
 
