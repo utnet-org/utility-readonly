@@ -765,7 +765,7 @@ pub(crate) fn action_create_rsa2048_challenge(
                                     total_power.clone(),
                                 ));
                                 // attach power to account
-                                tracing::info!("original power is : {}, new power is : {}, total power is : {}", account.power(), power, total_power.clone());
+                                tracing::info!("Account: {:?}, original power is : {}, new power is : {}, total power is : {}", account_id.clone(), account.power(), power, total_power.clone());
                                 account.set_power(total_power);
                             }
                             Err(_) => tracing::error!("Power value is not a valid u128 number"),

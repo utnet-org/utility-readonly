@@ -611,7 +611,7 @@ fn proposals_with_rollover(
     power_proposals: Vec<ValidatorPower>,
     pledge_proposals: Vec<ValidatorPledge>,
     prev_epoch_info: &EpochInfo,
-    validator_reward: &HashMap<AccountId, Balance>,
+    _validator_reward: &HashMap<AccountId, Balance>,
     validator_kickout: &HashMap<AccountId, ValidatorKickoutReason>,
     power_change: &mut BTreeMap<AccountId, Power>,
     pledge_change: &mut BTreeMap<AccountId, Balance>,
