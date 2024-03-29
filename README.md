@@ -82,11 +82,9 @@ $ latest=$(cat latest)
 $ rclone copy --no-check-certificate --progress --transfers=6  unc_aws:unc-oss/${latest:?} ~/.unc/data
 
 # node run
-
-```
 $ ./target/release/uncd --home ~/.unc  run
 ```
-```
+
 
 
 To learn how to become validator, checkout [documentation](https://docs.utnet-org/utility.org/docs/develop/node/validator/staking-and-delegation).
