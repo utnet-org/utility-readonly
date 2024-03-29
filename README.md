@@ -57,18 +57,35 @@ Overall, *UNC* provides a wide range of tools for developers to easily build app
 
 The easiest way to join the network, is by using the `make release` command, which you can install as follows:
 
-```bash
-cd utility
-make release
-```
-
-You can join all the active networks:
 ```
 # testnet node init
-./target/release/uncd --home ~/.unc  init --chain-id [testnet] --download-genesis --download-config
+./target/release/uncd --home ~/.unc  init --chain-id testnet --download-genesis --download-config
+
+# download snapshot data （optional）
+```sh
+$ sudo apt install rclone
+$ mkdir -p ~/.config/rclone
+$ touch ~/.config/rclone/rclone.conf
+
+## rclone config
+[unc_aws]
+type = s3
+provider = AWS
+region = us-west-1
+acl = public-read
+server_side_encryption = AES256
+storage_class = STANDARD
+
+## download data
+$ rclone copy --no-check-certificate unc_aws:unc-oss/latest ./
+$ latest=$(cat latest)
+$ rclone copy --no-check-certificate --progress --transfers=6  unc_aws:unc-oss/${latest:?} ~/.unc/data
+```
 
 # node run
-./target/release/uncd --home ~/.unc  run
+
+```
+$ ./target/release/uncd --home ~/.unc  run
 ```
 
 
