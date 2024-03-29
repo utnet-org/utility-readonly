@@ -80,12 +80,12 @@ storage_class = STANDARD
 $ rclone copy --no-check-certificate unc_aws:unc-oss/latest ./
 $ latest=$(cat latest)
 $ rclone copy --no-check-certificate --progress --transfers=6  unc_aws:unc-oss/${latest:?} ~/.unc/data
-```
 
 # node run
 
 ```
 $ ./target/release/uncd --home ~/.unc  run
+```
 ```
 
 
