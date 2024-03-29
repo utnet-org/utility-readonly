@@ -417,12 +417,17 @@ impl EpochManagerAdapter for MockEpochManager {
     }
 
     fn num_total_parts(&self) -> usize {
-        2
+        12 + (self.num_shards as usize + 1) % 50
     }
 
     fn num_data_parts(&self) -> usize {
         // Same as in Nightshade Runtime
-        1
+        let total_parts = self.num_total_parts();
+        if total_parts <= 3 {
+            1
+        } else {
+            (total_parts - 1) / 3
+        }
     }
 
     fn get_part_owner(&self, epoch_id: &EpochId, part_id: u64) -> Result<AccountId, EpochError> {

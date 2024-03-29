@@ -98,7 +98,7 @@ pub fn genesis_chunks(
     genesis_height: BlockHeight,
     genesis_protocol_version: ProtocolVersion,
 ) -> Vec<ShardChunk> {
-    let mut rs = ReedSolomonWrapper::new(1, 1);
+    let mut rs = ReedSolomonWrapper::new(1, 2);
     let state_roots = if state_roots.len() == shard_ids.len() {
         state_roots
     } else {

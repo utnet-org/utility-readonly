@@ -18,7 +18,7 @@ use unc_primitives::shard_layout::ShardLayout;
 use unc_primitives::types::validator_stake::ValidatorPledge;
 use unc_primitives::types::validator_power::ValidatorPower;
 use unc_primitives::types::validator_power_and_pledge::{ValidatorPowerAndPledge, ValidatorPowerAndPledgeIter};
-use unc_primitives::types::{AccountId, ApprovalPledge, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
+use unc_primitives::types::{AccountId, ApprovalPledge, Balance, BlockChunkValidatorStats, BlockHeight, EpochId, EpochInfoProvider, NumBlocks, NumSeats, Power, ShardId, ValidatorId, ValidatorInfoIdentifier, ValidatorKickoutReason, ValidatorStats};
 use unc_primitives::validator_mandates::AssignmentWeight;
 use unc_primitives::version::{ProtocolVersion, UPGRADABILITY_FIX_PROTOCOL_VERSION};
 use unc_primitives::views::{AllMinersView, CurrentEpochValidatorInfo, EpochValidatorInfo, NextEpochValidatorInfo, ValidatorKickoutView};
@@ -158,7 +158,7 @@ pub struct EpochManager {
     reward_calculator: RewardCalculator,
     /// Genesis protocol version. Useful when there are protocol upgrades.
     genesis_protocol_version: ProtocolVersion,
-
+    genesis_num_block_producer_seats: NumSeats,
     /// Cache of epoch information.
     epochs_info: SyncLruCache<EpochId, Arc<EpochInfo>>,
     /// Cache of block information.
@@ -278,11 +278,14 @@ impl EpochManager {
             .get_ser(DBCol::EpochInfo, AGGREGATOR_KEY)
             .map_err(EpochError::from)?
             .unwrap_or_default();
+        let genesis_num_block_producer_seats =
+        config.for_protocol_version(genesis_protocol_version).num_block_producer_seats;
         let mut epoch_manager = EpochManager {
             store,
             config,
             reward_calculator,
             genesis_protocol_version,
+            genesis_num_block_producer_seats,
             epochs_info: SyncLruCache::new(EPOCH_CACHE_SIZE),
             blocks_info: SyncLruCache::new(BLOCK_CACHE_SIZE),
             epoch_id_to_start: SyncLruCache::new(EPOCH_CACHE_SIZE),
@@ -646,7 +649,6 @@ impl EpochManager {
         let mut validator_kickout = HashMap::new();
 
         // Next protocol version calculation.
-        // Implements https://github.com/utility/UEPs/pull/64/files#diff-45f773511fe4321b446c3c4226324873R76
         let mut versions = HashMap::new();
         for (validator_id, version) in version_tracker {
             let pledge = epoch_info.validator_stake(validator_id);
