@@ -71,6 +71,7 @@ $ touch ~/.config/rclone/rclone.conf
 [unc_aws]
 type = s3
 provider = AWS
+download_url = https://unc-oss.s3.us-west-1.amazonaws.com
 region = us-west-1
 acl = public-read
 server_side_encryption = AES256
