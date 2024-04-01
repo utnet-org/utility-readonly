@@ -18,7 +18,7 @@ All security issues should be submitted on [hackenproof](https://hackenproof.com
 5. On the announcement date, the [UNC Security Update newsletter](https://groups.google.com/a/unc.org/g/security-updates) is sent an announcement. The changes are fast tracked and merged into the public repository. At least 6 hours after the mailing list is notified, a copy of the advisory will be published across social channels. 
 
 This process may take time, especially when coordinating with network participants and maintainers of other components in the ecosystem.
-The goal will be to address issues in as short of a period as possible, but it's important that the process described above to ensure that disclosures are handled in a consistent manner.  
+The goal will be to address issues in as short of a period as possible, but it's important that the process described above to ensure that disclosures are handled in a consistent manner.
 
 *Note:* If the Security Team identifies that an issue is mission-critical and requires a subset of network participants to update prior to newsletter announcement - this will be done in a manual way by communicating via direct channels. 
 

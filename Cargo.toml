@@ -2,7 +2,7 @@
 version = "0.0.0" # managed by cargo-workspaces, see below
 authors = ["Hello Inc <hello@unc.com>"]
 edition = "2021"
-rust-version = "1.76.0"
+rust-version = "1.77.0"
 repository = "https://github.com/utnet-org/utility"
 license = "MIT OR Apache-2.0"
 
