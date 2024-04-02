@@ -548,7 +548,7 @@ impl Display for InvalidTxError {
                 signer_id, balance, cost
             ),
             InvalidTxError::LackBalanceForState { signer_id, amount } => {
-                write!(f, "Failed to execute, because the account {:?} wouldn't have enough balance to cover storage, required to have {} yoctoUNC more", signer_id, amount)
+                write!(f, "Failed to execute, because the account {:?} wouldn't have enough balance to cover storage, required to have {} attoUNC more", signer_id, amount)
             }
             InvalidTxError::CostOverflow => {
                 write!(f, "Transaction gas or balance cost is too high")
@@ -788,7 +788,7 @@ impl Display for ActionErrorKind {
             ),
             ActionErrorKind::LackBalanceForState { account_id, amount } => write!(
                 f,
-                "The account {} wouldn't have enough balance to cover storage, required to have {} yoctoUNC more",
+                "The account {} wouldn't have enough balance to cover storage, required to have {} attoUNC more",
                 account_id, amount
             ),
             ActionErrorKind::TriesToUnpledge { account_id } => {

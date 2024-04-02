@@ -191,7 +191,7 @@ mod old_validator_selection {
                 pledge: r.pledge().clone(),
             });
             let f = ordered_pledge_proposals.entry(account_id.clone()).or_insert(r_f);
-            *f.pledge_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
+            //*f.pledge_mut() += *validator_reward.get(&account_id).unwrap_or(&0);
             pledge_change.insert(account_id, f.pledge());
         }
 

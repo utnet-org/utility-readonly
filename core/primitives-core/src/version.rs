@@ -25,7 +25,7 @@ pub enum ProtocolFeature {
     TransactionSizeLimit,
     /// Fix a bug in `storage_usage` for account caused by #3824
     FixStorageUsage,
-    /// Cap maximum gas price to 2,000,000,000 yoctoUNC
+    /// Cap maximum gas price to 2,000,000,000 attoUNC
     CapMaxGasPrice,
     CountRefundReceiptsInGasLimit,
     /// Add `ripemd60` and `ecrecover` host function

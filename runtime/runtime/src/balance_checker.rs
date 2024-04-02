@@ -448,7 +448,7 @@ mod tests {
         let signer =
             InMemorySigner::from_seed(alice_id.clone(), KeyType::ED25519, alice_id.as_ref());
 
-        // Sending 2 yoctoNEAR, so that we have an overflow when adding to alice's balance.
+        // Sending 2 attoNEAR, so that we have an overflow when adding to alice's balance.
         let tx =
             SignedTransaction::send_money(0, alice_id, bob_id, &signer, 2, CryptoHash::default());
 

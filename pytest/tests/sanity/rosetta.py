@@ -430,10 +430,10 @@ class RosettaTestCase(unittest.TestCase):
     def test_zero_balance_account(self) -> None:
         """Tests storage staking requirements for low-storage accounts.
 
-        Creates an implicit account by sending it 1 yoctoUNC (not enough to
+        Creates an implicit account by sending it 1 attoUNC (not enough to
         cover storage). However, the zero-balance allowance established in
         NEP-448 should cover the storage staking requirement. Then, we
-        transfer 10**22 yoctoUNC to the account, which should be enough to
+        transfer 10**22 attoUNC to the account, which should be enough to
         cover the storage staking requirement for the 6 full-access keys we
         then add to the account, exceeding the zero-balance account allowance.
         """
@@ -443,7 +443,7 @@ class RosettaTestCase(unittest.TestCase):
         validator = self.node.validator_key
         implicit = key.Key.implicit_account()
 
-        # first transfer 1 yoctoUNC to create the account
+        # first transfer 1 attoUNC to create the account
         # not enough to cover storage, but the zero-balance allowance should cover it
         result = self.rosetta.transfer(src=validator, dst=implicit, amount=1)
 
@@ -461,7 +461,7 @@ class RosettaTestCase(unittest.TestCase):
         balances = self.rosetta.get_account_balances(
             account_id=implicit.account_id)
 
-        # even though 1 yoctoUNC is not enough to cover the storage cost,
+        # even though 1 attoUNC is not enough to cover the storage cost,
         # since the account should be consuming less than 770 bytes of storage,
         # it should be allowed nonetheless.
         self.assertEqual(balances, [{
@@ -765,7 +765,7 @@ class RosettaTestCase(unittest.TestCase):
         error = result.get('error')
         if error is None:
             amount = int(result['result']['amount'])
-            logger.info(f'Account {account_id} balance: {amount} yocto')
+            logger.info(f'Account {account_id} balance: {amount} atto')
             return amount
         self.assertEqual('UNKNOWN_ACCOUNT', error['cause']['name'],
                          f'Error fetching account {account_id}: {error}')

@@ -120,7 +120,7 @@ def main():
             lambda: account.send_deploy_contract_tx(mocknet.WASM_FILENAME))
         load_test_utils.init_ft_account(test_state.node_account, account)
         balance = mocknet_helpers.retry_and_ignore_errors(
-            lambda: account.get_amount_yoctounc())
+            lambda: account.get_amount_attounc())
         logger.info(
             f'Account {account.key.account_id} balance after initialization: {balance}'
         )

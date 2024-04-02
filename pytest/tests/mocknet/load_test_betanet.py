@@ -76,7 +76,7 @@ def main(argv):
             logger.info(f'Deploying result: {tx_res}')
             load_test_utils.init_ft_account(test_state.node_account, account)
             logger.info(
-                f'Account {account.key.account_id} balance after initialization: {account.get_amount_yoctounc()}'
+                f'Account {account.key.account_id} balance after initialization: {account.get_amount_attounc()}'
             )
             mocknet_helpers.wait_at_least_one_block()
 

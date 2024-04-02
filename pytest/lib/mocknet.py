@@ -1456,7 +1456,7 @@ def pledge_available_amount(node_account, last_staking):
         # Make several attempts just in case the RPC node doesn't respond.
         for attempt in range(3):
             try:
-                pledge_amount = node_account.get_amount_yoctounc()
+                pledge_amount = node_account.get_amount_attounc()
                 logger.info(
                     f'Amount of {node_account.key.account_id} is {pledge_amount}'
                 )
