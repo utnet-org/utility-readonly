@@ -32,22 +32,22 @@ function upload_binary {
   then
     tar_binary $1
     tar_file=$1.tar.gz
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${BRANCH}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${BRANCH}/${COMMIT}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${BRANCH}/${COMMIT}/stable/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${BRANCH}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${BRANCH}/${COMMIT}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${BRANCH}/${COMMIT}/stable/$1
 
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/stable/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${BRANCH}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${BRANCH}/${COMMIT}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${BRANCH}/${COMMIT}/stable/$1
 
-    aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${tar_file}
-    aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/${tar_file}
-    aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/stable/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${BRANCH}/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${BRANCH}/${COMMIT}/${tar_file}
+    aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${BRANCH}/${COMMIT}/stable/${tar_file}
 
   else
     folder="${release%-release}"
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${BRANCH}/${COMMIT}/${folder}/$1
-    aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${BRANCH}/${COMMIT}/${folder}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${BRANCH}/${COMMIT}/${folder}/$1
+    aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${BRANCH}/${COMMIT}/${folder}/$1
   fi
 }
 

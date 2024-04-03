@@ -231,7 +231,7 @@ def _parse_timeout(timeout: typing.Optional[str]) -> typing.Optional[int]:
 
 def run_locally(args, tests):
     for test in tests:
-        # See nayduck specs at https://github.com/unc/nayduck/blob/master/lib/testspec.py
+        # See nayduck specs lib/testspec.py
         fields = test.split()
 
         timeout = None

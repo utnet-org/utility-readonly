@@ -38,31 +38,31 @@ function upload_binary {
 
 		if [ "$arch" == "x86_64" ]
 		then
-			aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${branch}/$1
-			aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${branch}/${commit}/$1
-			aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${branch}/${commit}/stable/$1
+			aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${branch}/$1
+			aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${branch}/${commit}/$1
+			aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${branch}/${commit}/stable/$1
 		fi
 
-		aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${branch}/$1
-		aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/$1
-		aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/stable/$1
+		aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${branch}/$1
+		aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${branch}/${commit}/$1
+		aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${branch}/${commit}/stable/$1
 
-		aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${branch}/${tar_file}
-		aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/${tar_file}
-		aws s3 cp --acl public-read ${tar_file} s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/stable/${tar_file}
+		aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${branch}/${tar_file}
+		aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${branch}/${commit}/${tar_file}
+		aws s3 cp --acl public-read ${tar_file} s3://unc-oss/${os_and_arch}/${branch}/${commit}/stable/${tar_file}
 	elif [ "$release" == "perf-release" ]
 	then
 		if [ "$arch" == "x86_64" ]
 		then
-			aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${branch}/${commit}/perf/$1
+			aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${branch}/${commit}/perf/$1
 		fi
-		aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/perf/$1
+		aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${branch}/${commit}/perf/$1
 	else
 		if [ "$arch" == "x86_64" ]
 		then
-			aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os}/${branch}/${commit}/nightly/$1
+			aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os}/${branch}/${commit}/nightly/$1
 		fi
-		aws s3 cp --acl public-read target/release/$1 s3://build.utility.com/framework/${os_and_arch}/${branch}/${commit}/nightly/$1
+		aws s3 cp --acl public-read target/release/$1 s3://unc-oss/${os_and_arch}/${branch}/${commit}/nightly/$1
 	fi
 }
 
