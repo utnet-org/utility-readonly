@@ -44,7 +44,7 @@ def send_transfer(account, test_state, base_block_hash=None):
                                          transfer_amount=amount,
                                          base_block_hash=base_block_hash))
     logger.info(
-        f'Account {account.key.account_id} transfers {amount} yoctoNear to {dest_account.key.account_id}'
+        f'Account {account.key.account_id} transfers {amount} attoNear to {dest_account.key.account_id}'
     )
 
 
@@ -130,14 +130,14 @@ def function_call_ft_transfer_call(account, test_state, base_block_hash=None):
 
 
 # See https://unc.github.io/framework/architecture/how/meta-tx.html to understand what is going on.
-# Alice pays the costs of Relayer sending 1 yoctoNear to Receiver
+# Alice pays the costs of Relayer sending 1 attoNear to Receiver
 def meta_transaction_transfer(alice_account, test_state, base_block_hash,
                               base_block_height):
     relayer_account = test_state.random_account()
     receiver_account = test_state.random_account()
 
-    yocto_unc_amount = 1
-    transfer_action = transaction.create_payment_action(yocto_unc_amount)
+    atto_unc_amount = 1
+    transfer_action = transaction.create_payment_action(atto_unc_amount)
     # Use (relayer_account.nonce + 2) as a nonce to deal with the case of Alice
     # and Relayer being the same account. The outer transaction needs to have
     # a lower nonce.
@@ -160,7 +160,7 @@ def meta_transaction_transfer(alice_account, test_state, base_block_hash,
     relayer_account.nonce += 2
 
     logger.info(
-        f'meta-transaction from {alice_account.key.account_id} to transfer {yocto_unc_amount} yoctoNear from {relayer_account.key.account_id} to {receiver_account.key.account_id}'
+        f'meta-transaction from {alice_account.key.account_id} to transfer {atto_unc_amount} attoNear from {relayer_account.key.account_id} to {receiver_account.key.account_id}'
     )
 
 

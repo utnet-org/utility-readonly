@@ -62,8 +62,16 @@ The easiest way to join the network, is by using the `make release` command, whi
 ./target/release/uncd --home ~/.unc  init --chain-id testnet --download-genesis --download-config
 
 # download snapshot data （optional）
+## install rclone
 ```sh
+# Mac 
+$ brew install rclone
+
+# Linux
 $ sudo apt install rclone
+```
+
+```sh
 $ mkdir -p ~/.config/rclone
 $ touch ~/.config/rclone/rclone.conf
 

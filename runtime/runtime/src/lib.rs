@@ -1615,7 +1615,7 @@ mod tests {
 
     const GAS_PRICE: Balance = 5000;
 
-    fn to_yocto(unc: Balance) -> Balance {
+    fn to_atto(unc: Balance) -> Balance {
         unc * 10u128.pow(24)
     }
 
@@ -1648,7 +1648,7 @@ mod tests {
         let tries = TestTriesBuilder::new().build();
         let mut state_update =
             tries.new_trie_update(ShardUId::single_shard(), MerkleHash::default());
-        let test_account = account_new(to_yocto(10), hash(&[]));
+        let test_account = account_new(to_atto(10), hash(&[]));
         let account_id = bob_account();
         set_account(&mut state_update, account_id.clone(), &test_account);
         let get_res = get_account(&state_update, &account_id).unwrap().unwrap();
@@ -1660,7 +1660,7 @@ mod tests {
         let tries = TestTriesBuilder::new().build();
         let root = MerkleHash::default();
         let mut state_update = tries.new_trie_update(ShardUId::single_shard(), root);
-        let test_account = account_new(to_yocto(10), hash(&[]));
+        let test_account = account_new(to_atto(10), hash(&[]));
         let account_id = bob_account();
         set_account(&mut state_update, account_id.clone(), &test_account);
         state_update.commit(StateChangeCause::InitialState);
@@ -1737,7 +1737,7 @@ mod tests {
     #[test]
     fn test_apply_no_op() {
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), 0, 0, 10u64.pow(15));
+            setup_runtime(to_atto(1_000_000), 0, 0, 10u64.pow(15));
         runtime
             .apply(
                 tries.get_trie_for_shard(ShardUId::single_shard(), root),
@@ -1753,12 +1753,12 @@ mod tests {
 
     #[test]
     fn test_apply_check_balance_validation_rewards() {
-        let initial_locked = to_yocto(500_000);
+        let initial_locked = to_atto(500_000);
         let initial_power = to_tera(5);
-        let reward = to_yocto(10_000_000);
-        let small_refund = to_yocto(500);
+        let reward = to_atto(10_000_000);
+        let small_refund = to_atto(500);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
+            setup_runtime(to_atto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let validator_accounts_update = ValidatorAccountsUpdate {
             power_info: vec![(alice_account(), initial_power)].into_iter().collect(),
@@ -1786,10 +1786,10 @@ mod tests {
 
     #[test]
     fn test_apply_refund_receipts() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
@@ -1832,10 +1832,10 @@ mod tests {
 
     #[test]
     fn test_apply_delayed_receipts_feed_all_at_once() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let gas_limit = 1;
         let (runtime, tries, mut root, apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
@@ -1878,10 +1878,10 @@ mod tests {
 
     #[test]
     fn test_apply_delayed_receipts_add_more_using_chunks() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
@@ -1930,10 +1930,10 @@ mod tests {
 
     #[test]
     fn test_apply_delayed_receipts_adjustable_gas_limit() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let (runtime, tries, mut root, mut apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
@@ -2034,10 +2034,10 @@ mod tests {
 
     #[test]
     fn test_apply_delayed_receipts_local_tx() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, 1);
 
@@ -2280,10 +2280,10 @@ mod tests {
 
     #[test]
     fn test_apply_deficit_gas_for_transfer() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
-        let small_transfer = to_yocto(10_000);
+        let small_transfer = to_atto(10_000);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, initial_power, gas_limit);
@@ -2310,8 +2310,8 @@ mod tests {
 
     #[test]
     fn test_apply_deficit_gas_for_function_call_covered() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
@@ -2374,8 +2374,8 @@ mod tests {
 
     #[test]
     fn test_apply_deficit_gas_for_function_call_partial() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, _, epoch_info_provider) =
@@ -2431,10 +2431,10 @@ mod tests {
 
     #[test]
     fn test_delete_key_add_key() {
-        let initial_locked = to_yocto(500_000);
+        let initial_locked = to_atto(500_000);
         let initial_power   = to_tera(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
+            setup_runtime(to_atto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let initial_account_state = get_account(&state_update, &alice_account()).unwrap().unwrap();
@@ -2476,10 +2476,10 @@ mod tests {
 
     #[test]
     fn test_delete_key_underflow() {
-        let initial_locked = to_yocto(500_000);
+        let initial_locked = to_atto(500_000);
         let initial_power  = to_tera(5);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
+            setup_runtime(to_atto(1_000_000), initial_locked, initial_power, 10u64.pow(15));
 
         let mut state_update = tries.new_trie_update(ShardUId::single_shard(), root);
         let mut initial_account_state =
@@ -2526,8 +2526,8 @@ mod tests {
     #[test]
     #[cfg(target_arch = "x86_64")]
     fn test_contract_precompilation() {
-        let initial_balance = to_yocto(1_000_000);
-        let initial_locked = to_yocto(500_000);
+        let initial_balance = to_atto(1_000_000);
+        let initial_locked = to_atto(500_000);
         let gas_limit = 10u64.pow(15);
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
             setup_runtime(initial_balance, initial_locked, gas_limit);
@@ -2567,7 +2567,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit() {
         let (runtime, tries, root, mut apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_tera(5), 1);
+            setup_runtime(to_atto(1_000_000), to_atto(500_000), to_tera(5), 1);
 
         let mut free_config = RuntimeConfig::free();
         let sha256_cost = ParameterCost {
@@ -2664,7 +2664,7 @@ mod tests {
     #[test]
     fn test_compute_usage_limit_with_failed_receipt() {
         let (runtime, tries, root, apply_state, signer, epoch_info_provider) =
-            setup_runtime(to_yocto(1_000_000), to_yocto(500_000), to_tera(5), 10u64.pow(15));
+            setup_runtime(to_atto(1_000_000), to_atto(500_000), to_tera(5), 10u64.pow(15));
 
         let deploy_contract_receipt = create_receipt_with_actions(
             alice_account(),

@@ -1694,6 +1694,7 @@ impl actix::Handler<WithSpanContext<Stop>> for PeerActor {
 type InboundHandshakePermit = tokio::sync::OwnedSemaphorePermit;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 enum ConnectingStatus {
     Inbound(InboundHandshakePermit),
     Outbound { _permit: connection::OutboundHandshakePermit, handshake_spec: HandshakeSpec },
@@ -1712,6 +1713,7 @@ enum ConnectingStatus {
 /// For the exact process of establishing a connection between peers,
 /// see PoolSnapshot in chain/network/src/peer_manager/connection.rs.
 #[derive(Debug)]
+#[allow(dead_code)]
 enum PeerStatus {
     /// Handshake in progress.
     Connecting(HandshakeSignalSender, ConnectingStatus),

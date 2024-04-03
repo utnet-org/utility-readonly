@@ -2,8 +2,7 @@ use unc_primitives::views::AllMinersView;
 use crate::client_actor::ClientActor;
 use crate::view_client::ViewClientActor;
 use unc_network::types::{
-    NetworkInfo, PartialEncodedChunkForwardMsg, PartialEncodedChunkRequestMsg,
-    PartialEncodedChunkResponseMsg, ReasonForBan, StateResponseInfo,
+    NetworkInfo, ReasonForBan, StateResponseInfo,
 };
 use unc_o11y::WithSpanContextExt;
 use unc_primitives::block::{Approval, Block, BlockHeader};
@@ -12,7 +11,6 @@ use unc_primitives::chunk_validation::{ChunkEndorsement, ChunkStateWitness};
 use unc_primitives::errors::InvalidTxError;
 use unc_primitives::hash::CryptoHash;
 use unc_primitives::network::{AnnounceAccount, PeerId};
-use unc_primitives::sharding::PartialEncodedChunk;
 use unc_primitives::transaction::SignedTransaction;
 use unc_primitives::types::{AccountId, BlockHeight, EpochId, Power, ShardId};
 use unc_primitives::views::FinalExecutionOutcomeView;
@@ -121,24 +119,6 @@ pub struct SetNetworkInfo(pub NetworkInfo);
 #[rtype(result = "()")]
 pub(crate) struct RecvChallenge(pub Challenge);
 
-#[derive(actix::Message, Debug)]
-#[rtype(result = "()")]
-pub(crate) struct RecvPartialEncodedChunkForward(pub PartialEncodedChunkForwardMsg);
-
-#[derive(actix::Message, Debug)]
-#[rtype(result = "()")]
-pub(crate) struct RecvPartialEncodedChunk(pub PartialEncodedChunk);
-
-#[derive(actix::Message, Debug)]
-#[rtype(result = "()")]
-pub(crate) struct RecvPartialEncodedChunkResponse(
-    pub PartialEncodedChunkResponseMsg,
-    pub std::time::Instant,
-);
-
-#[derive(actix::Message, Debug)]
-#[rtype(result = "()")]
-pub(crate) struct RecvPartialEncodedChunkRequest(pub PartialEncodedChunkRequestMsg, pub CryptoHash);
 
 #[derive(actix::Message, Debug)]
 #[rtype(result = "ProcessTxResponse")]

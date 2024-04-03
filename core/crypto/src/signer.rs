@@ -87,7 +87,7 @@ impl From<KeyFile> for InMemorySigner {
         Self {
             account_id: key_file.account_id,
             public_key: key_file.public_key,
-            secret_key: key_file.secret_key,
+            secret_key: key_file.private_key,
         }
     }
 }
@@ -97,7 +97,7 @@ impl From<&InMemorySigner> for KeyFile {
         KeyFile {
             account_id: signer.account_id.clone(),
             public_key: signer.public_key.clone(),
-            secret_key: signer.secret_key.clone(),
+            private_key: signer.secret_key.clone(),
         }
     }
 }
@@ -107,7 +107,7 @@ impl From<Arc<InMemorySigner>> for KeyFile {
         KeyFile {
             account_id: signer.account_id.clone(),
             public_key: signer.public_key.clone(),
-            secret_key: signer.secret_key.clone(),
+            private_key: signer.secret_key.clone(),
         }
     }
 }

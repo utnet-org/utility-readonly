@@ -133,7 +133,7 @@ class Account:
                              base_block_hash or self.base_block_hash)
         return self.send_tx(tx)
 
-    def get_amount_yoctounc(self):
+    def get_amount_attounc(self):
         j = self.json_rpc(
             'query', {
                 'request_type': 'view_account',

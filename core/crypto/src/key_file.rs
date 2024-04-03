@@ -9,11 +9,11 @@ use std::path::Path;
 pub struct KeyFile {
     pub account_id: AccountId,
     pub public_key: PublicKey,
-    // Credential files generated which unc cli works with have private_key
-    // rather than secret_key field.  To make it possible to read those from
-    // uncd add private_key as an alias to this field so either will work.
-    #[serde(alias = "private_key")]
-    pub secret_key: SecretKey,
+    // Credential files generated which unc cli works with have secret_key
+    // rather than private_key field.  To make it possible to read those from
+    // neard add secret_key as an alias to this field so either will work.
+    #[serde(alias = "secret_key")]
+    pub private_key: SecretKey,
 }
 
 impl KeyFile {
@@ -26,7 +26,7 @@ impl KeyFile {
     #[cfg(unix)]
     fn create(path: &Path) -> io::Result<File> {
         use std::os::unix::fs::OpenOptionsExt;
-        std::fs::File::options().mode(0o600).write(true).create(true).open(path)
+        std::fs::File::options().mode(0o600).write(true).create(true).truncate(true).open(path)
     }
 
     #[cfg(not(unix))]
@@ -54,7 +54,7 @@ mod test {
     const KEY_FILE_CONTENTS: &str = r#"{
   "account_id": "example",
   "public_key": "ed25519:6DSjZ8mvsRZDvFqFxo8tCKePG96omXW7eVYVSySmDk8e",
-  "secret_key": "ed25519:3D4YudUahN1nawWogh8pAKSj92sUNMdbZGjn7kERKzYoTy8tnFQuwoGUC51DowKqorvkr2pytJSnwuSbsNVfqygr"
+  "private_key": "ed25519:3D4YudUahN1nawWogh8pAKSj92sUNMdbZGjn7kERKzYoTy8tnFQuwoGUC51DowKqorvkr2pytJSnwuSbsNVfqygr"
 }"#;
 
     #[test]
@@ -63,9 +63,9 @@ mod test {
         let path = tmp.path().join("key-file");
 
         let account_id = ACCOUNT_ID.parse().unwrap();
-        let secret_key: SecretKey = SECRET_KEY.parse().unwrap();
-        let public_key = secret_key.public_key();
-        let key = KeyFile { account_id, public_key, secret_key };
+        let private_key: SecretKey = SECRET_KEY.parse().unwrap();
+        let public_key = private_key.public_key();
+        let key = KeyFile { account_id, public_key, private_key };
         key.write_to_file(&path).unwrap();
 
         assert_eq!(KEY_FILE_CONTENTS, std::fs::read_to_string(&path).unwrap());
@@ -89,7 +89,7 @@ mod test {
             result.map(|key| {
                 assert_eq!(ACCOUNT_ID, key.account_id.to_string());
                 let secret_key: SecretKey = SECRET_KEY.parse().unwrap();
-                assert_eq!(secret_key, key.secret_key);
+                assert_eq!(secret_key, key.private_key);
                 assert_eq!(secret_key.public_key(), key.public_key);
             })
         }

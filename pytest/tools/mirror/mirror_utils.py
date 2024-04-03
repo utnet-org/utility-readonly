@@ -710,7 +710,7 @@ def send_traffic(unc_root, source_nodes, traffic_data, callback):
     subaccount_contract_deployed = False
     subaccount_pledged = False
 
-    # here we are gonna send a tiny amount (1 yoctoUNC) to the implicit account and
+    # here we are gonna send a tiny amount (1 attoUNC) to the implicit account and
     # then wait a bit before properly initializing it. This hits a corner case where the
     # mirror binary needs to properly look for the second tx's outcome to find the starting
     # nonce because the first one failed

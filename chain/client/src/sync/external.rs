@@ -114,7 +114,11 @@ impl ExternalConnection {
                 if let Some(parent_dir) = path.parent() {
                     std::fs::create_dir_all(parent_dir)?;
                 }
-                let mut file = std::fs::OpenOptions::new().write(true).create(true).open(&path)?;
+                let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(&path)?;
                 file.write_all(state_part)?;
                 tracing::debug!(target: "state_sync_dump", shard_id, part_length = state_part.len(), ?location, "Wrote a state part to a file");
                 Ok(())

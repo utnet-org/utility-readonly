@@ -1131,8 +1131,8 @@ mod tests {
         }
     }
 
-    /// Setup: account has 1B yoctoN and is 180 bytes. Storage requirement is 1M per byte.
-    /// Test that such account can not send 950M yoctoN out as that will leave it under storage requirements.
+    /// Setup: account has 1B attoN and is 180 bytes. Storage requirement is 1M per byte.
+    /// Test that such account can not send 950M attoN out as that will leave it under storage requirements.
     /// If zero balance account is enabled, however, the transaction should succeed
     #[test]
     fn test_validate_transaction_invalid_low_balance() {

@@ -2,7 +2,7 @@
 version = "0.0.0" # managed by cargo-workspaces, see below
 authors = ["Hello Inc <hello@unc.com>"]
 edition = "2021"
-rust-version = "1.76.0"
+rust-version = "1.77.0"
 repository = "https://github.com/utnet-org/utility"
 license = "MIT OR Apache-2.0"
 
@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 # Most crates are not stable on purpose, as maintaining API compatibility is a
 # significant developer time expense. Please think thoroughly before adding
 # anything to the list of stable crates.
-version = "0.6.2"
+version = "0.7.0"
 exclude = ["uncd"]
 
 [workspace]
