@@ -25,13 +25,13 @@ jobs:
         include:
           - name: Linux
             id: linux
-            os: ubuntu-22.04-16core
+            os: ubuntu-latest
             type: stable
             runs_integ_tests: true
             upload_profraws: true
           - name: Linux Nightly
             id: linux-nightly
-            os: ubuntu-22.04-16core
+            os: ubuntu-latest
             type: nightly
             runs_integ_tests: true
             upload_profraws: true
@@ -94,7 +94,7 @@ jobs:
 
   py_backward_compat:
     name: "Backward Compatibility"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -120,7 +120,7 @@ jobs:
 
   py_db_migration:
     name: "Database Migration"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -147,7 +147,7 @@ jobs:
 
   py_sanity_checks:
     name: "Sanity Checks"
-    runs-on: ubuntu-22.04-16core
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     timeout-minutes: 90
@@ -182,7 +182,7 @@ jobs:
 
   py_genesis_check:
     name: "Genesis Changes"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -223,7 +223,7 @@ jobs:
 
   py_upgradability:
     name: "Upgradability"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -278,7 +278,7 @@ jobs:
 
   check_clippy:
     name: "Cargo Clippy"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@9b5b983efc779f85e5e5d11539f005e85ccb27ff
@@ -288,7 +288,7 @@ jobs:
 
   doctests:
     name: "Rust Doctests"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@9b5b983efc779f85e5e5d11539f005e85ccb27ff
@@ -328,7 +328,7 @@ jobs:
 
   check_udeps:
     name: "Unused Dependencies"
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@9b5b983efc779f85e5e5d11539f005e85ccb27ff
