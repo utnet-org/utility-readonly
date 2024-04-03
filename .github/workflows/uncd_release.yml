@@ -5,20 +5,20 @@ on:
   release:
     types: [released, prereleased]
   push:
-    branches: master
+    branches: main
 
   workflow_dispatch:
     inputs:
       branch:
-        default: 'master'
-        description: "Nearcore branch to build and publish"
+        default: 'main'
+        description: "Utility branch to build and publish"
         type: string
         required: true
 
 jobs:
   binary-release:
     name: "Build and publish uncd binary"
-    runs-on: "ubuntu-20.04-16core"
+    runs-on: "ubuntu-latest"
     #environment: deploy
     permissions:
       id-token: write # required to use OIDC authentication
@@ -27,7 +27,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::754641474505:role/GitHubActionsRunner
+          role-to-assume: arn:aws:iam::875198055600:role/GitHubActionsRunner
           aws-region: us-west-1
 
       - name: Checkout ${{ github.event.inputs.branch }} branch
@@ -51,7 +51,7 @@ jobs:
 
   docker-release:
     name: "Build and publish unc Docker image"
-    runs-on: "ubuntu-20.04-16core"
+    runs-on: "ubuntu-latest"
     #environment: deploy
     steps:
       - name: Checkout ${{ github.event.inputs.branch }} branch
@@ -81,7 +81,7 @@ jobs:
           docker push utnet-org/utility:${BRANCH}-${COMMIT}
           docker push utnet-org/utility:${BRANCH}
           
-          if [[ ${BRANCH} == "master" ]];
+          if [[ ${BRANCH} == "main" ]];
           then
             docker tag unc utnet-org/utility:latest
             docker push utnet-org/utility:latest
