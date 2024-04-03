@@ -69,9 +69,7 @@ $ brew install rclone
 
 # Linux
 $ sudo apt install rclone
-```
 
-```sh
 $ mkdir -p ~/.config/rclone
 $ touch ~/.config/rclone/rclone.conf
 

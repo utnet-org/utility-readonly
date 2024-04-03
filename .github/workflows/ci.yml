@@ -65,6 +65,12 @@ jobs:
         if: matrix.runs_integ_tests
       - run: mv coverage/profraw/{new,integration/${{matrix.id}}}.tar.zst
         if: matrix.runs_integ_tests
+      - run: mv coverage/profraw/{new,integration/${{matrix.id}}}.tar.zst
+        if: matrix.runs_integ_tests
+
+      # Cleanup the target directory, leaving only stuff interesting to llvm-cov, and tarball it
+      - run: just tar-bins-for-coverage-ci
+      - run: mv coverage/profraw/binaries/{new,${{matrix.id}}}.tar.zst
 
       # Cleanup the target directory, leaving only stuff interesting to llvm-cov, and tarball it
       - run: just tar-bins-for-coverage-ci
